@@ -1,0 +1,22 @@
+<package>
+  <description brief="android">
+
+    android
+
+  </description>
+  <author>Damon Kohler</author>
+  <license>Apache 2</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/android</url>
+
+  <depend package="rosjava"/>
+  <depend package="sensor_msgs" />
+
+  <export>
+    <android />
+    <rosjava-src location="src" />
+    <rosjava-src location="gen" />
+    <rosjava-src location="res" />
+  </export>
+
+</package>

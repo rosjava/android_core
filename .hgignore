@@ -1,0 +1,22 @@
+syntax: glob
+*.class
+*.dex
+*.orig
+*.swp
+*.pyc
+*.DS_Store
+*~
+*.log
+*.ap_
+*.apk
+local.properties
+ros.properties
+.cproject
+.settings
+.classpath-generated
+.project-generated
+.classpath
+.project
+rosjava/lib/rosjava.jar
+syntax: regexp
+(bin|build|dist|msg_gen|srv_gen|gen|test_output)/.*
