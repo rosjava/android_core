@@ -2,7 +2,6 @@
 <project name="." default="compile">
 
   <property file="ros.properties" />
-  <property file="default.properties" />
 
   <property name="android.tools.dir" location="${sdk.dir}/tools" />
 
