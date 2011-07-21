@@ -21,12 +21,11 @@ import com.google.common.base.Preconditions;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
-import org.ros.DefaultNode;
-import org.ros.MessageListener;
-import org.ros.Node;
-import org.ros.NodeConfiguration;
-import org.ros.NodeMain;
-import org.ros.exception.RosInitException;
+import org.ros.message.MessageListener;
+import org.ros.node.DefaultNodeFactory;
+import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMain;
 import org.ros.rosjava.android.MessageCallable;
 
 /**
@@ -64,12 +63,10 @@ public class RosTextView<T> extends TextView implements NodeMain {
   }
 
   @Override
-  public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
-    if (node == null) {
-      Preconditions.checkNotNull(nodeConfiguration);
-      node = new DefaultNode("/anonymous", nodeConfiguration);
-    }
-    node.createSubscriber(topicName, messageType, new MessageListener<T>() {
+  public void main(NodeConfiguration nodeConfiguration) {
+    Preconditions.checkState(node == null);
+    node = new DefaultNodeFactory().newNode("android/text_view", nodeConfiguration);
+    node.newSubscriber(topicName, messageType, new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {
         if (callable != null) {

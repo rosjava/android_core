@@ -20,14 +20,14 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import org.ros.DefaultNode;
-import org.ros.Node;
-import org.ros.NodeConfiguration;
-import org.ros.NodeMain;
-import org.ros.Publisher;
 import org.ros.message.Time;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.message.geometry_msgs.Quaternion;
+import org.ros.node.DefaultNodeFactory;
+import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMain;
+import org.ros.node.topic.Publisher;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -87,12 +87,13 @@ public class OrientationPublisher implements NodeMain {
   @Override
   public void main(NodeConfiguration configuration) throws Exception {
     try {
-      node = new DefaultNode("orientation", configuration);
+      node = new DefaultNodeFactory().newNode("android/orientation_publisher", configuration);
       Publisher<org.ros.message.geometry_msgs.PoseStamped> publisher =
-          node.createPublisher("android/orientation", "geometry_msgs/PoseStamped");
+          node.newPublisher("android/orientation", "geometry_msgs/PoseStamped");
       orientationListener = new OrientationListener(publisher);
       Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-      sensorManager.registerListener(orientationListener, sensor, 500000); // 10 Hz
+      sensorManager.registerListener(orientationListener, sensor, 500000); // 10
+                                                                           // Hz
     } catch (Exception e) {
       if (node != null) {
         node.getLog().fatal(e);

@@ -22,11 +22,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-import org.ros.DefaultNode;
-import org.ros.MessageListener;
-import org.ros.Node;
-import org.ros.NodeConfiguration;
-import org.ros.NodeMain;
+import org.ros.message.MessageListener;
+import org.ros.node.DefaultNodeFactory;
+import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMain;
 import org.ros.rosjava.android.MessageCallable;
 
 /**
@@ -61,7 +61,7 @@ public class RosImageView<T> extends ImageView implements NodeMain {
   public void setMessageType(String messageType) {
     this.messageType = messageType;
   }
-  
+
   public void setMessageToBitmapCallable(MessageCallable<Bitmap, T> callable) {
     this.callable = callable;
   }
@@ -69,9 +69,8 @@ public class RosImageView<T> extends ImageView implements NodeMain {
   @Override
   public void main(NodeConfiguration nodeConfiguration) throws Exception {
     Preconditions.checkState(node == null);
-    // TODO(damonkohler): This node name needs to be unique.
-    node = new DefaultNode("/android_image_view", nodeConfiguration);
-    node.createSubscriber(topicName, messageType, new MessageListener<T>() {
+    node = new DefaultNodeFactory().newNode("android/image_view", nodeConfiguration);
+    node.newSubscriber(topicName, messageType, new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {
         post(new Runnable() {

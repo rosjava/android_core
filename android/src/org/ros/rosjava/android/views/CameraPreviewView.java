@@ -30,6 +30,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import org.ros.exception.RosRuntimeException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -84,7 +85,7 @@ public class CameraPreviewView extends ViewGroup {
           camera.setPreviewDisplay(holder);
         }
       } catch (IOException e) {
-        throw new RuntimeException(e);
+        throw new RosRuntimeException(e);
       }
     }
 
@@ -141,7 +142,7 @@ public class CameraPreviewView extends ViewGroup {
       // This may have no effect if the SurfaceHolder is not yet created.
       camera.setPreviewDisplay(surfaceHolder);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
   }
 

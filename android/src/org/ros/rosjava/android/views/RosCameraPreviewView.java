@@ -23,16 +23,16 @@ import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
 import android.util.AttributeSet;
-import org.ros.DefaultNode;
-import org.ros.Node;
-import org.ros.NodeConfiguration;
-import org.ros.NodeMain;
-import org.ros.Publisher;
-import org.ros.internal.namespace.GraphName;
 import org.ros.message.Time;
 import org.ros.message.sensor_msgs.CameraInfo;
 import org.ros.message.sensor_msgs.CompressedImage;
+import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
+import org.ros.node.DefaultNodeFactory;
+import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMain;
+import org.ros.node.topic.Publisher;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -85,12 +85,12 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
   @Override
   public void main(NodeConfiguration nodeConfiguration) throws Exception {
     Preconditions.checkState(node == null);
-    node = new DefaultNode("/anonymous", nodeConfiguration);
-    NameResolver resolver = node.getResolver().createResolver(new GraphName("camera"));
+    node = new DefaultNodeFactory().newNode("android/camera_preview_view", nodeConfiguration);
+    NameResolver resolver = node.getResolver().createResolver(new GraphName("android/camera"));
     imagePublisher =
-        node.createPublisher(resolver.resolve("image_raw"), "sensor_msgs/CompressedImage");
+        node.newPublisher(resolver.resolve("image_raw"), "sensor_msgs/CompressedImage");
     cameraInfoPublisher =
-        node.createPublisher(resolver.resolve("camera_info"), "sensor_msgs/CameraInfo");
+        node.newPublisher(resolver.resolve("camera_info"), "sensor_msgs/CameraInfo");
     setPreviewCallback(new PublishingPreviewCallback());
   }
 

@@ -18,7 +18,6 @@ package org.ros.rosjava.android;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-
 import org.ros.message.sensor_msgs.CompressedImage;
 
 /**
