@@ -18,10 +18,9 @@ package org.ros.tutorials.pubsub;
 
 import android.app.Activity;
 import android.os.Bundle;
-
-import org.ros.NodeConfiguration;
-import org.ros.NodeRunner;
 import org.ros.RosCore;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeRunner;
 import org.ros.rosjava.android.MessageCallable;
 import org.ros.rosjava.android.views.RosTextView;
 
@@ -37,8 +36,7 @@ public class MainActivity extends Activity {
   private Talker talker;
 
   public MainActivity() {
-    super();
-    nodeRunner = NodeRunner.createDefault();
+    nodeRunner = NodeRunner.newDefault();
   }
   
   @SuppressWarnings("unchecked")
@@ -70,8 +68,8 @@ public class MainActivity extends Activity {
   protected void onResume() {
     super.onResume();
     try {
-      rosCore = RosCore.createPublic(11311);
-      NodeConfiguration nodeConfiguration = NodeConfiguration.createDefault();
+      rosCore = RosCore.newPrivate();
+      NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate();
       nodeRunner.run(rosCore, nodeConfiguration);
       rosCore.awaitStart();
       nodeConfiguration.setMasterUri(rosCore.getUri());

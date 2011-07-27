@@ -42,7 +42,6 @@ public class MainActivity extends Activity {
   private RosImageView<CompressedImage> image;
 
   public MainActivity() {
-    super();
     nodeRunner = NodeRunner.newDefault();
   }
 
@@ -63,8 +62,7 @@ public class MainActivity extends Activity {
     super.onResume();
     if (masterUri != null) {
       NodeConfiguration nodeConfiguration =
-          NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName());
-      nodeConfiguration.setMasterUri(masterUri);
+          NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName(), masterUri);
       nodeRunner.run(image, nodeConfiguration);
     }
   }

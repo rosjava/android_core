@@ -122,7 +122,7 @@
       <src path="${gen.absolute.dir}" />
       <src refid="project.libraries.src" />
       <classpath>
-        <pathelement path="${ros.classpath}" />
+        <pathelement path="${ros.compile.classpath}" />
       </classpath>
     </javac>
   </target>

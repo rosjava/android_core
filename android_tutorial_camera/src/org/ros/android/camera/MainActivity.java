@@ -17,16 +17,21 @@
 package org.ros.android.camera;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
-import org.ros.RosCore;
 import org.ros.address.InetAddressFactory;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeRunner;
+import org.ros.rosjava.android.MasterChooser;
+import org.ros.rosjava.android.views.RosCameraPreviewView;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
@@ -37,8 +42,8 @@ public class MainActivity extends Activity {
   private final NodeRunner nodeRunner;
 
   private int cameraId;
+  private URI masterUri;
   private RosCameraPreviewView preview;
-  private RosCore rosCore;
 
   public MainActivity() {
     nodeRunner = NodeRunner.newDefault();
@@ -51,6 +56,7 @@ public class MainActivity extends Activity {
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     preview = new RosCameraPreviewView(this);
     setContentView(preview);
+    startActivityForResult(new Intent(this, MasterChooser.class), 0);
   }
 
   @Override
@@ -58,17 +64,11 @@ public class MainActivity extends Activity {
     super.onResume();
     cameraId = 0;
     preview.setCamera(Camera.open(cameraId));
-    try {
-      NodeConfiguration nodeConfiguration = NodeConfiguration.createDefault();
-      String host = InetAddressFactory.createNonLoopback().getHostAddress();
-      nodeConfiguration.setHost(host);
-      rosCore = RosCore.createPublic(host, 11311);
-      nodeRunner.run(rosCore, nodeConfiguration);
-      rosCore.awaitStart();
-      nodeConfiguration.setMasterUri(rosCore.getUri());
+    if (masterUri != null) {
+      NodeConfiguration nodeConfiguration =
+          NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName());
+      nodeConfiguration.setMasterUri(masterUri);
       nodeRunner.run(preview, nodeConfiguration);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
     }
   }
 
@@ -98,8 +98,20 @@ public class MainActivity extends Activity {
   @Override
   protected void onPause() {
     super.onPause();
-    preview.shutdown();
-    rosCore.shutdown();
+    if (masterUri != null) {
+      preview.shutdown();
+    }
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == 0 && resultCode == RESULT_OK) {
+      try {
+        masterUri = new URI(data.getStringExtra("ROS_MASTER_URI"));
+      } catch (URISyntaxException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
 }
