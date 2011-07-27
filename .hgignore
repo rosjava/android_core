@@ -9,14 +9,15 @@ syntax: glob
 *.log
 *.ap_
 *.apk
-local.properties
-ros.properties
 .cproject
 .settings
 .classpath-generated
 .project-generated
 .classpath
 .project
-rosjava/lib/rosjava.jar
+dependencies.xml
+ros.properties
+default.properties
+
 syntax: regexp
-(bin|build|dist|msg_gen|srv_gen|gen|test_output)/.*
+(target|build|dist|msg_gen|srv_gen|gen|test_output)/.*
