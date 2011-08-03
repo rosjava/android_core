@@ -72,44 +72,48 @@ public class Scip20Device {
   public void reset() {
     write("RS");
     checkStatus();
-    consumeLf();
+    checkTerminator();
     write("SCIP2.0");
     try {
       checkStatus();
     } catch (Scip20Exception e) {
       // This command is undefined for SCIP2.0 devices.
     }
-    consumeLf();
+    checkTerminator();
   }
   
-  private void consumeLf() {
+  private void checkTerminator() {
     Preconditions.checkState(read().length() == 0);
   }
 
-  public void startScanning() {
+  private String readTimestamp() {
+    return verifyChecksum(read());
+  }
+  
+  public void startScanning(final LaserScanListener listener) {
     new Thread() {
       @Override
       public void run() {
         String command = "MD0000076800000";
         write(command);
-        checkStatus(); // 00P
-        consumeLf();
+        checkStatus();
+        checkTerminator();
         while (true) {
           Preconditions.checkState(read().equals(command));
           checkStatus();
-          verifyChecksum(read()); // Timestamp
-          List<Integer> ranges;
+          readTimestamp();
           StringBuilder data = new StringBuilder();
           while (true) {
             String line = read(); // Data and checksum or terminating LF
             if (line.length() == 0) {
-              ranges = Decoder.decode(data.toString(), 3);
+              listener.onNewLaserScan(Decoder.decode(data.toString(), 3));
               break;
             }
             data.append(verifyChecksum(line));
           }
         }
       }
+
     }.start();
   }
 }
