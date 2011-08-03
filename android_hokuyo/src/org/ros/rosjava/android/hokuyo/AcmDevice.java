@@ -33,14 +33,12 @@ public class AcmDevice {
   private static final int TIMEOUT = 3000;
 
   private final UsbDeviceConnection usbDeviceConnection;
-  private final UsbInterface usbInterface;
   private final BufferedReader reader;
   private final BufferedWriter writer;
 
   public AcmDevice(UsbDeviceConnection usbDeviceConnection, UsbInterface usbInterface) {
     Preconditions.checkState(usbDeviceConnection.claimInterface(usbInterface, true));
     this.usbDeviceConnection = usbDeviceConnection;
-    this.usbInterface = usbInterface;
 
     UsbEndpoint epOut = null;
     UsbEndpoint epIn = null;
@@ -63,10 +61,22 @@ public class AcmDevice {
     AcmWriter acmWriter = new AcmWriter(usbDeviceConnection, epOut);
     reader = new BufferedReader(acmReader);
     writer = new BufferedWriter(acmWriter);
-
   }
 
-  private void getLineCoding(UsbDeviceConnection usbDeviceConnection) {
+  public void setControlLineState() {
+    int byteCount = usbDeviceConnection.controlTransfer(0x21, 0x22, 0x100, 0, null, 0, TIMEOUT);
+    Preconditions.checkState(byteCount >= 0);
+  }
+
+  public void setLineCoding(byte[] lineCoding) {
+    int byteCount;
+    byteCount =
+        usbDeviceConnection.controlTransfer(0x21, 0x20, 0, 0, lineCoding, lineCoding.length,
+            TIMEOUT);
+    Preconditions.checkState(byteCount == lineCoding.length);
+  }
+
+  public void getLineCoding() {
     byte[] buffer = new byte[7];
     int byteCount =
         usbDeviceConnection.controlTransfer(0xa1, 0x21, 0, 0, buffer, buffer.length, TIMEOUT);
@@ -74,19 +84,6 @@ public class AcmDevice {
     for (int i = 0; i < buffer.length; i++) {
       Log.i("linecoding", String.format("%x", buffer[i]));
     }
-  }
-
-  private void setControlLineState(UsbDeviceConnection usbDeviceConnection) {
-    int byteCount = usbDeviceConnection.controlTransfer(0x21, 0x22, 0x100, 0, null, 0, TIMEOUT);
-    Preconditions.checkState(byteCount >= 0);
-  }
-
-  private void setLineCoding(UsbDeviceConnection connection) {
-    int byteCount;
-    byte[] lineCoding = new byte[] { 0, (byte) 0xe1, 0, 0, 0, 0, 0x8 };
-    byteCount =
-        connection.controlTransfer(0x21, 0x20, 0, 0, lineCoding, lineCoding.length, TIMEOUT);
-    Preconditions.checkState(byteCount == lineCoding.length);
   }
 
   public BufferedReader getReader() {
