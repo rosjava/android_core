@@ -1,0 +1,25 @@
+<package>
+  <description brief="android_tutorial_hokuyo">
+
+     android_tutorial_hokuyo
+
+  </description>
+  <author>Damon Kohler</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/android_tutorial_hokuyo</url>
+
+  <depend package="rosjava" />
+  <depend package="android" />
+  <depend package="android_hokuyo" />
+
+  <export>
+    <rosjava-android-app target="android-12" />
+    <rosjava-src location="src" />
+    <rosjava-src location="gen" />
+    <rosjava-src location="res" />
+  </export>
+
+</package>
+
+

@@ -1,5 +1,7 @@
-package org.ros.rosjava.android.hokuyo;
+package org.ros.rosjava.android.tutorial.hokuyo;
 
+import org.ros.rosjava.android.hokuyo.AcmDevice;
+import org.ros.rosjava.android.hokuyo.Scip20Device;
 import org.ros.rosjava.serial.R;
 
 import android.app.Activity;
@@ -7,9 +9,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 
-public class SerialActivity extends Activity {
-
-  private static final String TAG = "AcmSerial";
+public class MainActivity extends Activity {
 
   private Scip20Device scipDevice;
 
