@@ -16,10 +16,28 @@
 
 package org.ros.rosjava.android.hokuyo;
 
-import java.util.List;
+import junit.framework.TestCase;
 
-public interface LaserScanListener {
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
+public class ConfigurationTest extends TestCase {
   
-  void onNewLaserScan(List<Float> ranges);
+  private Configuration.Builder builder;
 
+  @Override
+  protected void setUp() throws Exception {
+    builder = new Configuration.Builder();
+  }
+
+  public void testParseModel() {
+    builder.parseModel("MODL:URG-04LX(Hokuyo Automatic Co., Ltd.);");
+    assertEquals("URG-04LX(Hokuyo Automatic Co., Ltd.)", builder.build().getModel());
+  }
+  
+  public void testParseIntegerValue() {
+    assertEquals(20, builder.parseIntegerValue("DMIN", "DMIN:20;"));
+  }
+  
+ 
 }

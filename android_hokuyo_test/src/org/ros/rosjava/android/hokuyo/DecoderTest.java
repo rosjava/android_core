@@ -16,10 +16,15 @@
 
 package org.ros.rosjava.android.hokuyo;
 
-import java.util.List;
+import junit.framework.TestCase;
 
-public interface LaserScanListener {
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
+public class DecoderTest extends TestCase {
   
-  void onNewLaserScan(List<Float> ranges);
+  public void testDecode3Letter() {
+    assertEquals(5432, Decoder.decode3Letter("1Dh"));
+  }
 
 }

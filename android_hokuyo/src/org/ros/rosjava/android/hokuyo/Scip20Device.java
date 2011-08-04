@@ -96,7 +96,7 @@ public class Scip20Device {
     }
     checkTerminator();
   }
-  
+
   private void checkTerminator() {
     Preconditions.checkState(read().length() == 0);
   }
@@ -104,7 +104,7 @@ public class Scip20Device {
   private String readTimestamp() {
     return verifyChecksum(read());
   }
-  
+
   public void startScanning(final LaserScanListener listener) {
     new Thread() {
       @Override
@@ -130,5 +130,27 @@ public class Scip20Device {
       }
 
     }.start();
+  }
+  
+  private String readAndStripSemicolon() {
+    String buffer = read();
+    Preconditions.checkState(buffer.charAt(buffer.length() - 2) == ';');
+    return buffer.substring(0, buffer.length() - 2) + buffer.charAt(buffer.length() - 1);
+  }
+
+  public Configuration queryConfiguration() {
+    Configuration.Builder builder = new Configuration.Builder();
+    write("PP");
+    checkStatus();
+    builder.parseModel(verifyChecksum(readAndStripSemicolon()));
+    builder.parseMinimumMeasurement(verifyChecksum(readAndStripSemicolon()));
+    builder.parseMaximumMeasurement(verifyChecksum(readAndStripSemicolon()));
+    builder.parseTotalSteps(verifyChecksum(readAndStripSemicolon()));
+    builder.parseFirstStep(verifyChecksum(readAndStripSemicolon()));
+    builder.parseLastStep(verifyChecksum(readAndStripSemicolon()));
+    builder.parseFrontStep(verifyChecksum(readAndStripSemicolon()));
+    builder.parseStandardMotorSpeed(verifyChecksum(readAndStripSemicolon()));
+    checkTerminator();
+    return builder.build();
   }
 }

@@ -16,6 +16,13 @@
 
 package org.ros.rosjava.android.tutorial.hokuyo;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMain;
+import org.ros.node.NodeRunner;
+import org.ros.rosjava.android.hokuyo.LaserScanPublisher;
 import org.ros.rosjava.serial.R;
 
 import android.app.Activity;
@@ -24,6 +31,14 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 
 public class MainActivity extends Activity {
+  
+  private final NodeRunner nodeRunner;
+  
+  private NodeMain laserScanPublisher;
+  
+  public MainActivity() {
+    nodeRunner = NodeRunner.newDefault();
+  }
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -34,7 +49,19 @@ public class MainActivity extends Activity {
       finish();
     } else {
       UsbManager manager = (UsbManager) getSystemService(USB_SERVICE);
-      // launch node
+      laserScanPublisher = new LaserScanPublisher(manager, device);
+      NodeConfiguration nodeConfiguration;
+      try {
+        nodeConfiguration = NodeConfiguration.newPublic("192.168.1.138", new URI("http://192.168.1.136:11311"));
+      } catch (URISyntaxException e) {
+        throw new RuntimeException(e);
+      }      
+      nodeRunner.run(laserScanPublisher, nodeConfiguration);
     }
+  }
+  
+  @Override
+  protected void onPause() {
+    laserScanPublisher.shutdown();
   }
 }
