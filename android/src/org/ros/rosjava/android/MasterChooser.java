@@ -16,12 +16,6 @@
 
 package org.ros.rosjava.android;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-
-import org.ros.node.NodeConfiguration;
-
 import com.google.common.base.Preconditions;
 
 import android.app.Activity;
@@ -32,9 +26,13 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import org.ros.node.NodeConfiguration;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 
 /**
  * Displays a text box to allow the user to enter a URI or scan a QR code. Then
