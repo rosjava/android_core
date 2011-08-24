@@ -75,7 +75,6 @@ public class LaserScanPublisher implements NodeMain {
         message.range_min = (float) (configuration.getMinimumMeasurment() / 1000.0);
         message.range_max = (float) (configuration.getMaximumMeasurement() / 1000.0);
         message.header.frame_id = "laser";
-        message.header.seq = seq;
         message.header.stamp = node.getCurrentTime();
         publisher.publish(message);
         seq++;

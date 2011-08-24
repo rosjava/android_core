@@ -24,7 +24,7 @@ import com.google.common.base.Preconditions;
 
 public class Scip20Device {
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final String TAG = "Scip20Device";
 
   private final AcmDevice device;

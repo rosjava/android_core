@@ -19,23 +19,28 @@ package org.ros.rosjava.android.tutorial.hokuyo;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.ros.address.InetAddressFactory;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeRunner;
+import org.ros.rosjava.android.MasterChooser;
 import org.ros.rosjava.android.hokuyo.LaserScanPublisher;
 import org.ros.rosjava.serial.R;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 
 public class MainActivity extends Activity {
-  
+
   private final NodeRunner nodeRunner;
-  
+
   private NodeMain laserScanPublisher;
-  
+
+  private URI masterUri;
+
   public MainActivity() {
     nodeRunner = NodeRunner.newDefault();
   }
@@ -44,24 +49,47 @@ public class MainActivity extends Activity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    UsbDevice device = (UsbDevice) getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
-    if (device == null) {
-      finish();
-    } else {
-      UsbManager manager = (UsbManager) getSystemService(USB_SERVICE);
-      laserScanPublisher = new LaserScanPublisher(manager, device);
-      NodeConfiguration nodeConfiguration;
-      try {
-        nodeConfiguration = NodeConfiguration.newPublic("192.168.1.138", new URI("http://192.168.1.136:11311"));
-      } catch (URISyntaxException e) {
-        throw new RuntimeException(e);
-      }      
-      nodeRunner.run(laserScanPublisher, nodeConfiguration);
-    }
   }
-  
+
+  @Override
+  protected void onResume() {
+    if (masterUri == null) {
+      startActivityForResult(new Intent(this, MasterChooser.class), 0);
+    } else {
+      final UsbDevice device = (UsbDevice) getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
+      if (device != null) {
+        new Thread() {
+          public void run() {
+            UsbManager manager = (UsbManager) getSystemService(USB_SERVICE);
+            laserScanPublisher = new LaserScanPublisher(manager, device);
+            NodeConfiguration nodeConfiguration =
+                NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName(),
+                    masterUri);
+            nodeRunner.run(laserScanPublisher, nodeConfiguration);
+          }
+        }.start();
+      }
+    }
+    super.onResume();
+  }
+
   @Override
   protected void onPause() {
-    laserScanPublisher.shutdown();
+    if (laserScanPublisher != null) {
+      laserScanPublisher.shutdown();
+    }
+    super.onPause();
   }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == 0 && resultCode == RESULT_OK) {
+      try {
+        masterUri = new URI(data.getStringExtra("ROS_MASTER_URI"));
+      } catch (URISyntaxException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
 }
