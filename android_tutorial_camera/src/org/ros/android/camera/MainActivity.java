@@ -54,17 +54,17 @@ public class MainActivity extends Activity {
     super.onCreate(savedInstanceState);
     requestWindowFeature(Window.FEATURE_NO_TITLE);
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-    preview = new RosCameraPreviewView(this);
-    setContentView(preview);
+    setContentView(R.layout.main);
+    preview = (RosCameraPreviewView) findViewById(R.id.camera_preview);
     startActivityForResult(new Intent(this, MasterChooser.class), 0);
   }
 
   @Override
   protected void onResume() {
     super.onResume();
-    cameraId = 0;
-    preview.setCamera(Camera.open(cameraId));
     if (masterUri != null) {
+      cameraId = 0;
+      preview.setCamera(Camera.open(cameraId));
       NodeConfiguration nodeConfiguration =
           NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName());
       nodeConfiguration.setMasterUri(masterUri);

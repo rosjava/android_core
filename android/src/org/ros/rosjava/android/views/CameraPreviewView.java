@@ -34,42 +34,45 @@ import org.ros.exception.RosRuntimeException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class CameraPreviewView extends ViewGroup {
-  
+
   private final static double ASPECT_TOLERANCE = 0.1;
+
+  private final ByteArrayOutputStream stream = new ByteArrayOutputStream(512);
 
   private SurfaceHolder surfaceHolder;
   private Size previewSize;
   private Camera camera;
   private PreviewCallback previewCallback;
-  private BufferingPreviewCallback bufferingPreviewCallback;
-  private ArrayList<byte[]> previewBuffers;
 
   private final class BufferingPreviewCallback implements PreviewCallback {
+
+    private final byte[] previewBuffer;
+    private final YuvImage yuvImage;
+    private final Rect rect;
+
+    public BufferingPreviewCallback(byte[] previewBuffer) {
+      this.previewBuffer = previewBuffer;
+      yuvImage =
+          new YuvImage(previewBuffer, ImageFormat.NV21, previewSize.width, previewSize.height, null);
+      rect = new Rect(0, 0, previewSize.width, previewSize.height);
+    }
+
     @Override
-    public void onPreviewFrame(byte[] data, Camera camera) {
-      // TODO(damonkohler): There should be a way to avoid this case?
-      Size size;
-      try {
-        size = camera.getParameters().getPreviewSize();
-      } catch (RuntimeException e) {
-        // Camera not available.
-        return;
-      }
-      // TODO(damonkohler): This is pretty awful and causing a lot of GC.
-      YuvImage image = new YuvImage(data, ImageFormat.NV21, size.width, size.height, null);
-      ByteArrayOutputStream stream = new ByteArrayOutputStream(512);
-      Preconditions.checkState(image.compressToJpeg(new Rect(0, 0, size.width, size.height), 80, stream));
+    public void onPreviewFrame(byte[] data, Camera unused) {
+      Preconditions.checkNotNull(camera);
+      Preconditions.checkArgument(data == previewBuffer);
+      Preconditions.checkState(yuvImage.compressToJpeg(rect, 80, stream));
       if (previewCallback != null) {
         previewCallback.onPreviewFrame(stream.toByteArray(), camera);
+        stream.reset();
       }
-      camera.addCallbackBuffer(data);
+      camera.addCallbackBuffer(previewBuffer);
     }
   }
 
@@ -101,7 +104,6 @@ public class CameraPreviewView extends ViewGroup {
     surfaceHolder = surfaceView.getHolder();
     surfaceHolder.addCallback(new SurfaceHolderCallback());
     surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-    bufferingPreviewCallback = new BufferingPreviewCallback();
   }
 
   public CameraPreviewView(Context context) {
@@ -123,6 +125,7 @@ public class CameraPreviewView extends ViewGroup {
     if (camera == null) {
       return;
     }
+    camera.setPreviewCallbackWithBuffer(null);
     camera.stopPreview();
     camera.release();
     camera = null;
@@ -183,21 +186,17 @@ public class CameraPreviewView extends ViewGroup {
         }
       }
     }
-    
+
     Preconditions.checkNotNull(optimalSize);
     return optimalSize;
   }
 
   private void setupBufferingPreviewCallback() {
-    previewBuffers = new ArrayList<byte[]>();
-    Size size = camera.getParameters().getPreviewSize();
     int format = camera.getParameters().getPreviewFormat();
     int bits_per_pixel = ImageFormat.getBitsPerPixel(format);
-    previewBuffers.add(new byte[size.height * size.width * bits_per_pixel / 8]);
-    for (byte[] x : previewBuffers) {
-      camera.addCallbackBuffer(x);
-    }
-    camera.setPreviewCallbackWithBuffer(bufferingPreviewCallback);
+    byte[] previewBuffer = new byte[previewSize.height * previewSize.width * bits_per_pixel / 8];
+    camera.addCallbackBuffer(previewBuffer);
+    camera.setPreviewCallbackWithBuffer(new BufferingPreviewCallback(previewBuffer));
   }
 
   @Override
@@ -224,5 +223,4 @@ public class CameraPreviewView extends ViewGroup {
       }
     }
   }
-
 }

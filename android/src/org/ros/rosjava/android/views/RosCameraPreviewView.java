@@ -19,11 +19,7 @@ package org.ros.rosjava.android.views;
 import com.google.common.base.Preconditions;
 
 import android.content.Context;
-import android.hardware.Camera;
-import android.hardware.Camera.PreviewCallback;
-import android.hardware.Camera.Size;
 import android.util.AttributeSet;
-import org.ros.message.Time;
 import org.ros.message.sensor_msgs.CameraInfo;
 import org.ros.message.sensor_msgs.CompressedImage;
 import org.ros.namespace.GraphName;
@@ -40,35 +36,6 @@ import org.ros.node.topic.Publisher;
 public class RosCameraPreviewView extends CameraPreviewView implements NodeMain {
 
   private Node node;
-  private Publisher<CompressedImage> imagePublisher;
-  private Publisher<CameraInfo> cameraInfoPublisher;
-
-  private final class PublishingPreviewCallback implements PreviewCallback {
-    @Override
-    public void onPreviewFrame(byte[] data, Camera camera) {
-      CompressedImage image = new CompressedImage();
-      CameraInfo cameraInfo = new CameraInfo();
-      String frameId = "camera";
-
-      // TODO(ethan): Right now serialization is deferred. When serialization
-      // happens inline, we won't need to copy.
-      image.data = new byte[data.length];
-      System.arraycopy(data, 0, image.data, 0, data.length);
-
-      image.format = "jpeg";
-      image.header.stamp = Time.fromMillis(System.currentTimeMillis());
-      image.header.frame_id = frameId;
-      imagePublisher.publish(image);
-
-      cameraInfo.header.stamp = image.header.stamp;
-      cameraInfo.header.frame_id = frameId;
-
-      Size previewSize = camera.getParameters().getPreviewSize();
-      cameraInfo.width = previewSize.width;
-      cameraInfo.height = previewSize.height;
-      cameraInfoPublisher.publish(cameraInfo);
-    }
-  }
 
   public RosCameraPreviewView(Context context) {
     super(context);
@@ -86,12 +53,12 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
   public void main(NodeConfiguration nodeConfiguration) throws Exception {
     Preconditions.checkState(node == null);
     node = new DefaultNodeFactory().newNode("android/camera_preview_view", nodeConfiguration);
-    NameResolver resolver = node.getResolver().createResolver(new GraphName("android/camera"));
-    imagePublisher =
+    NameResolver resolver = node.getResolver().createResolver(new GraphName("camera"));
+    Publisher<CompressedImage> imagePublisher =
         node.newPublisher(resolver.resolve("image_raw"), "sensor_msgs/CompressedImage");
-    cameraInfoPublisher =
+    Publisher<CameraInfo> cameraInfoPublisher =
         node.newPublisher(resolver.resolve("camera_info"), "sensor_msgs/CameraInfo");
-    setPreviewCallback(new PublishingPreviewCallback());
+    setPreviewCallback(new PublishingPreviewCallback(node, imagePublisher, cameraInfoPublisher));
   }
 
   @Override
