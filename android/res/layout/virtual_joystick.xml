@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent" android:layout_height="fill_parent"
+  android:id="@+id/virtual_joystick_layout">
+
+  <!-- The black backgroud on which all the other images will be displayed. -->
+  <ImageView android:id="@+id/black_background" android:layout_width="fill_parent"
+    android:layout_height="fill_parent" android:src="@drawable/black_background"
+    android:layout_centerInParent="true" />
+
+  <!-- Outer ring representing the maximum magnitude. -->
+  <ImageView android:id="@+id/outer_ring" android:layout_width="fill_parent"
+    android:layout_height="fill_parent" android:src="@drawable/grey_ring_notched"
+    android:layout_centerInParent="true"></ImageView>
+
+  <!-- The intensity circle representing current magnitude. -->
+  <ImageView android:id="@+id/intensity" android:src="@drawable/intensity"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"></ImageView>
+
+  <!-- Magnitude text display -->
+  <TextView android:id="@+id/magnitude" android:layout_width="wrap_content"
+    android:layout_height="wrap_content" android:layout_centerInParent="true"
+    android:textSize="15px" android:text="0%" />
+
+  <!-- 0 degree marker -->
+  <ImageView android:id="@+id/widget_0_degrees" android:src="@drawable/large_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"></ImageView>
+
+  <!-- 15 degree marker -->
+  <ImageView android:id="@+id/widget_15_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="15.0" />
+
+  <!-- 30 degree marker -->
+  <ImageView android:id="@+id/widget_30_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="30.0" />
+
+  <!-- 45 degree marker -->
+  <ImageView android:id="@+id/widget_45_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="45.0" />
+
+  <!-- 60 degree marker -->
+  <ImageView android:id="@+id/widget_60_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="60.0" />
+
+  <!-- 75 degree marker -->
+  <ImageView android:id="@+id/widget_75_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="75.0" />
+
+  <!-- 90 degree marker -->
+  <ImageView android:id="@+id/widget_90_degrees" android:src="@drawable/large_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="90.0" />
+
+  <!-- 105 degree marker -->
+  <ImageView android:id="@+id/widget_105_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="105.0" />
+
+  <!-- 120 degree marker -->
+  <ImageView android:id="@+id/widget_120_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="120.0" />
+
+  <!-- 135 degree marker -->
+  <ImageView android:id="@+id/widget_135_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="135.0" />
+
+  <!-- 150 degree marker -->
+  <ImageView android:id="@+id/widget_150_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="150.0" />
+
+  <!-- 165 degree marker -->
+  <ImageView android:id="@+id/widget_165_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="165.0" />
+
+  <!-- 180 degree marker -->
+  <ImageView android:id="@+id/widget_180_degrees" android:src="@drawable/large_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="180.0" />
+
+  <!-- 195 degree marker -->
+  <ImageView android:id="@+id/widget_195_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="195.0" />
+
+  <!-- 210 degree marker -->
+  <ImageView android:id="@+id/widget_210_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="210.0" />
+
+  <!-- 225 degree marker -->
+  <ImageView android:id="@+id/widget_225_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="225.0" />
+
+  <!-- 240 degree marker -->
+  <ImageView android:id="@+id/widget_240_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="240.0" />
+
+  <!-- 255 degree marker -->
+  <ImageView android:id="@+id/widget_255_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="255.0" />
+
+  <!-- 270 degree marker -->
+  <ImageView android:id="@+id/widget_270_degrees" android:src="@drawable/large_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="270.0" />
+
+  <!-- 285 degree marker -->
+  <ImageView android:id="@+id/widget_285_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="285.0" />
+
+  <!-- 300 degree marker -->
+  <ImageView android:id="@+id/widget_300_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="300.0" />
+
+  <!-- 315 degree marker -->
+  <ImageView android:id="@+id/widget_315_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="315.0" />
+
+  <!-- 330 degree marker -->
+  <ImageView android:id="@+id/widget_330_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="330.0" />
+
+  <!-- 345 degree marker -->
+  <ImageView android:id="@+id/widget_345_degrees" android:src="@drawable/small_d_widget_3"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:layout_centerInParent="true" android:antialias="true"
+    android:rotation="345.0" />
+
+  <ImageView android:id="@+id/top_angle_slice" android:layout_height="fill_parent"
+    android:layout_width="fill_parent" android:src="@drawable/top_angle_slice"
+    android:layout_centerInParent="true"></ImageView>
+
+  <ImageView android:id="@+id/mid_angle_slice" android:layout_height="fill_parent"
+    android:layout_width="fill_parent" android:src="@drawable/mid_angle_slice"
+    android:layout_centerInParent="true" android:alpha="0.5"></ImageView>
+
+
+  <!-- Previous velocity divet -->
+  <ImageView android:id="@+id/previous_velocity_divet" android:src="@drawable/previous_velocity"
+    android:layout_centerInParent="true" android:layout_width="wrap_content"
+    android:layout_height="wrap_content" android:antialias="true" />
+
+  <!-- The size of the center divet should always remain the same, since it's supposed 
+    to represent a deadzone that is dependent on the size of a human finger. -->
+  <ImageView android:id="@+id/center_divet" android:layout_height="wrap_content"
+    android:layout_width="wrap_content" android:src="@drawable/center_widget"
+    android:layout_centerInParent="true"></ImageView>
+
+  <!-- Thumb divet -->
+  <ImageView android:id="@+id/thumb_divet" android:src="@drawable/directional_arrow"
+    android:layout_centerInParent="true" android:layout_width="wrap_content"
+    android:layout_height="wrap_content" android:antialias="true" />
+
+</RelativeLayout>

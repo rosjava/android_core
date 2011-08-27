@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="400px" android:layout_height="300px" android:id="@+id/pan_tilt_layout">
+
+
+  <ImageView android:id="@+id/background" android:src="@drawable/background"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" />
+
+  <ImageView android:id="@+id/pt_outline" android:src="@drawable/pt_bg"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" />
+
+  <ImageView android:id="@+id/pt_home_marker" android:src="@drawable/pt_home_marker"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="15px"
+    android:translationY="-24px" android:alpha="0.6" />
+
+  <ImageView android:id="@+id/pt_divet" android:src="@drawable/pan_tilt_controller"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="15px"
+    android:translationY="-24px" />
+
+
+
+
+  <!-- Small Pan marker 0 (left most) -->
+  <ImageView android:id="@+id/pan_small_marker_0" android:src="@drawable/small_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="-102px"
+    android:translationY="-122px" />
+
+  <!-- Small Pan marker 1 -->
+  <ImageView android:id="@+id/pan_small_marker_1" android:src="@drawable/small_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="-76px"
+    android:translationY="-122px" />
+
+  <!-- Small Pan marker 2 -->
+  <ImageView android:id="@+id/pan_small_marker_2" android:src="@drawable/small_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="-50px"
+    android:translationY="-122px" />
+
+  <!-- Small Pan marker 3 -->
+  <ImageView android:id="@+id/pan_small_marker_3" android:src="@drawable/small_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="-24px"
+    android:translationY="-122px" />
+
+  <!-- Small Pan marker 4 -->
+  <ImageView android:id="@+id/pan_small_marker_4" android:src="@drawable/small_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="2px"
+    android:translationY="-122px" />
+
+  <!-- Small Pan marker 5 -->
+  <ImageView android:id="@+id/pan_small_marker_5" android:src="@drawable/small_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="28px"
+    android:translationY="-122px" />
+
+  <!-- Small Pan marker 6 -->
+  <ImageView android:id="@+id/pan_small_marker_6" android:src="@drawable/small_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="54px"
+    android:translationY="-122px" />
+
+  <!-- Small Pan marker 7 -->
+  <ImageView android:id="@+id/pan_small_marker_7" android:src="@drawable/small_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="80px"
+    android:translationY="-122px" />
+
+  <!-- Small Pan marker 8 -->
+  <ImageView android:id="@+id/pan_small_marker_8" android:src="@drawable/small_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="106px"
+    android:translationY="-122px" />
+
+  <!-- Small Pan marker 9 (right most) -->
+  <ImageView android:id="@+id/pan_small_marker_9" android:src="@drawable/small_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="133px"
+    android:translationY="-122px" />
+
+
+
+  <!-- Large Pan marker 0 (left most) -->
+  <ImageView android:id="@+id/pan_large_marker_0" android:src="@drawable/large_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="-102px"
+    android:translationY="-130px" />
+
+  <!-- Large Pan marker 1 -->
+  <ImageView android:id="@+id/pan_large_marker_1" android:src="@drawable/large_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="-76px"
+    android:translationY="-130px" />
+
+  <!-- Large Pan marker 2 -->
+  <ImageView android:id="@+id/pan_large_marker_2" android:src="@drawable/large_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="-50px"
+    android:translationY="-130px" />
+
+  <!-- Large Pan marker 3 -->
+  <ImageView android:id="@+id/pan_large_marker_3" android:src="@drawable/large_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="-24px"
+    android:translationY="-130px" />
+
+  <!-- Large Pan marker 4 -->
+  <ImageView android:id="@+id/pan_large_marker_4" android:src="@drawable/large_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="2px"
+    android:translationY="-130px" />
+
+  <!-- Large Pan marker 5 -->
+  <ImageView android:id="@+id/pan_large_marker_5" android:src="@drawable/large_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="28px"
+    android:translationY="-130px" />
+
+  <!-- Large Pan marker 6 -->
+  <ImageView android:id="@+id/pan_large_marker_6" android:src="@drawable/large_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="54px"
+    android:translationY="-130px" />
+
+  <!-- Large Pan marker 7 -->
+  <ImageView android:id="@+id/pan_large_marker_7" android:src="@drawable/large_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="80px"
+    android:translationY="-130px" />
+
+  <!-- Large Pan marker 8 -->
+  <ImageView android:id="@+id/pan_large_marker_8" android:src="@drawable/large_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="106px"
+    android:translationY="-130px" />
+
+  <!-- Large Pan marker 9 (right most) -->
+  <ImageView android:id="@+id/pan_large_marker_9" android:src="@drawable/large_pan_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="133px"
+    android:translationY="-130px" />
+
+
+
+
+
+
+
+
+
+
+
+  <!-- Small Tilt marker 0 (top most) -->
+  <ImageView android:id="@+id/tilt_small_marker_0" android:src="@drawable/small_tilt_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="172px"
+    android:translationY="-82px" />
+
+  <!-- Small Tilt marker 1 -->
+  <ImageView android:id="@+id/tilt_small_marker_1" android:src="@drawable/small_tilt_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="172px"
+    android:translationY="-51px" />
+
+  <!-- Small Tilt marker 2 -->
+  <ImageView android:id="@+id/tilt_small_marker_2" android:src="@drawable/small_tilt_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="172px"
+    android:translationY="-20px" />
+
+  <!-- Small Tilt marker 3 -->
+  <ImageView android:id="@+id/tilt_small_marker_3" android:src="@drawable/small_tilt_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="172px"
+    android:translationY="11px" />
+
+  <!-- Small Tilt marker 4 -->
+  <ImageView android:id="@+id/tilt_small_marker_4" android:src="@drawable/small_tilt_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="172px"
+    android:translationY="42px" />
+
+  <!-- Small Tilt marker 5 -->
+  <ImageView android:id="@+id/tilt_small_marker_5" android:src="@drawable/small_tilt_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="172px"
+    android:translationY="73px" />
+
+  <!-- Small Tilt marker 6 (bottom most) -->
+  <ImageView android:id="@+id/tilt_small_marker_6" android:src="@drawable/small_tilt_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="172px"
+    android:translationY="105px" />
+
+
+
+  <!-- Large Tilt marker 0 (top most) -->
+  <ImageView android:id="@+id/tilt_large_marker_0" android:src="@drawable/large_tilt_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="180px"
+    android:translationY="-82px" />
+
+  <!-- Large Tilt marker 1 -->
+  <ImageView android:id="@+id/tilt_large_marker_1" android:src="@drawable/large_tilt_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="180px"
+    android:translationY="-51px" />
+
+  <!-- Large Tilt marker 2 -->
+  <ImageView android:id="@+id/tilt_large_marker_2" android:src="@drawable/large_tilt_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="180px"
+    android:translationY="-20px" />
+
+  <!-- Large Tilt marker 3 -->
+  <ImageView android:id="@+id/tilt_large_marker_3" android:src="@drawable/large_tilt_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="180px"
+    android:translationY="11px" />
+
+  <!-- Large Tilt marker 4 -->
+  <ImageView android:id="@+id/tilt_large_marker_4" android:src="@drawable/large_tilt_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="180px"
+    android:translationY="42px" />
+
+  <!-- Large Tilt marker 5 -->
+  <ImageView android:id="@+id/tilt_large_marker_5" android:src="@drawable/large_tilt_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="180px"
+    android:translationY="73px" />
+
+  <!-- Large Tilt marker 6 (bottom most) -->
+  <ImageView android:id="@+id/tilt_large_marker_6" android:src="@drawable/large_tilt_marker_3"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="180px"
+    android:translationY="105px" />
+
+
+
+
+  <!-- Horizon -->
+  <ImageView android:id="@+id/horizon" android:src="@drawable/horizon_original"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:scaleX="0.71" android:scaleY="0.7"
+    android:translationX="16px" android:translationY="27px" />
+
+
+
+
+
+
+  <!-- Zoom shell -->
+  <ImageView android:id="@+id/pan_tilt_zoom_shell" android:src="@drawable/zoom_bg"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:scaleY="0.82" android:translationY="12px" />
+
+  <!-- Top zoom in (not pressed) -->
+  <ImageView android:id="@+id/zoom_in_button_not_pressed" android:src="@drawable/zoom_in_normal"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_centerInParent="true" android:translationX="-165px"
+    android:translationY="-75px" />
+
+  <!-- Top zoom out (not pressed) -->
+  <ImageView android:id="@+id/zoom_out_button_not_pressed"
+    android:src="@drawable/zoom_out_normal" android:layout_width="wrap_content"
+    android:layout_height="wrap_content" android:layout_centerInParent="true"
+    android:translationX="-165px" android:translationY="103px" />
+
+  <!-- Non-lit zoom bar 0 (top) -->
+  <ImageView android:id="@+id/zoom_bar_notlit_0" android:src="@drawable/zoom_bar_notlit"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:translationX="12px" android:translationY="105px" />
+
+  <!-- Non-lit zoom bar 1 -->
+  <ImageView android:id="@+id/zoom_bar_notlit_1" android:src="@drawable/zoom_bar_notlit"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:translationX="12px" android:translationY="130px" />
+
+  <!-- Non-lit zoom bar 2 -->
+  <ImageView android:id="@+id/zoom_bar_notlit_2" android:src="@drawable/zoom_bar_notlit"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:translationX="12px" android:translationY="155px" />
+
+  <!-- Non-lit zoom bar 3 -->
+  <ImageView android:id="@+id/zoom_bar_notlit_3" android:src="@drawable/zoom_bar_notlit"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:translationX="12px" android:translationY="180px" />
+
+  <!-- Non-lit zoom bar 4 (bottom) -->
+  <ImageView android:id="@+id/zoom_bar_notlit_4" android:src="@drawable/zoom_bar_notlit"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:translationX="12px" android:translationY="205px" />
+
+  <!-- Lit zoom bar 0 (top) -->
+  <ImageView android:id="@+id/zoom_bar_lit_0" android:src="@drawable/zoom_bar_lit"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:translationX="12px" android:translationY="105px" android:visibility="invisible" />
+
+  <!-- Lit zoom bar 1 -->
+  <ImageView android:id="@+id/zoom_bar_lit_1" android:src="@drawable/zoom_bar_lit"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:translationX="12px" android:translationY="130px" android:visibility="invisible" />
+
+  <!-- Lit zoom bar 2 -->
+  <ImageView android:id="@+id/zoom_bar_lit_2" android:src="@drawable/zoom_bar_lit"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:translationX="12px" android:translationY="155px" android:visibility="invisible" />
+
+  <!-- Lit zoom bar 3 -->
+  <ImageView android:id="@+id/zoom_bar_lit_3" android:src="@drawable/zoom_bar_lit"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:translationX="12px" android:translationY="180px" android:visibility="invisible" />
+
+  <!-- Lit zoom bar 4 (bottom) -->
+  <ImageView android:id="@+id/zoom_bar_lit_4" android:src="@drawable/zoom_bar_lit"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:translationX="12px" android:translationY="205px" android:visibility="invisible" />
+
+
+
+</RelativeLayout>
