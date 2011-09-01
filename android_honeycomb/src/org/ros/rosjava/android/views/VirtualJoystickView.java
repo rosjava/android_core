@@ -556,9 +556,6 @@ public class VirtualJoystickView extends RelativeLayout implements OnTouchListen
     intensity = (ImageView) findViewById(org.ros.rosjava.android.R.id.intensity);
     thumbDivet = (ImageView) findViewById(org.ros.rosjava.android.R.id.thumb_divet);
     orientationWidget = new ImageView[24];
-    for (ImageView widget : orientationWidget) {
-      widget = new ImageView(getContext());
-    }
     orientationWidget[0] = (ImageView) findViewById(org.ros.rosjava.android.R.id.widget_0_degrees);
     orientationWidget[1] = (ImageView) findViewById(org.ros.rosjava.android.R.id.widget_15_degrees);
     orientationWidget[2] = (ImageView) findViewById(org.ros.rosjava.android.R.id.widget_30_degrees);

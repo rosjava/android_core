@@ -16,10 +16,6 @@
 
 package org.ros.rosjava.android.views;
 
-import android.util.Log;
-
-import android.graphics.Point;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.view.LayoutInflater;
@@ -28,11 +24,11 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import org.ros.address.InetAddressFactory;
 import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.topic.Publisher;
-import org.ros.address.InetAddressFactory;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -81,11 +77,6 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener {
    * {@link #tiltTack}.
    */
   private static final int MAX_TACK_COORDINATE = 184;
-  /**
-   * CENTER_TACK_OFFSET The offset used to move the {@link #desiredTack} to the
-   * coordinates of the pointer.
-   */
-  private static final float CENTER_TACK_OFFSET = 16.0f;
   /**
    * GUIDE_LENGTH The length of the pan and tilt guides in pixels. This values
    * is used to normalize the coordinates to -1:+1.
