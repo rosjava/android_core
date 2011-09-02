@@ -9,6 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/android_hokuyo_test</url>
 
+  <depend package="rosjava" />
   <depend package="android_hokuyo" />
 
   <export>
