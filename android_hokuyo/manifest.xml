@@ -9,8 +9,8 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/android_hokuyo</url>
 
-  <depend package="rosjava"/>
-  <depend package="android"/>
+  <depend package="rosjava" />
+  <depend package="android_gingerbread" />
 
   <export>
     <rosjava-android-lib target="android-12" />

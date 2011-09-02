@@ -10,7 +10,7 @@
   <url>http://ros.org/wiki/android_tutorial_hokuyo</url>
 
   <depend package="rosjava" />
-  <depend package="android" />
+  <depend package="android_gingerbread" />
   <depend package="android_hokuyo" />
 
   <export>

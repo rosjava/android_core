@@ -1,7 +1,7 @@
 <package>
-  <description brief="android_honeycomb">
+  <description brief="android_honeycomb_mr2">
 
-    android_honeycomb
+    android_honeycomb_mr2
 
   </description>
   <author>Damon Kohler</author>
@@ -9,8 +9,8 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/android</url>
 
-  <depend package="rosjava"/>
-  <depend package="android"/>
+  <depend package="rosjava" />
+  <depend package="android_gingerbread" />
   <depend package="sensor_msgs" />
   <depend package="nav_msgs" />
 
