@@ -1,25 +1,25 @@
 <package>
-  <description brief="android_hokuyo">
+  <description brief="android_rosserial">
 
-     android_hokuyo
+     android_rosserial
 
   </description>
   <author>Damon Kohler</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/android_hokuyo</url>
+  <url>http://ros.org/wiki/android_rosserial</url>
 
   <depend package="rosjava" />
-  <depend package="android_gingerbread" />
+  <depend package="rosserial_java" />
   <depend package="android_acm_serial" />
+  <depend package="android_gingerbread" />
 
   <export>
-    <rosjava-android-lib target="android-13" />
+    <rosjava-android-app target="android-13" />
     <rosjava-src location="src" />
     <rosjava-src location="gen" />
     <rosjava-src location="res" />
   </export>
-
 </package>
 
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.ros.rosjava.android.hokuyo;
+package org.ros.rosjava.android.acm_serial;
 
 import com.google.common.base.Preconditions;
 
@@ -22,53 +22,55 @@ import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
-import android.util.Log;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
-/* This class represents a USB device that supports the adb protocol. */
 public class AcmDevice {
 
   private static final int TIMEOUT = 3000;
 
   private final UsbDeviceConnection usbDeviceConnection;
-  private final BufferedReader reader;
-  private final BufferedWriter writer;
+  private final InputStream inputStream;
+  private final OutputStream outputStream;
 
   public AcmDevice(UsbDeviceConnection usbDeviceConnection, UsbInterface usbInterface) {
     Preconditions.checkState(usbDeviceConnection.claimInterface(usbInterface, true));
     this.usbDeviceConnection = usbDeviceConnection;
 
-    UsbEndpoint epOut = null;
-    UsbEndpoint epIn = null;
-    // look for our bulk endpoints
+    UsbEndpoint endpointOut = null;
+    UsbEndpoint endpointIn = null;
     for (int i = 0; i < usbInterface.getEndpointCount(); i++) {
-      UsbEndpoint ep = usbInterface.getEndpoint(i);
-      if (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_BULK) {
-        if (ep.getDirection() == UsbConstants.USB_DIR_OUT) {
-          epOut = ep;
+      UsbEndpoint endpoint = usbInterface.getEndpoint(i);
+      if (endpoint.getType() == UsbConstants.USB_ENDPOINT_XFER_BULK) {
+        if (endpoint.getDirection() == UsbConstants.USB_DIR_OUT) {
+          endpointOut = endpoint;
         } else {
-          epIn = ep;
+          endpointIn = endpoint;
         }
       }
     }
-    if (epOut == null || epIn == null) {
+    if (endpointOut == null || endpointIn == null) {
       throw new IllegalArgumentException("Not all endpoints found.");
     }
 
-    AcmReader acmReader = new AcmReader(usbDeviceConnection, epIn);
-    AcmWriter acmWriter = new AcmWriter(usbDeviceConnection, epOut);
-    reader = new BufferedReader(acmReader);
-    writer = new BufferedWriter(acmWriter);
+    inputStream = new AcmInputStream(usbDeviceConnection, endpointIn);
+    outputStream = new AcmOutputStream(usbDeviceConnection, endpointOut);
   }
 
-  public void setControlLineState() {
-    int byteCount = usbDeviceConnection.controlTransfer(0x21, 0x22, 0x100, 0, null, 0, TIMEOUT);
-    Preconditions.checkState(byteCount >= 0);
+  public void setLineCoding(BitRate bitRate, StopBits stopBits, Parity parity, DataBits dataBits) {
+    ByteBuffer buffer = ByteBuffer.allocate(7);
+    buffer.order(ByteOrder.LITTLE_ENDIAN);
+    buffer.putInt(bitRate.getBitRate());
+    buffer.put(stopBits.getStopBits());
+    buffer.put(parity.getParity());
+    buffer.put(dataBits.getDataBits());
+    setLineCoding(buffer.array());
   }
 
-  public void setLineCoding(byte[] lineCoding) {
+  private void setLineCoding(byte[] lineCoding) {
     int byteCount;
     byteCount =
         usbDeviceConnection.controlTransfer(0x21, 0x20, 0, 0, lineCoding, lineCoding.length,
@@ -76,22 +78,16 @@ public class AcmDevice {
     Preconditions.checkState(byteCount == lineCoding.length);
   }
 
-  public void getLineCoding() {
-    byte[] buffer = new byte[7];
-    int byteCount =
-        usbDeviceConnection.controlTransfer(0xa1, 0x21, 0, 0, buffer, buffer.length, TIMEOUT);
-    Preconditions.checkState(byteCount == buffer.length);
-    for (int i = 0; i < buffer.length; i++) {
-      Log.i("linecoding", String.format("%x", buffer[i]));
-    }
+  public InputStream getInputStream() {
+    return inputStream;
   }
 
-  public BufferedReader getReader() {
-    return reader;
+  public OutputStream getOutputStream() {
+    return outputStream;
   }
 
-  public BufferedWriter getWriter() {
-    return writer;
+  public void close() {
+    usbDeviceConnection.close();
   }
 
 }

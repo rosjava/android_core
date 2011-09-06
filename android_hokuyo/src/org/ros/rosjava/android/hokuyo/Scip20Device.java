@@ -16,28 +16,40 @@
 
 package org.ros.rosjava.android.hokuyo;
 
-import java.io.IOException;
+import com.google.common.base.Preconditions;
 
 import android.util.Log;
+import org.ros.rosjava.android.acm_serial.AcmDevice;
 
-import com.google.common.base.Preconditions;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 
 public class Scip20Device {
 
   private static final boolean DEBUG = false;
   private static final String TAG = "Scip20Device";
 
-  private final AcmDevice device;
+  private final BufferedReader reader;
+  private final BufferedWriter writer;
 
   public Scip20Device(AcmDevice device) {
-    this.device = device;
+    reader =
+        new BufferedReader(new InputStreamReader(device.getInputStream(),
+            Charset.forName("US-ASCII")));
+    writer =
+        new BufferedWriter(new OutputStreamWriter(device.getOutputStream(),
+            Charset.forName("US-ASCII")));
   }
 
   private void write(String command) {
     Preconditions.checkArgument(!command.endsWith("\n"));
     try {
-      device.getWriter().write(command + "\n");
-      device.getWriter().flush();
+      writer.write(command + "\n");
+      writer.flush();
       if (DEBUG) {
         Log.d(TAG, "Wrote: " + command);
       }
@@ -60,7 +72,7 @@ public class Scip20Device {
   private String read() {
     String line = null;
     try {
-      line = device.getReader().readLine();
+      line = reader.readLine();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -131,7 +143,7 @@ public class Scip20Device {
 
     }.start();
   }
-  
+
   private String readAndStripSemicolon() {
     String buffer = read();
     Preconditions.checkState(buffer.charAt(buffer.length() - 2) == ';');

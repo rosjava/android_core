@@ -16,8 +16,10 @@
 
 package org.ros.rosjava.android.hokuyo;
 
-import java.util.List;
+import org.ros.rosjava.android.acm_serial.AcmDevice;
 
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import org.ros.message.sensor_msgs.LaserScan;
 import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
@@ -25,8 +27,7 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbManager;
+import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -40,8 +41,6 @@ public class LaserScanPublisher implements NodeMain {
 
   private final Scip20Device scipDevice;
   
-  private long seq = 0;
-
   private Node node;
   private Publisher<LaserScan> publisher;
 
@@ -77,7 +76,6 @@ public class LaserScanPublisher implements NodeMain {
         message.header.frame_id = "laser";
         message.header.stamp = node.getCurrentTime();
         publisher.publish(message);
-        seq++;
       }
     });
   }

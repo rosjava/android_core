@@ -36,7 +36,9 @@ public class ConfigurationTest extends TestCase {
   }
   
   public void testParseIntegerValue() {
-    assertEquals(20, builder.parseIntegerValue("DMIN", "DMIN:20;"));
+    // NOTE(damonkohler): We leave off the trailing ";" here because it is
+    // stripped before parsing.
+    assertEquals(20, builder.parseIntegerValue("DMIN", "DMIN:20"));
   }
   
  

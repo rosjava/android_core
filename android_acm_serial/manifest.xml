@@ -1,17 +1,15 @@
 <package>
-  <description brief="android_hokuyo">
+  <description brief="android_acm_serial">
 
-     android_hokuyo
+    android_acm_serial
 
   </description>
   <author>Damon Kohler</author>
-  <license>BSD</license>
+  <license>Apache 2</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/android_hokuyo</url>
+  <url>http://ros.org/wiki/android_acm_serial</url>
 
   <depend package="rosjava" />
-  <depend package="android_gingerbread" />
-  <depend package="android_acm_serial" />
 
   <export>
     <rosjava-android-lib target="android-13" />
@@ -21,5 +19,3 @@
   </export>
 
 </package>
-
-

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.rosjava.android.tutorial.hokuyo;
+package org.ros.rosjava.android.rosserial;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -23,10 +23,13 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import org.ros.address.InetAddressFactory;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeMain;
 import org.ros.node.NodeRunner;
 import org.ros.rosjava.android.MasterChooser;
-import org.ros.rosjava.android.hokuyo.LaserScanPublisher;
+import org.ros.rosjava.android.acm_serial.AcmDevice;
+import org.ros.rosjava.android.acm_serial.BitRate;
+import org.ros.rosjava.android.acm_serial.DataBits;
+import org.ros.rosjava.android.acm_serial.Parity;
+import org.ros.rosjava.android.acm_serial.StopBits;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -34,8 +37,6 @@ import java.net.URISyntaxException;
 public class MainActivity extends Activity {
 
   private final NodeRunner nodeRunner;
-
-  private NodeMain laserScanPublisher;
 
   private URI masterUri;
 
@@ -60,11 +61,14 @@ public class MainActivity extends Activity {
           @Override
           public void run() {
             UsbManager manager = (UsbManager) getSystemService(USB_SERVICE);
-            laserScanPublisher = new LaserScanPublisher(manager, device);
+            AcmDevice acmDevice = new AcmDevice(manager.openDevice(device), device.getInterface(1));
+            acmDevice.setLineCoding(BitRate.BPS_57600, StopBits.STOP_BITS_1, Parity.NONE,
+                DataBits.DATA_BITS_8);
             NodeConfiguration nodeConfiguration =
                 NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName(),
                     masterUri);
-            nodeRunner.run(laserScanPublisher, nodeConfiguration);
+            SerialNode node = new SerialNode(acmDevice);
+            nodeRunner.run(node, nodeConfiguration);
           }
         }.start();
       }
@@ -74,9 +78,6 @@ public class MainActivity extends Activity {
 
   @Override
   protected void onPause() {
-    if (laserScanPublisher != null) {
-      laserScanPublisher.shutdown();
-    }
     super.onPause();
   }
 
@@ -90,5 +91,4 @@ public class MainActivity extends Activity {
       }
     }
   }
-
 }
