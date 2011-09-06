@@ -20,30 +20,29 @@ import com.google.common.base.Preconditions;
 
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
+import android.hardware.usb.UsbRequest;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 public class AcmOutputStream extends OutputStream {
 
-  private static final int TIMEOUT = 3000;
-
-  private final UsbDeviceConnection connection;
-  private final UsbEndpoint endpoint;
+  private final UsbRequestPool requestPool;
 
   public AcmOutputStream(UsbDeviceConnection connection, UsbEndpoint endpoint) {
-    this.connection = connection;
-    this.endpoint = endpoint;
+    requestPool = new UsbRequestPool(connection, endpoint);
+    requestPool.start();
   }
 
   @Override
   public void close() throws IOException {
+    requestPool.shutdown();
   }
 
   @Override
   public void flush() throws IOException {
   }
-
 
   @Override
   public void write(byte[] buffer, int offset, int count) {
@@ -58,8 +57,8 @@ public class AcmOutputStream extends OutputStream {
     } else {
       slice = buffer;
     }
-    int byteCount = connection.bulkTransfer(endpoint, slice, slice.length, TIMEOUT);
-    Preconditions.checkState(byteCount == count);
+    UsbRequest request = requestPool.poll();
+    request.queue(ByteBuffer.wrap(slice), slice.length);
   }
 
   @Override

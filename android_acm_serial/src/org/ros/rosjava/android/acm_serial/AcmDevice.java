@@ -22,7 +22,9 @@ import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
+import org.ros.exception.RosRuntimeException;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -88,6 +90,12 @@ public class AcmDevice {
 
   public void close() {
     usbDeviceConnection.close();
+    try {
+      inputStream.close();
+      outputStream.close();
+    } catch (IOException e) {
+      throw new RosRuntimeException(e);
+    }
   }
 
 }
