@@ -18,6 +18,7 @@ package org.ros.rosjava.android.acm_serial;
 
 import com.google.common.base.Preconditions;
 
+import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 
@@ -32,6 +33,7 @@ public class AcmInputStream extends InputStream {
   private final UsbEndpoint endpoint;
 
   public AcmInputStream(UsbDeviceConnection connection, UsbEndpoint endpoint) {
+    Preconditions.checkArgument(endpoint.getDirection() == UsbConstants.USB_DIR_IN);
     this.connection = connection;
     this.endpoint = endpoint;
   }
@@ -46,27 +48,19 @@ public class AcmInputStream extends InputStream {
     if (offset < 0 || count < 0 || offset + count > buffer.length) {
       throw new IndexOutOfBoundsException();
     }
-    byte[] slice;
-    if (offset != 0) {
-      slice = new byte[count];
-      System.arraycopy(buffer, offset, slice, 0, count);
-    } else {
-      slice = buffer;
-    }
     // NOTE(damonkohler): According to the InputStream.read() javadoc, we should
     // be able to return 0 when we didn't read anything. However, it also says
     // we should block until input is available. Blocking seems to be the
     // preferred behavior.
+    byte[] slice = new byte[count];
     int byteCount = 0;
     while (byteCount == 0) {
       byteCount = connection.bulkTransfer(endpoint, slice, slice.length, TIMEOUT);
     }
     if (byteCount < 0) {
-      throw new IOException();
+      throw new IOException("USB read failed.");
     }
-    if (slice != buffer) {
-      System.arraycopy(slice, 0, buffer, offset, byteCount);
-    }
+    System.arraycopy(slice, 0, buffer, offset, byteCount);
     return byteCount;
   }
 

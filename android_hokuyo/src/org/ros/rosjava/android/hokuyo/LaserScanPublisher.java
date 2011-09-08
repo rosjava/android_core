@@ -16,8 +16,6 @@
 
 package org.ros.rosjava.android.hokuyo;
 
-import org.ros.rosjava.android.acm_serial.AcmDevice;
-
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import org.ros.message.sensor_msgs.LaserScan;
@@ -26,6 +24,7 @@ import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
+import org.ros.rosjava.android.acm_serial.AcmDevice;
 
 import java.util.List;
 
@@ -45,8 +44,8 @@ public class LaserScanPublisher implements NodeMain {
   private Publisher<LaserScan> publisher;
 
   public LaserScanPublisher(UsbManager manager, UsbDevice device) {
-    scipDevice =
-        new Scip20Device(new AcmDevice(manager.openDevice(device), device.getInterface(1)));
+    AcmDevice acmDevice = new AcmDevice(manager.openDevice(device), device.getInterface(1));
+    scipDevice = new Scip20Device(acmDevice);
   }
 
   @Override
@@ -56,7 +55,6 @@ public class LaserScanPublisher implements NodeMain {
     scipDevice.reset();
     final Configuration configuration = scipDevice.queryConfiguration();
     scipDevice.startScanning(new LaserScanListener() {
-
       @Override
       public void onNewLaserScan(List<Float> ranges) {
         LaserScan message = node.getMessageFactory().newMessage("sensor_msgs/LaserScan");

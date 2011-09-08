@@ -38,28 +38,30 @@ public class AcmDevice {
   private final InputStream inputStream;
   private final OutputStream outputStream;
 
+  private UsbEndpoint incomingEndpoint;
+
   public AcmDevice(UsbDeviceConnection usbDeviceConnection, UsbInterface usbInterface) {
     Preconditions.checkState(usbDeviceConnection.claimInterface(usbInterface, true));
     this.usbDeviceConnection = usbDeviceConnection;
 
-    UsbEndpoint endpointOut = null;
-    UsbEndpoint endpointIn = null;
+    UsbEndpoint outgoingEndpoint = null;
+    incomingEndpoint = null;
     for (int i = 0; i < usbInterface.getEndpointCount(); i++) {
       UsbEndpoint endpoint = usbInterface.getEndpoint(i);
       if (endpoint.getType() == UsbConstants.USB_ENDPOINT_XFER_BULK) {
         if (endpoint.getDirection() == UsbConstants.USB_DIR_OUT) {
-          endpointOut = endpoint;
+          outgoingEndpoint = endpoint;
         } else {
-          endpointIn = endpoint;
+          incomingEndpoint = endpoint;
         }
       }
     }
-    if (endpointOut == null || endpointIn == null) {
+    if (outgoingEndpoint == null || incomingEndpoint == null) {
       throw new IllegalArgumentException("Not all endpoints found.");
     }
 
-    inputStream = new AcmInputStream(usbDeviceConnection, endpointIn);
-    outputStream = new AcmOutputStream(usbDeviceConnection, endpointOut);
+    inputStream = new AcmInputStream(usbDeviceConnection, incomingEndpoint);
+    outputStream = new AcmOutputStream(usbDeviceConnection, outgoingEndpoint);
   }
 
   public void setLineCoding(BitRate bitRate, StopBits stopBits, Parity parity, DataBits dataBits) {
@@ -82,6 +84,10 @@ public class AcmDevice {
 
   public InputStream getInputStream() {
     return inputStream;
+  }
+
+  public AcmReader getReader() {
+    return new AcmReader(usbDeviceConnection, incomingEndpoint);
   }
 
   public OutputStream getOutputStream() {

@@ -18,6 +18,7 @@ package org.ros.rosjava.android.acm_serial;
 
 import com.google.common.base.Preconditions;
 
+import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbRequest;
@@ -31,6 +32,7 @@ public class AcmOutputStream extends OutputStream {
   private final UsbRequestPool requestPool;
 
   public AcmOutputStream(UsbDeviceConnection connection, UsbEndpoint endpoint) {
+    Preconditions.checkArgument(endpoint.getDirection() == UsbConstants.USB_DIR_OUT);
     requestPool = new UsbRequestPool(connection, endpoint);
     requestPool.start();
   }
@@ -50,15 +52,8 @@ public class AcmOutputStream extends OutputStream {
     if (offset < 0 || count < 0 || offset + count > buffer.length) {
       throw new IndexOutOfBoundsException();
     }
-    byte[] slice;
-    if (offset != 0) {
-      slice = new byte[count];
-      System.arraycopy(buffer, offset, slice, 0, count);
-    } else {
-      slice = buffer;
-    }
     UsbRequest request = requestPool.poll();
-    request.queue(ByteBuffer.wrap(slice), slice.length);
+    Preconditions.checkState(request.queue(ByteBuffer.wrap(buffer, offset, count), count));
   }
 
   @Override

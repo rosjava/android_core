@@ -19,11 +19,15 @@ package org.ros.rosjava.android.acm_serial;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbRequest;
+import android.util.Log;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 class UsbRequestPool {
+
+  private static final boolean DEBUG = true;
+  private static final String TAG = "UsbRequestPool";
 
   private final UsbDeviceConnection connection;
   private final UsbEndpoint endpoint;
@@ -52,6 +56,11 @@ class UsbRequestPool {
         }
         if (request != null) {
           requestPool.add(request);
+        } else {
+          Log.e(TAG, "USB request error.");
+        }
+        if (DEBUG) {
+          Log.d(TAG, "USB request completed.");
         }
       }
     }
@@ -73,5 +82,4 @@ class UsbRequestPool {
   public void shutdown() {
     requestWaitThread.interrupt();
   }
-
 }
