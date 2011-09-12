@@ -86,10 +86,6 @@ public class AcmDevice {
     return inputStream;
   }
 
-  public AcmReader getReader() {
-    return new AcmReader(usbDeviceConnection, incomingEndpoint);
-  }
-
   public OutputStream getOutputStream() {
     return outputStream;
   }

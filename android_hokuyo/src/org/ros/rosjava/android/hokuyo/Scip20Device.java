@@ -22,9 +22,12 @@ import android.util.Log;
 import org.ros.exception.RosRuntimeException;
 import org.ros.rosjava.android.acm_serial.AcmDevice;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 
@@ -33,17 +36,22 @@ public class Scip20Device {
   private static final boolean DEBUG = true;
   private static final String TAG = "Scip20Device";
 
+  private static final int STREAM_BUFFER_SIZE = 8192;
+
   private final BufferedReader reader;
   private final BufferedWriter writer;
 
   public Scip20Device(AcmDevice device) {
     // TODO(damonkohler): Wrapping the AcmDevice InputStream in an
-    // InputStreamReader crashes after a few scans. The AcmReader doesn't have
-    // this problem.
-    reader = new BufferedReader(device.getReader());
+    // BufferedInputStream avoids an error returned by the USB stack. Double
+    // buffering like this should not be necessary if the USB error turns out to
+    // be an Android bug. This was tested on Honeycomb MR2.
+    reader =
+        new BufferedReader(new InputStreamReader(new BufferedInputStream(device.getInputStream(),
+            STREAM_BUFFER_SIZE), Charset.forName("US-ASCII")));
     writer =
-        new BufferedWriter(new OutputStreamWriter(device.getOutputStream(),
-            Charset.forName("US-ASCII")));
+        new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(
+            device.getOutputStream(), STREAM_BUFFER_SIZE), Charset.forName("US-ASCII")));
   }
 
   private void write(String command) {

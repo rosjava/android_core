@@ -27,7 +27,9 @@ import java.io.InputStream;
 
 public class AcmInputStream extends InputStream {
 
-  private static final int TIMEOUT = 3000;
+  // Disable USB read timeouts. Reads are expected to block until data becomes
+  // available.
+  private static final int TIMEOUT = 0;
 
   private final UsbDeviceConnection connection;
   private final UsbEndpoint endpoint;
