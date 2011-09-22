@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
-  package="org.ros.rosjava.android.rosserial"
+  package="org.ros.android.rosserial"
   android:versionCode="1"
   android:versionName="1.0">
   <uses-feature android:name="android.hardware.usb.host" />
@@ -24,6 +24,6 @@
         android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
         android:resource="@xml/arduino_device_filter" />
     </activity>
-    <activity android:name="org.ros.rosjava.android.MasterChooser" />
+    <activity android:name="org.ros.android.MasterChooser" />
   </application>
 </manifest>

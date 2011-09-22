@@ -4,9 +4,9 @@
   android:layout_width="fill_parent" android:layout_height="fill_parent"
   android:background="#FF000000">
 
-  <org.ros.rosjava.android.views.RosImageView
+  <org.ros.android.views.RosImageView
     android:layout_height="fill_parent" android:id="@+id/video_display"
     android:layout_width="fill_parent">
-  </org.ros.rosjava.android.views.RosImageView>
+  </org.ros.android.views.RosImageView>
 </RelativeLayout>
 
