@@ -60,7 +60,9 @@ public class AcmOutputStream extends OutputStream {
       Log.i(TAG, "Writing " + count + " bytes.");
     }
     UsbRequest request = requestPool.poll();
-    Preconditions.checkState(request.queue(ByteBuffer.wrap(buffer, offset, count), count));
+    if (!request.queue(ByteBuffer.wrap(buffer, offset, count), count)) {
+      Log.e(TAG, "IO error while queuing " + count + " bytes to be written.");
+    }
   }
 
   @Override

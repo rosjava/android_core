@@ -23,31 +23,46 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import org.ros.address.InetAddressFactory;
 import org.ros.android.MasterChooser;
+import org.ros.android.NodeRunnerListener;
+import org.ros.android.NodeRunnerService;
+import org.ros.android.acm_serial.AcmDevice;
 import org.ros.android.hokuyo.LaserScanPublisher;
+import org.ros.android.hokuyo.Scip20Device;
+import org.ros.exception.RosRuntimeException;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeMain;
 import org.ros.node.NodeRunner;
-import org.ros.android.tutorial.hokuyo.R;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.CountDownLatch;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class MainActivity extends Activity {
 
-  private final NodeRunner nodeRunner;
+  private final CountDownLatch nodeRunnerLatch;
 
-  private NodeMain laserScanPublisher;
-
+  private NodeRunner nodeRunner;
   private URI masterUri;
 
   public MainActivity() {
-    nodeRunner = NodeRunner.newDefault();
+    super();
+    nodeRunnerLatch = new CountDownLatch(1);
   }
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
+    NodeRunnerService.start(this, "ROS Hokuyo service started.", "ROS Hokuyo",
+        new NodeRunnerListener() {
+          @Override
+          public void onNewNodeRunner(NodeRunner nodeRunner) {
+            MainActivity.this.nodeRunner = nodeRunner;
+            nodeRunnerLatch.countDown();
+          }
+        });
   }
 
   @Override
@@ -55,30 +70,39 @@ public class MainActivity extends Activity {
     if (masterUri == null) {
       startActivityForResult(new Intent(this, MasterChooser.class), 0);
     } else {
-      final UsbDevice device = (UsbDevice) getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
-      if (device != null) {
-        new Thread() {
-          @Override
-          public void run() {
-            UsbManager manager = (UsbManager) getSystemService(USB_SERVICE);
-            laserScanPublisher = new LaserScanPublisher(manager, device);
-            NodeConfiguration nodeConfiguration =
-                NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName(),
-                    masterUri);
-            nodeRunner.run(laserScanPublisher, nodeConfiguration);
-          }
-        }.start();
+      Intent intent = getIntent();
+      String action = intent.getAction();
+      final UsbDevice usbDevice =
+          (UsbDevice) getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
+      if (usbDevice != null) {
+        if (action.equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
+          new Thread() {
+            @Override
+            public void run() {
+              UsbManager usbManager = (UsbManager) getSystemService(USB_SERVICE);
+              AcmDevice acmDevice =
+                  new AcmDevice(usbManager.openDevice(usbDevice), usbDevice.getInterface(1));
+              Scip20Device scipDevice =
+                  new Scip20Device(acmDevice.getInputStream(), acmDevice.getOutputStream());
+              LaserScanPublisher laserScanPublisher = new LaserScanPublisher(scipDevice);
+              NodeConfiguration nodeConfiguration =
+                  NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName(),
+                      masterUri);
+              try {
+                nodeRunnerLatch.await();
+              } catch (InterruptedException e) {
+                throw new RosRuntimeException(e);
+              }
+              nodeRunner.run(laserScanPublisher, nodeConfiguration);
+            }
+          }.start();
+        }
+        if (action.equals(UsbManager.ACTION_USB_DEVICE_DETACHED) && nodeRunner != null) {
+          nodeRunner.shutdown();
+        }
       }
     }
     super.onResume();
-  }
-
-  @Override
-  protected void onPause() {
-    if (laserScanPublisher != null) {
-      laserScanPublisher.shutdown();
-    }
-    super.onPause();
   }
 
   @Override
@@ -91,5 +115,4 @@ public class MainActivity extends Activity {
       }
     }
   }
-
 }

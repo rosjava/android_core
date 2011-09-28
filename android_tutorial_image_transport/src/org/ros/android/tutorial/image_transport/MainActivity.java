@@ -16,6 +16,8 @@
 
 package org.ros.android.tutorial.image_transport;
 
+import org.ros.node.NodeRunner;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,7 +27,7 @@ import org.ros.android.MasterChooser;
 import org.ros.android.views.RosImageView;
 import org.ros.message.sensor_msgs.CompressedImage;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeRunner;
+import org.ros.node.DefaultNodeRunner;
 import org.ros.tutorials.image_transport.R;
 
 import java.net.URI;
@@ -43,7 +45,7 @@ public class MainActivity extends Activity {
   private RosImageView<CompressedImage> image;
 
   public MainActivity() {
-    nodeRunner = NodeRunner.newDefault();
+    nodeRunner = DefaultNodeRunner.newDefault();
   }
 
   @SuppressWarnings("unchecked")

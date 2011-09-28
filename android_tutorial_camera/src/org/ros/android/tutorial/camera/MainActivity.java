@@ -16,6 +16,8 @@
 
 package org.ros.android.tutorial.camera;
 
+import org.ros.node.NodeRunner;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.hardware.Camera;
@@ -29,7 +31,7 @@ import org.ros.android.MasterChooser;
 import org.ros.android.camera.R;
 import org.ros.android.views.RosCameraPreviewView;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeRunner;
+import org.ros.node.DefaultNodeRunner;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -47,7 +49,7 @@ public class MainActivity extends Activity {
   private RosCameraPreviewView preview;
 
   public MainActivity() {
-    nodeRunner = NodeRunner.newDefault();
+    nodeRunner = DefaultNodeRunner.newDefault();
   }
 
   @Override

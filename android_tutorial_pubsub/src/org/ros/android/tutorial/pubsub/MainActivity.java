@@ -16,13 +16,15 @@
 
 package org.ros.android.tutorial.pubsub;
 
+import org.ros.node.NodeRunner;
+
 import android.app.Activity;
 import android.os.Bundle;
 import org.ros.RosCore;
 import org.ros.android.MessageCallable;
 import org.ros.android.views.RosTextView;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeRunner;
+import org.ros.node.DefaultNodeRunner;
 import org.ros.tutorials.pubsub.R;
 import org.ros.tutorials.pubsub.Talker;
 
@@ -38,7 +40,7 @@ public class MainActivity extends Activity {
   private Talker talker;
 
   public MainActivity() {
-    nodeRunner = NodeRunner.newDefault();
+    nodeRunner = DefaultNodeRunner.newDefault();
   }
   
   @SuppressWarnings("unchecked")

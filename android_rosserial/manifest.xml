@@ -13,6 +13,7 @@
   <depend package="rosserial_java" />
   <depend package="android_acm_serial" />
   <depend package="android_gingerbread" />
+  <depend package="parsec_msgs" />
 
   <export>
     <rosjava-android-app target="android-13" />

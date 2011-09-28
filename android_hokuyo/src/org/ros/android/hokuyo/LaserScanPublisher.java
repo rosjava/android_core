@@ -16,9 +16,6 @@
 
 package org.ros.android.hokuyo;
 
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbManager;
-import org.ros.android.acm_serial.AcmDevice;
 import org.ros.message.sensor_msgs.LaserScan;
 import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
@@ -39,19 +36,18 @@ public class LaserScanPublisher implements NodeMain {
   private static final double SKIP = 0;
 
   private final Scip20Device scipDevice;
-  
+
   private Node node;
   private Publisher<LaserScan> publisher;
 
-  public LaserScanPublisher(UsbManager manager, UsbDevice device) {
-    AcmDevice acmDevice = new AcmDevice(manager.openDevice(device), device.getInterface(1));
-    scipDevice = new Scip20Device(acmDevice);
+  public LaserScanPublisher(Scip20Device scipDevice) {
+    this.scipDevice = scipDevice;
   }
 
   @Override
   public void main(NodeConfiguration nodeConfiguration) throws Exception {
-    node = new DefaultNodeFactory().newNode("android_hokuyo", nodeConfiguration);
-    publisher = node.newPublisher("scan", "sensor_msgs/LaserScan");
+    node = new DefaultNodeFactory().newNode("android_hokuyo_node", nodeConfiguration);
+    publisher = node.newPublisher(node.resolveName("laser"), "sensor_msgs/LaserScan");
     scipDevice.reset();
     final Configuration configuration = scipDevice.queryConfiguration();
     scipDevice.startScanning(new LaserScanListener() {
@@ -80,7 +76,6 @@ public class LaserScanPublisher implements NodeMain {
 
   @Override
   public void shutdown() {
-    // TODO(damonkohler): Shutdown the laser and release the USB interface.
+    scipDevice.shutdown();
   }
-
 }

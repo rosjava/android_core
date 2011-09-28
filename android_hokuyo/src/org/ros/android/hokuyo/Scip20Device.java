@@ -19,7 +19,6 @@ package org.ros.android.hokuyo;
 import com.google.common.base.Preconditions;
 
 import android.util.Log;
-import org.ros.android.acm_serial.AcmDevice;
 import org.ros.exception.RosRuntimeException;
 
 import java.io.BufferedInputStream;
@@ -27,13 +26,18 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class Scip20Device {
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final String TAG = "Scip20Device";
 
   private static final int STREAM_BUFFER_SIZE = 8192;
@@ -41,17 +45,26 @@ public class Scip20Device {
   private final BufferedReader reader;
   private final BufferedWriter writer;
 
-  public Scip20Device(AcmDevice device) {
+  /**
+   * It is not necessary to provide buffered streams. Buffering is handled
+   * internally.
+   * 
+   * @param inputStream
+   *          the {@link InputStream} for the ACM serial device
+   * @param outputStream
+   *          the {@link OutputStream} for the ACM serial device
+   */
+  public Scip20Device(InputStream inputStream, OutputStream outputStream) {
     // TODO(damonkohler): Wrapping the AcmDevice InputStream in an
     // BufferedInputStream avoids an error returned by the USB stack. Double
     // buffering like this should not be necessary if the USB error turns out to
     // be an Android bug. This was tested on Honeycomb MR2.
     reader =
-        new BufferedReader(new InputStreamReader(new BufferedInputStream(device.getInputStream(),
+        new BufferedReader(new InputStreamReader(new BufferedInputStream(inputStream,
             STREAM_BUFFER_SIZE), Charset.forName("US-ASCII")));
     writer =
-        new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(
-            device.getOutputStream(), STREAM_BUFFER_SIZE), Charset.forName("US-ASCII")));
+        new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(outputStream,
+            STREAM_BUFFER_SIZE), Charset.forName("US-ASCII")));
   }
 
   private void write(String command) {
@@ -172,5 +185,20 @@ public class Scip20Device {
     builder.parseStandardMotorSpeed(verifyChecksum(readAndStripSemicolon()));
     checkTerminator();
     return builder.build();
+  }
+
+  public void shutdown() {
+    try {
+      reader.close();
+    } catch (IOException e) {
+      // Ignore spurious shutdown errors.
+      e.printStackTrace();
+    }
+    try {
+      writer.close();
+    } catch (IOException e) {
+      // Ignore spurious shutdown errors.
+      e.printStackTrace();
+    }
   }
 }
