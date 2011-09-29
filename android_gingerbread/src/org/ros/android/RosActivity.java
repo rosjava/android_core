@@ -1,0 +1,123 @@
+/*
+ * Copyright (C) 2011 Google Inc.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+package org.ros.android;
+
+import com.google.common.base.Preconditions;
+
+import android.app.Activity;
+import android.content.Intent;
+import org.ros.exception.RosRuntimeException;
+import org.ros.node.NodeMain;
+import org.ros.node.NodeRunner;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.concurrent.CountDownLatch;
+
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
+public abstract class RosActivity extends Activity {
+
+  private static final int MASTER_CHOOSER_REQUEST_CODE = 0;
+
+  private final String notificationTicker;
+  private final String notificationTitle;
+  private final CountDownLatch nodeRunnerLatch;
+
+  private URI masterUri;
+  private NodeRunner nodeRunner;
+
+  protected RosActivity(String notificationTicker, String notificationTitle) {
+    super();
+    this.notificationTicker = notificationTicker;
+    this.notificationTitle = notificationTitle;
+    nodeRunnerLatch = new CountDownLatch(1);
+  }
+
+  @Override
+  protected void onResume() {
+    if (getMasterUri() == null) {
+      // Call this method on super to avoid triggering our precondition in the
+      // overridden startActivityForResult().
+      super.startActivityForResult(new Intent(this, MasterChooser.class), 0);
+    } else {
+      NodeRunnerService.start(RosActivity.this, notificationTicker, notificationTitle,
+          new NodeRunnerListener() {
+            @Override
+            public void onNewNodeRunner(NodeRunner nodeRunner) {
+              RosActivity.this.nodeRunner = nodeRunner;
+              nodeRunnerLatch.countDown();
+            }
+          });
+      new Thread() {
+        @Override
+        public void run() {
+          try {
+            nodeRunnerLatch.await();
+          } catch (InterruptedException e) {
+            throw new RosRuntimeException(e);
+          }
+          init();
+        }
+      }.start();
+    }
+    super.onResume();
+  }
+
+  /**
+   * This method is called in a background thread once this {@link Activity} has
+   * been initialized with a master {@link URI} via the {@link MasterChooser}
+   * and a {@link NodeRunnerService} has started. Your {@link NodeMain}s should
+   * be started here.
+   */
+  protected abstract void init();
+
+  @Override
+  public void startActivityForResult(Intent intent, int requestCode) {
+    Preconditions.checkArgument(requestCode != MASTER_CHOOSER_REQUEST_CODE);
+    super.startActivityForResult(intent, requestCode);
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == MASTER_CHOOSER_REQUEST_CODE && resultCode == RESULT_OK) {
+      try {
+        masterUri = new URI(data.getStringExtra("ROS_MASTER_URI"));
+      } catch (URISyntaxException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    super.onActivityResult(requestCode, resultCode, data);
+  }
+
+  /**
+   * @return the configured master {@link URI} or <code>null</code> if it is not
+   *         yet available
+   */
+  public URI getMasterUri() {
+    return masterUri;
+  }
+
+  /**
+   * @return this {@link RosActivity}'s {@link NodeRunner} or <code>null</code>
+   *         if it is not yet available
+   */
+  public NodeRunner getNodeRunner() {
+    return nodeRunner;
+  }
+}

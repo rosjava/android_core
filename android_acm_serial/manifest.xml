@@ -10,6 +10,7 @@
   <url>http://ros.org/wiki/android_acm_serial</url>
 
   <depend package="rosjava" />
+  <depend package="android_gingerbread" />
 
   <export>
     <rosjava-android-lib target="android-13" />

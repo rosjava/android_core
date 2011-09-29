@@ -75,11 +75,7 @@ public class NodeRunnerService extends Service implements NodeRunner {
 
       @Override
       public void onServiceDisconnected(ComponentName name) {
-        Preconditions.checkNotNull(nodeRunnerService);
-        nodeRunnerService.stopForeground(true);
-        nodeRunnerService.stopSelf();
       }
-
     };
 
     Intent intent = new Intent(context, NodeRunnerService.class);
@@ -91,9 +87,9 @@ public class NodeRunnerService extends Service implements NodeRunner {
   private void startForeground(String notificationTicker, String notificationTitle) {
     Notification notification =
         new Notification(R.drawable.icon, notificationTicker, System.currentTimeMillis());
-    Intent notificationIntent = new Intent(this, NodeRunnerService.class);
-    PendingIntent pendingIntent = PendingIntent.getService(this, 0, notificationIntent, 0);
-    notification.setLatestEventInfo(this, notificationTitle, "Tap to shutdown.", pendingIntent);
+    Intent notificationIntent = new Intent(context, NodeRunnerService.class);
+    PendingIntent pendingIntent = PendingIntent.getService(context, 0, notificationIntent, 0);
+    notification.setLatestEventInfo(context, notificationTitle, "Tap to shutdown.", pendingIntent);
     startForeground(ONGOING_NOTIFICATION, notification);
   }
 
@@ -117,9 +113,13 @@ public class NodeRunnerService extends Service implements NodeRunner {
 
   @Override
   public void shutdown() {
-    Preconditions.checkNotNull(context);
-    Preconditions.checkNotNull(serviceConnection);
-    context.unbindService(serviceConnection);
+    if (context != null && serviceConnection != null) {
+      context.unbindService(serviceConnection);
+    }
+    context = null;
+    serviceConnection = null;
+    stopForeground(true);
+    stopSelf();
     // Shutdown of the NodeRunner and releasing the WakeLock are handled in
     // onDestroy() in case the service was shutdown by the system instead of by
     // the user calling shutdown().
