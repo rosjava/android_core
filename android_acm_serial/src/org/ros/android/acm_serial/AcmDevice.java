@@ -30,22 +30,23 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class AcmDevice {
 
-  private static final int TIMEOUT = 3000;
+  private static final int CONTROL_TRANSFER_TIMEOUT = 3000; // ms
 
   private final UsbDeviceConnection usbDeviceConnection;
   private final InputStream inputStream;
   private final OutputStream outputStream;
-
-  private UsbEndpoint incomingEndpoint;
 
   public AcmDevice(UsbDeviceConnection usbDeviceConnection, UsbInterface usbInterface) {
     Preconditions.checkState(usbDeviceConnection.claimInterface(usbInterface, true));
     this.usbDeviceConnection = usbDeviceConnection;
 
     UsbEndpoint outgoingEndpoint = null;
-    incomingEndpoint = null;
+    UsbEndpoint incomingEndpoint = null;
     for (int i = 0; i < usbInterface.getEndpointCount(); i++) {
       UsbEndpoint endpoint = usbInterface.getEndpoint(i);
       if (endpoint.getType() == UsbConstants.USB_ENDPOINT_XFER_BULK) {
@@ -78,7 +79,7 @@ public class AcmDevice {
     int byteCount;
     byteCount =
         usbDeviceConnection.controlTransfer(0x21, 0x20, 0, 0, lineCoding, lineCoding.length,
-            TIMEOUT);
+            CONTROL_TRANSFER_TIMEOUT);
     Preconditions.checkState(byteCount == lineCoding.length);
   }
 

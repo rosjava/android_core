@@ -23,6 +23,7 @@ import org.ros.android.acm_serial.AcmDeviceActivity;
 import org.ros.android.acm_serial.BitRate;
 import org.ros.android.acm_serial.DataBits;
 import org.ros.android.acm_serial.Parity;
+import org.ros.android.acm_serial.PollingInputStream;
 import org.ros.android.acm_serial.StopBits;
 import org.ros.node.NodeConfiguration;
 import org.ros.rosserial.RosSerial;
@@ -44,12 +45,13 @@ public class MainActivity extends AcmDeviceActivity {
 
   @Override
   protected void init(AcmDevice acmDevice) {
-    acmDevice.setLineCoding(BitRate.BPS_57600, StopBits.STOP_BITS_1, Parity.NONE,
+    acmDevice.setLineCoding(BitRate.BPS_115200, StopBits.STOP_BITS_1, Parity.NONE,
         DataBits.DATA_BITS_8);
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName(),
             getMasterUri());
-    getNodeRunner().run(new RosSerial(acmDevice.getInputStream(), acmDevice.getOutputStream()),
-        nodeConfiguration);
+    getNodeRunner().run(
+        new RosSerial(new PollingInputStream(acmDevice.getInputStream()),
+            acmDevice.getOutputStream()), nodeConfiguration);
   }
 }

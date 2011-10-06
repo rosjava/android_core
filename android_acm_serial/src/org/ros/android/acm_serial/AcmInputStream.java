@@ -65,22 +65,24 @@ public class AcmInputStream extends InputStream {
     int byteCount = 0;
     while (byteCount == 0) {
       byteCount = connection.bulkTransfer(endpoint, slice, slice.length, TIMEOUT);
+      if (DEBUG) {
+        if (byteCount == 0) {
+          Log.i(TAG, "bulkTransfer() returned 0, retrying.");
+        }
+      }
     }
     if (byteCount < 0) {
       throw new IOException("USB read failed.");
     }
     System.arraycopy(slice, 0, buffer, offset, byteCount);
+    if (DEBUG) {
+      Log.i(TAG, "Actually read " + byteCount + " bytes.");
+    }
     return byteCount;
   }
 
   @Override
   public int read() throws IOException {
-    byte[] buffer = new byte[1];
-    int byteCount = 0;
-    while (byteCount == 0) {
-      byteCount = read(buffer, 0, 1);
-    }
-    return buffer[0];
+    throw new UnsupportedOperationException();
   }
-
 }
