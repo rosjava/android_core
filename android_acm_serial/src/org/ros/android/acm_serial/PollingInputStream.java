@@ -29,7 +29,7 @@ import java.io.PipedOutputStream;
  */
 public class PollingInputStream extends InputStream {
 
-  private final static int STREAM_BUFFER_SIZE = 8192;
+  private final static int STREAM_BUFFER_SIZE = 256;
 
   private final PipedInputStream pipedInputStream;
 
@@ -45,7 +45,7 @@ public class PollingInputStream extends InputStream {
       public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_MORE_FAVORABLE);
         byte[] buffer = new byte[STREAM_BUFFER_SIZE];
-        while (true) {
+        while (true && !Thread.currentThread().isInterrupted()) {
           try {
             int bytesRead = inputStream.read(buffer, 0, STREAM_BUFFER_SIZE);
             pipedOutputStream.write(buffer, 0, bytesRead);
