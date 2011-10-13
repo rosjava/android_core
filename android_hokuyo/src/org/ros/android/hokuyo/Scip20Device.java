@@ -119,6 +119,17 @@ public class Scip20Device {
   }
 
   public void reset() {
+    try {
+      write("RS");
+      checkStatus();
+      checkTerminator();
+      // When we are in the middle of a scan, this might fail. 
+      // Catch the exceptions and ignore.
+    } catch(IllegalStateException e) {
+    } catch(Scip20Exception e) {
+    }
+
+    // The second reset should actually work
     write("RS");
     checkStatus();
     checkTerminator();
