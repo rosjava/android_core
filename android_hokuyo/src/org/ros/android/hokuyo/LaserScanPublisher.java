@@ -35,8 +35,6 @@ import java.util.List;
  */
 public class LaserScanPublisher implements NodeMain {
 
-  private static final double MINIMUM_ANGLE = -Math.PI / 2;
-  private static final double MAXIMUM_ANGLE = Math.PI / 2;
   private static final double CLUSTER = 1;
   private static final double SKIP = 0;
 
@@ -82,15 +80,17 @@ public class LaserScanPublisher implements NodeMain {
       @Override
       public void onNewLaserScan(List<Float> ranges) {
         LaserScan message = node.getMessageFactory().newMessage("sensor_msgs/LaserScan");
-        message.ranges = new float[ranges.size()];
-        for (int i = 0; i < ranges.size(); i++) {
-          message.ranges[i] = (float) (ranges.get(i) / 1000.0);
-        }
-        int min_i = (int) (configuration.getFrontStep() + MINIMUM_ANGLE * configuration.getTotalSteps() / (2.0 * Math.PI));
-        int max_i = (int) (configuration.getFrontStep() + MAXIMUM_ANGLE * configuration.getTotalSteps() / (2.0 * Math.PI));
-        message.angle_min = (float) ((min_i - configuration.getFrontStep()) * ((2.0 * Math.PI) / configuration.getTotalSteps()));
-        message.angle_max = (float) ((max_i - configuration.getFrontStep()) * ((2.0 * Math.PI) / configuration.getTotalSteps()));
+        // Some laser scanners have blind areas before and after the actual detection range.
+        // These are indicated by the front step and the last step configuration variables.
+        // Since the blind values never change, we can just ignore them when creating the 
+        // range array.
         message.angle_increment = (float) (CLUSTER * (2.0 * Math.PI) / configuration.getTotalSteps());
+        message.angle_min = (configuration.getFirstStep() - configuration.getFrontStep()) * message.angle_increment;
+        message.angle_max = (configuration.getLastStep() - configuration.getFrontStep()) * message.angle_increment;
+        message.ranges = new float[configuration.getLastStep() - configuration.getFirstStep()];
+        for (int i = 0; i < message.ranges.length; i++) {
+          message.ranges[i] = (float) (ranges.get(i + configuration.getFirstStep()) / 1000.0);
+        }
         message.time_increment = (float) (60.0 / ((double) configuration.getStandardMotorSpeed() * configuration.getTotalSteps()));
         message.scan_time = (float) (60.0 * (SKIP + 1) / (double) configuration.getStandardMotorSpeed());
         message.range_min = (float) (configuration.getMinimumMeasurment() / 1000.0);
