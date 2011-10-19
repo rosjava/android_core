@@ -26,7 +26,6 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.topic.Publisher;
-import org.ros.node.topic.Subscriber;
 
 import java.util.List;
 
@@ -42,25 +41,11 @@ public class LaserScanPublisher implements NodeMain {
 
   private Node node;
   private Publisher<LaserScan> publisher;
-  private Subscriber<org.ros.message.std_msgs.Time> wall_clock_subscriber;
   
   /**
    * We need a way to adjust time stamps because it is not (easily) possible to change 
    * a tablet's clock.
    */
-  private class WallTimeListener implements MessageListener<org.ros.message.std_msgs.Time> {
-	  private Duration timeOffset = new Duration(0.0);
-	  
-	  public Duration getTimeOffset() {
-		  return timeOffset;
-	  }
-
-	  @Override
-	  public void onNewMessage(Time message) {
-		  timeOffset = message.data.subtract(node.getCurrentTime());
-	  }
-  }
-
   public LaserScanPublisher(Scip20Device scipDevice) {
     this.scipDevice = scipDevice;
   }
@@ -72,8 +57,13 @@ public class LaserScanPublisher implements NodeMain {
     final String laserTopic = params.getString("~laser_topic", "laser");
     final String laserFrame = params.getString("~laser_frame", "laser");
     publisher = node.newPublisher(node.resolveName(laserTopic), "sensor_msgs/LaserScan");
-    final WallTimeListener wallTimeListener = new WallTimeListener();
-    wall_clock_subscriber = node.newSubscriber("/wall_clock", "std_msgs/Time", wallTimeListener);
+    node.newSubscriber("/wall_clock", "std_msgs/Time", 
+        new MessageListener<org.ros.message.std_msgs.Time>() {
+          @Override
+          public void onNewMessage(Time message) {
+            timeOffset = message.data.subtract(node.getCurrentTime());
+          }
+        });
     scipDevice.reset();
     final Configuration configuration = scipDevice.queryConfiguration();
     scipDevice.startScanning(new LaserScanListener() {
@@ -96,7 +86,7 @@ public class LaserScanPublisher implements NodeMain {
         message.range_min = (float) (configuration.getMinimumMeasurment() / 1000.0);
         message.range_max = (float) (configuration.getMaximumMeasurement() / 1000.0);
         message.header.frame_id = laserFrame;
-        message.header.stamp = node.getCurrentTime().add(wallTimeListener.getTimeOffset());
+        message.header.stamp = node.getCurrentTime().add(timeOffset);
         publisher.publish(message);
       }
     });
