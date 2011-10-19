@@ -18,7 +18,6 @@ package org.ros.android.hokuyo;
 
 import org.ros.message.Duration;
 import org.ros.message.MessageListener;
-import org.ros.message.sensor_msgs.LaserScan;
 import org.ros.message.std_msgs.Time;
 import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
@@ -26,8 +25,6 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.topic.Publisher;
-
-import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -39,8 +36,10 @@ public class LaserScanPublisher implements NodeMain {
 
   private final Scip20Device scipDevice;
 
+  private Duration timeOffset;
+  
   private Node node;
-  private Publisher<LaserScan> publisher;
+  private Publisher<org.ros.message.sensor_msgs.LaserScan> publisher;
   
   /**
    * We need a way to adjust time stamps because it is not (easily) possible to change 
@@ -66,10 +65,13 @@ public class LaserScanPublisher implements NodeMain {
         });
     scipDevice.reset();
     final Configuration configuration = scipDevice.queryConfiguration();
+    scipDevice.calibrateTime();
+    node.getLog().info("Calibrated laser time offset: " + scipDevice.getScanOffset());
     scipDevice.startScanning(new LaserScanListener() {
       @Override
-      public void onNewLaserScan(List<Float> ranges) {
-        LaserScan message = node.getMessageFactory().newMessage("sensor_msgs/LaserScan");
+      public void onNewLaserScan(LaserScan scan) {
+        org.ros.message.sensor_msgs.LaserScan message = 
+            node.getMessageFactory().newMessage("sensor_msgs/LaserScan");
         // Some laser scanners have blind areas before and after the actual detection range.
         // These are indicated by the front step and the last step configuration variables.
         // Since the blind values never change, we can just ignore them when creating the 
@@ -79,14 +81,14 @@ public class LaserScanPublisher implements NodeMain {
         message.angle_max = (configuration.getLastStep() - configuration.getFrontStep()) * message.angle_increment;
         message.ranges = new float[configuration.getLastStep() - configuration.getFirstStep()];
         for (int i = 0; i < message.ranges.length; i++) {
-          message.ranges[i] = (float) (ranges.get(i + configuration.getFirstStep()) / 1000.0);
+          message.ranges[i] = (float) (scan.getRanges().get(i + configuration.getFirstStep()) / 1000.0);
         }
         message.time_increment = (float) (60.0 / ((double) configuration.getStandardMotorSpeed() * configuration.getTotalSteps()));
         message.scan_time = (float) (60.0 * (SKIP + 1) / (double) configuration.getStandardMotorSpeed());
         message.range_min = (float) (configuration.getMinimumMeasurment() / 1000.0);
         message.range_max = (float) (configuration.getMaximumMeasurement() / 1000.0);
         message.header.frame_id = laserFrame;
-        message.header.stamp = node.getCurrentTime().add(timeOffset);
+        message.header.stamp = new org.ros.message.Time(scan.getTimeStamp()).add(timeOffset);
         publisher.publish(message);
       }
     });

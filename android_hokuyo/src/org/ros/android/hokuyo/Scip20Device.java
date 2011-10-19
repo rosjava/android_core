@@ -31,6 +31,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -44,6 +45,8 @@ public class Scip20Device {
 
   private final BufferedReader reader;
   private final BufferedWriter writer;
+  
+  private double scanOffset;
 
   /**
    * It is not necessary to provide buffered streams. Buffering is handled
@@ -146,8 +149,12 @@ public class Scip20Device {
     Preconditions.checkState(read().length() == 0);
   }
 
-  private String readTimestamp() {
-    return verifyChecksum(read());
+  private long readTimestamp() {
+    String stampString = verifyChecksum(read());
+    long stamp = 0;
+    for(int i=0; i<4; i++)
+      stamp |= stampString.charAt(i) << i;
+    return stamp;
   }
 
   public void startScanning(final LaserScanListener listener) {
@@ -160,13 +167,14 @@ public class Scip20Device {
         checkTerminator();
         while (true) {
           Preconditions.checkState(read().equals(command));
+          double scanStartTime = System.currentTimeMillis() / 1000.0;
           checkStatus();
           readTimestamp();
           StringBuilder data = new StringBuilder();
           while (true) {
             String line = read(); // Data and checksum or terminating LF
             if (line.length() == 0) {
-              listener.onNewLaserScan(Decoder.decode(data.toString(), 3));
+              listener.onNewLaserScan(new LaserScan(scanStartTime + scanOffset, Decoder.decode(data.toString(), 3)));
               break;
             }
             data.append(verifyChecksum(line));
@@ -211,5 +219,73 @@ public class Scip20Device {
       // Ignore spurious shutdown errors.
       e.printStackTrace();
     }
+  }
+  
+  // TODO(moesenle): assert that scanning is not running
+  public void calibrateTime() {
+    /* To calibrate time, we do the following (similar to what ROS' hokuyo_node does):
+     *   1. get current hokuyo time and calculate offset to current time
+     *   2. request a scan and calculate the scan offset to current time
+     *   3. request hokuyo time again and calculate offset to current time
+     *   4. offset = scan - (end + start)/2
+     * We repeat this process 11 times and take the median offset.
+     */
+    long[] samples = new long[11];
+    long start = hokuyoClockOffset();
+    for(int i=0; i<samples.length; i++) {
+      long scan = hokuyoScanOffset();
+      long end = hokuyoClockOffset();
+      samples[i] = scan - (end + start) / 2;
+      start = end;
+    }
+    Arrays.sort(samples);
+    scanOffset = samples[5] / 1000.0;
+  }
+  
+  public double getScanOffset() {
+    return scanOffset;
+  }
+  
+  private long hokuyoClockOffset() {
+    // Enter time adjust mode
+    write("TM0");
+    checkStatus();
+    checkTerminator();
+
+    // Read the current time stamp
+    final long start = System.currentTimeMillis();
+    write("TM1");
+    checkStatus();
+    final long offset = readTimestamp()
+        - (start + System.currentTimeMillis()) / 2;
+    checkTerminator();
+    
+    // Leave adjust mode
+    write("TM2");
+    checkStatus();
+    checkTerminator();
+    
+    return offset;
+  }
+  
+  private long hokuyoScanOffset() {
+    // We request exactly one scan from the laser and use the difference 
+    // between the laser's own time stamp and the system time at which we
+    // received the scan
+    write("MD0000076800001");
+    checkStatus();
+    checkTerminator();
+    
+    Preconditions.checkState(read().equals("MD0000076800000"));
+    long scanStartTime = System.currentTimeMillis();
+    checkStatus();
+    long scanTimeStamp = readTimestamp();
+    while(true) {
+        String line = read(); // Data and checksum or terminating LF
+        if (line.length() == 0) 
+          break;
+        verifyChecksum(line);
+    }
+    return scanTimeStamp - scanStartTime;
   }
 }

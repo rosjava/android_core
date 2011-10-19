@@ -16,10 +16,8 @@
 
 package org.ros.android.hokuyo;
 
-import java.util.List;
-
 public interface LaserScanListener {
   
-  void onNewLaserScan(List<Float> ranges);
+  void onNewLaserScan(LaserScan scan);
 
 }
