@@ -150,11 +150,7 @@ public class Scip20Device {
   }
 
   private long readTimestamp() {
-    String stampString = verifyChecksum(read());
-    long stamp = 0;
-    for(int i=0; i<4; i++)
-      stamp |= stampString.charAt(i) << i;
-    return stamp;
+    return Decoder.decodeValue(verifyChecksum(read()), 4);
   }
 
   public void startScanning(final LaserScanListener listener) {
