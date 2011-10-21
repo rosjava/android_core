@@ -55,6 +55,7 @@ public class LaserScanPublisher implements NodeMain {
     ParameterTree params = node.newParameterTree();
     final String laserTopic = params.getString("~laser_topic", "laser");
     final String laserFrame = params.getString("~laser_frame", "laser");
+    timeOffset = new Duration(0);
     publisher = node.newPublisher(node.resolveName(laserTopic), "sensor_msgs/LaserScan");
     node.newSubscriber("/wall_clock", "std_msgs/Time", 
         new MessageListener<org.ros.message.std_msgs.Time>() {
