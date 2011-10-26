@@ -18,16 +18,15 @@ package org.ros.android.hokuyo;
 
 import java.util.List;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-public class Decoder {
+class Decoder {
 
-  static int decodeValue(String buffer, int blockSize) {
+  public static int decodeValue(String buffer, int blockSize) {
     Preconditions.checkArgument(buffer.length() == blockSize);
     int result = 0;
-    for(int i=0; i<blockSize; i++) {
+    for(int i = 0; i < blockSize; i++) {
       result |= (buffer.charAt(blockSize - i - 1) - 0x30) << i * 6;
     }
     return result;
