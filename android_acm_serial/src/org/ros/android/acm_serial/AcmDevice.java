@@ -42,6 +42,8 @@ public class AcmDevice {
   private final OutputStream outputStream;
 
   public AcmDevice(UsbDeviceConnection usbDeviceConnection, UsbInterface usbInterface) {
+    Preconditions.checkNotNull(usbDeviceConnection);
+    Preconditions.checkNotNull(usbInterface);  
     Preconditions.checkState(usbDeviceConnection.claimInterface(usbInterface, true));
     this.usbDeviceConnection = usbDeviceConnection;
 
