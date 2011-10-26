@@ -4,9 +4,9 @@ import java.util.List;
 
 public class LaserScan {
   private final double timeStamp;
-  private final List<Float> ranges;
+  private final List<Integer> ranges;
 
-  public LaserScan(double timeStamp, List<Float> ranges) {
+  public LaserScan(double timeStamp, List<Integer> ranges) {
     this.timeStamp = timeStamp;
     this.ranges = ranges;
   }
@@ -15,7 +15,7 @@ public class LaserScan {
     return timeStamp;
   }
 
-  public List<Float> getRanges() {
+  public List<Integer> getRanges() {
     return ranges;
   }
 
