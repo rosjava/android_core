@@ -31,9 +31,6 @@ import org.ros.node.topic.Publisher;
  */
 public class LaserScanPublisher implements NodeMain {
 
-  private static final double CLUSTER = 1;
-  private static final double SKIP = 0;
-
   private final Scip20Device scipDevice;
 
   private Duration timeOffset;
@@ -77,15 +74,15 @@ public class LaserScanPublisher implements NodeMain {
         // These are indicated by the front step and the last step configuration variables.
         // Since the blind values never change, we can just ignore them when creating the 
         // range array.
-        message.angle_increment = (float) (CLUSTER * (2.0 * Math.PI) / configuration.getTotalSteps());
-        message.angle_min = (configuration.getFirstStep() - configuration.getFrontStep()) * message.angle_increment;
-        message.angle_max = (configuration.getLastStep() - configuration.getFrontStep()) * message.angle_increment;
+        message.angle_increment = configuration.getAngleIncrement(); 
+        message.angle_min = configuration.getMinimumAngle();
+        message.angle_max = configuration.getMaximumAngle();
         message.ranges = new float[configuration.getLastStep() - configuration.getFirstStep()];
         for (int i = 0; i < message.ranges.length; i++) {
           message.ranges[i] = (float) (scan.getRanges().get(i + configuration.getFirstStep()) / 1000.0);
         }
-        message.time_increment = (float) (60.0 / ((double) configuration.getStandardMotorSpeed() * configuration.getTotalSteps()));
-        message.scan_time = (float) (60.0 * (SKIP + 1) / (double) configuration.getStandardMotorSpeed());
+        message.time_increment = configuration.getTimeIncrement();
+        message.scan_time = configuration.getScanTime();
         message.range_min = (float) (configuration.getMinimumMeasurment() / 1000.0);
         message.range_max = (float) (configuration.getMaximumMeasurement() / 1000.0);
         message.header.frame_id = laserFrame;

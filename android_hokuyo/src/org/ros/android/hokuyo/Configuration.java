@@ -24,6 +24,9 @@ import com.google.common.base.Preconditions;
  */
 public class Configuration {
 
+  private static final double CLUSTER = 1;
+  private static final double SKIP = 0;
+
   private String model;
   private int minimumMeasurment; // mm
   private int maximumMeasurement; // mm
@@ -128,6 +131,26 @@ public class Configuration {
 
   public int getStandardMotorSpeed() {
     return standardMotorSpeed;
+  }
+  
+  public float getAngleIncrement() {
+    return (float) (CLUSTER * (2.0 * Math.PI) / getTotalSteps());
+  }
+  
+  public float getMinimumAngle() {
+    return (getFirstStep() - getFrontStep()) * getAngleIncrement();
+  }
+  
+  public float getMaximumAngle() {
+    return (getLastStep() - getFrontStep()) * getAngleIncrement();
+  }
+  
+  public float getTimeIncrement() {
+    return (float) (60.0 / ((double) getStandardMotorSpeed() * getTotalSteps()));
+  }
+  
+  public float getScanTime() {
+    return (float) (60.0 * (SKIP + 1) / (double) getStandardMotorSpeed());
   }
 
   @Override
