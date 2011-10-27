@@ -170,7 +170,7 @@ public class Scip20Device {
           while (true) {
             String line = read(); // Data and checksum or terminating LF
             if (line.length() == 0) {
-              listener.onNewLaserScan(new LaserScan(scanStartTime + scanOffset, Decoder.decode(data.toString(), 3)));
+              listener.onNewLaserScan(new LaserScan(scanStartTime + scanOffset, Decoder.decodeValues(data.toString(), 3)));
               break;
             }
             data.append(verifyChecksum(line));

@@ -32,7 +32,7 @@ class Decoder {
     return result;
   }
 
-  public static List<Integer> decode(String buffer, int blockSize) {
+  public static List<Integer> decodeValues(String buffer, int blockSize) {
     Preconditions.checkArgument(buffer.length() % blockSize == 0);
     List<Integer> data = Lists.newArrayList();
     for (int i = 0; i < buffer.length(); i += blockSize) {
