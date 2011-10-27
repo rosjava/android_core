@@ -37,7 +37,7 @@ class Decoder {
     List<Integer> data = Lists.newArrayList();
     for (int i = 0; i < buffer.length(); i += blockSize) {
       // sensor_msgs/LaserScan uses floats for ranges.
-      data.add((int) decodeValue(buffer.substring(i, i + 3), blockSize));
+      data.add(decodeValue(buffer.substring(i, i + 3), blockSize));
     }
     return data;
   }
