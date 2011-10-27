@@ -36,7 +36,7 @@ import java.util.Arrays;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Scip20Device {
+public class Scip20Device implements LaserScannerDevice {
 
   private static final boolean DEBUG = false;
   private static final String TAG = "Scip20Device";
@@ -45,8 +45,12 @@ public class Scip20Device {
 
   private final BufferedReader reader;
   private final BufferedWriter writer;
+  private final LaserScannerConfiguration configuration;
   
-  private double scanOffset;
+  /**
+   * The time offset between the first 
+   */
+  private double scanTimeOffset;
 
   /**
    * It is not necessary to provide buffered streams. Buffering is handled
@@ -68,6 +72,10 @@ public class Scip20Device {
     writer =
         new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(outputStream,
             STREAM_BUFFER_SIZE), Charset.forName("US-ASCII")));
+    
+    reset();
+    configuration = queryConfiguration();
+    calibrateTime();
   }
 
   private void write(String command) {
@@ -121,7 +129,7 @@ public class Scip20Device {
     throw new InvalidChecksum();
   }
 
-  public void reset() {
+  private void reset() {
     try {
       write("RS");
       checkStatus();
@@ -153,6 +161,7 @@ public class Scip20Device {
     return Decoder.decodeValue(verifyChecksum(read()), 4);
   }
 
+  @Override
   public void startScanning(final LaserScanListener listener) {
     new Thread() {
       @Override
@@ -170,7 +179,7 @@ public class Scip20Device {
           while (true) {
             String line = read(); // Data and checksum or terminating LF
             if (line.length() == 0) {
-              listener.onNewLaserScan(new LaserScan(scanStartTime + scanOffset, Decoder.decodeValues(data.toString(), 3)));
+              listener.onNewLaserScan(new LaserScan(scanStartTime + scanTimeOffset, Decoder.decodeValues(data.toString(), 3)));
               break;
             }
             data.append(verifyChecksum(line));
@@ -186,8 +195,8 @@ public class Scip20Device {
     return buffer.substring(0, buffer.length() - 2) + buffer.charAt(buffer.length() - 1);
   }
 
-  public Configuration queryConfiguration() {
-    Configuration.Builder builder = new Configuration.Builder();
+  private LaserScannerConfiguration queryConfiguration() {
+    Scip20DeviceConfiguration.Builder builder = new Scip20DeviceConfiguration.Builder();
     write("PP");
     checkStatus();
     builder.parseModel(verifyChecksum(readAndStripSemicolon()));
@@ -202,6 +211,7 @@ public class Scip20Device {
     return builder.build();
   }
 
+  @Override
   public void shutdown() {
     try {
       reader.close();
@@ -218,7 +228,7 @@ public class Scip20Device {
   }
   
   // TODO(moesenle): assert that scanning is not running
-  public void calibrateTime() {
+  private void calibrateTime() {
     /* To calibrate time, we do the following (similar to what ROS' hokuyo_node does):
      *   1. get current hokuyo time and calculate offset to current time
      *   2. request a scan and calculate the scan offset to current time
@@ -235,11 +245,7 @@ public class Scip20Device {
       start = end;
     }
     Arrays.sort(samples);
-    scanOffset = samples[5] / 1000.0;
-  }
-  
-  public double getScanOffset() {
-    return scanOffset;
+    scanTimeOffset = samples[5] / 1000.0;
   }
   
   private long hokuyoClockOffset() {
@@ -283,5 +289,10 @@ public class Scip20Device {
         verifyChecksum(line);
     }
     return scanTimeStamp - scanStartTime;
+  }
+
+  @Override
+  public LaserScannerConfiguration getConfiguration() {
+    return configuration;
   }
 }

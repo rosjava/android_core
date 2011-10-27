@@ -31,54 +31,57 @@ import org.ros.node.topic.Publisher;
  */
 public class LaserScanPublisher implements NodeMain {
 
-  private final Scip20Device scipDevice;
+  private final LaserScannerDevice scipDevice;
 
-  private Duration timeOffset;
-  
+  /**
+   * The offset from our local clock to the actual wall clock time. This is
+   * necessary because we cannot set time on android devices accurately enough
+   * at the moment.
+   */
+  private Duration wallClockOffset;
+
   private Node node;
   private Publisher<org.ros.message.sensor_msgs.LaserScan> publisher;
-  
+
   /**
-   * We need a way to adjust time stamps because it is not (easily) possible to change 
-   * a tablet's clock.
+   * We need a way to adjust time stamps because it is not (easily) possible to
+   * change a tablet's clock.
    */
-  public LaserScanPublisher(Scip20Device scipDevice) {
+  public LaserScanPublisher(LaserScannerDevice scipDevice) {
     this.scipDevice = scipDevice;
   }
 
   @Override
   public void main(NodeConfiguration nodeConfiguration) throws Exception {
-    node = new DefaultNodeFactory().newNode("android_hokuyo_node", nodeConfiguration);
+    node = new DefaultNodeFactory().newNode("android_hokuyo_node",
+        nodeConfiguration);
     ParameterTree params = node.newParameterTree();
     final String laserTopic = params.getString("~laser_topic", "laser");
     final String laserFrame = params.getString("~laser_frame", "laser");
-    timeOffset = new Duration(0);
-    publisher = node.newPublisher(node.resolveName(laserTopic), "sensor_msgs/LaserScan");
-    node.newSubscriber("/wall_clock", "std_msgs/Time", 
+    wallClockOffset = new Duration(0);
+    publisher = node.newPublisher(node.resolveName(laserTopic),
+        "sensor_msgs/LaserScan");
+    node.newSubscriber("/wall_clock", "std_msgs/Time",
         new MessageListener<org.ros.message.std_msgs.Time>() {
           @Override
           public void onNewMessage(Time message) {
-            timeOffset = message.data.subtract(node.getCurrentTime());
+            wallClockOffset = message.data.subtract(node.getCurrentTime());
           }
         });
-    scipDevice.reset();
-    final Configuration configuration = scipDevice.queryConfiguration();
-    scipDevice.calibrateTime();
-    node.getLog().info("Calibrated laser time offset: " + scipDevice.getScanOffset());
     scipDevice.startScanning(new LaserScanListener() {
       @Override
       public void onNewLaserScan(LaserScan scan) {
         org.ros.message.sensor_msgs.LaserScan message = toLaserScanMessage(
-            laserFrame, configuration, scan);
+            laserFrame, scan);
         publisher.publish(message);
-      }});
+      }
+    });
   }
 
   @Override
   public void shutdown() {
     scipDevice.shutdown();
   }
-  
 
   /**
    * Construct a LaserScan message from sensor readings and the laser
@@ -93,16 +96,16 @@ public class LaserScanPublisher implements NodeMain {
    * 
    * @param laserFrame
    *          The laser's sensor frame.
-   * @param configuration
-   *          The laser's current configuration.
    * @param scan
    *          The actual range readings.
    * @return A new LaserScan message
    */
   private org.ros.message.sensor_msgs.LaserScan toLaserScanMessage(
-      String laserFrame, Configuration configuration, LaserScan scan) {
+      String laserFrame, LaserScan scan) {
     org.ros.message.sensor_msgs.LaserScan message = node.getMessageFactory()
         .newMessage("sensor_msgs/LaserScan");
+    LaserScannerConfiguration configuration = scipDevice.getConfiguration();
+    
     message.angle_increment = configuration.getAngleIncrement();
     message.angle_min = configuration.getMinimumAngle();
     message.angle_max = configuration.getMaximumAngle();
@@ -118,7 +121,7 @@ public class LaserScanPublisher implements NodeMain {
     message.range_max = (float) (configuration.getMaximumMeasurement() / 1000.0);
     message.header.frame_id = laserFrame;
     message.header.stamp = new org.ros.message.Time(scan.getTimeStamp())
-        .add(timeOffset);
+        .add(wallClockOffset);
     return message;
   }
 
