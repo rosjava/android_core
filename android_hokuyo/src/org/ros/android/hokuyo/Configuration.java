@@ -98,63 +98,116 @@ public class Configuration {
     // Use the Configuration.Builder to construct a Configuration object.
   }
 
+  /**
+   * @return The laser's model.
+   */
   public String getModel() {
     return model;
   }
 
+  /**
+   * @return The minimal range.
+   */
   public int getMinimumMeasurment() {
     return minimumMeasurment;
   }
 
+  /**
+   * @return The maximal range.
+   */
   public int getMaximumMeasurement() {
     return maximumMeasurement;
   }
 
+  /**
+   * @return The total number of range readings returned by the laser.
+   */
   public int getTotalSteps() {
     return totalSteps;
   }
 
+  /**
+   * Returns the first meaningful range reading. The laser might have a blind
+   * area at the beginning of the scan range. Range readings are generated for
+   * this area, they do not contain any useful information though.
+   * 
+   * @return The index of the first meaningful range reading.
+   */
   public int getFirstStep() {
     return firstStep;
   }
 
+  /**
+   * Returns the last meaningful range reading. The laser might have a blind
+   * area at the end of the scan range. Range readings are generated for this
+   * area, they do not contain any useful information though.
+   * 
+   * @return The index of the last meaningful range reading.
+   */
   public int getLastStep() {
     return lastStep;
   }
 
+  /**
+   * Returns the front step of the laser. The front step is the index of the
+   * reading that is pointing directly forward.
+   * 
+   * @return The index of the front step.
+   */
   public int getFrontStep() {
     return frontStep;
   }
 
+  /**
+   * @return The motor speed of the laser
+   */
   public int getStandardMotorSpeed() {
     return standardMotorSpeed;
   }
-  
+
+  /**
+   * @return The angle increment i.e. the angle between two successive points in
+   *         a scan.
+   */
   public float getAngleIncrement() {
     return (float) ((2.0 * Math.PI) / getTotalSteps());
   }
-  
+
+  /**
+   * @return The minimum angle, i.e. the angle of the first step
+   */
   public float getMinimumAngle() {
     return (getFirstStep() - getFrontStep()) * getAngleIncrement();
   }
-  
+
+  /**
+   * @return The maximum angle, i.e. the angle of the last step
+   */
   public float getMaximumAngle() {
     return (getLastStep() - getFrontStep()) * getAngleIncrement();
   }
-  
+
+  /**
+   * @return The time increment between two successive points in a scan.
+   */
   public float getTimeIncrement() {
     return (float) (60.0 / ((double) getStandardMotorSpeed() * getTotalSteps()));
   }
-  
+
+  /**
+   * @return The time between two scans.
+   */
   public float getScanTime() {
     return (float) (60.0 / (double) getStandardMotorSpeed());
   }
 
   @Override
   public String toString() {
-    return String.format(
-        "MODL: %s\nDMIN: %d\nDMAX: %d\nARES: %d\nAMIN: %d\nAMAX: %d\nAFRT: %d\nSCAN: %d",
-        getModel(), getMinimumMeasurment(), getMaximumMeasurement(), getTotalSteps(),
-        getFirstStep(), getLastStep(), getFrontStep(), getStandardMotorSpeed());
+    return String
+        .format(
+            "MODL: %s\nDMIN: %d\nDMAX: %d\nARES: %d\nAMIN: %d\nAMAX: %d\nAFRT: %d\nSCAN: %d",
+            getModel(), getMinimumMeasurment(), getMaximumMeasurement(),
+            getTotalSteps(), getFirstStep(), getLastStep(), getFrontStep(),
+            getStandardMotorSpeed());
   }
 }
