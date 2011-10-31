@@ -19,14 +19,15 @@ package org.ros.android;
 import com.google.common.base.Preconditions;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
-import org.ros.exception.RosRuntimeException;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeRunner;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -35,18 +36,36 @@ public abstract class RosActivity extends Activity {
 
   private static final int MASTER_CHOOSER_REQUEST_CODE = 0;
 
-  private final String notificationTicker;
-  private final String notificationTitle;
-  private final CountDownLatch nodeRunnerLatch;
-
   private URI masterUri;
   private NodeRunner nodeRunner;
+
+  private final ServiceConnection nodeRunnerServiceConnection;
+  private final String notificationTicker;
+  private final String notificationTitle;
+
+  private class NodeRunnerServiceConnection implements ServiceConnection {
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder binder) {
+      nodeRunner = ((NodeRunnerService.LocalBinder) binder).getService();
+      // We run init() in a new thread since it often requires network access.
+      new Thread() {
+        @Override
+        public void run() {
+          init();
+        };
+      }.start();
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+    }
+  };
 
   protected RosActivity(String notificationTicker, String notificationTitle) {
     super();
     this.notificationTicker = notificationTicker;
     this.notificationTitle = notificationTitle;
-    nodeRunnerLatch = new CountDownLatch(1);
+    nodeRunnerServiceConnection = new NodeRunnerServiceConnection();
   }
 
   @Override
@@ -55,28 +74,31 @@ public abstract class RosActivity extends Activity {
       // Call this method on super to avoid triggering our precondition in the
       // overridden startActivityForResult().
       super.startActivityForResult(new Intent(this, MasterChooser.class), 0);
-    } else {
-      NodeRunnerService.start(RosActivity.this, notificationTicker, notificationTitle,
-          new NodeRunnerListener() {
-            @Override
-            public void onNewNodeRunner(NodeRunner nodeRunner) {
-              RosActivity.this.nodeRunner = nodeRunner;
-              nodeRunnerLatch.countDown();
-            }
-          });
-      new Thread() {
-        @Override
-        public void run() {
-          try {
-            nodeRunnerLatch.await();
-          } catch (InterruptedException e) {
-            throw new RosRuntimeException(e);
-          }
-          init();
-        }
-      }.start();
+    } else if (nodeRunner == null) {
+      // TODO(damonkohler): The NodeRunnerService should maintain its own copy
+      // of master URI that we can query if we're restarting this activity.
+      startNodeRunnerService();
     }
     super.onResume();
+  }
+
+  private void startNodeRunnerService() {
+    Intent intent = new Intent(this, NodeRunnerService.class);
+    intent.setAction(NodeRunnerService.ACTION_START);
+    intent.putExtra(NodeRunnerService.EXTRA_NOTIFICATION_TICKER, notificationTicker);
+    intent.putExtra(NodeRunnerService.EXTRA_NOTIFICATION_TITLE, notificationTitle);
+    startService(intent);
+    Preconditions.checkState(bindService(intent, nodeRunnerServiceConnection, BIND_AUTO_CREATE),
+        "Failed to bind NodeRunnerService.");
+  }
+
+  @Override
+  protected void onPause() {
+    if (nodeRunner != null) {
+      unbindService(nodeRunnerServiceConnection);
+      nodeRunner = null;
+    }
+    super.onPause();
   }
 
   /**

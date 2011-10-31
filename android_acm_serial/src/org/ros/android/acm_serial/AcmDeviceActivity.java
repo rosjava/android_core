@@ -32,11 +32,12 @@ import org.ros.android.RosActivity;
 public abstract class AcmDeviceActivity extends RosActivity {
 
   private UsbDevice usbDevice;
+  private BroadcastReceiver usbReceiver;
 
   protected AcmDeviceActivity(String notificationTicker, String notificationTitle) {
     super(notificationTicker, notificationTitle);
   }
-  
+
   /**
    * @param acmDevice
    *          the connected {@link AcmDevice}
@@ -54,26 +55,28 @@ public abstract class AcmDeviceActivity extends RosActivity {
       final UsbInterface usbInterface = usbDevice.getInterface(1);
       AcmDevice acmDevice = new AcmDevice(usbDeviceConnection, usbInterface);
       init(acmDevice);
-      
-      // The MainActivity process also hosts the NodeRunnerService. So, keeping
-      // this around for the lifetime of this process is equivalent to making
-      // sure
-      // that the NodeRunnerService can handle ACTION_USB_DEVICE_DETACHED.
-      BroadcastReceiver usbReceiver = new BroadcastReceiver() {
+
+      usbReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
           UsbDevice detachedUsbDevice =
               (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
           if (detachedUsbDevice.equals(usbDevice)) {
-            getNodeRunner().shutdown();
             usbDeviceConnection.releaseInterface(usbInterface);
             usbDeviceConnection.close();
-            AcmDeviceActivity.this.unregisterReceiver(this);
           }
         }
       };
       registerReceiver(usbReceiver, new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED));
     }
+  }
+
+  @Override
+  protected void onDestroy() {
+    if (usbReceiver != null) {
+      unregisterReceiver(usbReceiver);
+    }
+    super.onDestroy();
   }
 
 }

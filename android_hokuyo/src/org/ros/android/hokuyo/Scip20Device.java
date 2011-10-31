@@ -46,9 +46,9 @@ public class Scip20Device implements LaserScannerDevice {
   private final BufferedReader reader;
   private final BufferedWriter writer;
   private final LaserScannerConfiguration configuration;
-  
+
   /**
-   * The time offset between the first 
+   * The time offset between the first
    */
   private double scanTimeOffset;
 
@@ -72,10 +72,24 @@ public class Scip20Device implements LaserScannerDevice {
     writer =
         new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(outputStream,
             STREAM_BUFFER_SIZE), Charset.forName("US-ASCII")));
-    
-    reset();
+
+    while (true) {
+      try {
+        reset();
+        calibrateTime();
+      } catch (Scip20Exception e) {
+        // Status errors are common during startup. We'll retry continuously
+        // until we're successful.
+        continue;
+      } catch (IllegalStateException e) {
+        // It's possible that commands will be ignored and thus break
+        // communication state. It's safe to retry in this case as well.
+        continue;
+      }
+      break;
+    }
+
     configuration = queryConfiguration();
-    calibrateTime();
   }
 
   private void write(String command) {
@@ -130,17 +144,6 @@ public class Scip20Device implements LaserScannerDevice {
   }
 
   private void reset() {
-    try {
-      write("RS");
-      checkStatus();
-      checkTerminator();
-      // When we are in the middle of a scan, this might fail. 
-      // Catch the exceptions and ignore.
-    } catch(IllegalStateException e) {
-    } catch(Scip20Exception e) {
-    }
-
-    // The second reset should actually work
     write("RS");
     checkStatus();
     checkTerminator();
@@ -179,7 +182,8 @@ public class Scip20Device implements LaserScannerDevice {
           while (true) {
             String line = read(); // Data and checksum or terminating LF
             if (line.length() == 0) {
-              listener.onNewLaserScan(new LaserScan(scanStartTime + scanTimeOffset, Decoder.decodeValues(data.toString(), 3)));
+              listener.onNewLaserScan(new LaserScan(scanStartTime + scanTimeOffset, Decoder
+                  .decodeValues(data.toString(), 3)));
               break;
             }
             data.append(verifyChecksum(line));
@@ -226,29 +230,30 @@ public class Scip20Device implements LaserScannerDevice {
       e.printStackTrace();
     }
   }
-  
+
   // TODO(moesenle): assert that scanning is not running
   private void calibrateTime() {
-    /* To calibrate time, we do the following (similar to what ROS' hokuyo_node does):
-     *   1. get current hokuyo time and calculate offset to current time
-     *   2. request a scan and calculate the scan offset to current time
-     *   3. request hokuyo time again and calculate offset to current time
-     *   4. offset = scan - (end + start)/2
-     * We repeat this process 11 times and take the median offset.
+    /*
+     * To calibrate time, we do the following (similar to what ROS' hokuyo_node
+     * does): 1. get current hokuyo time and calculate offset to current time 2.
+     * request a scan and calculate the scan offset to current time 3. request
+     * hokuyo time again and calculate offset to current time 4. offset = scan -
+     * (end + start)/2 We repeat this process 11 times and take the median
+     * offset.
      */
     long[] samples = new long[11];
-    long start = hokuyoClockOffset();
-    for(int i=0; i<samples.length; i++) {
-      long scan = hokuyoScanOffset();
-      long end = hokuyoClockOffset();
+    long start = calculateClockOffset();
+    for (int i = 0; i < samples.length; i++) {
+      long scan = calculateScanOffset();
+      long end = calculateClockOffset();
       samples[i] = scan - (end + start) / 2;
       start = end;
     }
     Arrays.sort(samples);
     scanTimeOffset = samples[5] / 1000.0;
   }
-  
-  private long hokuyoClockOffset() {
+
+  private long calculateClockOffset() {
     // Enter time adjust mode
     write("TM0");
     checkStatus();
@@ -258,35 +263,39 @@ public class Scip20Device implements LaserScannerDevice {
     final long start = System.currentTimeMillis();
     write("TM1");
     checkStatus();
-    final long offset = readTimestamp()
-        - (start + System.currentTimeMillis()) / 2;
+    final long offset = readTimestamp() - (start + System.currentTimeMillis()) / 2;
     checkTerminator();
-    
+
     // Leave adjust mode
     write("TM2");
     checkStatus();
     checkTerminator();
-    
+
     return offset;
   }
-  
-  private long hokuyoScanOffset() {
-    // We request exactly one scan from the laser and use the difference 
-    // between the laser's own time stamp and the system time at which we
-    // received the scan
+
+  /**
+   * Request exactly one scan from the laser and return the difference between
+   * the laser's own time stamp and the system time at which we received the
+   * scan.
+   * 
+   * @return the time offset between the laser scanner and the system
+   */
+  private long calculateScanOffset() {
     write("MD0000076800001");
     checkStatus();
     checkTerminator();
-    
+
     Preconditions.checkState(read().equals("MD0000076800000"));
     long scanStartTime = System.currentTimeMillis();
     checkStatus();
     long scanTimeStamp = readTimestamp();
-    while(true) {
-        String line = read(); // Data and checksum or terminating LF
-        if (line.length() == 0) 
-          break;
-        verifyChecksum(line);
+    while (true) {
+      String line = read(); // Data and checksum or terminating LF
+      if (line.length() == 0) {
+        break;
+      }
+      verifyChecksum(line);
     }
     return scanTimeStamp - scanStartTime;
   }

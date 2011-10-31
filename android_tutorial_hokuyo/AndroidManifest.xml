@@ -21,14 +21,8 @@
       <intent-filter>
         <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
       </intent-filter>
-      <intent-filter>
-        <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
-      </intent-filter>
       <meta-data
         android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-        android:resource="@xml/hokuyo_device_filter" />
-      <meta-data
-        android:name="android.hardware.usb.action.USB_DEVICE_DETACHED"
         android:resource="@xml/hokuyo_device_filter" />
     </activity>
     <activity android:name="org.ros.android.MasterChooser" />

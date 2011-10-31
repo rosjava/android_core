@@ -14,7 +14,8 @@
     android:label="@string/app_name">
     <activity
       android:label="@string/app_name"
-      android:name="MasterChooser" />
+      android:name="MasterChooser"
+      android:launchMode="singleTask" />
     <service android:name="NodeRunnerService">
       <intent-filter>
         <action android:name="org.ros.android.NodeRunnerService" />

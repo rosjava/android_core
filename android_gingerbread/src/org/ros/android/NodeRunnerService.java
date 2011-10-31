@@ -21,10 +21,7 @@ import com.google.common.base.Preconditions;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -39,58 +36,27 @@ import org.ros.node.NodeRunner;
  */
 public class NodeRunnerService extends Service implements NodeRunner {
 
+  // NOTE(damonkohler): If this is 0, the notification does not show up.
   private static final int ONGOING_NOTIFICATION = 1;
+
+  static final String ACTION_START = "org.ros.android.ACTION_START_NODE_RUNNER_SERVICE";
+  static final String ACTION_SHUTDOWN = "org.ros.android.ACTION_SHUTDOWN_NODE_RUNNER_SERVICE";
+  static final String EXTRA_NOTIFICATION_TITLE = "org.ros.android.EXTRA_NOTIFICATION_TITLE";
+  static final String EXTRA_NOTIFICATION_TICKER = "org.ros.android.EXTRA_NOTIFICATION_TICKER";
 
   private final NodeRunner nodeRunner;
   private final IBinder binder;
 
   private WakeLock wakeLock;
-  private Context context;
-  private ServiceConnection serviceConnection;
 
   /**
    * Class for clients to access. Because we know this service always runs in
    * the same process as its clients, we don't need to deal with IPC.
    */
-  private class LocalBinder extends Binder {
+  class LocalBinder extends Binder {
     NodeRunnerService getService() {
       return NodeRunnerService.this;
     }
-  }
-
-  public static void start(final Context context, final String notificationTicker,
-      final String notificationTitle, final NodeRunnerListener listener) {
-    ServiceConnection serviceConnection = new ServiceConnection() {
-      private NodeRunnerService nodeRunnerService;
-
-      @Override
-      public void onServiceConnected(ComponentName name, IBinder binder) {
-        Preconditions.checkState(nodeRunnerService == null);
-        nodeRunnerService = ((LocalBinder) binder).getService();
-        nodeRunnerService.context = context;
-        nodeRunnerService.serviceConnection = this;
-        nodeRunnerService.startForeground(notificationTicker, notificationTitle);
-        listener.onNewNodeRunner(nodeRunnerService);
-      }
-
-      @Override
-      public void onServiceDisconnected(ComponentName name) {
-      }
-    };
-
-    Intent intent = new Intent(context, NodeRunnerService.class);
-    Preconditions.checkState(
-        context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE),
-        "Failed to start NodeRunnerService.");
-  }
-
-  private void startForeground(String notificationTicker, String notificationTitle) {
-    Notification notification =
-        new Notification(R.drawable.icon, notificationTicker, System.currentTimeMillis());
-    Intent notificationIntent = new Intent(context, NodeRunnerService.class);
-    PendingIntent pendingIntent = PendingIntent.getService(context, 0, notificationIntent, 0);
-    notification.setLatestEventInfo(context, notificationTitle, "Tap to shutdown.", pendingIntent);
-    startForeground(ONGOING_NOTIFICATION, notification);
   }
 
   public NodeRunnerService() {
@@ -113,16 +79,8 @@ public class NodeRunnerService extends Service implements NodeRunner {
 
   @Override
   public void shutdown() {
-    if (context != null && serviceConnection != null) {
-      context.unbindService(serviceConnection);
-    }
-    context = null;
-    serviceConnection = null;
     stopForeground(true);
     stopSelf();
-    // Shutdown of the NodeRunner and releasing the WakeLock are handled in
-    // onDestroy() in case the service was shutdown by the system instead of by
-    // the user calling shutdown().
   }
 
   @Override
@@ -134,10 +92,26 @@ public class NodeRunnerService extends Service implements NodeRunner {
 
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
-    // This service should only be started using the start() static method. Any
-    // intent sent to the service via onStart() triggers a shutdown. We use this
-    // to trigger a shutdown when the user taps on the notification.
-    shutdown();
+    if (intent.getAction() == null) {
+      return START_NOT_STICKY;
+    }
+    if (intent.getAction().equals(ACTION_START)) {
+      Preconditions.checkArgument(intent.hasExtra(EXTRA_NOTIFICATION_TICKER));
+      Preconditions.checkArgument(intent.hasExtra(EXTRA_NOTIFICATION_TITLE));
+      Notification notification =
+          new Notification(R.drawable.icon, intent.getStringExtra(EXTRA_NOTIFICATION_TICKER),
+              System.currentTimeMillis());
+      // Should this be the RosActivity context instead?
+      Intent notificationIntent = new Intent(this, NodeRunnerService.class);
+      notificationIntent.setAction(NodeRunnerService.ACTION_SHUTDOWN);
+      PendingIntent pendingIntent = PendingIntent.getService(this, 0, notificationIntent, 0);
+      notification.setLatestEventInfo(this, intent.getStringExtra(EXTRA_NOTIFICATION_TITLE),
+          "Tap to shutdown.", pendingIntent);
+      startForeground(ONGOING_NOTIFICATION, notification);
+    }
+    if (intent.getAction().equals(ACTION_SHUTDOWN)) {
+      shutdown();
+    }
     return START_NOT_STICKY;
   }
 
