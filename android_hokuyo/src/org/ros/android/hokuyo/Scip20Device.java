@@ -16,11 +16,6 @@
 
 package org.ros.android.hokuyo;
 
-import com.google.common.base.Preconditions;
-
-import android.util.Log;
-import org.ros.exception.RosRuntimeException;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -31,13 +26,22 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.ros.exception.RosRuntimeException;
+
+import android.util.Log;
+
+import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class Scip20Device implements LaserScannerDevice {
 
+  private static final int TIME_CALIBRATION_AVERAGING_COUNT = 11;
   private static final boolean DEBUG = false;
   private static final String TAG = "Scip20Device";
 
@@ -48,9 +52,26 @@ public class Scip20Device implements LaserScannerDevice {
   private final LaserScannerConfiguration configuration;
 
   /**
-   * The time offset between the first
+   * The time offset between taking the scan and the USB package arriving.
    */
   private double scanTimeOffset;
+
+  /**
+   * Calculates the median. This method modifies the sequence.
+   * 
+   * @param sequence
+   *          input data to get the median from, this parameter is modified
+   * @return the median
+   */
+  private static <T extends Comparable<? super T>> T calculateMedian(
+      List<? extends T> sequence) {
+    Collections.sort(sequence);
+    if (sequence.size() % 2 == 0) {
+      return sequence.get(sequence.size() / 2);
+    } else {
+      return sequence.get(sequence.size() / 2 + 1);
+    }
+  }
 
   /**
    * It is not necessary to provide buffered streams. Buffering is handled
@@ -196,7 +217,8 @@ public class Scip20Device implements LaserScannerDevice {
   private String readAndStripSemicolon() {
     String buffer = read();
     Preconditions.checkState(buffer.charAt(buffer.length() - 2) == ';');
-    return buffer.substring(0, buffer.length() - 2) + buffer.charAt(buffer.length() - 1);
+    return buffer.substring(0, buffer.length() - 2)
+        + buffer.charAt(buffer.length() - 1);
   }
 
   private LaserScannerConfiguration queryConfiguration() {
@@ -243,17 +265,17 @@ public class Scip20Device implements LaserScannerDevice {
    * We repeat this process 11 times and take the median offset.
    */
   private void calibrateTime() {
-    // TODO(moesenle): Assert that scanning is not running.
-    long[] samples = new long[11];
+    ArrayList<Long> samples = new ArrayList<Long>(
+        TIME_CALIBRATION_AVERAGING_COUNT);
     long start = calculateClockOffset();
-    for (int i = 0; i < samples.length; i++) {
+    for (int i = 0; i < samples.size(); i++) {
       long scan = calculateScanTimeOffset();
-      long end = calculateClockOffset();
-      samples[i] = scan - (end + start) / 2;
+      long end = calculateScanTimeOffset();
+      samples.set(i, scan - (end + start) / 2);
       start = end;
     }
-    Arrays.sort(samples);
-    scanTimeOffset = samples[5] / 1000.0;
+
+    scanTimeOffset = calculateMedian(samples) / 1000.0;
   }
 
   private long calculateClockOffset() {
@@ -266,7 +288,7 @@ public class Scip20Device implements LaserScannerDevice {
     final long start = System.currentTimeMillis();
     write("TM1");
     checkStatus();
-    final long offset = readTimestamp() - (start + System.currentTimeMillis()) / 2;
+    long offset = readTimestamp() - (start + System.currentTimeMillis()) / 2;
     checkTerminator();
 
     // Leave adjust mode
