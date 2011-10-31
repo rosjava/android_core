@@ -23,6 +23,7 @@ import org.ros.android.acm_serial.AcmDeviceActivity;
 import org.ros.android.hokuyo.LaserScanPublisher;
 import org.ros.android.hokuyo.Scip20Device;
 import org.ros.node.NodeConfiguration;
+import org.ros.time.NtpTimeProvider;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -48,6 +49,10 @@ public class MainActivity extends AcmDeviceActivity {
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName(),
             getMasterUri());
     nodeConfiguration.setNodeName("hokuyo_node");
+    NtpTimeProvider ntpTimeProvider = new NtpTimeProvider(InetAddressFactory
+        .newFromHostString("ntp.ubuntu.com"));
+    ntpTimeProvider.updateTime();
+    nodeConfiguration.setTimeProvider(ntpTimeProvider);
     getNodeRunner().run(laserScanPublisher, nodeConfiguration);
   }
 }

@@ -18,9 +18,6 @@ package org.ros.android.hokuyo;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.message.Duration;
-import org.ros.message.MessageListener;
-import org.ros.message.std_msgs.Time;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.parameter.ParameterTree;
@@ -32,13 +29,6 @@ import org.ros.node.topic.Publisher;
 public class LaserScanPublisher implements NodeMain {
 
   private final LaserScannerDevice scipDevice;
-
-  /**
-   * The offset from our local clock to the actual wall clock time. This is
-   * necessary because we cannot set time on android devices accurately enough
-   * at the moment.
-   */
-  private Duration wallClockOffset;
 
   private Node node;
   private Publisher<org.ros.message.sensor_msgs.LaserScan> publisher;
@@ -58,16 +48,8 @@ public class LaserScanPublisher implements NodeMain {
     ParameterTree params = node.newParameterTree();
     final String laserTopic = params.getString("~laser_topic", "laser");
     final String laserFrame = params.getString("~laser_frame", "laser");
-    wallClockOffset = new Duration(0);
     publisher = node.newPublisher(node.resolveName(laserTopic),
         "sensor_msgs/LaserScan");
-    node.newSubscriber("/wall_clock", "std_msgs/Time",
-        new MessageListener<org.ros.message.std_msgs.Time>() {
-          @Override
-          public void onNewMessage(Time message) {
-            wallClockOffset = message.data.subtract(node.getCurrentTime());
-          }
-        });
     scipDevice.startScanning(new LaserScanListener() {
       @Override
       public void onNewLaserScan(LaserScan scan) {
@@ -124,8 +106,7 @@ public class LaserScanPublisher implements NodeMain {
     message.range_min = (float) (configuration.getMinimumMeasurment() / 1000.0);
     message.range_max = (float) (configuration.getMaximumMeasurement() / 1000.0);
     message.header.frame_id = laserFrame;
-    message.header.stamp = new org.ros.message.Time(scan.getTimeStamp())
-        .add(wallClockOffset);
+    message.header.stamp = node.getCurrentTime();
     return message;
   }
 

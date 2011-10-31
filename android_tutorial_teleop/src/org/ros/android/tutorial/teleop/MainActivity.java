@@ -16,8 +16,6 @@
 
 package org.ros.android.tutorial.teleop;
 
-import org.ros.node.NodeRunner;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -36,9 +34,9 @@ import org.ros.android.views.RosImageView;
 import org.ros.android.views.VirtualJoystickView;
 import org.ros.android.views.ZoomMode;
 import org.ros.message.sensor_msgs.CompressedImage;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.DefaultNodeRunner;
-import org.ros.android.tutorials.remote_teleop.R;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeRunner;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -237,9 +235,9 @@ public class MainActivity extends Activity {
     paramsMapView.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
     mainLayout.addView(mapView, paramsMapView);
     // Start the nodes.
-    nodeRunner.run(distanceView, nodeConfiguration);
-    nodeRunner.run(mapView, nodeConfiguration);
-    nodeRunner.run(video, nodeConfiguration);
+    nodeRunner.run(distanceView, nodeConfiguration.setNodeName("android/distance_view"));
+    nodeRunner.run(mapView, nodeConfiguration.setNodeName("android/map_view"));
+    nodeRunner.run(video, nodeConfiguration.setNodeName("android/video_view"));
   }
 
   /**

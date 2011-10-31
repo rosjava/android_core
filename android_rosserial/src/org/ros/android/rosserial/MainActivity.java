@@ -27,6 +27,7 @@ import org.ros.android.acm_serial.PollingInputStream;
 import org.ros.android.acm_serial.StopBits;
 import org.ros.node.NodeConfiguration;
 import org.ros.rosserial.RosSerial;
+import org.ros.time.NtpTimeProvider;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -50,6 +51,11 @@ public class MainActivity extends AcmDeviceActivity {
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName(),
             getMasterUri());
+    nodeConfiguration.setNodeName("rosserial");
+    NtpTimeProvider ntpTimeProvider = new NtpTimeProvider(InetAddressFactory
+        .newFromHostString("ntp.ubuntu.com"));
+    ntpTimeProvider.updateTime();
+    nodeConfiguration.setTimeProvider(ntpTimeProvider);
     getNodeRunner().run(
         new RosSerial(new PollingInputStream(acmDevice.getInputStream()),
             acmDevice.getOutputStream()), nodeConfiguration);
