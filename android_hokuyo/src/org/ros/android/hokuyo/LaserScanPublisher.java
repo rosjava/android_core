@@ -16,8 +16,6 @@
 
 package org.ros.android.hokuyo;
 
-import com.google.common.base.Preconditions;
-
 import org.ros.message.Duration;
 import org.ros.message.MessageListener;
 import org.ros.message.std_msgs.Time;
@@ -25,6 +23,9 @@ import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.topic.Publisher;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -104,17 +105,22 @@ public class LaserScanPublisher implements NodeMain {
    *          The actual range readings.
    * @return A new LaserScan message
    */
-  private org.ros.message.sensor_msgs.LaserScan toLaserScanMessage(
+  @VisibleForTesting
+  org.ros.message.sensor_msgs.LaserScan toLaserScanMessage(
       String laserFrame, LaserScan scan) {
     org.ros.message.sensor_msgs.LaserScan message = node.getMessageFactory()
         .newMessage("sensor_msgs/LaserScan");
     LaserScannerConfiguration configuration = scipDevice.getConfiguration();
-    
+
     message.angle_increment = configuration.getAngleIncrement();
     message.angle_min = configuration.getMinimumAngle();
     message.angle_max = configuration.getMaximumAngle();
     message.ranges = new float[configuration.getLastStep()
-        - configuration.getFirstStep()];
+        - configuration.getFirstStep() + 1];
+    Preconditions
+        .checkState(message.ranges.length <= scan.getRanges().size(),
+            String.format("Number of scans in configuration does not match received range measurements (%d > %d).", 
+                message.ranges.length, scan.getRanges().size()));
     for (int i = 0; i < message.ranges.length; i++) {
       message.ranges[i] = (float) (scan.getRanges().get(
           i + configuration.getFirstStep()) / 1000.0);
@@ -128,5 +134,9 @@ public class LaserScanPublisher implements NodeMain {
         .add(wallClockOffset);
     return message;
   }
-
+  
+  @VisibleForTesting
+  void setNode(Node node) {
+    this.node = node;
+  }
 }
