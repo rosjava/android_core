@@ -231,20 +231,23 @@ public class Scip20Device implements LaserScannerDevice {
     }
   }
 
-  // TODO(moesenle): assert that scanning is not running
+  /**
+   * To calibrate time, we do the following (similar to what the C++ version of
+   * hokuyo_node does):
+   * <ol>
+   * <li>get current hokuyo time and calculate offset to current time</li>
+   * <li>request a scan and calculate the scan offset to current time</li>
+   * <li>request hokuyo time again and calculate offset to current time</li>
+   * <li>offset = scan - * (end + start) / 2</li>
+   * </ol>
+   * We repeat this process 11 times and take the median offset.
+   */
   private void calibrateTime() {
-    /*
-     * To calibrate time, we do the following (similar to what ROS' hokuyo_node
-     * does): 1. get current hokuyo time and calculate offset to current time 2.
-     * request a scan and calculate the scan offset to current time 3. request
-     * hokuyo time again and calculate offset to current time 4. offset = scan -
-     * (end + start)/2 We repeat this process 11 times and take the median
-     * offset.
-     */
+    // TODO(moesenle): Assert that scanning is not running.
     long[] samples = new long[11];
     long start = calculateClockOffset();
     for (int i = 0; i < samples.length; i++) {
-      long scan = calculateScanOffset();
+      long scan = calculateScanTimeOffset();
       long end = calculateClockOffset();
       samples[i] = scan - (end + start) / 2;
       start = end;
@@ -281,7 +284,7 @@ public class Scip20Device implements LaserScannerDevice {
    * 
    * @return the time offset between the laser scanner and the system
    */
-  private long calculateScanOffset() {
+  private long calculateScanTimeOffset() {
     write("MD0000076800001");
     checkStatus();
     checkTerminator();
