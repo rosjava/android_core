@@ -25,7 +25,7 @@ import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import org.ros.address.InetAddressFactory;
-import org.ros.node.DefaultNodeFactory;
+import org.ros.internal.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.topic.Publisher;
@@ -463,12 +463,14 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener {
     homeIcon = (ImageView) findViewById(org.ros.android.R.id.pt_home_marker);
   }
 
+  // TODO(damonkohler): PanTiltView should be a NodeMain.
   public void initPublisher(URI masterUri) {
     try {
       NodeConfiguration nodeConfiguration =
           NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress()
               .toString(), masterUri);
-      node = new DefaultNodeFactory().newNode("pan_tilt_view", nodeConfiguration);
+      nodeConfiguration.setNodeName("pan_tilt_view");
+      node = new DefaultNodeFactory().newNode(nodeConfiguration);
       publisher = node.newPublisher("/ptu_cmd", "sensor_msgs/JointState");
     } catch (Exception e) {
       if (node != null) {

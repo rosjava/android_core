@@ -47,6 +47,7 @@ public class MainActivity extends AcmDeviceActivity {
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName(),
             getMasterUri());
+    nodeConfiguration.setNodeName("hokuyo_node");
     getNodeRunner().run(laserScanPublisher, nodeConfiguration);
   }
 }

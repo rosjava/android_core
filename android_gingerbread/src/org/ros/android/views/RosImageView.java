@@ -18,16 +18,13 @@ package org.ros.android.views;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.android.MessageCallable;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.widget.ImageView;
+import org.ros.android.MessageCallable;
 import org.ros.message.MessageListener;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 
 /**
@@ -68,9 +65,9 @@ public class RosImageView<T> extends ImageView implements NodeMain {
   }
 
   @Override
-  public void main(NodeConfiguration nodeConfiguration) throws Exception {
-    Preconditions.checkState(node == null);
-    node = new DefaultNodeFactory().newNode("android/image_view", nodeConfiguration);
+  public void main(Node node) throws Exception {
+    Preconditions.checkState(this.node == null);
+    this.node = node;
     node.newSubscriber(topicName, messageType, new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {
@@ -87,9 +84,10 @@ public class RosImageView<T> extends ImageView implements NodeMain {
 
   @Override
   public void shutdown() {
-    Preconditions.checkNotNull(node);
-    node.shutdown();
-    node = null;
+    if (node != null) {
+      node.shutdown();
+      node = null;
+    }
   }
 
 }

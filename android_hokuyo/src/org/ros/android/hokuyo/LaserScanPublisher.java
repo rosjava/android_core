@@ -16,12 +16,12 @@
 
 package org.ros.android.hokuyo;
 
+import com.google.common.base.Preconditions;
+
 import org.ros.message.Duration;
 import org.ros.message.MessageListener;
 import org.ros.message.std_msgs.Time;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.topic.Publisher;
@@ -52,9 +52,9 @@ public class LaserScanPublisher implements NodeMain {
   }
 
   @Override
-  public void main(NodeConfiguration nodeConfiguration) throws Exception {
-    node = new DefaultNodeFactory().newNode("android_hokuyo_node",
-        nodeConfiguration);
+  public void main(final Node node) throws Exception {
+    Preconditions.checkState(this.node == null);
+    this.node = node;
     ParameterTree params = node.newParameterTree();
     final String laserTopic = params.getString("~laser_topic", "laser");
     final String laserFrame = params.getString("~laser_frame", "laser");
@@ -80,6 +80,10 @@ public class LaserScanPublisher implements NodeMain {
 
   @Override
   public void shutdown() {
+    if (node != null) {
+      node.shutdown();
+      node = null;
+    }
     scipDevice.shutdown();
   }
 

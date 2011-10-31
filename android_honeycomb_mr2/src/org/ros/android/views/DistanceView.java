@@ -27,9 +27,7 @@ import android.view.View.OnTouchListener;
 import org.ros.message.MessageListener;
 import org.ros.message.geometry_msgs.Twist;
 import org.ros.message.sensor_msgs.LaserScan;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 
 import java.util.ArrayList;
@@ -96,11 +94,9 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
   }
 
   @Override
-  public void main(NodeConfiguration nodeConfiguration) throws Exception {
-    if (node == null) {
-      Preconditions.checkNotNull(nodeConfiguration);
-    }
-    node = new DefaultNodeFactory().newNode("android/distance_view", nodeConfiguration);
+  public void main(Node node) throws Exception {
+    Preconditions.checkState(this.node == null);
+    this.node = node;
     // Subscribe to the laser scans.
     node.newSubscriber(laserTopic, "sensor_msgs/LaserScan", this);
     // Subscribe to the command velocity. This is needed for auto adjusting the
@@ -123,9 +119,10 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
 
   @Override
   public void shutdown() {
-    Preconditions.checkNotNull(node);
-    node.shutdown();
-    node = null;
+    if (node != null) {
+      node.shutdown();
+      node = null;
+    }
     // Save the existing settings before exiting.
     distanceRenderer.savePreferences(this.getContext());
   }

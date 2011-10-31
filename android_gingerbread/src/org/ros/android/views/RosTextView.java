@@ -18,15 +18,12 @@ package org.ros.android.views;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.android.MessageCallable;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
+import org.ros.android.MessageCallable;
 import org.ros.message.MessageListener;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 
 /**
@@ -64,9 +61,9 @@ public class RosTextView<T> extends TextView implements NodeMain {
   }
 
   @Override
-  public void main(NodeConfiguration nodeConfiguration) {
-    Preconditions.checkState(node == null);
-    node = new DefaultNodeFactory().newNode("android/text_view", nodeConfiguration);
+  public void main(Node node) {
+    Preconditions.checkState(this.node == null);
+    this.node = node;
     node.newSubscriber(topicName, messageType, new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {
@@ -90,16 +87,12 @@ public class RosTextView<T> extends TextView implements NodeMain {
     });
   }
 
-  public void setNode(Node node) {
-    Preconditions.checkState(node == null);
-    this.node = node;
-  }
-
   @Override
   public void shutdown() {
-    Preconditions.checkNotNull(node);
-    node.shutdown();
-    node = null;
+    if (node != null) {
+      node.shutdown();
+      node = null;
+    }
   }
 
 }

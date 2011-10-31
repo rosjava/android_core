@@ -16,6 +16,8 @@
 
 package org.ros.android;
 
+import com.google.common.base.Preconditions;
+
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -23,9 +25,7 @@ import android.hardware.SensorManager;
 import org.ros.message.Time;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.message.geometry_msgs.Quaternion;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
@@ -85,9 +85,10 @@ public class OrientationPublisher implements NodeMain {
   }
 
   @Override
-  public void main(NodeConfiguration configuration) throws Exception {
+  public void main(Node node) throws Exception {
+    Preconditions.checkState(this.node == null);
+    this.node = node;
     try {
-      node = new DefaultNodeFactory().newNode("android/orientation_publisher", configuration);
       Publisher<org.ros.message.geometry_msgs.PoseStamped> publisher =
           node.newPublisher("android/orientation", "geometry_msgs/PoseStamped");
       orientationListener = new OrientationListener(publisher);
@@ -105,8 +106,9 @@ public class OrientationPublisher implements NodeMain {
 
   @Override
   public void shutdown() {
-    sensorManager.unregisterListener(orientationListener);
-    node.shutdown();
+    if (node != null) {
+      node.shutdown();
+      node = null;
+    }
   }
-
 }

@@ -21,13 +21,13 @@ import junit.framework.TestCase;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ConfigurationTest extends TestCase {
+public class Scip20DeviceConfigurationTest extends TestCase {
   
-  private Configuration.Builder builder;
+  private Scip20DeviceConfiguration.Builder builder;
 
   @Override
   protected void setUp() throws Exception {
-    builder = new Configuration.Builder();
+    builder = new Scip20DeviceConfiguration.Builder();
   }
 
   public void testParseModel() {

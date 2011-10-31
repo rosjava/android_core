@@ -34,9 +34,7 @@ import org.ros.message.geometry_msgs.Quaternion;
 import org.ros.message.nav_msgs.MapMetaData;
 import org.ros.message.nav_msgs.OccupancyGrid;
 import org.ros.message.nav_msgs.Path;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
@@ -182,11 +180,9 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
   }
 
   @Override
-  public void main(NodeConfiguration nodeConfiguration) throws Exception {
-    if (node == null) {
-      Preconditions.checkNotNull(nodeConfiguration);
-      node = new DefaultNodeFactory().newNode("android/map_view", nodeConfiguration);
-    }
+  public void main(Node node) throws Exception {
+    Preconditions.checkState(this.node == null);
+    this.node = node;
     // Initialize the goal publisher.
     goalPublisher = node.newPublisher(SIMPLE_GOAL_TOPIC, "geometry_msgs/PoseStamped");
     // Initialize the initial pose publisher.
@@ -263,9 +259,10 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
 
   @Override
   public void shutdown() {
-    Preconditions.checkNotNull(node);
-    node.shutdown();
-    node = null;
+    if (node != null) {
+      node.shutdown();
+      node = null;
+    }
   }
 
   @Override

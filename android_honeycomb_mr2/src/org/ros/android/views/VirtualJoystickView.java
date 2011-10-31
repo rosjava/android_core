@@ -33,9 +33,9 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import org.ros.address.InetAddressFactory;
+import org.ros.internal.node.DefaultNodeFactory;
 import org.ros.message.MessageListener;
 import org.ros.message.nav_msgs.Odometry;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.topic.Publisher;
@@ -260,12 +260,14 @@ public class VirtualJoystickView extends RelativeLayout implements OnTouchListen
    * @param masterUri
    *          The address of the master node.
    */
+  // TODO(damonkohler): VirtualJoystickView should be a NodeMain.
   private void initNode(final URI masterUri) {
     try {
       NodeConfiguration nodeConfiguration =
           NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress()
               .toString(), masterUri);
-      node = new DefaultNodeFactory().newNode("virtual_joystick", nodeConfiguration);
+      nodeConfiguration.setNodeName("virtual_joystick");
+      node = new DefaultNodeFactory().newNode(nodeConfiguration);
       publisher = node.newPublisher("cmd_vel", "geometry_msgs/Twist");
       node.newSubscriber("odom", "nav_msgs/Odometry", this);
       publisherTimer.schedule(timerTask, 0, 80);
