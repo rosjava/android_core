@@ -23,8 +23,17 @@ import junit.framework.TestCase;
  */
 public class DecoderTest extends TestCase {
   
-  public void testDecode3Letter() {
+  public void testDecodeValue2() {
+    assertEquals(1234, Decoder.decodeValue("CB", 2));
+  }
+  
+  public void testDecodeValue3() {
     assertEquals(5432, Decoder.decodeValue("1Dh", 3));
   }
+  
+  public void testDecodeValue4() {
+    assertEquals(16000000, Decoder.decodeValue("m2@0", 4));
+  }
+
 
 }
