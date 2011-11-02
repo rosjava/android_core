@@ -17,6 +17,7 @@
 package org.ros.android.hokuyo;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,7 +33,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class Scip20Device implements LaserScannerDevice {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Scip20Device.class);
 
-  private static final int TIME_CALIBRATION_AVERAGING_COUNT = 11;
+  private static final int TIME_CALIBRATION_SAMPLE_SIZE = 11;
   private static final int STREAM_BUFFER_SIZE = 8192;
 
   private final BufferedReader reader;
@@ -63,8 +63,8 @@ public class Scip20Device implements LaserScannerDevice {
    *          input data to get the median from, this parameter is modified
    * @return the median
    */
-  private static <T extends Comparable<? super T>> T calculateMedian(
-      List<? extends T> sequence) {
+  private static <T extends Comparable<? super T>> T calculateMedian(List<? extends T> sequence) {
+    Preconditions.checkArgument(sequence.size() > 0);
     Collections.sort(sequence);
     if (sequence.size() % 2 == 0) {
       return sequence.get(sequence.size() / 2);
@@ -93,24 +93,36 @@ public class Scip20Device implements LaserScannerDevice {
     writer =
         new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(outputStream,
             STREAM_BUFFER_SIZE), Charset.forName("US-ASCII")));
+    init();
+    configuration = queryConfiguration();
+  }
 
+  private void init() {
     while (true) {
       try {
         reset();
-        calibrateTime();
+        calibrateTime(TIME_CALIBRATION_SAMPLE_SIZE);
       } catch (Scip20Exception e) {
         // Status errors are common during startup. We'll retry continuously
         // until we're successful.
+        try {
+          Thread.sleep(500);
+        } catch (InterruptedException e1) {
+          throw new RosRuntimeException(e);
+        }
         continue;
       } catch (IllegalStateException e) {
         // It's possible that commands will be ignored and thus break
         // communication state. It's safe to retry in this case as well.
+        try {
+          Thread.sleep(500);
+        } catch (InterruptedException e1) {
+          throw new RosRuntimeException(e);
+        }
         continue;
       }
       break;
     }
-
-    configuration = queryConfiguration();
   }
 
   private void write(String command) {
@@ -217,8 +229,7 @@ public class Scip20Device implements LaserScannerDevice {
   private String readAndStripSemicolon() {
     String buffer = read();
     Preconditions.checkState(buffer.charAt(buffer.length() - 2) == ';');
-    return buffer.substring(0, buffer.length() - 2)
-        + buffer.charAt(buffer.length() - 1);
+    return buffer.substring(0, buffer.length() - 2) + buffer.charAt(buffer.length() - 1);
   }
 
   private LaserScannerConfiguration queryConfiguration() {
@@ -262,19 +273,20 @@ public class Scip20Device implements LaserScannerDevice {
    * <li>request hokuyo time again and calculate offset to current time</li>
    * <li>offset = scan - * (end + start) / 2</li>
    * </ol>
-   * We repeat this process 11 times and take the median offset.
+   * We repeat this process {@code sampleSize} times and take the median offset.
+   * 
+   * @param sampleSize
+   *          number of samples to use when calibrating time
    */
-  private void calibrateTime() {
-    ArrayList<Long> samples = new ArrayList<Long>(
-        TIME_CALIBRATION_AVERAGING_COUNT);
+  private void calibrateTime(int sampleSize) {
+    List<Long> samples = Lists.newArrayList();
     long start = calculateClockOffset();
-    for (int i = 0; i < samples.size(); i++) {
+    for (int i = 0; i < sampleSize; i++) {
       long scan = calculateScanTimeOffset();
       long end = calculateScanTimeOffset();
-      samples.set(i, scan - (end + start) / 2);
+      samples.add(scan - (end + start) / 2);
       start = end;
     }
-
     scanTimeOffset = calculateMedian(samples) / 1000.0;
   }
 

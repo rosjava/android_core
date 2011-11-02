@@ -28,6 +28,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.util.Log;
 import org.ros.node.DefaultNodeRunner;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
@@ -73,8 +74,15 @@ public class NodeRunnerService extends Service implements NodeRunner {
     PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
     wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "NodeRunnerService");
     wakeLock.acquire();
+    int wifiLockType = WifiManager.WIFI_MODE_FULL;
+    try {
+      wifiLockType = WifiManager.class.getField("WIFI_MODE_FULL_HIGH_PERF").getInt(null);
+    } catch (Exception e) {
+      // We must be running on a pre-Honeycomb device.
+      Log.w("NodeRunnerService", "Unable to acquire high performance wifi lock.");
+    }
     WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
-    wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "NodeRunnerService");
+    wifiLock = wifiManager.createWifiLock(wifiLockType, "NodeRunnerService");
     wifiLock.acquire();
   }
 

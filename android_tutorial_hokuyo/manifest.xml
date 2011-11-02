@@ -11,6 +11,7 @@
 
   <depend package="rosjava" />
   <depend package="android_gingerbread" />
+  <depend package="android_acm_serial" />
   <depend package="android_hokuyo" />
 
   <export>
