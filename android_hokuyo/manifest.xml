@@ -10,14 +10,14 @@
   <url>http://ros.org/wiki/android_hokuyo</url>
 
   <depend package="rosjava" />
-  <depend package="android_gingerbread" />
-  <depend package="android_acm_serial" />
+  <depend package="sensor_msgs" />
 
   <export>
-    <rosjava-android-lib target="android-13" />
-    <rosjava-src location="src" />
-    <rosjava-src location="gen" />
-    <rosjava-src location="res" />
+    <rosjava-src location="src/main/java" />
+    <rosjava-src location="src/test/java" scope="test" />
+    <rosjava-pathelement location="target/" groupId="org.ros.android" artifactId="org.ros.android.hokuyo" version="0.0.0" built="true" />
+    <rosjava-pathelement groupId="com.google.guava" artifactId="org.ros.rosjava.guava" version="r07" />
+    <rosjava-pathelement groupId="junit" artifactId="junit" version="4.8.2" scope="test" />
   </export>
 
 </package>

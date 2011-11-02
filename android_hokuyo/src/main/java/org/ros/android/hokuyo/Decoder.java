@@ -16,12 +16,10 @@
 
 package org.ros.android.hokuyo;
 
-import java.util.List;
-
-import android.gesture.Prediction;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+
+import java.util.List;
 
 class Decoder {
 

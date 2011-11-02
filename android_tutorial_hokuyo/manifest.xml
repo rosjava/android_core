@@ -14,10 +14,11 @@
   <depend package="android_hokuyo" />
 
   <export>
-    <rosjava-android-app target="android-12" />
+    <rosjava-android-app target="android-13" />
     <rosjava-src location="src" />
     <rosjava-src location="gen" />
     <rosjava-src location="res" />
+    <rosjava-pathelement groupId="com.google.guava" artifactId="org.ros.rosjava.guava" version="r07" />
   </export>
 
 </package>

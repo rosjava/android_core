@@ -16,6 +16,12 @@
 
 package org.ros.android.hokuyo;
 
+import com.google.common.base.Preconditions;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.ros.exception.RosRuntimeException;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -30,21 +36,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.ros.exception.RosRuntimeException;
-
-import android.util.Log;
-
-import com.google.common.base.Preconditions;
-
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class Scip20Device implements LaserScannerDevice {
 
-  private static final int TIME_CALIBRATION_AVERAGING_COUNT = 11;
   private static final boolean DEBUG = false;
-  private static final String TAG = "Scip20Device";
+  private static final Log log = LogFactory.getLog(Scip20Device.class);
 
+  private static final int TIME_CALIBRATION_AVERAGING_COUNT = 11;
   private static final int STREAM_BUFFER_SIZE = 8192;
 
   private final BufferedReader reader;
@@ -119,7 +119,7 @@ public class Scip20Device implements LaserScannerDevice {
       writer.write(command + "\n");
       writer.flush();
       if (DEBUG) {
-        Log.d(TAG, "Wrote: " + command);
+        log.info("Wrote: " + command);
       }
     } catch (IOException e) {
       throw new RosRuntimeException(e);
@@ -145,7 +145,7 @@ public class Scip20Device implements LaserScannerDevice {
       throw new RosRuntimeException(e);
     }
     if (DEBUG) {
-      Log.d(TAG, "Read: " + line);
+      log.info("Read: " + line);
     }
     return line;
   }

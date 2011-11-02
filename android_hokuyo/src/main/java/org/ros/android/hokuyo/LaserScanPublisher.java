@@ -16,6 +16,7 @@
 
 package org.ros.android.hokuyo;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 import org.ros.node.Node;
@@ -48,13 +49,11 @@ public class LaserScanPublisher implements NodeMain {
     ParameterTree params = node.newParameterTree();
     final String laserTopic = params.getString("~laser_topic", "laser");
     final String laserFrame = params.getString("~laser_frame", "laser");
-    publisher = node.newPublisher(node.resolveName(laserTopic),
-        "sensor_msgs/LaserScan");
+    publisher = node.newPublisher(node.resolveName(laserTopic), "sensor_msgs/LaserScan");
     scipDevice.startScanning(new LaserScanListener() {
       @Override
       public void onNewLaserScan(LaserScan scan) {
-        org.ros.message.sensor_msgs.LaserScan message = toLaserScanMessage(
-            laserFrame, scan);
+        org.ros.message.sensor_msgs.LaserScan message = toLaserScanMessage(laserFrame, scan);
         publisher.publish(message);
       }
     });
@@ -81,30 +80,28 @@ public class LaserScanPublisher implements NodeMain {
    * ignore them when copying the range readings.
    * 
    * @param laserFrame
-   *          The laser's sensor frame.
+   *          the laser's sensor frame
    * @param scan
-   *          The actual range readings.
-   * @return A new LaserScan message
+   *          the actual range readings.
+   * @return a new sensor_msgs/LaserScan message
    */
   @VisibleForTesting
-  org.ros.message.sensor_msgs.LaserScan toLaserScanMessage(
-      String laserFrame, LaserScan scan) {
-    org.ros.message.sensor_msgs.LaserScan message = node.getMessageFactory()
-        .newMessage("sensor_msgs/LaserScan");
+  org.ros.message.sensor_msgs.LaserScan toLaserScanMessage(String laserFrame, LaserScan scan) {
+    Preconditions.checkNotNull(node);
+    Preconditions.checkNotNull(node.getMessageFactory());
+    org.ros.message.sensor_msgs.LaserScan message =
+        node.getMessageFactory().newMessage("sensor_msgs/LaserScan");
     LaserScannerConfiguration configuration = scipDevice.getConfiguration();
 
     message.angle_increment = configuration.getAngleIncrement();
     message.angle_min = configuration.getMinimumAngle();
     message.angle_max = configuration.getMaximumAngle();
-    message.ranges = new float[configuration.getLastStep()
-        - configuration.getFirstStep() + 1];
-    Preconditions
-        .checkState(message.ranges.length <= scan.getRanges().size(),
-            String.format("Number of scans in configuration does not match received range measurements (%d > %d).", 
-                message.ranges.length, scan.getRanges().size()));
+    message.ranges = new float[configuration.getLastStep() - configuration.getFirstStep() + 1];
+    Preconditions.checkState(message.ranges.length <= scan.getRanges().size(), String.format(
+        "Number of scans in configuration does not match received range measurements (%d > %d).",
+        message.ranges.length, scan.getRanges().size()));
     for (int i = 0; i < message.ranges.length; i++) {
-      message.ranges[i] = (float) (scan.getRanges().get(
-          i + configuration.getFirstStep()) / 1000.0);
+      message.ranges[i] = (float) (scan.getRanges().get(i + configuration.getFirstStep()) / 1000.0);
     }
     message.time_increment = configuration.getTimeIncrement();
     message.scan_time = configuration.getScanTime();
@@ -114,7 +111,7 @@ public class LaserScanPublisher implements NodeMain {
     message.header.stamp = node.getCurrentTime();
     return message;
   }
-  
+
   @VisibleForTesting
   void setNode(Node node) {
     this.node = node;
