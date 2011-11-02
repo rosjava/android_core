@@ -105,20 +105,10 @@ public class Scip20Device implements LaserScannerDevice {
       } catch (Scip20Exception e) {
         // Status errors are common during startup. We'll retry continuously
         // until we're successful.
-        try {
-          Thread.sleep(500);
-        } catch (InterruptedException e1) {
-          throw new RosRuntimeException(e);
-        }
         continue;
       } catch (IllegalStateException e) {
         // It's possible that commands will be ignored and thus break
         // communication state. It's safe to retry in this case as well.
-        try {
-          Thread.sleep(500);
-        } catch (InterruptedException e1) {
-          throw new RosRuntimeException(e);
-        }
         continue;
       }
       break;
