@@ -14,20 +14,22 @@
  * the License.
  */
 
-package org.ros.android.hokuyo;
+package org.ros.android.hokuyo.scip20;
+
+import org.ros.android.hokuyo.scip20.Configuration;
 
 import junit.framework.TestCase;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Scip20DeviceConfigurationTest extends TestCase {
+public class ConfigurationTest extends TestCase {
   
-  private Scip20DeviceConfiguration.Builder builder;
+  private Configuration.Builder builder;
 
   @Override
   protected void setUp() throws Exception {
-    builder = new Scip20DeviceConfiguration.Builder();
+    builder = new Configuration.Builder();
   }
 
   public void testParseModel() {

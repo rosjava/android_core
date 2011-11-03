@@ -14,13 +14,16 @@
  * the License.
  */
 
-package org.ros.android.hokuyo;
+package org.ros.android.hokuyo.scip20;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import java.util.List;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 class Decoder {
 
   public static int decodeValue(String buffer, int blockSize) {

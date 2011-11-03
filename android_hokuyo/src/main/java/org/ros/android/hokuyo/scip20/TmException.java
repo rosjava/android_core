@@ -14,26 +14,25 @@
  * the License.
  */
 
-package org.ros.android.hokuyo;
-
-import junit.framework.TestCase;
+package org.ros.android.hokuyo.scip20;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DecoderTest extends TestCase {
-  
-  public void testDecodeValue2() {
-    assertEquals(1234, Decoder.decodeValue("CB", 2));
-  }
-  
-  public void testDecodeValue3() {
-    assertEquals(5432, Decoder.decodeValue("1Dh", 3));
-  }
-  
-  public void testDecodeValue4() {
-    assertEquals(16000000, Decoder.decodeValue("m2@0", 4));
+public class TmException extends RuntimeException {
+
+  public TmException(String status) {
+    super(getMessage(status));
   }
 
+  private static String getMessage(String status) {
+    if (status.equals("01")) {
+      return "Invalid control code.";
+    }
+    if (status.equals("04")) {
+      return "Adjust mode is off when requested for time.";
+    }
 
+    return "Unknown status code: " + status;
+  }
 }

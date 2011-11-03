@@ -14,15 +14,17 @@
  * the License.
  */
 
-package org.ros.android.hokuyo;
+package org.ros.android.hokuyo.scip20;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
+import org.ros.android.hokuyo.LaserScannerConfiguration;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Scip20DeviceConfiguration implements LaserScannerConfiguration {
+public class Configuration implements LaserScannerConfiguration {
 
   private String model;
   private int minimumMeasurment; // mm
@@ -35,10 +37,10 @@ public class Scip20DeviceConfiguration implements LaserScannerConfiguration {
 
   public static class Builder {
 
-    private Scip20DeviceConfiguration configuration;
+    private Configuration configuration;
 
     public Builder() {
-      configuration = new Scip20DeviceConfiguration();
+      configuration = new Configuration();
     }
 
     public LaserScannerConfiguration build() {
@@ -91,10 +93,9 @@ public class Scip20DeviceConfiguration implements LaserScannerConfiguration {
       configuration.standardMotorSpeed = parseIntegerValue("SCAN", buffer);
       return this;
     }
-
   }
 
-  private Scip20DeviceConfiguration() {
+  private Configuration() {
     // Use the Configuration.Builder to construct a Configuration object.
   }
 

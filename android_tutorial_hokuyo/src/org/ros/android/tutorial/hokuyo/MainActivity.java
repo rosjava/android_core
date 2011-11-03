@@ -16,12 +16,13 @@
 
 package org.ros.android.tutorial.hokuyo;
 
+import org.ros.android.hokuyo.scip20.Device;
+
 import android.os.Bundle;
 import org.ros.address.InetAddressFactory;
 import org.ros.android.acm_serial.AcmDevice;
 import org.ros.android.acm_serial.AcmDeviceActivity;
 import org.ros.android.hokuyo.LaserScanPublisher;
-import org.ros.android.hokuyo.Scip20Device;
 import org.ros.node.NodeConfiguration;
 import org.ros.time.NtpTimeProvider;
 
@@ -42,8 +43,8 @@ public class MainActivity extends AcmDeviceActivity {
 
   @Override
   protected void init(AcmDevice acmDevice) {
-    Scip20Device scipDevice =
-        new Scip20Device(acmDevice.getInputStream(), acmDevice.getOutputStream());
+    Device scipDevice =
+        new Device(acmDevice.getInputStream(), acmDevice.getOutputStream());
     LaserScanPublisher laserScanPublisher = new LaserScanPublisher(scipDevice);
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName(),

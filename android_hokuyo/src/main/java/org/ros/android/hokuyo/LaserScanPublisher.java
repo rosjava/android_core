@@ -29,7 +29,7 @@ import org.ros.node.topic.Publisher;
  */
 public class LaserScanPublisher implements NodeMain {
 
-  private final LaserScannerDevice scipDevice;
+  private final LaserScannerDevice laserScannerDevice;
 
   private Node node;
   private Publisher<org.ros.message.sensor_msgs.LaserScan> publisher;
@@ -38,8 +38,8 @@ public class LaserScanPublisher implements NodeMain {
    * We need a way to adjust time stamps because it is not (easily) possible to
    * change a tablet's clock.
    */
-  public LaserScanPublisher(LaserScannerDevice scipDevice) {
-    this.scipDevice = scipDevice;
+  public LaserScanPublisher(LaserScannerDevice laserScannerDevice) {
+    this.laserScannerDevice = laserScannerDevice;
   }
 
   @Override
@@ -50,7 +50,7 @@ public class LaserScanPublisher implements NodeMain {
     final String laserTopic = params.getString("~laser_topic", "laser");
     final String laserFrame = params.getString("~laser_frame", "laser");
     publisher = node.newPublisher(node.resolveName(laserTopic), "sensor_msgs/LaserScan");
-    scipDevice.startScanning(new LaserScanListener() {
+    laserScannerDevice.startScanning(new LaserScanListener() {
       @Override
       public void onNewLaserScan(LaserScan scan) {
         org.ros.message.sensor_msgs.LaserScan message = toLaserScanMessage(laserFrame, scan);
@@ -65,7 +65,7 @@ public class LaserScanPublisher implements NodeMain {
       node.shutdown();
       node = null;
     }
-    scipDevice.shutdown();
+    laserScannerDevice.shutdown();
   }
 
   /**
@@ -91,7 +91,7 @@ public class LaserScanPublisher implements NodeMain {
     Preconditions.checkNotNull(node.getMessageFactory());
     org.ros.message.sensor_msgs.LaserScan message =
         node.getMessageFactory().newMessage("sensor_msgs/LaserScan");
-    LaserScannerConfiguration configuration = scipDevice.getConfiguration();
+    LaserScannerConfiguration configuration = laserScannerDevice.getConfiguration();
 
     message.angle_increment = configuration.getAngleIncrement();
     message.angle_min = configuration.getMinimumAngle();

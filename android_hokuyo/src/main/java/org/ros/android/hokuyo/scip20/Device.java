@@ -14,13 +14,17 @@
  * the License.
  */
 
-package org.ros.android.hokuyo;
+package org.ros.android.hokuyo.scip20;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ros.android.hokuyo.LaserScan;
+import org.ros.android.hokuyo.LaserScanListener;
+import org.ros.android.hokuyo.LaserScannerConfiguration;
+import org.ros.android.hokuyo.LaserScannerDevice;
 import org.ros.exception.RosRuntimeException;
 
 import java.io.BufferedInputStream;
@@ -39,14 +43,16 @@ import java.util.List;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Scip20Device implements LaserScannerDevice {
+public class Device implements LaserScannerDevice {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(Scip20Device.class);
+  private static final Log log = LogFactory.getLog(Device.class);
 
   private static final int TIME_CALIBRATION_SAMPLE_SIZE = 11;
   private static final int STREAM_BUFFER_SIZE = 8192;
+  private static final String EXPECTED_SENSOR_DIAGNOSTIC = "Sensor works well.";
 
+  private final BufferedInputStream bufferedInputStream;
   private final BufferedReader reader;
   private final BufferedWriter writer;
   private final LaserScannerConfiguration configuration;
@@ -82,14 +88,10 @@ public class Scip20Device implements LaserScannerDevice {
    * @param outputStream
    *          the {@link OutputStream} for the ACM serial device
    */
-  public Scip20Device(InputStream inputStream, OutputStream outputStream) {
-    // TODO(damonkohler): Wrapping the AcmDevice InputStream in an
-    // BufferedInputStream avoids an error returned by the USB stack. Double
-    // buffering like this should not be necessary if the USB error turns out to
-    // be an Android bug. This was tested on Honeycomb MR2.
+  public Device(InputStream inputStream, OutputStream outputStream) {
+    bufferedInputStream = new BufferedInputStream(inputStream, STREAM_BUFFER_SIZE);
     reader =
-        new BufferedReader(new InputStreamReader(new BufferedInputStream(inputStream,
-            STREAM_BUFFER_SIZE), Charset.forName("US-ASCII")));
+        new BufferedReader(new InputStreamReader(bufferedInputStream, Charset.forName("US-ASCII")));
     writer =
         new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(outputStream,
             STREAM_BUFFER_SIZE), Charset.forName("US-ASCII")));
@@ -97,22 +99,26 @@ public class Scip20Device implements LaserScannerDevice {
     configuration = queryConfiguration();
   }
 
+  /**
+   * Initialize the sensor by
+   * <ol>
+   * <li>trying TM commands until one completes successfully,</li>
+   * <li>performing a reset,</li>
+   * <li>checking the laser's diagnostic information,</li>
+   * <li>and finally calibrating the laser's clock.</li>
+   * </ol>
+   */
   private void init() {
-    while (true) {
-      try {
-        reset();
-        calibrateTime(TIME_CALIBRATION_SAMPLE_SIZE);
-      } catch (Scip20Exception e) {
-        // Status errors are common during startup. We'll retry continuously
-        // until we're successful.
-        continue;
-      } catch (IllegalStateException e) {
-        // It's possible that commands will be ignored and thus break
-        // communication state. It's safe to retry in this case as well.
-        continue;
-      }
-      break;
-    }
+    reset();
+    String sensorDiagnostic = queryState().getSensorDiagnostic();
+    Preconditions.checkState(sensorDiagnostic.equals(EXPECTED_SENSOR_DIAGNOSTIC),
+        "Sensor diagnostic check failed: \"" + sensorDiagnostic + "\"");
+    calibrateTime(TIME_CALIBRATION_SAMPLE_SIZE);
+  }
+
+  @Override
+  public LaserScannerConfiguration getConfiguration() {
+    return configuration;
   }
 
   private void write(String command) {
@@ -127,16 +133,34 @@ public class Scip20Device implements LaserScannerDevice {
       throw new RosRuntimeException(e);
     }
     String echo = read();
-    Preconditions.checkState(echo.equals(command));
+    Preconditions.checkState(echo.equals(command),
+        String.format("Echo does not match command: \"%s\" != \"%s\"", echo, command));
   }
 
   private void checkStatus() {
     String statusAndChecksum = read();
     String status = verifyChecksum(statusAndChecksum);
+    Preconditions.checkState(status.equals("00"));
+  }
+
+  private void checkMdmsStatus() {
+    String statusAndChecksum = read();
+    String status = verifyChecksum(statusAndChecksum);
+    // NOTE(damonkohler): It's not clear in the spec that both of these status
+    // codes are valid.
     if (status.equals("00") || status.equals("99")) {
       return;
     }
-    throw new Scip20Exception(status);
+    throw new MdmsException(status);
+  }
+
+  private void checkTmStatus() {
+    String statusAndChecksum = read();
+    String status = verifyChecksum(statusAndChecksum);
+    if (!(status.equals("01") || status.equals("04"))) {
+      return;
+    }
+    throw new TmException(status);
   }
 
   private String read() {
@@ -163,19 +187,35 @@ public class Scip20Device implements LaserScannerDevice {
     if ((sum & 63) + 0x30 == checksum) {
       return data;
     }
-    throw new InvalidChecksum();
+    throw new ChecksumException();
   }
 
   private void reset() {
+    // Exit time adjust mode.
+    write("TM2");
+    checkTmStatus();
+    checkTerminator();
+
+    // Reset
     write("RS");
     checkStatus();
     checkTerminator();
+
+    // Change to SCIP2.0 mode.
     write("SCIP2.0");
     try {
       checkStatus();
-    } catch (Scip20Exception e) {
-      // This command is undefined for SCIP2.0 devices.
+    } catch (IllegalStateException e) {
+      if (DEBUG) {
+        log.error("Switch to SCIP 2.0 failed.", e);
+      }
+      // Not all devices support this command.
     }
+    checkTerminator();
+
+    // Reset
+    write("RS");
+    checkStatus();
     checkTerminator();
   }
 
@@ -194,12 +234,12 @@ public class Scip20Device implements LaserScannerDevice {
       public void run() {
         String command = "MD0000076800000";
         write(command);
-        checkStatus();
+        checkMdmsStatus();
         checkTerminator();
         while (true) {
           Preconditions.checkState(read().equals(command));
           double scanStartTime = System.currentTimeMillis() / 1000.0;
-          checkStatus();
+          checkMdmsStatus();
           readTimestamp();
           StringBuilder data = new StringBuilder();
           while (true) {
@@ -223,7 +263,7 @@ public class Scip20Device implements LaserScannerDevice {
   }
 
   private LaserScannerConfiguration queryConfiguration() {
-    Scip20DeviceConfiguration.Builder builder = new Scip20DeviceConfiguration.Builder();
+    Configuration.Builder builder = new Configuration.Builder();
     write("PP");
     checkStatus();
     builder.parseModel(verifyChecksum(readAndStripSemicolon()));
@@ -234,6 +274,21 @@ public class Scip20Device implements LaserScannerDevice {
     builder.parseLastStep(verifyChecksum(readAndStripSemicolon()));
     builder.parseFrontStep(verifyChecksum(readAndStripSemicolon()));
     builder.parseStandardMotorSpeed(verifyChecksum(readAndStripSemicolon()));
+    checkTerminator();
+    return builder.build();
+  }
+
+  private State queryState() {
+    State.Builder builder = new State.Builder();
+    write("II");
+    checkStatus();
+    builder.parseModel(verifyChecksum(readAndStripSemicolon()));
+    builder.parseLaserIlluminationState(verifyChecksum(readAndStripSemicolon()));
+    builder.parseMotorSpeed(verifyChecksum(readAndStripSemicolon()));
+    builder.parseMeasurementMode(verifyChecksum(readAndStripSemicolon()));
+    builder.parseBitRate(verifyChecksum(readAndStripSemicolon()));
+    builder.parseTimeStamp(verifyChecksum(readAndStripSemicolon()));
+    builder.parseSensorDiagnostic(verifyChecksum(readAndStripSemicolon()));
     checkTerminator();
     return builder.build();
   }
@@ -283,19 +338,19 @@ public class Scip20Device implements LaserScannerDevice {
   private long calculateClockOffset() {
     // Enter time adjust mode
     write("TM0");
-    checkStatus();
+    checkMdmsStatus();
     checkTerminator();
 
     // Read the current time stamp
     final long start = System.currentTimeMillis();
     write("TM1");
-    checkStatus();
+    checkMdmsStatus();
     long offset = readTimestamp() - (start + System.currentTimeMillis()) / 2;
     checkTerminator();
 
     // Leave adjust mode
     write("TM2");
-    checkStatus();
+    checkMdmsStatus();
     checkTerminator();
 
     return offset;
@@ -310,12 +365,12 @@ public class Scip20Device implements LaserScannerDevice {
    */
   private long calculateScanTimeOffset() {
     write("MD0000076800001");
-    checkStatus();
+    checkMdmsStatus();
     checkTerminator();
 
     Preconditions.checkState(read().equals("MD0000076800000"));
     long scanStartTime = System.currentTimeMillis();
-    checkStatus();
+    checkMdmsStatus();
     long scanTimeStamp = readTimestamp();
     while (true) {
       String line = read(); // Data and checksum or terminating LF
@@ -325,10 +380,5 @@ public class Scip20Device implements LaserScannerDevice {
       verifyChecksum(line);
     }
     return scanTimeStamp - scanStartTime;
-  }
-
-  @Override
-  public LaserScannerConfiguration getConfiguration() {
-    return configuration;
   }
 }
