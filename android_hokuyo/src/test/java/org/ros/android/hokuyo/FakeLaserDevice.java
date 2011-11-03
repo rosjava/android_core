@@ -85,6 +85,6 @@ public class FakeLaserDevice implements LaserScannerDevice {
     for (int i = 0; i < numberOfRangeValues; i++) {
       fakeRangeMeasurements.add(0);
     }
-    return new LaserScan(0.0, fakeRangeMeasurements);
+    return new LaserScan(0, fakeRangeMeasurements);
   }
 }

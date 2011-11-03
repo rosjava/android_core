@@ -19,6 +19,8 @@ package org.ros.android.hokuyo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
+import org.ros.message.Duration;
+import org.ros.message.Time;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.parameter.ParameterTree;
@@ -33,6 +35,7 @@ public class LaserScanPublisher implements NodeMain {
 
   private Node node;
   private Publisher<org.ros.message.sensor_msgs.LaserScan> publisher;
+  private Duration nodeTimeOffset;
 
   /**
    * We need a way to adjust time stamps because it is not (easily) possible to
@@ -46,6 +49,7 @@ public class LaserScanPublisher implements NodeMain {
   public void main(final Node node) throws Exception {
     Preconditions.checkState(this.node == null);
     this.node = node;
+    nodeTimeOffset = node.getCurrentTime().subtract(Time.fromMillis(System.currentTimeMillis()));
     ParameterTree params = node.newParameterTree();
     final String laserTopic = params.getString("~laser_topic", "laser");
     final String laserFrame = params.getString("~laser_frame", "laser");
@@ -108,7 +112,7 @@ public class LaserScanPublisher implements NodeMain {
     message.range_min = (float) (configuration.getMinimumMeasurment() / 1000.0);
     message.range_max = (float) (configuration.getMaximumMeasurement() / 1000.0);
     message.header.frame_id = laserFrame;
-    message.header.stamp = node.getCurrentTime();
+    message.header.stamp = Time.fromMillis(scan.getTimestamp()).add(nodeTimeOffset);
     return message;
   }
 
