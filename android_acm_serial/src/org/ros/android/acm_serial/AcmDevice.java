@@ -38,6 +38,7 @@ public class AcmDevice {
   private static final int CONTROL_TRANSFER_TIMEOUT = 3000; // ms
 
   private final UsbDeviceConnection usbDeviceConnection;
+  private final UsbInterface usbInterface;
   private final InputStream inputStream;
   private final OutputStream outputStream;
 
@@ -46,6 +47,7 @@ public class AcmDevice {
     Preconditions.checkNotNull(usbInterface);  
     Preconditions.checkState(usbDeviceConnection.claimInterface(usbInterface, true));
     this.usbDeviceConnection = usbDeviceConnection;
+    this.usbInterface = usbInterface;
 
     UsbEndpoint outgoingEndpoint = null;
     UsbEndpoint incomingEndpoint = null;
@@ -94,6 +96,7 @@ public class AcmDevice {
   }
 
   public void close() {
+    usbDeviceConnection.releaseInterface(usbInterface);
     usbDeviceConnection.close();
     try {
       inputStream.close();

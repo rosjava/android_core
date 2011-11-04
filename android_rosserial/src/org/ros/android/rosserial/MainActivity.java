@@ -25,17 +25,25 @@ import org.ros.android.acm_serial.DataBits;
 import org.ros.android.acm_serial.Parity;
 import org.ros.android.acm_serial.PollingInputStream;
 import org.ros.android.acm_serial.StopBits;
+import org.ros.exception.RosRuntimeException;
 import org.ros.node.NodeConfiguration;
 import org.ros.rosserial.RosSerial;
 import org.ros.time.NtpTimeProvider;
+
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MainActivity extends AcmDeviceActivity {
 
+  private final CountDownLatch acmDeviceLatch;
+
+  private AcmDevice acmDevice;
+
   public MainActivity() {
     super("ROS Serial", "ROS Serial");
+    acmDeviceLatch = new CountDownLatch(1);
   }
 
   @Override
@@ -45,7 +53,12 @@ public class MainActivity extends AcmDeviceActivity {
   }
 
   @Override
-  protected void init(AcmDevice acmDevice) {
+  protected void init() {
+    try {
+      acmDeviceLatch.await();
+    } catch (InterruptedException e) {
+      throw new RosRuntimeException(e);
+    }
     acmDevice.setLineCoding(BitRate.BPS_115200, StopBits.STOP_BITS_1, Parity.NONE,
         DataBits.DATA_BITS_8);
     NodeConfiguration nodeConfiguration =
@@ -59,5 +72,15 @@ public class MainActivity extends AcmDeviceActivity {
     getNodeRunner().run(
         new RosSerial(new PollingInputStream(acmDevice.getInputStream()),
             acmDevice.getOutputStream()), nodeConfiguration);
+  }
+
+  @Override
+  public void onPermissionGranted(AcmDevice acmDevice) {
+    this.acmDevice = acmDevice;
+    acmDeviceLatch.countDown();
+  }
+
+  @Override
+  public void onPermissionDenied() {
   }
 }

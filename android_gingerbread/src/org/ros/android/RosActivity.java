@@ -70,6 +70,7 @@ public abstract class RosActivity extends Activity {
 
   @Override
   protected void onResume() {
+    super.onResume();
     if (getMasterUri() == null) {
       // Call this method on super to avoid triggering our precondition in the
       // overridden startActivityForResult().
@@ -79,7 +80,6 @@ public abstract class RosActivity extends Activity {
       // of master URI that we can query if we're restarting this activity.
       startNodeRunnerService();
     }
-    super.onResume();
   }
 
   private void startNodeRunnerService() {
@@ -111,12 +111,13 @@ public abstract class RosActivity extends Activity {
 
   @Override
   public void startActivityForResult(Intent intent, int requestCode) {
-    Preconditions.checkArgument(requestCode != MASTER_CHOOSER_REQUEST_CODE);
     super.startActivityForResult(intent, requestCode);
+    Preconditions.checkArgument(requestCode != MASTER_CHOOSER_REQUEST_CODE);
   }
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
     if (requestCode == MASTER_CHOOSER_REQUEST_CODE && resultCode == RESULT_OK) {
       try {
         masterUri = new URI(data.getStringExtra("ROS_MASTER_URI"));
@@ -124,7 +125,6 @@ public abstract class RosActivity extends Activity {
         throw new RuntimeException(e);
       }
     }
-    super.onActivityResult(requestCode, resultCode, data);
   }
 
   /**

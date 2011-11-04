@@ -16,23 +16,30 @@
 
 package org.ros.android.tutorial.hokuyo;
 
-import org.ros.android.hokuyo.scip20.Device;
-
 import android.os.Bundle;
 import org.ros.address.InetAddressFactory;
 import org.ros.android.acm_serial.AcmDevice;
 import org.ros.android.acm_serial.AcmDeviceActivity;
 import org.ros.android.hokuyo.LaserScanPublisher;
+import org.ros.android.hokuyo.scip20.Device;
+import org.ros.exception.RosRuntimeException;
 import org.ros.node.NodeConfiguration;
 import org.ros.time.NtpTimeProvider;
+
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MainActivity extends AcmDeviceActivity {
 
+  private final CountDownLatch acmDeviceLatch;
+
+  private AcmDevice acmDevice;
+
   public MainActivity() {
-    super("ROS Hokuyo", "ROS Hokuyo");
+    super("Hokuyo Node", "Hokuyo Node");
+    acmDeviceLatch = new CountDownLatch(1);
   }
 
   @Override
@@ -42,18 +49,32 @@ public class MainActivity extends AcmDeviceActivity {
   }
 
   @Override
-  protected void init(AcmDevice acmDevice) {
-    Device scipDevice =
-        new Device(acmDevice.getInputStream(), acmDevice.getOutputStream());
+  protected void init() {
+    try {
+      acmDeviceLatch.await();
+    } catch (InterruptedException e) {
+      throw new RosRuntimeException(e);
+    }
+    Device scipDevice = new Device(acmDevice.getInputStream(), acmDevice.getOutputStream());
     LaserScanPublisher laserScanPublisher = new LaserScanPublisher(scipDevice);
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName(),
             getMasterUri());
     nodeConfiguration.setNodeName("hokuyo_node");
-    NtpTimeProvider ntpTimeProvider = new NtpTimeProvider(InetAddressFactory
-        .newFromHostString("ntp.ubuntu.com"));
+    NtpTimeProvider ntpTimeProvider =
+        new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"));
     ntpTimeProvider.updateTime();
     nodeConfiguration.setTimeProvider(ntpTimeProvider);
     getNodeRunner().run(laserScanPublisher, nodeConfiguration);
+  }
+
+  @Override
+  public void onPermissionGranted(AcmDevice acmDevice) {
+    this.acmDevice = acmDevice;
+    acmDeviceLatch.countDown();
+  }
+
+  @Override
+  public void onPermissionDenied() {
   }
 }
