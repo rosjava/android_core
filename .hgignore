@@ -16,6 +16,7 @@ syntax: glob
 dependencies.xml
 ros.properties
 default.properties
+project.properties
 
 syntax: regexp
-(target|build|dist|msg_gen|srv_gen|gen|test_output)/.*
+(target|build|bin|dist|msg_gen|srv_gen|gen|test_output)/.*

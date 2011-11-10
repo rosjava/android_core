@@ -23,6 +23,7 @@ import org.ros.android.acm_serial.AcmDeviceActivity;
 import org.ros.android.hokuyo.LaserScanPublisher;
 import org.ros.android.hokuyo.scip20.Device;
 import org.ros.exception.RosRuntimeException;
+import org.ros.namespace.GraphName;
 import org.ros.node.NodeConfiguration;
 import org.ros.time.NtpTimeProvider;
 
@@ -33,13 +34,11 @@ import java.util.concurrent.CountDownLatch;
  */
 public class MainActivity extends AcmDeviceActivity {
 
-  private final CountDownLatch acmDeviceLatch;
-
-  private AcmDevice acmDevice;
+  private final CountDownLatch nodeRunnerServiceLatch;
 
   public MainActivity() {
     super("Hokuyo Node", "Hokuyo Node");
-    acmDeviceLatch = new CountDownLatch(1);
+    nodeRunnerServiceLatch = new CountDownLatch(1);
   }
 
   @Override
@@ -50,8 +49,12 @@ public class MainActivity extends AcmDeviceActivity {
 
   @Override
   protected void init() {
+    nodeRunnerServiceLatch.countDown();
+  }
+
+  private void startLaserScanPublisher(AcmDevice acmDevice) {
     try {
-      acmDeviceLatch.await();
+      nodeRunnerServiceLatch.await();
     } catch (InterruptedException e) {
       throw new RosRuntimeException(e);
     }
@@ -60,7 +63,7 @@ public class MainActivity extends AcmDeviceActivity {
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName(),
             getMasterUri());
-    nodeConfiguration.setNodeName("hokuyo_node");
+    nodeConfiguration.setNodeName(GraphName.newAnonymous());
     NtpTimeProvider ntpTimeProvider =
         new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"));
     ntpTimeProvider.updateTime();
@@ -69,9 +72,13 @@ public class MainActivity extends AcmDeviceActivity {
   }
 
   @Override
-  public void onPermissionGranted(AcmDevice acmDevice) {
-    this.acmDevice = acmDevice;
-    acmDeviceLatch.countDown();
+  public void onPermissionGranted(final AcmDevice acmDevice) {
+    new Thread() {
+      @Override
+      public void run() {
+        startLaserScanPublisher(acmDevice);
+      };
+    }.start();
   }
 
   @Override

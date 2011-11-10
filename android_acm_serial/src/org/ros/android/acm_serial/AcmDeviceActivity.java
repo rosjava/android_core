@@ -29,6 +29,8 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ros.android.RosActivity;
 import org.ros.exception.RosRuntimeException;
 
@@ -39,6 +41,9 @@ import java.util.Map;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public abstract class AcmDeviceActivity extends RosActivity implements AcmDevicePermissionCallback {
+
+  private static final boolean DEBUG = true;
+  private static final Log log = LogFactory.getLog(AcmDeviceActivity.class);
 
   static final String ACTION_USB_PERMISSION = "org.ros.android.USB_PERMISSION";
 
@@ -68,6 +73,9 @@ public abstract class AcmDeviceActivity extends RosActivity implements AcmDevice
   }
 
   private void newAcmDevice(UsbDevice usbDevice) {
+    if (DEBUG) {
+      log.info("Adding new ACM device.");
+    }
     Preconditions.checkNotNull(usbDevice);
     Preconditions.checkState(!acmDevices.containsKey(usbDevice), "Already connected to device.");
     Preconditions.checkState(usbManager.hasPermission(usbDevice), "Permission denied.");
@@ -95,7 +103,11 @@ public abstract class AcmDeviceActivity extends RosActivity implements AcmDevice
     Intent intent = getIntent();
     if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
       UsbDevice usbDevice = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-      newAcmDevice(usbDevice);
+      if (!acmDevices.containsKey(usbDevice)) {
+        newAcmDevice(usbDevice);
+      } else if (DEBUG) {
+        log.info("Ignoring already connected device.");
+      }
     }
   }
 

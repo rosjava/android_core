@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project>
+<project name="android_tutorial_camera" default="debug">
   <property file="ros.properties" />
-  <include file="${ros.pkg.rosjava_bootstrap.dir}/android.xml" />
+  <property file="project.properties" />
+  <import file="${ros.pkg.rosjava_bootstrap.dir}/android.xml" />
 </project>
 
