@@ -268,7 +268,7 @@ public class VirtualJoystickView extends RelativeLayout implements OnTouchListen
               .toString(), masterUri);
       nodeConfiguration.setNodeName("virtual_joystick");
       node = new DefaultNodeFactory().newNode(nodeConfiguration);
-      publisher = node.newPublisher("cmd_vel", "geometry_msgs/Twist");
+      publisher = node.newPublisher("~cmd_vel", "geometry_msgs/Twist");
       node.newSubscriber("odom", "nav_msgs/Odometry", this);
       publisherTimer.schedule(timerTask, 0, 80);
     } catch (Exception e) {
