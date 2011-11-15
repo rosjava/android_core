@@ -19,7 +19,6 @@ package org.ros.android.acm_serial;
 import com.google.common.base.Preconditions;
 
 import android.hardware.usb.UsbConstants;
-import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbRequest;
 import android.util.Log;
@@ -33,17 +32,18 @@ public class AcmOutputStream extends OutputStream {
   private static final boolean DEBUG = false;
   private static final String TAG = "AcmOutputStream";
 
-  private final UsbRequestPool requestPool;
+  private final UsbRequestPool usbRequestPool;
+  private final UsbEndpoint endpoint;
 
-  public AcmOutputStream(UsbDeviceConnection connection, UsbEndpoint endpoint) {
+  public AcmOutputStream(UsbRequestPool usbRequestPool, UsbEndpoint endpoint) {
     Preconditions.checkArgument(endpoint.getDirection() == UsbConstants.USB_DIR_OUT);
-    requestPool = new UsbRequestPool(connection, endpoint);
-    requestPool.start();
+    this.endpoint = endpoint;
+    this.usbRequestPool = usbRequestPool;
   }
 
   @Override
   public void close() throws IOException {
-    requestPool.shutdown();
+    usbRequestPool.shutdown();
   }
 
   @Override
@@ -59,7 +59,7 @@ public class AcmOutputStream extends OutputStream {
     if (DEBUG) {
       Log.i(TAG, "Writing " + count + " bytes.");
     }
-    UsbRequest request = requestPool.poll();
+    UsbRequest request = usbRequestPool.poll(endpoint);
     if (!request.queue(ByteBuffer.wrap(buffer, offset, count), count)) {
       Log.e(TAG, "IO error while queuing " + count + " bytes to be written.");
     }

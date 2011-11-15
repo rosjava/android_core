@@ -46,14 +46,16 @@ public abstract class RosActivity extends Activity {
   private class NodeRunnerServiceConnection implements ServiceConnection {
     @Override
     public void onServiceConnected(ComponentName name, IBinder binder) {
-      nodeRunner = ((NodeRunnerService.LocalBinder) binder).getService();
-      // We run init() in a new thread since it often requires network access.
-      new Thread() {
-        @Override
-        public void run() {
-          init();
-        };
-      }.start();
+      // NOTE(damonkohler): This must be synchronized in case the activity is
+      // paused while we are connecting to the service. Pausing the activity
+      // causes the nodeRunner field to be nulled.
+      synchronized (RosActivity.this) {
+        nodeRunner = ((NodeRunnerService.LocalBinder) binder).getService();
+        // Run init() in a new thread as a convenience since it often requires
+        // network access. Also, this allows us to keep a reference to the
+        // NodeRunner separate from this class.
+        new Thread(new InitRunnable(RosActivity.this, nodeRunner)).start();
+      }
     }
 
     @Override
@@ -94,11 +96,13 @@ public abstract class RosActivity extends Activity {
 
   @Override
   protected void onPause() {
-    if (nodeRunner != null) {
-      unbindService(nodeRunnerServiceConnection);
-      nodeRunner = null;
-    }
     super.onPause();
+    synchronized (this) {
+      if (nodeRunner != null) {
+        unbindService(nodeRunnerServiceConnection);
+        nodeRunner = null;
+      }
+    }
   }
 
   /**
@@ -106,8 +110,11 @@ public abstract class RosActivity extends Activity {
    * been initialized with a master {@link URI} via the {@link MasterChooser}
    * and a {@link NodeRunnerService} has started. Your {@link NodeMain}s should
    * be started here.
+   * 
+   * @param nodeRunner
+   *          the {@link NodeRunner} created for this {@link Activity}
    */
-  protected abstract void init();
+  protected abstract void init(NodeRunner nodeRunner);
 
   @Override
   public void startActivityForResult(Intent intent, int requestCode) {
@@ -133,13 +140,5 @@ public abstract class RosActivity extends Activity {
    */
   public URI getMasterUri() {
     return masterUri;
-  }
-
-  /**
-   * @return this {@link RosActivity}'s {@link NodeRunner} or <code>null</code>
-   *         if it is not yet available
-   */
-  public NodeRunner getNodeRunner() {
-    return nodeRunner;
   }
 }

@@ -16,13 +16,15 @@
 
 package org.ros.android.acm_serial;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbRequest;
 import android.util.Log;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Map;
 
 class UsbRequestPool {
 
@@ -30,16 +32,8 @@ class UsbRequestPool {
   private static final String TAG = "UsbRequestPool";
 
   private final UsbDeviceConnection connection;
-  private final UsbEndpoint endpoint;
-  private final Queue<UsbRequest> requestPool;
+  private final Map<UsbEndpoint, UsbRequestQueue> usbRequestQueues;
   private final RequestWaitThread requestWaitThread;
-
-  public UsbRequestPool(UsbDeviceConnection connection, UsbEndpoint endpoint) {
-    this.connection = connection;
-    this.endpoint = endpoint;
-    requestPool = new ConcurrentLinkedQueue<UsbRequest>();
-    requestWaitThread = new RequestWaitThread();
-  }
 
   private final class RequestWaitThread extends Thread {
     @Override
@@ -52,10 +46,19 @@ class UsbRequestPool {
           // NOTE(damonkohler): There appears to be a bug around
           // UsbRequest.java:155 that can cause a spurious NPE. This seems safe
           // to ignore.
+          if (DEBUG) {
+            Log.e(TAG, "NPE while waiting for UsbRequest.", e);
+          }
           continue;
         }
         if (request != null) {
-          requestPool.add(request);
+          UsbEndpoint endpoint = request.getEndpoint();
+          if (endpoint != null) {
+            Preconditions.checkState(usbRequestQueues.containsKey(endpoint));
+            usbRequestQueues.get(endpoint).add(request);
+          } else {
+            Log.e(TAG, "Completed UsbRequest is no longer open.");
+          }
         } else {
           Log.e(TAG, "USB request error.");
         }
@@ -66,12 +69,21 @@ class UsbRequestPool {
     }
   }
 
-  public UsbRequest poll() {
-    UsbRequest request = requestPool.poll();
-    if (request == null) {
-      request = new UsbRequest();
-      request.initialize(connection, endpoint);
-    }
+  public UsbRequestPool(UsbDeviceConnection connection) {
+    this.connection = connection;
+    usbRequestQueues = Maps.newConcurrentMap();
+    requestWaitThread = new RequestWaitThread();
+  }
+
+  public void addEndpoint(UsbEndpoint endpoint, UsbRequestCallback callback) {
+    usbRequestQueues.put(endpoint, new UsbRequestQueue(connection, endpoint, callback));
+  }
+
+  public UsbRequest poll(UsbEndpoint endpoint) {
+    Preconditions.checkArgument(usbRequestQueues.containsKey(endpoint),
+        "Call addEndpoint() before the first call to poll().");
+    UsbRequestQueue queue = usbRequestQueues.get(endpoint);
+    UsbRequest request = queue.poll();
     return request;
   }
 

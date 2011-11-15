@@ -41,6 +41,7 @@ public class AcmDevice {
   private final UsbInterface usbInterface;
   private final InputStream inputStream;
   private final OutputStream outputStream;
+  private final UsbRequestPool usbRequestPool;
 
   public AcmDevice(UsbDeviceConnection usbDeviceConnection, UsbInterface usbInterface) {
     Preconditions.checkNotNull(usbDeviceConnection);
@@ -65,8 +66,12 @@ public class AcmDevice {
       throw new IllegalArgumentException("Not all endpoints found.");
     }
 
+    usbRequestPool = new UsbRequestPool(usbDeviceConnection);
+    usbRequestPool.addEndpoint(outgoingEndpoint, null);
+    usbRequestPool.start();
+
+    outputStream = new AcmOutputStream(usbRequestPool, outgoingEndpoint);
     inputStream = new AcmInputStream(usbDeviceConnection, incomingEndpoint);
-    outputStream = new AcmOutputStream(usbDeviceConnection, outgoingEndpoint);
   }
 
   public void setLineCoding(BitRate bitRate, StopBits stopBits, Parity parity, DataBits dataBits) {
@@ -105,5 +110,4 @@ public class AcmDevice {
       throw new RosRuntimeException(e);
     }
   }
-
 }

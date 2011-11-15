@@ -126,7 +126,7 @@ public class Device implements LaserScannerDevice {
         checkMdmsStatus();
       } catch (MdmsException e) {
         if (DEBUG) {
-          log.error("Sensor not ready.", e);
+          log.info("Sensor not ready.", e);
         }
         ready = false;
       }
@@ -272,14 +272,24 @@ public class Device implements LaserScannerDevice {
           checkMdmsStatus();
           readTimestamp();
           StringBuilder data = new StringBuilder();
+          boolean checksumOk = true;
           while (true) {
             String line = read(); // Data and checksum or terminating LF
-            if (line.length() == 0) {
+            if (line.length() == 0 && checksumOk) {
               listener.onNewLaserScan(new LaserScan(scanStartTime + scanTimeOffset, Decoder
                   .decodeValues(data.toString(), 3)));
               break;
             }
-            data.append(verifyChecksum(line));
+            try {
+              data.append(verifyChecksum(line));
+            } catch (ChecksumException e) {
+              // NOTE(damonkohler): Even though this checksum is incorrect, we
+              // continue processing the scan data so that we don't lose
+              // synchronization. Once the complete laser scan has arrived, we
+              // will drop it and continue with the next incoming scan.
+              checksumOk = false;
+              log.error("Invalid checksum.", e);
+            }
           }
         }
       }

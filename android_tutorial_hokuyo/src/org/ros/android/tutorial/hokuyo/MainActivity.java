@@ -25,6 +25,7 @@ import org.ros.android.hokuyo.scip20.Device;
 import org.ros.exception.RosRuntimeException;
 import org.ros.namespace.GraphName;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeRunner;
 import org.ros.time.NtpTimeProvider;
 
 import java.util.concurrent.CountDownLatch;
@@ -35,6 +36,8 @@ import java.util.concurrent.CountDownLatch;
 public class MainActivity extends AcmDeviceActivity {
 
   private final CountDownLatch nodeRunnerServiceLatch;
+
+  private NodeRunner nodeRunner;
 
   public MainActivity() {
     super("Hokuyo Node", "Hokuyo Node");
@@ -48,8 +51,9 @@ public class MainActivity extends AcmDeviceActivity {
   }
 
   @Override
-  protected void init() {
+  protected void init(NodeRunner nodeRunner) {
     nodeRunnerServiceLatch.countDown();
+    this.nodeRunner = nodeRunner;
   }
 
   private void startLaserScanPublisher(AcmDevice acmDevice) {
@@ -68,7 +72,7 @@ public class MainActivity extends AcmDeviceActivity {
         new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"));
     ntpTimeProvider.updateTime();
     nodeConfiguration.setTimeProvider(ntpTimeProvider);
-    getNodeRunner().run(laserScanPublisher, nodeConfiguration);
+    nodeRunner.run(laserScanPublisher, nodeConfiguration);
   }
 
   @Override
