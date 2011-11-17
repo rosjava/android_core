@@ -29,6 +29,7 @@ import org.ros.node.NodeRunner;
 import org.ros.time.NtpTimeProvider;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -71,6 +72,7 @@ public class MainActivity extends AcmDeviceActivity {
     NtpTimeProvider ntpTimeProvider =
         new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"));
     ntpTimeProvider.updateTime();
+    ntpTimeProvider.startPeriodicUpdates(5, TimeUnit.MINUTES);
     nodeConfiguration.setTimeProvider(ntpTimeProvider);
     nodeRunner.run(laserScanPublisher, nodeConfiguration);
   }
