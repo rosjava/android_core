@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RosRuntimeException;
 
 import java.util.Map;
@@ -30,20 +32,29 @@ import java.util.Map;
  */
 final class UsbDeviceDetachedReceiver extends BroadcastReceiver {
 
-  private final Map<UsbDevice, AcmDevice> acmDevices;
+  private static final boolean DEBUG = true;
+  private static final Log log = LogFactory.getLog(UsbDeviceDetachedReceiver.class);
 
-  public UsbDeviceDetachedReceiver(Map<UsbDevice, AcmDevice> acmDevices) {
+  private final Map<String, AcmDevice> acmDevices;
+
+  public UsbDeviceDetachedReceiver(Map<String, AcmDevice> acmDevices) {
     this.acmDevices = acmDevices;
   }
 
   @Override
   public void onReceive(Context context, Intent intent) {
     UsbDevice usbDevice = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-    AcmDevice acmDevice = acmDevices.remove(usbDevice);
-    try {
-      acmDevice.close();
-    } catch (RosRuntimeException e) {
-      // Ignore spurious errors on disconnect.
+    String deviceName = usbDevice.getDeviceName();
+    AcmDevice acmDevice = acmDevices.remove(deviceName);
+    if (acmDevice != null) {
+      try {
+        acmDevice.close();
+      } catch (RosRuntimeException e) {
+        // Ignore spurious errors on disconnect.
+      }
+    }
+    if (DEBUG) {
+      log.info("USB device removed: " + deviceName);
     }
   }
 }

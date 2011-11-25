@@ -57,7 +57,7 @@ public class AcmOutputStream extends OutputStream {
       throw new IndexOutOfBoundsException();
     }
     if (DEBUG) {
-      Log.i(TAG, "Writing " + count + " bytes.");
+      Log.i(TAG, "Writing " + count + " bytes from offset " + offset + ".");
     }
     UsbRequest request = usbRequestPool.poll(endpoint);
     if (!request.queue(ByteBuffer.wrap(buffer, offset, count), count)) {

@@ -47,7 +47,7 @@ public abstract class AcmDeviceActivity extends RosActivity implements AcmDevice
 
   static final String ACTION_USB_PERMISSION = "org.ros.android.USB_PERMISSION";
 
-  private final Map<UsbDevice, AcmDevice> acmDevices;
+  private final Map<String, AcmDevice> acmDevices;
 
   private UsbManager usbManager;
   private PendingIntent usbPermissionIntent;
@@ -73,17 +73,20 @@ public abstract class AcmDeviceActivity extends RosActivity implements AcmDevice
   }
 
   private void newAcmDevice(UsbDevice usbDevice) {
-    if (DEBUG) {
-      log.info("Adding new ACM device.");
-    }
     Preconditions.checkNotNull(usbDevice);
-    Preconditions.checkState(!acmDevices.containsKey(usbDevice), "Already connected to device.");
-    Preconditions.checkState(usbManager.hasPermission(usbDevice), "Permission denied.");
+    String deviceName = usbDevice.getDeviceName();
+    Preconditions.checkState(!acmDevices.containsKey(deviceName), "Already connected to device: "
+        + deviceName);
+    Preconditions.checkState(usbManager.hasPermission(usbDevice), "Permission denied: "
+        + deviceName);
     UsbInterface usbInterface = usbDevice.getInterface(1);
     UsbDeviceConnection usbDeviceConnection = usbManager.openDevice(usbDevice);
-    Preconditions.checkNotNull(usbDeviceConnection, "Failed to open device.");
+    Preconditions.checkNotNull(usbDeviceConnection, "Failed to open device: " + deviceName);
+    if (DEBUG) {
+      log.info("Adding new ACM device: " + deviceName);
+    }
     AcmDevice acmDevice = new AcmDevice(usbDeviceConnection, usbInterface);
-    acmDevices.put(usbDevice, acmDevice);
+    acmDevices.put(deviceName, acmDevice);
     AcmDeviceActivity.this.onPermissionGranted(acmDevice);
   }
 
@@ -94,19 +97,19 @@ public abstract class AcmDeviceActivity extends RosActivity implements AcmDevice
     usbPermissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
     registerReceiver(usbDevicePermissionReceiver, new IntentFilter(ACTION_USB_PERMISSION));
     registerReceiver(usbDeviceDetachedReceiver, new IntentFilter(
-        UsbManager.ACTION_USB_ACCESSORY_DETACHED));
+        UsbManager.ACTION_USB_DEVICE_DETACHED));
   }
 
   @Override
-  protected void onResume() {
-    super.onResume();
-    Intent intent = getIntent();
+  protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
     if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
       UsbDevice usbDevice = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-      if (!acmDevices.containsKey(usbDevice)) {
+      String deviceName = usbDevice.getDeviceName();
+      if (!acmDevices.containsKey(deviceName)) {
         newAcmDevice(usbDevice);
       } else if (DEBUG) {
-        log.info("Ignoring already connected device.");
+        log.info("Ignoring already connected device: " + deviceName);
       }
     }
   }
