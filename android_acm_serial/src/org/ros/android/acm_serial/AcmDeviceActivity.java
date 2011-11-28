@@ -98,11 +98,16 @@ public abstract class AcmDeviceActivity extends RosActivity implements AcmDevice
     registerReceiver(usbDevicePermissionReceiver, new IntentFilter(ACTION_USB_PERMISSION));
     registerReceiver(usbDeviceDetachedReceiver, new IntentFilter(
         UsbManager.ACTION_USB_DEVICE_DETACHED));
+    onUsbDeviceAttached(getIntent());
   }
 
   @Override
   protected void onNewIntent(Intent intent) {
     super.onNewIntent(intent);
+    onUsbDeviceAttached(intent);
+  }
+
+  private void onUsbDeviceAttached(Intent intent) {
     if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
       UsbDevice usbDevice = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
       String deviceName = usbDevice.getDeviceName();
