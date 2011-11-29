@@ -244,8 +244,8 @@ public class MainActivity extends Activity {
    * Shutdown the nodes and exit.
    */
   private void shutdown() {
-    distanceView.shutdown();
-    mapView.shutdown();
+    nodeRunner.shutdownNodeMain(distanceView);
+    nodeRunner.shutdownNodeMain(mapView);
     finish();
   }
 }
