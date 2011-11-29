@@ -16,8 +16,6 @@
 
 package org.ros.android.views;
 
-import com.google.common.base.Preconditions;
-
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -145,10 +143,7 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
    * Publisher for user specified goal for autonomous navigation.
    */
   private Publisher<PoseStamped> goalPublisher;
-  /**
-   * The node for map view.
-   */
-  private Node node;
+
   public final Runnable longPressRunnable = new Runnable() {
     @Override
     public void run() {
@@ -180,9 +175,7 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
   }
 
   @Override
-  public void main(Node node) throws Exception {
-    Preconditions.checkState(this.node == null);
-    this.node = node;
+  public void onStart(Node node) {
     // Initialize the goal publisher.
     goalPublisher = node.newPublisher(SIMPLE_GOAL_TOPIC, "geometry_msgs/PoseStamped");
     // Initialize the initial pose publisher.
@@ -258,11 +251,7 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
   }
 
   @Override
-  public void shutdown() {
-    if (node != null) {
-      node.shutdown();
-      node = null;
-    }
+  public void onShutdown(Node node) {
   }
 
   @Override

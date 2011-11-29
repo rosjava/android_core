@@ -16,8 +16,6 @@
 
 package org.ros.android.tutorial.camera;
 
-import org.ros.node.NodeRunner;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.hardware.Camera;
@@ -30,8 +28,9 @@ import org.ros.address.InetAddressFactory;
 import org.ros.android.MasterChooser;
 import org.ros.android.camera.R;
 import org.ros.android.views.RosCameraPreviewView;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.DefaultNodeRunner;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeRunner;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -101,9 +100,7 @@ public class MainActivity extends Activity {
   @Override
   protected void onPause() {
     super.onPause();
-    if (masterUri != null) {
-      preview.shutdown();
-    }
+    nodeRunner.shutdownNodeMain(preview);
   }
 
   @Override

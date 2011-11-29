@@ -16,8 +16,6 @@
 
 package org.ros.android.views;
 
-import com.google.common.base.Preconditions;
-
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
@@ -64,7 +62,6 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
    * {@link GLSurfaceView.Renderer} and is used to render the distance view.
    */
   private DistanceRenderer distanceRenderer;
-  private Node node;
 
   /**
    * Initialize the rendering surface.
@@ -94,9 +91,7 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
   }
 
   @Override
-  public void main(Node node) throws Exception {
-    Preconditions.checkState(this.node == null);
-    this.node = node;
+  public void onStart(Node node) {
     // Subscribe to the laser scans.
     node.newSubscriber(laserTopic, "sensor_msgs/LaserScan", this);
     // Subscribe to the command velocity. This is needed for auto adjusting the
@@ -118,11 +113,7 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
   }
 
   @Override
-  public void shutdown() {
-    if (node != null) {
-      node.shutdown();
-      node = null;
-    }
+  public void onShutdown(Node node) {
     // Save the existing settings before exiting.
     distanceRenderer.savePreferences(this.getContext());
   }

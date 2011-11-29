@@ -31,8 +31,11 @@ import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import org.ros.node.DefaultNodeRunner;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeListener;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeRunner;
+
+import java.util.Collection;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -87,8 +90,19 @@ public class NodeRunnerService extends Service implements NodeRunner {
   }
 
   @Override
+  public void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
+      Collection<NodeListener> nodeListeneners) {
+    nodeRunner.run(nodeMain, nodeConfiguration, nodeListeneners);
+  }
+
+  @Override
   public void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration) {
-    nodeRunner.run(nodeMain, nodeConfiguration);
+    run(nodeMain, nodeConfiguration, null);
+  }
+
+  @Override
+  public void shutdownNodeMain(NodeMain nodeMain) {
+    nodeRunner.shutdownNodeMain(nodeMain);
   }
 
   @Override

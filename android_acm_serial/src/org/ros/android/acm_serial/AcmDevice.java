@@ -89,7 +89,7 @@ public class AcmDevice {
     byteCount =
         usbDeviceConnection.controlTransfer(0x21, 0x20, 0, 0, lineCoding, lineCoding.length,
             CONTROL_TRANSFER_TIMEOUT);
-    Preconditions.checkState(byteCount == lineCoding.length);
+    Preconditions.checkState(byteCount == lineCoding.length, "Failed to set line coding.");
   }
 
   public InputStream getInputStream() {

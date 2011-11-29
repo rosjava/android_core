@@ -32,15 +32,12 @@ public class LaserScanSubscriber implements NodeMain {
 
   private final CountDownLatch laserScanReceived;
 
-  private Node node;
-
   LaserScanSubscriber(CountDownLatch laserScanReceived) {
     this.laserScanReceived = laserScanReceived;
   }
 
   @Override
-  public void main(Node node) throws Exception {
-    this.node = node;
+  public void onStart(Node node) {
     node.newSubscriber("laser", "sensor_msgs/LaserScan",
         new MessageListener<org.ros.message.sensor_msgs.LaserScan>() {
           @Override
@@ -54,7 +51,6 @@ public class LaserScanSubscriber implements NodeMain {
   }
 
   @Override
-  public void shutdown() {
-    node.shutdown();
+  public void onShutdown(Node node) {
   }
 }

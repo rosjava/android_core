@@ -16,8 +16,6 @@
 
 package org.ros.android.views;
 
-import com.google.common.base.Preconditions;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import org.ros.message.sensor_msgs.CameraInfo;
@@ -33,8 +31,6 @@ import org.ros.node.topic.Publisher;
  */
 public class RosCameraPreviewView extends CameraPreviewView implements NodeMain {
 
-  private Node node;
-
   public RosCameraPreviewView(Context context) {
     super(context);
   }
@@ -48,9 +44,7 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
   }
 
   @Override
-  public void main(Node node) throws Exception {
-    Preconditions.checkState(this.node == null);
-    this.node = node;
+  public void onStart(Node node) {
     NameResolver resolver = node.getResolver().createResolver(new GraphName("camera"));
     Publisher<CompressedImage> imagePublisher =
         node.newPublisher(resolver.resolve("image_raw/compressed"), "sensor_msgs/CompressedImage");
@@ -60,12 +54,7 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
   }
 
   @Override
-  public void shutdown() {
-    if (node != null) {
-      node.shutdown();
-      node = null;
-    }
+  public void onShutdown(Node node) {
     releaseCamera();
   }
-
 }

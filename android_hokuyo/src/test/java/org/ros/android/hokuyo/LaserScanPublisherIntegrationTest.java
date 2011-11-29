@@ -26,6 +26,7 @@ import org.ros.RosCore;
 import org.ros.internal.node.DefaultNode;
 import org.ros.namespace.GraphName;
 import org.ros.node.DefaultNodeRunner;
+import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeRunner;
 
@@ -76,7 +77,8 @@ public class LaserScanPublisherIntegrationTest {
     NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate(rosCore.getUri());
     FakeLaserDevice fakeLaser = new FakeLaserDevice(0);
     LaserScanPublisher scanPublisher = new LaserScanPublisher(fakeLaser);
-    scanPublisher.setNode(new DefaultNode(nodeConfiguration.setNodeName(GraphName.newAnonymous())));
+    Node node = new DefaultNode(nodeConfiguration.setNodeName(GraphName.newAnonymous()), null);
+    scanPublisher.setNode(node);
     try {
       scanPublisher.toLaserScanMessage("/base_scan", fakeLaser.makeFakeScan());
       fail();
@@ -84,8 +86,7 @@ public class LaserScanPublisherIntegrationTest {
       // This should throw because our laser scan has too few range
       // measurements. It expects three according to our configuration.
     }
-
-    scanPublisher.shutdown();
+    node.shutdown();
     fakeLaser.shutdown();
   }
 }

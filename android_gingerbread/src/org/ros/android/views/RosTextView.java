@@ -16,8 +16,6 @@
 
 package org.ros.android.views;
 
-import com.google.common.base.Preconditions;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
@@ -34,7 +32,6 @@ public class RosTextView<T> extends TextView implements NodeMain {
   private String topicName;
   private String messageType;
   private MessageCallable<String, T> callable;
-  private Node node;
 
   public RosTextView(Context context) {
     super(context);
@@ -61,9 +58,7 @@ public class RosTextView<T> extends TextView implements NodeMain {
   }
 
   @Override
-  public void main(Node node) {
-    Preconditions.checkState(this.node == null);
-    this.node = node;
+  public void onStart(Node node) {
     node.newSubscriber(topicName, messageType, new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {
@@ -88,11 +83,6 @@ public class RosTextView<T> extends TextView implements NodeMain {
   }
 
   @Override
-  public void shutdown() {
-    if (node != null) {
-      node.shutdown();
-      node = null;
-    }
+  public void onShutdown(Node node) {
   }
-
 }

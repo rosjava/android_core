@@ -16,8 +16,6 @@
 
 package org.ros.android;
 
-import com.google.common.base.Preconditions;
-
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -36,7 +34,6 @@ public class OrientationPublisher implements NodeMain {
 
   private final SensorManager sensorManager;
 
-  private Node node;
   private OrientationListener orientationListener;
 
   private final class OrientationListener implements SensorEventListener {
@@ -85,9 +82,7 @@ public class OrientationPublisher implements NodeMain {
   }
 
   @Override
-  public void main(Node node) throws Exception {
-    Preconditions.checkState(this.node == null);
-    this.node = node;
+  public void onStart(Node node) {
     try {
       Publisher<org.ros.message.geometry_msgs.PoseStamped> publisher =
           node.newPublisher("android/orientation", "geometry_msgs/PoseStamped");
@@ -96,19 +91,11 @@ public class OrientationPublisher implements NodeMain {
       sensorManager.registerListener(orientationListener, sensor, 500000); // 10
                                                                            // Hz
     } catch (Exception e) {
-      if (node != null) {
-        node.getLog().fatal(e);
-      } else {
-        e.printStackTrace();
-      }
+      node.getLog().fatal(e);
     }
   }
 
   @Override
-  public void shutdown() {
-    if (node != null) {
-      node.shutdown();
-      node = null;
-    }
+  public void onShutdown(Node node) {
   }
 }

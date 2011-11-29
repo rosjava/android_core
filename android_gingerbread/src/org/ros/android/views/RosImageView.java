@@ -16,8 +16,6 @@
 
 package org.ros.android.views;
 
-import com.google.common.base.Preconditions;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
@@ -38,7 +36,6 @@ public class RosImageView<T> extends ImageView implements NodeMain {
   private String topicName;
   private String messageType;
   private MessageCallable<Bitmap, T> callable;
-  private Node node;
 
   public RosImageView(Context context) {
     super(context);
@@ -65,9 +62,7 @@ public class RosImageView<T> extends ImageView implements NodeMain {
   }
 
   @Override
-  public void main(Node node) throws Exception {
-    Preconditions.checkState(this.node == null);
-    this.node = node;
+  public void onStart(Node node) {
     node.newSubscriber(topicName, messageType, new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {
@@ -83,11 +78,6 @@ public class RosImageView<T> extends ImageView implements NodeMain {
   }
 
   @Override
-  public void shutdown() {
-    if (node != null) {
-      node.shutdown();
-      node = null;
-    }
+  public void onShutdown(Node node) {
   }
-
 }

@@ -46,8 +46,7 @@ public class LaserScanPublisher implements NodeMain {
   }
 
   @Override
-  public void main(final Node node) throws Exception {
-    Preconditions.checkState(this.node == null);
+  public void onStart(final Node node) {
     this.node = node;
     nodeTimeOffset = node.getCurrentTime().subtract(Time.fromMillis(System.currentTimeMillis()));
     ParameterTree params = node.newParameterTree();
@@ -64,11 +63,7 @@ public class LaserScanPublisher implements NodeMain {
   }
 
   @Override
-  public void shutdown() {
-    if (node != null) {
-      node.shutdown();
-      node = null;
-    }
+  public void onShutdown(Node node) {
     laserScannerDevice.shutdown();
   }
 
