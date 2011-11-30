@@ -20,5 +20,4 @@ package org.ros.android.hokuyo.scip20;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ChecksumException extends RuntimeException {
-
 }

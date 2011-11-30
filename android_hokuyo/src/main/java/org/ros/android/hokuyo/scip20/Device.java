@@ -204,7 +204,7 @@ public class Device implements LaserScannerDevice {
   }
 
   private String verifyChecksum(String buffer) {
-    Preconditions.checkArgument(buffer.length() > 0);
+    Preconditions.checkArgument(buffer.length() > 0, "Empty buffer supplied to verifyChecksum().");
     String data = buffer.substring(0, buffer.length() - 1);
     char checksum = buffer.charAt(buffer.length() - 1);
     int sum = 0;
@@ -275,9 +275,11 @@ public class Device implements LaserScannerDevice {
           boolean checksumOk = true;
           while (true) {
             String line = read(); // Data and checksum or terminating LF
-            if (line.length() == 0 && checksumOk) {
-              listener.onNewLaserScan(new LaserScan(scanStartTime + scanTimeOffset, Decoder
-                  .decodeValues(data.toString(), 3)));
+            if (line.length() == 0) {
+              if (checksumOk) {
+                listener.onNewLaserScan(new LaserScan(scanStartTime + scanTimeOffset, Decoder
+                    .decodeValues(data.toString(), 3)));
+              }
               break;
             }
             try {
