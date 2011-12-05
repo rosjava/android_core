@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.android.views;
+package org.ros.android.views.map;
 
 import android.graphics.Point;
 import android.opengl.GLSurfaceView;
@@ -148,8 +148,7 @@ class MapRenderer implements GLSurfaceView.Renderer {
     if (showRegion) {
       map.drawRegion(gl);
     }
-    map.drawRobot(gl);
-    map.drawRobotOutline(gl, zoom / MIN_ZOOM_MAP_CENTRIC_MODE);
+    map.drawRobot(gl, zoom / MIN_ZOOM_MAP_CENTRIC_MODE);
     if (showUserGoal) {
       map.drawUserGoal(gl, zoom / MIN_ZOOM_MAP_CENTRIC_MODE);
     }

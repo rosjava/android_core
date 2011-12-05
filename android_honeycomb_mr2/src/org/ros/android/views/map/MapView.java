@@ -14,7 +14,9 @@
  * the License.
  */
 
-package org.ros.android.views;
+package org.ros.android.views.map;
+
+import com.google.common.base.Preconditions;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
@@ -25,7 +27,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import org.ros.message.MessageListener;
-import org.ros.message.Time;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.message.geometry_msgs.PoseWithCovarianceStamped;
 import org.ros.message.geometry_msgs.Quaternion;
@@ -46,44 +47,26 @@ import java.util.Calendar;
  */
 public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener {
 
-  private enum InteractionMode {
-    // Default mode.
-    INVALID,
-    // When the user starts moves the map but the distance moved is less than
-    // FINAL_MAP_MODE_DISTANCE_THRESHOLD.
-    MOVE_MAP,
-    // When the user starts moves the map and the distance moved is greater than
-    // FINAL_MAP_MODE_DISTANCE_THRESHOLD.
-    MOVE_MAP_FINAL_MODE,
-    // When the user is zooming in/out.
-    ZOOM_MAP,
-    // When the user is trying to specify a location (either a goal or initial
-    // pose).
-    SPECIFY_LOCATION,
-    // When the user is trying to select a region.
-    SELECT_REGION
-  }
-
   /**
    * Topic name for the map.
    */
-  private static final String MAP_TOPIC_NAME = "map";
+  private static final String MAP_TOPIC_NAME = "~map";
   /**
    * Topic name at which the initial pose will be published.
    */
-  private static final String INITIAL_POSE_TOPIC_NAME = "initialpose";
+  private static final String INITIAL_POSE_TOPIC_NAME = "~initialpose";
   /**
    * Topic name at which the goal message will be published.
    */
-  private static final String SIMPLE_GOAL_TOPIC = "move_base_simple/goal";
+  private static final String SIMPLE_GOAL_TOPIC = "simple_waypoints_server/goal_pose";
   /**
    * Topic name for the subscribed AMCL pose.
    */
-  private static final String ROBOT_POSE_TOPIC = "pose";
+  private static final String ROBOT_POSE_TOPIC = "~pose";
   /**
    * Topic name for the subscribed path.
    */
-  private static final String PATH_TOPIC = "move_base_node/NavfnROS/plan";
+  private static final String PATH_TOPIC = "~global_plan";
   /**
    * If the contact on the view moves more than this distance in pixels the
    * interaction mode is switched to MOVE_MAP_FINAL_MODE.
@@ -143,6 +126,8 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
    * Publisher for user specified goal for autonomous navigation.
    */
   private Publisher<PoseStamped> goalPublisher;
+  private String poseFrameId;
+  private Node node;
 
   public final Runnable longPressRunnable = new Runnable() {
     @Override
@@ -176,6 +161,7 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
 
   @Override
   public void onStart(Node node) {
+    this.node = node;
     // Initialize the goal publisher.
     goalPublisher = node.newPublisher(SIMPLE_GOAL_TOPIC, "geometry_msgs/PoseStamped");
     // Initialize the initial pose publisher.
@@ -211,6 +197,7 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
             post(new Runnable() {
               @Override
               public void run() {
+                poseFrameId = message.header.frame_id;
                 // Update the robot's location on the map.
                 mapRenderer.updateRobotPose(message.pose, mapMetaData.resolution);
                 requestRender();
@@ -387,6 +374,7 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
   }
 
   private void contactUp(MotionEvent event) {
+    Preconditions.checkNotNull(poseFrameId);
     // If the user was trying to specify a pose and just lifted the contact then
     // publish the position based on the initial contact down location and the
     // orientation based on the current contact up location.
@@ -394,8 +382,8 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
       Point goalPoint = mapRenderer.getWorldCoordinate(goalContact.x, goalContact.y);
       PoseStamped poseStamped = new PoseStamped();
       poseStamped.header.seq = goalHeaderSequence++;
-      poseStamped.header.frame_id = "map";
-      poseStamped.header.stamp = new Time();
+      poseStamped.header.frame_id = poseFrameId;
+      poseStamped.header.stamp = node.getCurrentTime();
       poseStamped.pose.position.x = -goalPoint.x * mapMetaData.resolution;
       poseStamped.pose.position.y = -goalPoint.y * mapMetaData.resolution;
       poseStamped.pose.position.z = 0;
@@ -404,7 +392,7 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
       // If the user was trying to specify an initial pose.
       if (initialPoseMode) {
         PoseWithCovarianceStamped poseWithCovarianceStamped = new PoseWithCovarianceStamped();
-        poseWithCovarianceStamped.header.frame_id = "map";
+        poseWithCovarianceStamped.header.frame_id = poseFrameId;
         poseWithCovarianceStamped.pose.pose = poseStamped.pose;
         // Publish the initial pose.
         initialPose.publish(poseWithCovarianceStamped);
