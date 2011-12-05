@@ -1,7 +1,7 @@
 <stack>
   <description brief="android_core">android_core</description>
   <author>Maintained by Damon Kohler</author>
-  <license>BSD,Apache 2</license>  
+  <license>BSD, Apache 2.0</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/android_core</url>
 

@@ -13,7 +13,7 @@
   <depend package="sensor_msgs" />
 
   <export>
-    <rosjava-android-lib target="android-9" />
+    <rosjava-android-lib target="android-10" />
     <rosjava-src location="src" />
     <rosjava-src location="gen" />
     <rosjava-src location="res" />
