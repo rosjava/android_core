@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -32,6 +32,7 @@ import org.ros.rosserial.RosSerial;
 import org.ros.time.NtpTimeProvider;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -64,17 +65,16 @@ public class MainActivity extends AcmDeviceActivity {
     acmDevice.setLineCoding(BitRate.BPS_115200, StopBits.STOP_BITS_1, Parity.NONE,
         DataBits.DATA_BITS_8);
     NodeConfiguration nodeConfiguration =
-        NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName(),
+        NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress(),
             getMasterUri());
     nodeConfiguration.setNodeName("rosserial");
-    NtpTimeProvider ntpTimeProvider = new NtpTimeProvider(InetAddressFactory
-        .newFromHostString("ntp.ubuntu.com"));
-    ntpTimeProvider.updateTime();
+    NtpTimeProvider ntpTimeProvider =
+        new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"));
     ntpTimeProvider.startPeriodicUpdates(5, TimeUnit.MINUTES);
     nodeConfiguration.setTimeProvider(ntpTimeProvider);
     nodeRunner.run(
-        new RosSerial(new PollingInputStream(acmDevice.getInputStream()),
-            acmDevice.getOutputStream()), nodeConfiguration);
+        new RosSerial(new PollingInputStream(acmDevice.getInputStream(), Executors
+            .newCachedThreadPool()), acmDevice.getOutputStream()), nodeConfiguration);
   }
 
   @Override
