@@ -13,7 +13,7 @@
   <depend package="android_gingerbread"/>
 
   <export>
-    <rosjava-android-app target="android-9" />
+    <rosjava-android-app target="android-10" />
     <rosjava-src location="src" />
     <rosjava-src location="gen" />
     <rosjava-src location="res" />

@@ -277,8 +277,13 @@ public class Device implements LaserScannerDevice {
             String line = read(); // Data and checksum or terminating LF
             if (line.length() == 0) {
               if (checksumOk) {
-                listener.onNewLaserScan(new LaserScan(scanStartTime + scanTimeOffset, Decoder
-                    .decodeValues(data.toString(), 3)));
+                try {
+                  listener.onNewLaserScan(new LaserScan(scanStartTime + scanTimeOffset, Decoder
+                      .decodeValues(data.toString(), 3)));
+                } catch (IllegalArgumentException e) {
+                  log.error("Failed to decode scan data.", e);
+                  break;
+                }
               }
               break;
             }
