@@ -17,7 +17,6 @@
 package org.ros.android.hokuyo.scip20;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,8 +36,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -48,7 +45,6 @@ public class Device implements LaserScannerDevice {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Device.class);
 
-  private static final int TIME_CALIBRATION_SAMPLE_SIZE = 11;
   private static final int STREAM_BUFFER_SIZE = 8192;
   private static final String EXPECTED_SENSOR_DIAGNOSTIC = "Sensor works well.";
 
@@ -56,28 +52,7 @@ public class Device implements LaserScannerDevice {
   private final BufferedReader reader;
   private final BufferedWriter writer;
   private final LaserScannerConfiguration configuration;
-
-  /**
-   * The time offset between taking the scan and the USB package arriving.
-   */
-  private long scanTimeOffset;
-
-  /**
-   * Calculates the median. This method modifies the sequence.
-   * 
-   * @param sequence
-   *          input data to get the median from, this parameter is modified
-   * @return the median
-   */
-  private static <T extends Comparable<? super T>> T calculateMedian(List<? extends T> sequence) {
-    Preconditions.checkArgument(sequence.size() > 0);
-    Collections.sort(sequence);
-    if (sequence.size() % 2 == 0) {
-      return sequence.get(sequence.size() / 2);
-    } else {
-      return sequence.get(sequence.size() / 2 + 1);
-    }
-  }
+  private final Clock clock;
 
   /**
    * It is not necessary to provide buffered streams. Buffering is handled
@@ -95,6 +70,7 @@ public class Device implements LaserScannerDevice {
     writer =
         new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(outputStream,
             STREAM_BUFFER_SIZE), Charset.forName("US-ASCII")));
+    clock = new Clock(this);
     init();
     configuration = queryConfiguration();
   }
@@ -114,7 +90,6 @@ public class Device implements LaserScannerDevice {
     Preconditions.checkState(sensorDiagnostic.equals(EXPECTED_SENSOR_DIAGNOSTIC),
         "Sensor diagnostic check failed: \"" + sensorDiagnostic + "\"");
     waitUntilReady();
-    calibrateTime(TIME_CALIBRATION_SAMPLE_SIZE);
   }
 
   private void waitUntilReady() {
@@ -233,10 +208,10 @@ public class Device implements LaserScannerDevice {
     try {
       checkStatus();
     } catch (IllegalStateException e) {
+      // Not all devices support this command.
       if (DEBUG) {
         log.error("Switch to SCIP 2.0 failed.", e);
       }
-      // Not all devices support this command.
     }
     checkTerminator();
 
@@ -262,42 +237,48 @@ public class Device implements LaserScannerDevice {
     new Thread() {
       @Override
       public void run() {
-        String command = "MD0000076800000";
-        write(command);
-        checkMdmsStatus();
-        checkTerminator();
+        clock.init();
         while (true) {
-          Preconditions.checkState(read().equals(command));
-          long scanStartTime = System.currentTimeMillis();
+          String command = "MD00000768000%02d";
+          write(String.format(command, 99));
           checkMdmsStatus();
-          readTimestamp();
-          StringBuilder data = new StringBuilder();
-          boolean checksumOk = true;
-          while (true) {
-            String line = read(); // Data and checksum or terminating LF
-            if (line.length() == 0) {
-              if (checksumOk) {
-                try {
-                  listener.onNewLaserScan(new LaserScan(scanStartTime + scanTimeOffset, Decoder
-                      .decodeValues(data.toString(), 3)));
-                } catch (IllegalArgumentException e) {
-                  log.error("Failed to decode scan data.", e);
-                  break;
+          checkTerminator();
+          int scansRemaining = 99;
+          while (scansRemaining > 0) {
+            String commandEcho = read();
+            scansRemaining = Integer.valueOf(commandEcho.substring(commandEcho.length() - 3));
+            checkMdmsStatus();
+            long timestamp = readTimestamp();
+            StringBuilder data = new StringBuilder();
+            boolean checksumOk = true;
+            while (true) {
+              String line = read(); // Data and checksum or terminating LF
+              if (line.length() == 0) {
+                if (checksumOk) {
+                  try {
+                    long predictedOffset = clock.calculateOffset(scansRemaining, 99);
+                    listener.onNewLaserScan(new LaserScan(timestamp - predictedOffset, Decoder
+                        .decodeValues(data.toString(), 3)));
+                  } catch (IllegalArgumentException e) {
+                    log.error("Failed to decode scan data.", e);
+                    break;
+                  }
                 }
+                break;
               }
-              break;
-            }
-            try {
-              data.append(verifyChecksum(line));
-            } catch (ChecksumException e) {
-              // NOTE(damonkohler): Even though this checksum is incorrect, we
-              // continue processing the scan data so that we don't lose
-              // synchronization. Once the complete laser scan has arrived, we
-              // will drop it and continue with the next incoming scan.
-              checksumOk = false;
-              log.error("Invalid checksum.", e);
+              try {
+                data.append(verifyChecksum(line));
+              } catch (ChecksumException e) {
+                // NOTE(damonkohler): Even though this checksum is incorrect, we
+                // continue processing the scan data so that we don't lose
+                // synchronization. Once the complete laser scan has arrived, we
+                // will drop it and continue with the next incoming scan.
+                checksumOk = false;
+                log.error("Invalid checksum.", e);
+              }
             }
           }
+          clock.update();
         }
       }
     }.start();
@@ -357,50 +338,17 @@ public class Device implements LaserScannerDevice {
   }
 
   /**
-   * To calibrate time, we do the following (similar to what the C++ version of
-   * hokuyo_node does):
-   * <ol>
-   * <li>calculate the offset from the sensor's uptime to epoch time,</li>
-   * <li>calculate the duration from the time a scan was taken until it was
-   * received,</li>
-   * <li>and finally return the offset from the system time when a scan was
-   * received to the epoch time the scan was taken.</li>
-   * </ol>
-   * 
-   * We repeat this process {@code sampleSize} times and use the median result.
-   * 
-   * @param sampleSize
-   *          number of samples to use when calibrating time
-   */
-  private void calibrateTime(int sampleSize) {
-    if (DEBUG) {
-      log.info("Calibrating time...");
-    }
-    List<Long> samples = Lists.newArrayList();
-    // NOTE(damonkohler): The clock offset may drift over time.
-    long clockOffset = calculateClockOffset();
-    for (int i = 0; i < sampleSize; i++) {
-      long scan = calculateScanTimeOffset(clockOffset);
-      samples.add(scan);
-    }
-    scanTimeOffset = calculateMedian(samples);
-    if (DEBUG) {
-      log.info("Scan time offset is " + scanTimeOffset + " seconds.");
-    }
-  }
-
-  /**
    * @return the offset in milliseconds from epoch time to the sensor's internal
    *         uptime clock (i.e.
    *         {@code long sensorTime = System.currentTimeMillis() + offset} and
    *         {@code long epochTime = sensorTime - offset})
    */
-  private long calculateClockOffset() {
+  public long calculateClockOffset() {
+    long startTime = System.currentTimeMillis();
     // Enter time adjust mode
     write("TM0");
     checkTmStatus();
     checkTerminator();
-
     // Read the current time stamp
     final long start = System.currentTimeMillis();
     write("TM1");
@@ -409,42 +357,14 @@ public class Device implements LaserScannerDevice {
     // sensor's time is exactly in between the start time and the current time.
     long offset = readTimestamp() - (start + System.currentTimeMillis()) / 2;
     checkTerminator();
-
     // Leave adjust mode
     write("TM2");
     checkTmStatus();
     checkTerminator();
-
-    return offset;
-  }
-
-  /**
-   * Determine the duration from the time a scan is taken until it is received
-   * (i.e. the age of the scan).
-   * 
-   * Add this offset to system time to get the epoch time of the scan.
-   * 
-   * @return the offset from system time to the time the scan was taken
-   */
-  private long calculateScanTimeOffset(long clockOffset) {
-    write("MD0000076800001");
-    checkMdmsStatus();
-    checkTerminator();
-
-    Preconditions.checkState(read().equals("MD0000076800000"));
-    long startTime = System.currentTimeMillis();
-    checkMdmsStatus();
-
-    // This is the sensor time in epoch time when the scan was taken.
-    long sensorEpochTime = readTimestamp() - clockOffset;
-    while (true) {
-      String line = read(); // Data and checksum or terminating LF
-      if (line.length() == 0) {
-        break;
-      }
-      verifyChecksum(line);
+    if (DEBUG) {
+      log.info(String.format("%d Clock offset is %dms (took %dms).", this.hashCode(), offset,
+          System.currentTimeMillis() - startTime));
     }
-    Preconditions.checkState(sensorEpochTime < startTime);
-    return sensorEpochTime - startTime;
+    return offset;
   }
 }

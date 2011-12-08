@@ -9,11 +9,12 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/android_rosserial</url>
 
-  <depend package="rosjava" />
-  <depend package="rosserial_java" />
   <depend package="android_acm_serial" />
   <depend package="android_gingerbread" />
   <depend package="parsec_msgs" />
+  <depend package="polling_input_stream" />
+  <depend package="rosjava" />
+  <depend package="rosserial_java" />
 
   <export>
     <rosjava-android-app target="android-13" />

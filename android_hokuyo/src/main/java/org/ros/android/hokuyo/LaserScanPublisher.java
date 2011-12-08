@@ -35,7 +35,6 @@ public class LaserScanPublisher implements NodeMain {
 
   private Node node;
   private Publisher<org.ros.message.sensor_msgs.LaserScan> publisher;
-  private Duration nodeTimeOffset;
 
   /**
    * We need a way to adjust time stamps because it is not (easily) possible to
@@ -48,7 +47,6 @@ public class LaserScanPublisher implements NodeMain {
   @Override
   public void onStart(final Node node) {
     this.node = node;
-    nodeTimeOffset = node.getCurrentTime().subtract(Time.fromMillis(System.currentTimeMillis()));
     ParameterTree params = node.newParameterTree();
     final String laserTopic = params.getString("~laser_topic", "laser");
     final String laserFrame = params.getString("~laser_frame", "laser");
@@ -107,7 +105,8 @@ public class LaserScanPublisher implements NodeMain {
     message.range_min = (float) (configuration.getMinimumMeasurment() / 1000.0);
     message.range_max = (float) (configuration.getMaximumMeasurement() / 1000.0);
     message.header.frame_id = laserFrame;
-    message.header.stamp = Time.fromMillis(scan.getTimestamp()).add(nodeTimeOffset);
+    Duration offset = node.getCurrentTime().subtract(Time.fromMillis(System.currentTimeMillis()));
+    message.header.stamp = Time.fromMillis(scan.getTimestamp()).add(offset);
     return message;
   }
 
