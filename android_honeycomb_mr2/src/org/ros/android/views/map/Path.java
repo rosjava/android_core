@@ -42,12 +42,12 @@ public class Path implements OpenGlDrawable {
    * @param resolution
    *          The resolution of the current map.
    */
-   public void update(org.ros.message.nav_msgs.Path path, float resolution) {
+  public void update(org.ros.message.nav_msgs.Path path) {
     float[] pathVertices = new float[path.poses.size() * 3];
     // Add the path coordinates to the array.
     for (int i = 0; i < path.poses.size(); i++) {
-      pathVertices[i * 3] = (float) path.poses.get(i).pose.position.x / resolution;
-      pathVertices[i * 3 + 1] = (float) path.poses.get(i).pose.position.y / resolution;
+      pathVertices[i * 3] = (float) path.poses.get(i).pose.position.x;
+      pathVertices[i * 3 + 1] = (float) path.poses.get(i).pose.position.y;
       pathVertices[i * 3 + 2] = 0f;
     }
     updateVertices(path, pathVertices);

@@ -13,6 +13,7 @@
   <depend package="android_gingerbread" />
   <depend package="sensor_msgs" />
   <depend package="nav_msgs" />
+  <depend package="rosjava_geometry" />
 
   <export>
     <rosjava-android-lib target="android-13" />

@@ -17,7 +17,8 @@
 package org.ros.android.views.map;
 
 import org.ros.message.geometry_msgs.Pose;
-import org.ros.message.geometry_msgs.Quaternion;
+import org.ros.message.geometry_msgs.Vector3;
+import org.ros.rosjava_geometry.Geometry;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -38,20 +39,9 @@ public class Robot implements OpenGlDrawable {
    * Vertices for the robot's shape.
    */
   private FloatBuffer robotVertexBuffer;
-  /**
-   * Vertices for the robot's outline used while zoomed out.
-   */
-  private FloatBuffer robotOutlineVertexBuffer;
 
-  private int robotIndexCount;
   private Pose robotPose;
-  private float robotTheta;
   private float scaleFactor;
-  private int robotOutlineIndexCount;
-
-  public Robot() {
-    robotPose = new Pose();
-  }
 
   public void initFootprint() {
     float[] robotVertices = new float[12];
@@ -60,18 +50,19 @@ public class Robot implements OpenGlDrawable {
     robotVertices[0] = 0f;
     robotVertices[1] = 0f;
     robotVertices[2] = 0f;
-    // -2,-1
-    robotVertices[3] = -2f;
-    robotVertices[4] = -2f;
+
+    robotVertices[3] = -0.1f;
+    robotVertices[4] = -0.1f;
     robotVertices[5] = 0f;
-    // 2,-1
-    robotVertices[6] = 2f;
-    robotVertices[7] = -2f;
+
+    robotVertices[6] = -0.1f;
+    robotVertices[7] = 0.1f;
     robotVertices[8] = 0f;
-    // 0,5
-    robotVertices[9] = 0f;
-    robotVertices[10] = 5f;
+
+    robotVertices[9] = 0.25f;
+    robotVertices[10] = 0.0f;
     robotVertices[11] = 0f;
+
     // Indices for the robot.
     short[] robotIndices = new short[6];
     // Left triangle (counter-clockwise)
@@ -94,87 +85,36 @@ public class Robot implements OpenGlDrawable {
     robotIndexBuffer = robotIndexByteBuffer.asShortBuffer();
     robotIndexBuffer.put(robotIndices);
     robotIndexBuffer.position(0);
-    robotIndexCount = robotIndices.length;
-  }
-
-  public void initOutline() {
-    float[] robotOutlineVertices = new float[12];
-    // The arrow shaped outline of the robot.
-    // -2,-1
-    robotOutlineVertices[0] = -2f;
-    robotOutlineVertices[1] = -2f;
-    robotOutlineVertices[2] = 0f;
-    // 0,0
-    robotOutlineVertices[3] = 0f;
-    robotOutlineVertices[4] = 0f;
-    robotOutlineVertices[5] = 0f;
-    // 2,-1
-    robotOutlineVertices[6] = 2f;
-    robotOutlineVertices[7] = -2f;
-    robotOutlineVertices[8] = 0f;
-    // 0,5
-    robotOutlineVertices[9] = 0f;
-    robotOutlineVertices[10] = 5f;
-    robotOutlineVertices[11] = 0f;
-    ByteBuffer robotOutlineVertexByteBuffer =
-        ByteBuffer.allocateDirect(robotOutlineVertices.length * Float.SIZE / 8);
-    robotOutlineVertexByteBuffer.order(ByteOrder.nativeOrder());
-    robotOutlineVertexBuffer = robotOutlineVertexByteBuffer.asFloatBuffer();
-    robotOutlineVertexBuffer.put(robotOutlineVertices);
-    robotOutlineVertexBuffer.position(0);
-    robotOutlineIndexCount = 4;
   }
 
   @Override
   public void draw(GL10 gl) {
-    drawOutline(gl);
     drawFootprint(gl);
   }
 
-  // TODO(munjaldesai): The robot size should be drawn based on the robot radius
-  // or the footprint published.
   private void drawFootprint(GL10 gl) {
+    if (robotPose == null) {
+      return;
+    }
     gl.glPushMatrix();
     gl.glDisable(GL10.GL_CULL_FACE);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-    gl.glTranslatef((float) robotPose.position.x, (float) robotPose.position.y, 0);
-    gl.glRotatef(robotTheta - 90, 0, 0, 1);
-    gl.glPointSize(15);
-    gl.glVertexPointer(3, GL10.GL_FLOAT, 0, robotVertexBuffer);
-    gl.glColor4f(1f, 0.0f, 0.0f, 1f);
-    gl.glDrawElements(GL10.GL_TRIANGLES, robotIndexCount, GL10.GL_UNSIGNED_SHORT, robotIndexBuffer);
-    gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
-    gl.glPopMatrix();
-  }
-
-  private void drawOutline(GL10 gl) {
-    gl.glPushMatrix();
-    gl.glEnable(GL10.GL_LINE_SMOOTH);
-    gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-    gl.glTranslatef((float) robotPose.position.x, (float) robotPose.position.y, 0);
-    gl.glRotatef(robotTheta - 90, 0, 0, 1);
+    gl.glTranslatef((float) robotPose.position.x, (float) robotPose.position.y, 0.0f);
+    float robotThetaDegrees =
+        (float) Math.toDegrees(Geometry.calculateRotationAngle(robotPose.orientation));
+    Vector3 axis = Geometry.calculateRotationAxis(robotPose.orientation);
+    gl.glRotatef(robotThetaDegrees, (float) axis.x, (float) axis.y, (float) axis.z);
     gl.glScalef(scaleFactor, scaleFactor, scaleFactor);
-    gl.glLineWidth(2);
-    gl.glVertexPointer(3, GL10.GL_FLOAT, 0, robotOutlineVertexBuffer);
-    gl.glColor4f(1f, 1.0f, 1.0f, 1f);
-    gl.glDrawArrays(GL10.GL_LINE_LOOP, 0, robotOutlineIndexCount);
+    gl.glColor4f(0.0f, 0.635f, 1.0f, 0.5f);
+    gl.glVertexPointer(3, GL10.GL_FLOAT, 0, robotVertexBuffer);
+    gl.glDrawElements(GL10.GL_TRIANGLES, robotIndexBuffer.limit(), GL10.GL_UNSIGNED_SHORT,
+        robotIndexBuffer);
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
-    gl.glDisable(GL10.GL_LINE_SMOOTH);
     gl.glPopMatrix();
   }
 
   public void setScaleFactor(float scaleFactor) {
     this.scaleFactor = scaleFactor;
-  }
-
-  private float calculateHeading(Quaternion orientation) {
-    double heading;
-    double w = orientation.w;
-    double x = orientation.x;
-    double y = orientation.z;
-    double z = orientation.y;
-    heading = Math.atan2(2 * y * w - 2 * x * z, x * x - y * y - z * z + w * w) * 180 / Math.PI;
-    return (float) heading;
   }
 
   /**
@@ -185,10 +125,7 @@ public class Robot implements OpenGlDrawable {
    * @param res
    *          The resolution of the map
    */
-  public void updatePose(Pose pose, float res) {
-    this.robotPose = pose;
-    this.robotPose.position.x /= res;
-    this.robotPose.position.y /= res;
-    robotTheta = calculateHeading(pose.orientation);
+  public void updatePose(Pose pose) {
+    robotPose = pose;
   }
 }

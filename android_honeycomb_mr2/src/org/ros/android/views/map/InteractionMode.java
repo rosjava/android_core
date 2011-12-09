@@ -25,14 +25,7 @@ enum InteractionMode {
   // When the user starts moves the map but the distance moved is less than
   // FINAL_MAP_MODE_DISTANCE_THRESHOLD.
   MOVE_MAP,
-  // When the user starts moves the map and the distance moved is greater than
-  // FINAL_MAP_MODE_DISTANCE_THRESHOLD.
-  MOVE_MAP_FINAL_MODE,
-  // When the user is zooming in/out.
-  ZOOM_MAP,
   // When the user is trying to specify a location (either a goal or initial
   // pose).
-  SPECIFY_LOCATION,
-  // When the user is trying to select a region.
-  SELECT_REGION
+  SPECIFY_LOCATION
 }

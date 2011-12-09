@@ -52,7 +52,6 @@ class MapPoints {
     // Initialize the other components of the OpenGL display (if needed).
     if (!ready) {
       initRobot();
-      initRobotOutline();
       initCurrentGoal();
       initUserGoal();
       initPath();
@@ -61,8 +60,8 @@ class MapPoints {
     }
   }
 
-  public void updatePath(org.ros.message.nav_msgs.Path newPath, float res) {
-    path.update(newPath, res);
+  public void updatePath(org.ros.message.nav_msgs.Path newPath) {
+    path.update(newPath);
   }
 
   public void drawMap(GL10 gl) {
@@ -74,18 +73,6 @@ class MapPoints {
   public void drawPath(GL10 gl) {
     if (ready) {
       path.draw(gl);
-    }
-  }
-
-  /**
-   * Renders the region currently selected by the user as a rectangle.
-   * 
-   * @param gl
-   *          Instance of the GL interface.
-   */
-  public void drawRegion(GL10 gl) {
-    if (ready) {
-      region.draw(gl);
     }
   }
 
@@ -135,20 +122,16 @@ class MapPoints {
     }
   }
 
-  public void updateRobotPose(Pose pose, float res) {
-    robot.updatePose(pose, res);
+  public void updateRobotPose(Pose pose) {
+    robot.updatePose(pose);
   }
 
-  public void updateCurrentGoalPose(Pose pose, float res) {
-    currentGoal.updatePose(pose, res);
+  public void updateCurrentGoalPose(Pose pose) {
+    currentGoal.updatePose(pose);
   }
 
-  public void updateUserGoalLocation(Point realWorldLocation) {
-    userGoal.updateUserGoalLocation(realWorldLocation);
-  }
-
-  public void updateUserGoalOrientation(float theta) {
-    userGoal.updateUserGoalOrientation(theta);
+  public void updateUserGoal(Pose goal) {
+    userGoal.updateUserGoal(goal);
   }
 
   /**
@@ -167,10 +150,6 @@ class MapPoints {
 
   private void initRobot() {
     robot.initFootprint();
-  }
-
-  private void initRobotOutline() {
-    robot.initOutline();
   }
 
   private void initCurrentGoal() {

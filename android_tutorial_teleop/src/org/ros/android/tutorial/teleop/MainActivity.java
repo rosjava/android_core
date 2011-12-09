@@ -139,10 +139,6 @@ public class MainActivity extends Activity {
       mapView.initialPose();
       return true;
     }
-    case R.id.map_view_annotate_region: {
-      mapView.annotateRegion();
-      return true;
-    }
     case R.id.virtual_joystick_snap: {
       if (!item.isChecked()) {
         item.setChecked(true);

@@ -16,7 +16,9 @@
 
 package org.ros.android.views.map;
 
-import android.graphics.Point;
+import org.ros.message.geometry_msgs.Pose;
+import org.ros.message.geometry_msgs.Vector3;
+import org.ros.rosjava_geometry.Geometry;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -32,17 +34,19 @@ public class UserGoal extends Goal {
 
   @Override
   public void draw(GL10 gl) {
-    System.err.print("Drawing user goal.");
     gl.glPushMatrix();
     gl.glDisable(GL10.GL_CULL_FACE);
     gl.glFrontFace(GL10.GL_CW);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
     gl.glTranslatef((float) pose.position.x, (float) pose.position.y, 0);
-    gl.glRotatef(theta - 90, 0, 0, 1);
+    float thetaDegrees = (float) Math.toDegrees(Geometry.calculateRotationAngle(pose.orientation));
+    Vector3 axis = Geometry.calculateRotationAxis(pose.orientation);
+    gl.glRotatef(thetaDegrees, (float) axis.x, (float) axis.y, (float) axis.z);
     gl.glScalef(getScaleFactor(), getScaleFactor(), getScaleFactor());
+    gl.glScalef(1.5f, 1.5f, 1.5f);
     gl.glColor4f(0.847058824f, 0.243137255f, 0.8f, 1f);
-    gl.glDrawArrays(GL10.GL_TRIANGLE_FAN, 0, goalIndexCount);
+    gl.glDrawArrays(GL10.GL_TRIANGLE_FAN, 0, vertexBuffer.limit() / 3);
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glPopMatrix();
   }
@@ -54,32 +58,32 @@ public class UserGoal extends Goal {
     goalVertices[1] = 0f;
     goalVertices[2] = 0f;
     goalVertices[3] = 0f;
-    goalVertices[4] = 21f;
+    goalVertices[4] = 0.21f;
     goalVertices[5] = 0f;
-    goalVertices[6] = 3f;
-    goalVertices[7] = 3f;
+    goalVertices[6] = 0.03f;
+    goalVertices[7] = 0.03f;
     goalVertices[8] = 0f;
-    goalVertices[9] = 10.5f;
+    goalVertices[9] = 0.105f;
     goalVertices[10] = 0f;
     goalVertices[11] = 0f;
-    goalVertices[12] = 3f;
-    goalVertices[13] = -3f;
+    goalVertices[12] = 0.03f;
+    goalVertices[13] = -0.03f;
     goalVertices[14] = 0f;
     goalVertices[15] = 0f;
-    goalVertices[16] = -10.5f;
+    goalVertices[16] = -0.105f;
     goalVertices[17] = 0f;
-    goalVertices[18] = -3f;
-    goalVertices[19] = -3f;
+    goalVertices[18] = -0.03f;
+    goalVertices[19] = -0.03f;
     goalVertices[20] = 0f;
-    goalVertices[21] = -10.5f;
+    goalVertices[21] = -0.105f;
     goalVertices[22] = 0f;
     goalVertices[23] = 0f;
-    goalVertices[24] = -3f;
-    goalVertices[25] = 3f;
+    goalVertices[24] = -0.03f;
+    goalVertices[25] = 0.03f;
     goalVertices[26] = 0f;
     // Repeat of point 1
     goalVertices[27] = 0f;
-    goalVertices[28] = 21f;
+    goalVertices[28] = 0.21f;
     goalVertices[29] = 0f;
     ByteBuffer goalVertexByteBuffer =
         ByteBuffer.allocateDirect(goalVertices.length * Float.SIZE / 8);
@@ -100,22 +104,10 @@ public class UserGoal extends Goal {
   /**
    * Update the location of the goal that the user is trying to specify.
    * 
-   * @param realWorldLocation
-   *          The real world coordinates (in meters) representing the location
-   *          of the user's desired goal.
+   * @param goal
+   *          the user goal
    */
-  public void updateUserGoalLocation(Point realWorldLocation) {
-    pose.position.x = -realWorldLocation.x;
-    pose.position.y = -realWorldLocation.y;
-  }
-
-  /**
-   * Update the orientation of the goal that the user is trying to specify.
-   * 
-   * @param theta
-   *          The orientation of the desired goal in degrees.
-   */
-  public void updateUserGoalOrientation(float theta) {
-    this.theta = theta;
+  public void updateUserGoal(Pose goal) {
+    pose = goal;
   }
 }

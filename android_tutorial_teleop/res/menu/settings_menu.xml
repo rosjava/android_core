@@ -4,7 +4,6 @@
     android:showAsAction="ifRoom|withText">
     <menu>
       <item android:id="@+id/map_view_initial_pose" android:title="Set initial pose" />
-      <item android:id="@+id/map_view_annotate_region" android:title="Annotate region" />
       <group android:checkableBehavior="all">
         <item android:id="@+id/map_view_robot_centric_view" android:title="Lock to robot" />
       </group>
