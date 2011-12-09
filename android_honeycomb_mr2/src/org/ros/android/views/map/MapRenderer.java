@@ -205,7 +205,7 @@ class MapRenderer implements GLSurfaceView.Renderer {
   public Pose toOpenGLPose(android.graphics.Point goalScreenPoint, float orientation) {
     Pose goal = new Pose();
     goal.position = toOpenGLCoordinates(goalScreenPoint);
-    goal.orientation = Geometry.axisAngleToQuaternion(0, 0, -1, Math.PI + orientation);
+    goal.orientation = Geometry.axisAngleToQuaternion(0, 0, -1, orientation + Math.PI / 2);
     return goal;
   }
 

@@ -51,7 +51,10 @@ public class Goal implements OpenGlDrawable {
     Vector3 axis = Geometry.calculateRotationAxis(pose.orientation);
     gl.glRotatef((float) Math.toDegrees(Geometry.calculateRotationAngle(pose.orientation)),
         (float) axis.x, (float) axis.y, (float) axis.z);
-    gl.glRotatef(180, 0, 0, 1);
+    // The mesh is oriented along the y-axis. The ROS coordinate system wants it
+    // along the x-axis, so rotate it.
+    gl.glRotatef(90, 0, 0, 1);
+    gl.glScalef(1.5f, 1.5f, 1.5f);
     gl.glColor4f(0.180392157f, 0.71372549f, 0.909803922f, 0.5f);
     gl.glDrawArrays(GL10.GL_TRIANGLE_FAN, 0, vertexBuffer.limit() / 3);
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);

@@ -43,6 +43,9 @@ public class UserGoal extends Goal {
     float thetaDegrees = (float) Math.toDegrees(Geometry.calculateRotationAngle(pose.orientation));
     Vector3 axis = Geometry.calculateRotationAxis(pose.orientation);
     gl.glRotatef(thetaDegrees, (float) axis.x, (float) axis.y, (float) axis.z);
+    // The mesh is oriented along the y axis. Rotate it to have it oriented
+    // along the y axis.
+    gl.glRotatef(-90, 0, 0, 1);
     gl.glScalef(getScaleFactor(), getScaleFactor(), getScaleFactor());
     gl.glScalef(1.5f, 1.5f, 1.5f);
     gl.glColor4f(0.847058824f, 0.243137255f, 0.8f, 1f);
