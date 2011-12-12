@@ -1,0 +1,23 @@
+<launch>
+  <node name="compressed_occupancy_grid" type="compressed_occupancy_grid_publisher.py"
+        pkg="compressed_visualization_transport">
+    <remap from="~compressed_map" to="/android/map_view/compressed_map" />    
+    <rosparam>
+      width: 1024
+      height: 1024
+      colors:
+        # Colors are in RGBA format, i.e. the first value corresponds
+        # to red, the last to alpha.
+        occupied: [0xcc, 0x19, 0x19, 0xff]
+        free: [0x7f, 0x7f, 0x7f, 0xff]
+        unknown: [0x00, 0x00, 0x00, 0xff]
+    </rosparam>
+  </node>
+  <node name="robot_map_pose_publisher" type="tf_frame_map_pose_publisher"
+        pkg="compressed_visualization_transport">
+    <remap from="~frame_pose" to="/android/map_view/pose" />
+    <rosparam>
+      frame_id: base_footprint
+    </rosparam>
+  </node>
+</launch>

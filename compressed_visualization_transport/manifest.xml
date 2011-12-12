@@ -1,0 +1,17 @@
+<package>
+  <description brief="compressed_visualization_transport">
+
+     compressed_visualization_transport
+
+  </description>
+  <author>Lorenz Moesenlechner</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes="" />
+  <url>http://ros.org/wiki/compressed_visualization_transport</url>
+  <depend package="roscpp" />
+  <depend package="rospy" />
+  <depend package="tf" />
+  <depend package="nav_msgs" />
+  <depend package="compressed_visualization_transport_msgs" />
+  <depend package="geometry_msgs" />
+</package>

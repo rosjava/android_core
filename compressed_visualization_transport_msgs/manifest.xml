@@ -1,0 +1,16 @@
+<package>
+  <description brief="lightweight_navigation_visualization_msgs">
+
+     lightweight_navigation_visualization_msgs
+
+  </description>
+  <author>Lorenz Moesenlechner</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/lightweight_navigation_visualization_msgs</url>
+  <depend package="nav_msgs"/>
+  <depend package="geometry_msgs"/>
+
+</package>
+
+
