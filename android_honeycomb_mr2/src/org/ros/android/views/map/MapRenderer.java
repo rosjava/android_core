@@ -16,7 +16,11 @@
 
 package org.ros.android.views.map;
 
+import com.google.common.base.Preconditions;
+
+import android.graphics.Bitmap;
 import android.opengl.GLSurfaceView;
+import org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap;
 import org.ros.message.geometry_msgs.Point;
 import org.ros.message.geometry_msgs.Pose;
 import org.ros.message.nav_msgs.OccupancyGrid;
@@ -125,11 +129,22 @@ class MapRenderer implements GLSurfaceView.Renderer {
   }
 
   public void updateMap(OccupancyGrid newMap) {
-    map.updateMap(newMap);
+    Bitmap mapBitmap = MapTextureBitmap.createFromOccupancyGrid(newMap);
+    map.updateMapFromBitmap(newMap.info.origin, newMap.info.resolution, mapBitmap);
     topLeftMapPoint.x = (float) newMap.info.origin.position.x;
     topLeftMapPoint.y = (float) newMap.info.origin.position.y;
     bottomRightMapPoint.x = (float) topLeftMapPoint.x + newMap.info.width * newMap.info.resolution;
     bottomRightMapPoint.y = (float) topLeftMapPoint.y + newMap.info.height * newMap.info.resolution;
+  }
+
+  public void updateCompressedMap(CompressedBitmap compressedMap) {
+    Preconditions.checkArgument(compressedMap.resolution_x == compressedMap.resolution_y);
+    Bitmap mapBitmap = MapTextureBitmap.createFromCompressedBitmap(compressedMap);
+    map.updateMapFromBitmap(compressedMap.origin, compressedMap.resolution_x, mapBitmap);
+    topLeftMapPoint.x = (float) compressedMap.origin.position.x;
+    topLeftMapPoint.y = (float) compressedMap.origin.position.y;
+    bottomRightMapPoint.x = (float) topLeftMapPoint.x + mapBitmap.getWidth() * compressedMap.resolution_x;
+    bottomRightMapPoint.y = (float) topLeftMapPoint.y + mapBitmap.getHeight() * compressedMap.resolution_y;
   }
 
   public void updatePath(Path path) {

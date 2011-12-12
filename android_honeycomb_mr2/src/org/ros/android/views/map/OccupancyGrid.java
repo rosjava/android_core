@@ -16,6 +16,10 @@
 
 package org.ros.android.views.map;
 
+import com.google.common.base.Preconditions;
+
+import android.graphics.Bitmap;
+import org.ros.message.geometry_msgs.Pose;
 import org.ros.rosjava_geometry.Geometry;
 
 import java.nio.ByteBuffer;
@@ -33,7 +37,10 @@ public class OccupancyGrid implements OpenGlDrawable {
   private OccupancyGridTexture texture;
   private FloatBuffer vertexBuffer;
   private FloatBuffer textureBuffer;
-  private org.ros.message.nav_msgs.OccupancyGrid occupancyGrid;
+  private Pose origin;
+  private double resolution;
+  private double width;
+  private double height;
 
   public OccupancyGrid() {
     float vertexCoordinates[] = {
@@ -71,9 +78,13 @@ public class OccupancyGrid implements OpenGlDrawable {
    * @param newOccupancyGrid
    *          OccupancyGrid representing the map data.
    */
-  public void update(org.ros.message.nav_msgs.OccupancyGrid newOccupancyGrid) {
-    occupancyGrid = newOccupancyGrid;
-    texture.updateTextureFromOccupancyGrid(newOccupancyGrid);
+  public void update(Pose newOrigin, double newResolution, Bitmap newBitmap) {
+    origin = newOrigin;
+    resolution = newResolution;
+    width = newBitmap.getWidth() * resolution;
+    height = newBitmap.getHeight() * resolution;
+    Preconditions.checkArgument(width == height);
+    texture.updateTexture(newBitmap);
   }
 
   @Override
@@ -91,15 +102,11 @@ public class OccupancyGrid implements OpenGlDrawable {
       return;
     }
     gl.glPushMatrix();
-    float scaleFactor = texture.getTextureSize() * occupancyGrid.info.resolution;
-    gl.glTranslatef((float) occupancyGrid.info.origin.position.x,
-        (float) occupancyGrid.info.origin.position.y, (float) occupancyGrid.info.origin.position.z);
-    org.ros.message.geometry_msgs.Vector3 axis =
-        Geometry.calculateRotationAxis(occupancyGrid.info.origin.orientation);
-    gl.glRotatef(
-        (float) Math.toDegrees(Geometry.calculateRotationAngle(occupancyGrid.info.origin.orientation)),
+    gl.glTranslatef((float) origin.position.x, (float) origin.position.y, (float) origin.position.z);
+    org.ros.message.geometry_msgs.Vector3 axis = Geometry.calculateRotationAxis(origin.orientation);
+    gl.glRotatef((float) Math.toDegrees(Geometry.calculateRotationAngle(origin.orientation)),
         (float) axis.x, (float) axis.y, (float) axis.z);
-    gl.glScalef(scaleFactor, scaleFactor, 1.0f);
+    gl.glScalef((float) width, (float) height, 1.0f);
     gl.glEnable(GL10.GL_TEXTURE_2D);
     gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);

@@ -25,6 +25,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import org.ros.message.MessageListener;
+import org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.message.geometry_msgs.PoseWithCovarianceStamped;
 import org.ros.message.nav_msgs.OccupancyGrid;
@@ -63,6 +64,10 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
    * Topic name for the subscribed path.
    */
   private static final String PATH_TOPIC = "~global_plan";
+  /**
+   * Topic name for the compressed map.
+   */
+  private static final String COMPRESSED_MAP_TOPIC = "~compressed_map";
   /**
    * Time in milliseconds after which taps are not considered to be double taps.
    */
@@ -214,10 +219,26 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
           public void run() {
             // Update the path on the map.
             mapRenderer.updatePath(path);
+            requestRender();
           }
         });
       }
     });
+    node.newSubscriber(COMPRESSED_MAP_TOPIC,
+        "compressed_visualization_transport_msgs/CompressedBitmap",
+        new MessageListener<CompressedBitmap>() {
+          @Override
+          public void onNewMessage(final CompressedBitmap compressedMap) {
+            // TODO Auto-generated method stub
+            post(new Runnable() {
+              @Override
+              public void run() {
+                mapRenderer.updateCompressedMap(compressedMap);
+                requestRender();
+              }
+            });
+          }
+        });
     // Start listening for touch events.
     setOnTouchListener(this);
   }
@@ -372,7 +393,6 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
     previousContact[0].y = (int) event.getY(0);
     goalContact.x = previousContact[0].x;
     goalContact.y = previousContact[0].y;
-    System.out.println("goal contact: " + goalContact);
     previousContactDownTime = Calendar.getInstance().getTimeInMillis();
     return returnValue;
   }

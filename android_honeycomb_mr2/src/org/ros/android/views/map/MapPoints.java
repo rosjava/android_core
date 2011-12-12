@@ -16,6 +16,7 @@
 
 package org.ros.android.views.map;
 
+import android.graphics.Bitmap;
 import android.graphics.Point;
 import org.ros.message.geometry_msgs.Pose;
 
@@ -47,8 +48,8 @@ class MapPoints {
     region = new Region();
   }
 
-  public void updateMap(org.ros.message.nav_msgs.OccupancyGrid newMap) {
-    occupancyGrid.update(newMap);
+  public void updateMapFromBitmap(Pose origin, double resolution, Bitmap mapBitmap) {
+    occupancyGrid.update(origin, resolution, mapBitmap);
     // Initialize the other components of the OpenGL display (if needed).
     if (!ready) {
       initRobot();
