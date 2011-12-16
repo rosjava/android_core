@@ -113,12 +113,6 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
   }
 
   @Override
-  public void onShutdown(Node node) {
-    // Save the existing settings before exiting.
-    distanceRenderer.savePreferences(this.getContext());
-  }
-
-  @Override
   public void onNewMessage(final LaserScan message) {
     queueEvent(new Runnable() {
       @Override
@@ -215,5 +209,15 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
 
   private double calculateDistance(float x1, float y1, float x2, float y2) {
     return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+  }
+
+  @Override
+  public void onShutdown(Node node) {
+  }
+
+  @Override
+  public void onShutdownComplete(Node arg0) {
+    // Save the existing settings before exiting.
+    distanceRenderer.savePreferences(this.getContext());
   }
 }

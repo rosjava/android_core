@@ -114,4 +114,8 @@ public class LaserScanPublisher implements NodeMain {
   void setNode(Node node) {
     this.node = node;
   }
+
+  @Override
+  public void onShutdownComplete(Node node) {
+  }
 }

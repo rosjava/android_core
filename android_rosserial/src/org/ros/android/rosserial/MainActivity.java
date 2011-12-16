@@ -69,7 +69,7 @@ public class MainActivity extends AcmDeviceActivity {
             getMasterUri());
     nodeConfiguration.setNodeName("rosserial");
     NtpTimeProvider ntpTimeProvider =
-        new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"));
+        new NtpTimeProvider(InetAddressFactory.newFromHostString("192.168.0.1"));
     ntpTimeProvider.startPeriodicUpdates(5, TimeUnit.MINUTES);
     nodeConfiguration.setTimeProvider(ntpTimeProvider);
     nodeRunner.run(

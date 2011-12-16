@@ -28,7 +28,6 @@ class Clock {
 
   private final Device device;
 
-  private long timestamp;
   private long offset;
   private long previousOffset;
   private double deltaOffset;
@@ -37,7 +36,7 @@ class Clock {
   public Clock(Device device) {
     this.device = device;
   }
-
+  
   public void init() {
     offset = device.calculateClockOffset();
     previousOffset = offset;

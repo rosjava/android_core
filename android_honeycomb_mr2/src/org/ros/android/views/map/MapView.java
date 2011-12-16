@@ -238,10 +238,6 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
   }
 
   @Override
-  public void onShutdown(Node node) {
-  }
-
-  @Override
   public boolean onTouch(View v, MotionEvent event) {
     final int action = event.getAction();
     switch (action & MotionEvent.ACTION_MASK) {
@@ -503,5 +499,13 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
       return true;
     }
     return false;
+  }
+
+  @Override
+  public void onShutdown(Node node) {
+  }
+
+  @Override
+  public void onShutdownComplete(Node node) {
   }
 }

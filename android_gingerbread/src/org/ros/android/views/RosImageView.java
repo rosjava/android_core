@@ -80,4 +80,8 @@ public class RosImageView<T> extends ImageView implements NodeMain {
   @Override
   public void onShutdown(Node node) {
   }
+
+  @Override
+  public void onShutdownComplete(Node node) {
+  }
 }
