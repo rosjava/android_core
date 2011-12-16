@@ -22,6 +22,7 @@ import org.ros.message.MessageListener;
 import org.ros.message.sensor_msgs.LaserScan;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
+import org.ros.node.topic.Subscriber;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -38,16 +39,17 @@ public class LaserScanSubscriber implements NodeMain {
 
   @Override
   public void onStart(Node node) {
-    node.newSubscriber("laser", "sensor_msgs/LaserScan",
-        new MessageListener<org.ros.message.sensor_msgs.LaserScan>() {
-          @Override
-          public void onNewMessage(LaserScan message) {
-            assertEquals(3, message.ranges.length);
-            laserScanReceived.countDown();
-            // TODO(moesenle): Check that the fake laser data is equal to
-            // the received message.
-          }
-        });
+    Subscriber<org.ros.message.sensor_msgs.LaserScan> subscriber =
+        node.newSubscriber("laser", "sensor_msgs/LaserScan");
+    subscriber.addMessageListener(new MessageListener<org.ros.message.sensor_msgs.LaserScan>() {
+      @Override
+      public void onNewMessage(LaserScan message) {
+        assertEquals(3, message.ranges.length);
+        laserScanReceived.countDown();
+        // TODO(moesenle): Check that the fake laser data is equal to
+        // the received message.
+      }
+    });
   }
 
   @Override

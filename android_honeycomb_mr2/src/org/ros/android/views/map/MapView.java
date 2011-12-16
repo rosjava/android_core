@@ -36,6 +36,7 @@ import org.ros.message.nav_msgs.Path;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 import java.util.Calendar;
 
@@ -168,60 +169,64 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
     initialPose =
         node.newPublisher(INITIAL_POSE_TOPIC_NAME, "geometry_msgs/PoseWithCovarianceStamped");
     // Subscribe to the map.
-    node.newSubscriber(MAP_TOPIC_NAME, "nav_msgs/OccupancyGrid",
-        new MessageListener<OccupancyGrid>() {
+    Subscriber<org.ros.message.nav_msgs.OccupancyGrid> occupancyGridSubscriber =
+        node.newSubscriber(MAP_TOPIC_NAME, "nav_msgs/OccupancyGrid");
+    occupancyGridSubscriber.addMessageListener(new MessageListener<OccupancyGrid>() {
+      @Override
+      public void onNewMessage(final OccupancyGrid map) {
+        post(new Runnable() {
           @Override
-          public void onNewMessage(final OccupancyGrid map) {
-            post(new Runnable() {
-              @Override
-              public void run() {
-                // Show the map.
-                mapRenderer.updateMap(map);
-                mapMetaData = map.info;
-                // If this is the first time map data is received then center
-                // the camera on the map.
-                if (!firstMapRendered) {
-                  mapRenderer.moveCamera(-mapMetaData.width / 2, -mapMetaData.height / 2);
-                  firstMapRendered = true;
-                }
-                requestRender();
-              }
-            });
+          public void run() {
+            // Show the map.
+            mapRenderer.updateMap(map);
+            mapMetaData = map.info;
+            // If this is the first time map data is received then center
+            // the camera on the map.
+            if (!firstMapRendered) {
+              mapRenderer.moveCamera(-mapMetaData.width / 2, -mapMetaData.height / 2);
+              firstMapRendered = true;
+            }
+            requestRender();
           }
         });
+      }
+    });
     // Subscribe to the pose.
-    node.newSubscriber(ROBOT_POSE_TOPIC, "geometry_msgs/PoseStamped",
-        new MessageListener<PoseStamped>() {
+    Subscriber<PoseStamped> robotPoseSubscriber =
+        node.newSubscriber(ROBOT_POSE_TOPIC, "geometry_msgs/PoseStamped");
+    robotPoseSubscriber.addMessageListener(new MessageListener<PoseStamped>() {
+      @Override
+      public void onNewMessage(final PoseStamped message) {
+        post(new Runnable() {
           @Override
-          public void onNewMessage(final PoseStamped message) {
-            post(new Runnable() {
-              @Override
-              public void run() {
-                poseFrameId = message.header.frame_id;
-                // Update the robot's location on the map.
-                mapRenderer.updateRobotPose(message.pose, mapMetaData.resolution);
-                requestRender();
-              }
-            });
+          public void run() {
+            poseFrameId = message.header.frame_id;
+            // Update the robot's location on the map.
+            mapRenderer.updateRobotPose(message.pose, mapMetaData.resolution);
+            requestRender();
           }
         });
+      }
+    });
     // Subscribe to the current goal.
-    node.newSubscriber(SIMPLE_GOAL_TOPIC, "geometry_msgs/PoseStamped",
-        new MessageListener<PoseStamped>() {
+    Subscriber<PoseStamped> simpleGoalSubscriber =
+        node.newSubscriber(SIMPLE_GOAL_TOPIC, "geometry_msgs/PoseStamped");
+    simpleGoalSubscriber.addMessageListener(new MessageListener<PoseStamped>() {
+      @Override
+      public void onNewMessage(final PoseStamped goal) {
+        post(new Runnable() {
           @Override
-          public void onNewMessage(final PoseStamped goal) {
-            post(new Runnable() {
-              @Override
-              public void run() {
-                // Update the location of the current goal on the map.
-                mapRenderer.updateCurrentGoalPose(goal.pose, mapMetaData.resolution);
-                requestRender();
-              }
-            });
+          public void run() {
+            // Update the location of the current goal on the map.
+            mapRenderer.updateCurrentGoalPose(goal.pose, mapMetaData.resolution);
+            requestRender();
           }
         });
+      }
+    });
     // Subscribe to the current path plan.
-    node.newSubscriber(PATH_TOPIC, "nav_msgs/Path", new MessageListener<Path>() {
+    Subscriber<Path> pathSubscriber = node.newSubscriber(PATH_TOPIC, "nav_msgs/Path");
+    pathSubscriber.addMessageListener(new MessageListener<Path>() {
       @Override
       public void onNewMessage(final Path path) {
         post(new Runnable() {

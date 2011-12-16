@@ -39,6 +39,7 @@ import org.ros.message.nav_msgs.Odometry;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 import java.net.URI;
 import java.util.Timer;
@@ -270,7 +271,8 @@ public class VirtualJoystickView extends RelativeLayout implements OnTouchListen
       node = new DefaultNodeFactory().newNode(nodeConfiguration);
       publisher = node.newPublisher("~cmd_vel", "geometry_msgs/Twist");
       publisher.setQueueLimit(1);
-      node.newSubscriber("odom", "nav_msgs/Odometry", this);
+      Subscriber<Odometry> newSubscriber = node.newSubscriber("odom", "nav_msgs/Odometry");
+      newSubscriber.addMessageListener(this);
       publisherTimer.schedule(timerTask, 0, 80);
     } catch (Exception e) {
       if (node != null) {

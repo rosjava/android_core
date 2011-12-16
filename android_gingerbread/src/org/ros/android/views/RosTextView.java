@@ -23,6 +23,7 @@ import org.ros.android.MessageCallable;
 import org.ros.message.MessageListener;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
+import org.ros.node.topic.Subscriber;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -59,7 +60,8 @@ public class RosTextView<T> extends TextView implements NodeMain {
 
   @Override
   public void onStart(Node node) {
-    node.newSubscriber(topicName, messageType, new MessageListener<T>() {
+    Subscriber<T> subscriber = node.newSubscriber(topicName, messageType);
+    subscriber.addMessageListener(new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {
         if (callable != null) {
@@ -87,6 +89,6 @@ public class RosTextView<T> extends TextView implements NodeMain {
   }
 
   @Override
-  public void onShutdownComplete(Node arg0) {
+  public void onShutdownComplete(Node node) {
   }
 }

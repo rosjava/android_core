@@ -27,6 +27,7 @@ import org.ros.message.geometry_msgs.Twist;
 import org.ros.message.sensor_msgs.LaserScan;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
+import org.ros.node.topic.Subscriber;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,10 +94,14 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
   @Override
   public void onStart(Node node) {
     // Subscribe to the laser scans.
-    node.newSubscriber(laserTopic, "sensor_msgs/LaserScan", this);
+    Subscriber<org.ros.message.sensor_msgs.LaserScan> laserScanSubscriber =
+        node.newSubscriber(laserTopic, "sensor_msgs/LaserScan");
+    laserScanSubscriber.addMessageListener(this);
     // Subscribe to the command velocity. This is needed for auto adjusting the
     // zoom in ZoomMode.VELOCITY_ZOOM_MODE mode.
-    node.newSubscriber("cmd_vel", "geometry_msgs/Twist", new MessageListener<Twist>() {
+    Subscriber<org.ros.message.geometry_msgs.Twist> twistSubscriber =
+        node.newSubscriber("cmd_vel", "geometry_msgs/Twist");
+    twistSubscriber.addMessageListener(new MessageListener<Twist>() {
       @Override
       public void onNewMessage(final Twist robotVelocity) {
         post(new Runnable() {
@@ -196,8 +201,8 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
         }
         break;
       }
-        // When the second contact touches the screen initialize contactDistance
-        // for the immediate round of interaction.
+      // When the second contact touches the screen initialize contactDistance
+      // for the immediate round of interaction.
       case MotionEvent.ACTION_POINTER_1_DOWN: {
         contactDistance =
             calculateDistance(event.getX(0), event.getY(0), event.getX(1), event.getY(1));
