@@ -66,11 +66,6 @@ class MapRenderer implements GLSurfaceView.Renderer {
    */
   private float scalingFactor = 0.1f;
   /**
-   * True when the map is supposed to be in the robot centric mode and false
-   * when the map is supposed to be in the map centric mode.
-   */
-  private boolean robotCentricMode;
-  /**
    * True when the camera should follow the robot in the map centric mode, false
    * otherwise.
    */
@@ -151,11 +146,20 @@ class MapRenderer implements GLSurfaceView.Renderer {
     map.updatePath(path);
   }
 
-  public void moveCamera(android.graphics.Point point) {
+  /**
+   * Performs a (relative) movement of the camera. The distances are specified
+   * in the Android device's coordinate system, _not_ in OpenGL coordinates.
+   * 
+   * @param distanceX
+   *          distance along X to move
+   * @param distanceY
+   *          distance along Y to move
+   */
+  public void moveCamera(float distanceX, float distanceY) {
     // Point is the relative movement in pixels on the viewport. We need to
     // scale this by width end height of the viewport.
-    cameraPoint.x += (float) point.y / viewport.y / scalingFactor;
-    cameraPoint.y += (float) point.x / viewport.x / scalingFactor;
+    cameraPoint.x -= distanceY / viewport.y / scalingFactor;
+    cameraPoint.y -= distanceX / viewport.x / scalingFactor;
     disableCenterOnRobot();
   }
 
@@ -246,7 +250,6 @@ class MapRenderer implements GLSurfaceView.Renderer {
    *          centric mode.
    */
   public void setViewMode(boolean isRobotCentricMode) {
-    robotCentricMode = isRobotCentricMode;
   }
 
   public void updateCurrentGoalPose(Pose goalPose) {
