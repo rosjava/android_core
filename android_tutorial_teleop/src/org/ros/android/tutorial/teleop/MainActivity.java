@@ -200,10 +200,10 @@ public class MainActivity extends RosActivity {
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(
             InetAddressFactory.newNonLoopback().getHostAddress().toString(), getMasterUri());
-    virtualJoy.setMasterUri(nodeConfiguration.getMasterUri());
     // Start the nodes.
     nodeRunner.run(distanceView, nodeConfiguration.setNodeName("android/distance_view"));
     nodeRunner.run(mapView, nodeConfiguration.setNodeName("android/map_view"));
+    nodeRunner.run(virtualJoy, nodeConfiguration.setNodeName("virtual_joystick"));
     // nodeRunner.run(video,
     // nodeConfiguration.setNodeName("android/video_view"));
   }

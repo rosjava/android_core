@@ -21,8 +21,6 @@ import android.graphics.Point;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
@@ -32,15 +30,12 @@ import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import org.ros.address.InetAddressFactory;
-import org.ros.internal.node.DefaultNodeFactory;
 import org.ros.message.MessageListener;
 import org.ros.message.nav_msgs.Odometry;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
-import java.net.URI;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -51,8 +46,8 @@ import java.util.TimerTask;
  * 
  * @author munjaldesai@google.com (Munjal Desai)
  */
-public class VirtualJoystickView extends RelativeLayout implements OnTouchListener,
-    AnimationListener, MessageListener<org.ros.message.nav_msgs.Odometry> {
+public class VirtualJoystickView extends RelativeLayout implements AnimationListener,
+    MessageListener<org.ros.message.nav_msgs.Odometry>, NodeMain {
 
   /**
    * BOX_TO_CIRCLE_RATIO The dimensions of the square box that contains the
@@ -96,7 +91,6 @@ public class VirtualJoystickView extends RelativeLayout implements OnTouchListen
   private static final float POST_LOCK_MAGNET_THETA = 20.0f;
   private static final int INVALID_POINTER_ID = -1;
   private Publisher<org.ros.message.geometry_msgs.Twist> publisher;
-  private Node node;
   /**
    * mainLayout The parent layout that contains all the elements of the virtual
    * joystick.
@@ -234,15 +228,8 @@ public class VirtualJoystickView extends RelativeLayout implements OnTouchListen
    * Used to publish velocity commands at a specific rate.
    */
   private Timer publisherTimer;
-  org.ros.message.geometry_msgs.Twist vel = new org.ros.message.geometry_msgs.Twist();
-  TimerTask timerTask = new TimerTask() {
-    @Override
-    public void run() {
-      if (publishVelocity) {
-        publisher.publish(vel);
-      }
-    }
-  };
+  private org.ros.message.geometry_msgs.Twist currentVelocityCommand =
+      new org.ros.message.geometry_msgs.Twist();
 
   public VirtualJoystickView(Context context) {
     super(context);
@@ -252,33 +239,6 @@ public class VirtualJoystickView extends RelativeLayout implements OnTouchListen
     LayoutInflater.from(context).inflate(org.ros.android.R.layout.virtual_joystick, this,
         true);
     initVirtualJoystick();
-  }
-
-  /**
-   * Initialize the node and register the publisher and subscriber.
-   * 
-   * @param masterUri
-   *          The address of the master node.
-   */
-  // TODO(damonkohler): VirtualJoystickView should be a NodeMain.
-  private void initNode(final URI masterUri) {
-    try {
-      NodeConfiguration nodeConfiguration =
-          NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress()
-              .toString(), masterUri);
-      nodeConfiguration.setNodeName("virtual_joystick");
-      node = new DefaultNodeFactory().newNode(nodeConfiguration);
-      publisher = node.newPublisher("~cmd_vel", "geometry_msgs/Twist");
-      publisher.setQueueLimit(1);
-      node.newSubscriber("odom", "nav_msgs/Odometry", this);
-      publisherTimer.schedule(timerTask, 0, 80);
-    } catch (Exception e) {
-      if (node != null) {
-        node.getLog().fatal(e);
-      } else {
-        android.util.Log.e("VIRTUAL_JOYSTICK", e.toString());
-      }
-    }
   }
 
   @Override
@@ -323,7 +283,7 @@ public class VirtualJoystickView extends RelativeLayout implements OnTouchListen
   }
 
   @Override
-  public boolean onTouch(View v, MotionEvent event) {
+  public boolean onTouchEvent(MotionEvent event) {
     final int action = event.getAction();
     switch (action & MotionEvent.ACTION_MASK) {
       case MotionEvent.ACTION_MOVE: {
@@ -626,8 +586,6 @@ public class VirtualJoystickView extends RelativeLayout implements OnTouchListen
     for (ImageView tack : orientationWidget) {
       tack.setVisibility(INVISIBLE);
     }
-    // Create a timer.
-    publisherTimer = new Timer();
   }
 
   /**
@@ -802,15 +760,17 @@ public class VirtualJoystickView extends RelativeLayout implements OnTouchListen
     pointerId = INVALID_POINTER_ID;
     // The robot should stop moving.
     publishVelocity(0, 0);
+    // Stop publishing the velocity since the contact is no longer on the
+    // screen.
+    publishVelocity = false;
+    // Publish one last message to make sure the robot stops.
+    publisher.publish(currentVelocityCommand);
     // Turn-in-place should not be active anymore.
     endTurnInPlaceRotation();
     // Hide the orientation tacks.
     for (ImageView tack : orientationWidget) {
       tack.setVisibility(INVISIBLE);
     }
-    // Stop publishing the velocity since the contact is no longer on the
-    // screen.
-    publishVelocity = false;
   }
 
   /**
@@ -822,25 +782,12 @@ public class VirtualJoystickView extends RelativeLayout implements OnTouchListen
    *          The normalized angular velocity (-1 to 1).
    */
   private void publishVelocity(double linearV, double angularV) {
-    vel.linear.x = linearV;
-    vel.linear.y = 0;
-    vel.linear.z = 0;
-    vel.angular.x = 0;
-    vel.angular.y = 0;
-    vel.angular.z = -angularV;
-  }
-
-  /**
-   * Specify the location of the master node to which the velocity messages will
-   * be published. Unless this method is called no messages will be published.
-   * 
-   * @param masterUri
-   *          The location of the master node.
-   */
-  public void setMasterUri(URI masterUri) {
-    // Setup the publisher first.
-    initNode(masterUri);
-    this.setOnTouchListener(this);
+    currentVelocityCommand.linear.x = linearV;
+    currentVelocityCommand.linear.y = 0;
+    currentVelocityCommand.linear.z = 0;
+    currentVelocityCommand.angular.x = 0;
+    currentVelocityCommand.angular.y = 0;
+    currentVelocityCommand.angular.z = -angularV;
   }
 
   /**
@@ -953,4 +900,27 @@ public class VirtualJoystickView extends RelativeLayout implements OnTouchListen
     }
     return false;
   }
+
+  @Override
+  public void onStart(Node node) {
+    publisher = node.newPublisher("~cmd_vel", "geometry_msgs/Twist");
+    publisher.setQueueLimit(1);
+    node.newSubscriber("odom", "nav_msgs/Odometry", this);
+    publisherTimer = new Timer();
+    publisherTimer.schedule(new TimerTask() {
+      @Override
+      public void run() {
+        if (publishVelocity) {
+          publisher.publish(currentVelocityCommand);
+        }
+      }
+    }, 0, 80);
+  }
+
+  @Override
+  public void onShutdown(Node node) {
+    publisherTimer.cancel();
+    publisherTimer.purge();
+  }
+
 }
