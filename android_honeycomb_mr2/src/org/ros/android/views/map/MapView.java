@@ -20,10 +20,9 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.opengl.GLSurfaceView;
-import android.os.Handler;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.View.OnTouchListener;
+import android.view.ScaleGestureDetector;
 import org.ros.message.MessageListener;
 import org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap;
 import org.ros.message.geometry_msgs.PoseStamped;
@@ -34,15 +33,13 @@ import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
-import java.util.Calendar;
-
 /**
  * Displays a map and other data on a OpenGL surface. This is an interactive map
  * that allows the user to pan, zoom, specify goals, initial pose, and regions.
  * 
  * @author munjaldesai@google.com (Munjal Desai)
  */
-public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener {
+public class MapView extends GLSurfaceView implements NodeMain {
 
   /**
    * Topic name for the map.
@@ -69,24 +66,10 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
    */
   private static final String COMPRESSED_MAP_TOPIC = "~compressed_map";
   /**
-   * Time in milliseconds after which taps are not considered to be double taps.
-   */
-  private static final int DOUBLE_TAP_TIME = 200;
-  /**
-   * Time in milliseconds for which the user must keep the contact down without
-   * moving to trigger a press and hold gesture.
-   */
-  private static final int PRESS_AND_HOLD_TIME = 600;
-  /**
-   * Threshold to indicate that the map should be moved. If the user taps and
-   * moves at least that distance, we enter the map move mode.
-   */
-  private static final int MOVE_MAP_DISTANCE_THRESHOLD = 10;
-  /**
    * The OpenGL renderer that creates and manages the surface.
    */
   private MapRenderer mapRenderer;
-  private InteractionMode currentInteractionMode = InteractionMode.INVALID;
+  private InteractionMode currentInteractionMode = InteractionMode.MOVE_MAP;
   /**
    * A sub-mode of InteractionMode.SPECIFY_LOCATION. True when the user is
    * trying to set the initial pose of the robot. False when the user is
@@ -94,25 +77,16 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
    */
   private boolean initialPoseMode;
   /**
-   * Time in milliseconds when the last contact down occurred. Used to determine
-   * a double tap event.
-   */
-  private long previousContactDownTime;
-  /**
    * Records the on-screen location (in pixels) of the contact down event. Later
    * when it is determined that the user was specifying a destination this
    * points is translated to a position in the real world.
    */
   private Point goalContact = new Point();
   /**
-   * Keeps the latest coordinates of up to 2 contacts.
-   */
-  private Point[] previousContact = new Point[2];
-  /**
    * Used to determine a long press and hold event in conjunction with
    * {@link #longPressRunnable}.
    */
-  private Handler longPressHandler = new Handler();
+  // private Handler longPressHandler = new Handler();
   /**
    * Publisher for the initial pose of the robot for AMCL.
    */
@@ -123,24 +97,8 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
   private Publisher<PoseStamped> goalPublisher;
   private String poseFrameId;
   private Node node;
-
-  public final Runnable longPressRunnable = new Runnable() {
-    @Override
-    public void run() {
-      // TODO: Draw a state diagram and check what states can transition here.
-      // This might help with the somewhat scattered removeCallbacks.
-      longPressHandler.removeCallbacks(longPressRunnable);
-      // The user is trying to specify a location to the robot.
-      if (currentInteractionMode == InteractionMode.INVALID) {
-        currentInteractionMode = InteractionMode.SPECIFY_LOCATION;
-        // Show the goal icon.
-        mapRenderer.userGoalVisible(true);
-        // Move the goal icon to the correct location in the map.
-        mapRenderer.updateUserGoal(mapRenderer.toOpenGLPose(goalContact, 0));
-        requestRender();
-      }
-    }
-  };
+  private GestureDetector gestureDetector;
+  private ScaleGestureDetector scaleGestureDetector;
 
   public MapView(Context context) {
     super(context);
@@ -152,8 +110,44 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
     // This is important since the display needs to be updated only when new
     // data is received.
     setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-    previousContact[0] = new Point();
-    previousContact[1] = new Point();
+    gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+      @Override
+      public boolean onDoubleTap(MotionEvent event) {
+        mapRenderer.toggleCenterOnRobot();
+        requestRender();
+        return true;
+      }
+
+      @Override
+      public void onLongPress(MotionEvent event) {
+        System.out.println("onLongPress");
+        startSpecifyLocation((int) event.getX(), (int) event.getY());
+      }
+
+      @Override
+      public boolean onFling(MotionEvent event1, MotionEvent event2, float velocityX,
+          float velocityY) {
+        System.out.println("onFling" + velocityX + " " + velocityY);
+        return false;
+      }
+
+      @Override
+      public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
+          float distanceY) {
+        mapRenderer.moveCamera(distanceX, distanceY);
+        requestRender();
+        return true;
+      }
+    });
+    scaleGestureDetector =
+        new ScaleGestureDetector(context, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+          @Override
+          public boolean onScale(ScaleGestureDetector detector) {
+            mapRenderer.zoomCamera(detector.getScaleFactor());
+            requestRender();
+            return true;
+          }
+        });
   }
 
   @Override
@@ -239,8 +233,6 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
             });
           }
         });
-    // Start listening for touch events.
-    setOnTouchListener(this);
   }
 
   @Override
@@ -248,39 +240,31 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
   }
 
   @Override
-  public boolean onTouch(View v, MotionEvent event) {
-    final int action = event.getAction();
-    switch (action & MotionEvent.ACTION_MASK) {
-      case MotionEvent.ACTION_MOVE: {
-        contactMove(event);
-        break;
-      }
-      case MotionEvent.ACTION_DOWN: {
-        return contactDown(event);
-      }
-      case MotionEvent.ACTION_POINTER_1_DOWN: {
-        // If the user is trying to specify a location on the map.
-        if (currentInteractionMode == InteractionMode.SPECIFY_LOCATION) {
-          // Cancel the currently specified location and reset the interaction
-          // state machine.
-          resetInteractionState();
-        }
-        previousContact[1].x = (int) event.getX(event.getActionIndex());
-        previousContact[1].y = (int) event.getY(event.getActionIndex());
-        break;
-      }
-      case MotionEvent.ACTION_POINTER_2_DOWN: {
-        // If there is a third contact on the screen then reset the interaction
-        // state machine.
-        resetInteractionState();
-        break;
-      }
-      case MotionEvent.ACTION_UP: {
-        contactUp(event);
-        break;
-      }
+  public boolean onTouchEvent(MotionEvent event) {
+    if (handleSetGoal(event)) {
+      return true;
+    }
+    if (gestureDetector.onTouchEvent(event)) {
+      return true;
+    }
+    if (scaleGestureDetector.onTouchEvent(event)) {
+      return true;
     }
     return true;
+  }
+
+  private boolean handleSetGoal(MotionEvent event) {
+    if (currentInteractionMode != InteractionMode.SPECIFY_LOCATION) {
+      return false;
+    }
+    if (event.getAction() == MotionEvent.ACTION_MOVE) {
+      contactMove(event);
+      return true;
+    } else if (event.getAction() == MotionEvent.ACTION_UP) {
+      contactUp(event);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -307,47 +291,8 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
   }
 
   private void contactMove(MotionEvent event) {
-    // If only one contact is on the view.
-    if (event.getPointerCount() == 1) {
-      // And the user is moving the map.
-      if (currentInteractionMode == InteractionMode.INVALID) {
-        if (calcDistance(event.getX(), event.getY(), previousContact[0].x, previousContact[0].y) > MOVE_MAP_DISTANCE_THRESHOLD) {
-          currentInteractionMode = InteractionMode.MOVE_MAP;
-          longPressHandler.removeCallbacks(longPressRunnable);
-          return;
-        }
-      }
-      if (currentInteractionMode == InteractionMode.MOVE_MAP) {
-        // Move the map.
-        mapRenderer.moveCamera(new Point((int) event.getX(0) - previousContact[0].x, (int) event
-            .getY(0) - previousContact[0].y));
-      }
-      // And the user is specifying an orientation for a pose on the map.
-      else if (currentInteractionMode == InteractionMode.SPECIFY_LOCATION) {
-        // Set orientation of the goal pose.
-        mapRenderer.updateUserGoal(mapRenderer.toOpenGLPose(goalContact,
-            getGoalOrientation(event.getX(0), event.getY(0))));
-      }
-      // Store current contact position.
-      previousContact[0].x = (int) event.getX(0);
-      previousContact[0].y = (int) event.getY(0);
-    }
-    // If there are two contacts on the view.
-    else if (event.getPointerCount() == 2) {
-      // Zoom in/out based on the distance between locations of current
-      // contacts and previous contacts.
-      mapRenderer.zoomCamera(calcDistance(event.getX(0), event.getY(0), event.getX(1),
-          event.getY(1))
-            / calcDistance(previousContact[0].x, previousContact[0].y, previousContact[1].x,
-                previousContact[1].y));
-      // Update contact information.
-      previousContact[0].x = (int) event.getX(0);
-      previousContact[0].y = (int) event.getY(0);
-      previousContact[1].x = (int) event.getX(1);
-      previousContact[1].y = (int) event.getY(1);
-      // Prevent transition into SPECIFY_GOAL mode.
-      longPressHandler.removeCallbacks(longPressRunnable);
-    }
+    mapRenderer.updateUserGoal(mapRenderer.toOpenGLPose(goalContact,
+        getGoalOrientation(event.getX(0), event.getY(0))));
     requestRender();
   }
 
@@ -355,6 +300,7 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
     // If the user was trying to specify a pose and just lifted the contact then
     // publish the position based on the initial contact down location and the
     // orientation based on the current contact up location.
+    System.out.println("contactUp");
     if (poseFrameId != null && currentInteractionMode == InteractionMode.SPECIFY_LOCATION) {
       PoseStamped poseStamped = new PoseStamped();
       poseStamped.header.frame_id = poseFrameId;
@@ -372,43 +318,22 @@ public class MapView extends GLSurfaceView implements NodeMain, OnTouchListener 
         goalPublisher.publish(poseStamped);
       }
     }
-    resetInteractionState();
+    endSpecifyLocation();
   }
 
-  private boolean contactDown(MotionEvent event) {
-    boolean returnValue = true;
-    // If it's been less than DOUBLE_TAP_TIME milliseconds since the last
-    // contact down then the user just performed a double tap gesture.
-    if (Calendar.getInstance().getTimeInMillis() - previousContactDownTime < DOUBLE_TAP_TIME) {
-      mapRenderer.toggleCenterOnRobot();
-      requestRender();
-      // Further information from this contact is no longer needed.
-      returnValue = false;
-    } else {
-      // Since this is not a double tap, start the timer to detect a
-      // press and hold.
-      longPressHandler.postDelayed(longPressRunnable, PRESS_AND_HOLD_TIME);
-    }
-    previousContact[0].x = (int) event.getX(0);
-    previousContact[0].y = (int) event.getY(0);
-    goalContact.x = previousContact[0].x;
-    goalContact.y = previousContact[0].y;
-    previousContactDownTime = Calendar.getInstance().getTimeInMillis();
-    return returnValue;
+  private void startSpecifyLocation(int x, int y) {
+    mapRenderer.userGoalVisible(true);
+    currentInteractionMode = InteractionMode.SPECIFY_LOCATION;
+    goalContact = new Point((int) x, (int) y);
+    mapRenderer.updateUserGoal(mapRenderer.toOpenGLPose(goalContact, 0));
+    requestRender();
   }
 
-  private void resetInteractionState() {
-    currentInteractionMode = InteractionMode.INVALID;
-    longPressHandler.removeCallbacks(longPressRunnable);
+  private void endSpecifyLocation() {
+    currentInteractionMode = InteractionMode.MOVE_MAP;
     initialPoseMode = false;
     mapRenderer.userGoalVisible(false);
-  }
-
-  /**
-   * Calculates the distance between the 2 specified points.
-   */
-  private float calcDistance(float x1, float y1, float x2, float y2) {
-    return (float) (Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)));
+    requestRender();
   }
 
   /**

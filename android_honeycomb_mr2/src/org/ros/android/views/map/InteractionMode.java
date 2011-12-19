@@ -20,8 +20,6 @@ package org.ros.android.views.map;
  * @author munjaldesai@google.com (Munjal Desai)
  */
 enum InteractionMode {
-  // Default mode.
-  INVALID,
   // When the user starts moves the map but the distance moved is less than
   // FINAL_MAP_MODE_DISTANCE_THRESHOLD.
   MOVE_MAP,
