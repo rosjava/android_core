@@ -16,8 +16,6 @@
 
 package org.ros.android.tutorial.teleop;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,7 +23,7 @@ import android.view.MenuItem;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 import org.ros.address.InetAddressFactory;
-import org.ros.android.MasterChooser;
+import org.ros.android.RosActivity;
 import org.ros.android.views.DistanceView;
 import org.ros.android.views.PanTiltView;
 import org.ros.android.views.RosImageView;
@@ -33,12 +31,8 @@ import org.ros.android.views.VirtualJoystickView;
 import org.ros.android.views.ZoomMode;
 import org.ros.android.views.map.MapView;
 import org.ros.message.sensor_msgs.CompressedImage;
-import org.ros.node.DefaultNodeRunner;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeRunner;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * An app that can be used to control a remote robot. This app also demonstrates
@@ -46,7 +40,12 @@ import java.net.URISyntaxException;
  * 
  * @author munjaldesai@google.com (Munjal Desai)
  */
-public class MainActivity extends Activity {
+public class MainActivity extends RosActivity {
+
+  public MainActivity() {
+    super("Teleop", "Teleop");
+  }
+
   /**
    * Instance of a virtual joystick used to teleoperate a robot.
    */
@@ -59,6 +58,7 @@ public class MainActivity extends Activity {
    * Instance of a pan tilt controller that can control the pan and tilt of
    * pan-tilt capable device.
    */
+  @SuppressWarnings("unused")
   private PanTiltView panTiltView;
   /**
    * Instance of an interactive map view.
@@ -68,17 +68,14 @@ public class MainActivity extends Activity {
    * Instance of {@link RosImageView} that can display video from a compressed
    * image source.
    */
+  @SuppressWarnings("unused")
   private RosImageView<CompressedImage> video;
   /**
    * The root layout that contains the different views.
    */
   private RelativeLayout mainLayout;
-  private final NodeRunner nodeRunner;
 
-  public MainActivity() {
-    super();
-    nodeRunner = DefaultNodeRunner.newDefault();
-  }
+  private NodeRunner nodeRunner;
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -149,11 +146,6 @@ public class MainActivity extends Activity {
       }
       return true;
     }
-    case R.id.exit: {
-      // Shutdown and exit.
-      shutdown();
-      return true;
-    }
     default: {
       return super.onOptionsItemSelected(item);
     }
@@ -169,40 +161,10 @@ public class MainActivity extends Activity {
     distanceView.setTopicName("base_scan");
     // panTiltView = new PanTiltView(this);
     mapView = new MapView(this);
-    // Call the MasterChooser to get the URI for the master node.
-    startActivityForResult(new Intent(this, MasterChooser.class), 0);
+    initViews();
   }
 
-  /**
-   * Process the information sent via intents by MasterChooser.
-   */
-  @Override
-  protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
-    // If the MasterChoose returned a uri.
-    if (requestCode == 0 && resultCode == RESULT_OK) {
-      try {
-        // TODO: Switch from getHostAddress() to getHostName(). Using
-        // getHostName() requires spawing a thread to prevent the UI to be
-        // blocked.
-        NodeConfiguration nodeConfiguration =
-            NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress()
-                .toString(), new URI(data.getStringExtra("ROS_MASTER_URI")));
-        virtualJoy.setMasterUri(nodeConfiguration.getMasterUri());
-        // panTiltView.setMasterUri(nodeConfiguration.getMasterUri());
-        initViews(nodeConfiguration);
-      } catch (URISyntaxException e) {
-        e.printStackTrace();
-        throw new RuntimeException(e);
-      }
-    } else {
-      // Shutdown this activity since the location of the master node was not
-      // specified and the activity can not proceed.
-      shutdown();
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private void initViews(NodeConfiguration nodeConfiguration) {
+  private void initViews() {
     // video = (RosImageView<CompressedImage>) findViewById(R.id.video_display);
     // video.setTopicName("camera/image_raw");
     // video.setMessageType("sensor_msgs/CompressedImage");
@@ -230,6 +192,15 @@ public class MainActivity extends Activity {
     paramsMapView.addRule(RelativeLayout.CENTER_VERTICAL);
     paramsMapView.addRule(RelativeLayout.CENTER_HORIZONTAL);
     mainLayout.addView(mapView, paramsMapView);
+  }
+
+  @Override
+  protected void init(NodeRunner nodeRunner) {
+    this.nodeRunner = nodeRunner;
+    NodeConfiguration nodeConfiguration =
+        NodeConfiguration.newPublic(
+            InetAddressFactory.newNonLoopback().getHostAddress().toString(), getMasterUri());
+    virtualJoy.setMasterUri(nodeConfiguration.getMasterUri());
     // Start the nodes.
     nodeRunner.run(distanceView, nodeConfiguration.setNodeName("android/distance_view"));
     nodeRunner.run(mapView, nodeConfiguration.setNodeName("android/map_view"));
@@ -237,12 +208,12 @@ public class MainActivity extends Activity {
     // nodeConfiguration.setNodeName("android/video_view"));
   }
 
-  /**
-   * Shutdown the nodes and exit.
-   */
-  private void shutdown() {
-    nodeRunner.shutdownNodeMain(distanceView);
-    nodeRunner.shutdownNodeMain(mapView);
-    finish();
+  @Override
+  protected void onPause() {
+    super.onPause();
+    if (nodeRunner != null) {
+      nodeRunner.shutdown();
+      nodeRunner = null;
+    }
   }
 }
