@@ -14,16 +14,26 @@
  * the License.
  */
 
-package org.ros.android.views.map;
+package org.ros.android.views.navigation;
+
+import android.content.Context;
+import android.view.MotionEvent;
+
+import javax.microedition.khronos.opengles.GL10;
 
 /**
- * @author munjaldesai@google.com (Munjal Desai)
+ * Interface for a drawable layer on a NavigationView.
+ * 
+ * @author moesenle@google.com (Lorenz Moesenlechner)
+ * 
  */
-enum InteractionMode {
-  // When the user starts moves the map but the distance moved is less than
-  // FINAL_MAP_MODE_DISTANCE_THRESHOLD.
-  MOVE_MAP,
-  // When the user is trying to specify a location (either a goal or initial
-  // pose).
-  SPECIFY_LOCATION
+public interface NavigationViewLayer extends OpenGlDrawable {
+
+  public void draw(GL10 gl);
+
+  public boolean onTouchEvent(NavigationView view, MotionEvent event);
+
+  public void onRegister(Context context, NavigationView view);
+
+  public void onUnregister();
 }

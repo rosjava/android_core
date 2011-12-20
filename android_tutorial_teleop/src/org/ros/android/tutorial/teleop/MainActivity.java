@@ -29,7 +29,12 @@ import org.ros.android.views.PanTiltView;
 import org.ros.android.views.RosImageView;
 import org.ros.android.views.VirtualJoystickView;
 import org.ros.android.views.ZoomMode;
-import org.ros.android.views.map.MapView;
+import org.ros.android.views.navigation.CameraLayer;
+import org.ros.android.views.navigation.CompressedOccupancyGridLayer;
+import org.ros.android.views.navigation.NavigationGoalLayer;
+import org.ros.android.views.navigation.NavigationView;
+import org.ros.android.views.navigation.RobotLayer;
+import org.ros.android.views.navigation.SetPoseStampedLayer;
 import org.ros.message.sensor_msgs.CompressedImage;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeRunner;
@@ -63,7 +68,7 @@ public class MainActivity extends RosActivity {
   /**
    * Instance of an interactive map view.
    */
-  private MapView mapView;
+  private NavigationView navigationView;
   /**
    * Instance of {@link RosImageView} that can display video from a compressed
    * image source.
@@ -125,15 +130,15 @@ public class MainActivity extends RosActivity {
     case R.id.map_view_robot_centric_view: {
       if (!item.isChecked()) {
         item.setChecked(true);
-        mapView.setViewMode(true);
+          // navigationView.setViewMode(true);
       } else {
         item.setChecked(false);
-        mapView.setViewMode(false);
+          // navigationView.setViewMode(false);
       }
       return true;
     }
     case R.id.map_view_initial_pose: {
-      mapView.initialPose();
+        // navigationView.initialPose();
       return true;
     }
     case R.id.virtual_joystick_snap: {
@@ -160,7 +165,12 @@ public class MainActivity extends RosActivity {
     distanceView = new DistanceView(this);
     distanceView.setTopicName("base_scan");
     // panTiltView = new PanTiltView(this);
-    mapView = new MapView(this);
+    navigationView = new NavigationView(this);
+    navigationView.addLayer(new CameraLayer());
+    navigationView.addLayer(new CompressedOccupancyGridLayer());
+    navigationView.addLayer(new RobotLayer());
+    navigationView.addLayer(new NavigationGoalLayer("simple_waypoints_server/goal_pose"));
+    navigationView.addLayer(new SetPoseStampedLayer("simple_waypoints_server/goal_pose", "map"));
     initViews();
   }
 
@@ -191,7 +201,7 @@ public class MainActivity extends RosActivity {
     RelativeLayout.LayoutParams paramsMapView = new RelativeLayout.LayoutParams(600, 600);
     paramsMapView.addRule(RelativeLayout.CENTER_VERTICAL);
     paramsMapView.addRule(RelativeLayout.CENTER_HORIZONTAL);
-    mainLayout.addView(mapView, paramsMapView);
+    mainLayout.addView(navigationView, paramsMapView);
   }
 
   @Override
@@ -202,7 +212,7 @@ public class MainActivity extends RosActivity {
             InetAddressFactory.newNonLoopback().getHostAddress().toString(), getMasterUri());
     // Start the nodes.
     nodeRunner.run(distanceView, nodeConfiguration.setNodeName("android/distance_view"));
-    nodeRunner.run(mapView, nodeConfiguration.setNodeName("android/map_view"));
+    nodeRunner.run(navigationView, nodeConfiguration.setNodeName("android/map_view"));
     nodeRunner.run(virtualJoy, nodeConfiguration.setNodeName("virtual_joystick"));
     // nodeRunner.run(video,
     // nodeConfiguration.setNodeName("android/video_view"));

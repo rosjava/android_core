@@ -1,4 +1,4 @@
-package org.ros.android.views.map;
+package org.ros.android.views.navigation;
 
 import com.google.common.base.Preconditions;
 

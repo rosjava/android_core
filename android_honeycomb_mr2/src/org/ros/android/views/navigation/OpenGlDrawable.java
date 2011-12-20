@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.android.views.map;
+package org.ros.android.views.navigation;
 
 import javax.microedition.khronos.opengles.GL10;
 

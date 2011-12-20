@@ -14,9 +14,10 @@
  * the License.
  */
 
-package org.ros.android.views.map;
+package org.ros.android.views.navigation;
 
 import com.google.common.base.Preconditions;
+
 
 import android.graphics.Bitmap;
 import org.ros.message.geometry_msgs.Pose;
