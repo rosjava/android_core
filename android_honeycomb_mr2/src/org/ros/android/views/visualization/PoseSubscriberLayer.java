@@ -14,14 +14,14 @@
  * the License.
  */
 
-package org.ros.android.views.navigation;
+package org.ros.android.views.visualization;
 
 import android.content.Context;
+import android.os.Handler;
 import android.view.MotionEvent;
 import org.ros.message.MessageListener;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.node.Node;
-import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -30,7 +30,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * 
  */
-public class NavigationGoalLayer implements NavigationViewLayer, NodeMain {
+public class PoseSubscriberLayer implements VisualizationLayer, TfLayer {
 
   private static final float vertices[] = {
     0.0f, 0.0f, 0.0f, // center
@@ -51,11 +51,13 @@ public class NavigationGoalLayer implements NavigationViewLayer, NodeMain {
   private Subscriber<org.ros.message.geometry_msgs.PoseStamped> poseSubscriber;
   private boolean visible = false;
 
-  private NavigationView navigationView;
+  private VisualizationView navigationView;
 
   private String topic;
+
+  private String poseFrame;
   
-  public NavigationGoalLayer(String topic) {
+  public PoseSubscriberLayer(String topic) {
     this.topic = topic;
     goalShape = new TriangleFanShape(vertices, color);
   }
@@ -68,27 +70,20 @@ public class NavigationGoalLayer implements NavigationViewLayer, NodeMain {
   }
 
   @Override
-  public boolean onTouchEvent(NavigationView view, MotionEvent event) {
+  public boolean onTouchEvent(VisualizationView view, MotionEvent event) {
     return false;
   }
 
   @Override
-  public void onRegister(Context context, NavigationView view) {
+  public void onStart(Context context, VisualizationView view, Node node, Handler handler) {
     navigationView = view;
-  }
-
-  @Override
-  public void onUnregister() {
-  }
-
-  @Override
-  public void onStart(Node node) {
     poseSubscriber =
         node.newSubscriber(topic, "geometry_msgs/PoseStamped",
             new MessageListener<org.ros.message.geometry_msgs.PoseStamped>() {
               @Override
               public void onNewMessage(PoseStamped pose) {
                 goalShape.setPose(pose.pose);
+                poseFrame = pose.header.frame_id;
                 visible = true;
                 navigationView.requestRender();
               }
@@ -96,7 +91,7 @@ public class NavigationGoalLayer implements NavigationViewLayer, NodeMain {
   }
 
   @Override
-  public void onShutdown(Node node) {
+  public void onShutdown(VisualizationView view, Node node) {
     poseSubscriber.shutdown();
   }
 
@@ -106,6 +101,11 @@ public class NavigationGoalLayer implements NavigationViewLayer, NodeMain {
 
   public void setVisible(boolean visible) {
     this.visible = visible;
+  }
+
+  @Override
+  public String getFrame() {
+    return poseFrame;
   }
 
 }

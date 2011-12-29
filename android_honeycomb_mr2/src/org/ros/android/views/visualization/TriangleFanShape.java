@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.android.views.navigation;
+package org.ros.android.views.visualization;
 
 import org.ros.message.geometry_msgs.Pose;
 import org.ros.message.geometry_msgs.Vector3;

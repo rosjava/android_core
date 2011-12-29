@@ -14,13 +14,15 @@
  * the License.
  */
 
-package org.ros.android.views.navigation;
+package org.ros.android.views.visualization;
 
 import android.opengl.GLSurfaceView;
 import org.ros.message.geometry_msgs.Point;
 import org.ros.message.geometry_msgs.Pose;
+import org.ros.message.geometry_msgs.Transform;
 import org.ros.rosjava_geometry.Geometry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -32,7 +34,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * 
  */
-public class NavigationViewRenderer implements GLSurfaceView.Renderer {
+public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
   /**
    * Most the user can zoom in.
    */
@@ -59,10 +61,26 @@ public class NavigationViewRenderer implements GLSurfaceView.Renderer {
    * List of layers to draw. Layers are drawn in-order, i.e. the layer with
    * index 0 is the bottom layer and is drawn first.
    */
-  private List<NavigationViewLayer> layers;
+  private List<VisualizationLayer> layers;
 
-  public NavigationViewRenderer(List<NavigationViewLayer> layers) {
-    this.layers = layers;
+  /**
+   * The frame in which to render everything. The default value is /map which
+   * indicates that everything is rendered in map. If this is changed to, for
+   * instance, base_link, the view follows the robot and the robot itself is in
+   * the origin.
+   */
+  private String referenceFrame = "/map";
+
+  /**
+   * The frame to follow.
+   */
+  private String targetFrame;
+
+  private TransformListener transformListener;
+
+  public VisualizationViewRenderer(TransformListener transformListener) {
+    this.setLayers(layers);
+    this.transformListener = transformListener;
   }
 
   @Override
@@ -87,12 +105,31 @@ public class NavigationViewRenderer implements GLSurfaceView.Renderer {
     gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
     gl.glLoadIdentity();
+    applyCameraTransform(gl);
+    drawLayers(gl);
+  }
+
+  private void applyCameraTransform(GL10 gl) {
     // We need to negate cameraLocation.x because at this point, in the OpenGL
     // coordinate system, x is pointing left.
     gl.glScalef(getScalingFactor(), getScalingFactor(), 1);
     gl.glRotatef(90, 0, 0, 1);
     gl.glTranslatef((float) -cameraPoint.x, (float) -cameraPoint.y, (float) -cameraPoint.z);
-    drawLayers(gl);
+    if (getTargetFrame() != null && transformListener.getTransformer().canTransform(getTargetFrame(), referenceFrame)) {
+      List<Transform> transforms = transformListener.getTransformer().lookupTransforms(referenceFrame, getTargetFrame());
+      GlTransformer.applyTransforms(gl, ignoreRotations(transforms));
+    }
+  }
+
+  private List<Transform> ignoreRotations(List<Transform> transforms) {
+    List<Transform> result = new ArrayList<Transform>(transforms.size());
+    for (Transform transform : transforms) {
+      Transform transformWithoutRotation = new Transform();
+      transformWithoutRotation.translation = transform.translation;
+      transformWithoutRotation.rotation.w = 1.0;
+      result.add(transformWithoutRotation);
+    }
+    return result;
   }
 
   @Override
@@ -177,8 +214,21 @@ public class NavigationViewRenderer implements GLSurfaceView.Renderer {
   }
 
   private void drawLayers(GL10 gl) {
-    for (NavigationViewLayer layer : layers) {
+    if (layers == null) {
+      return;
+    }
+    for (VisualizationLayer layer : getLayers()) {
       gl.glPushMatrix();
+      if (layer instanceof TfLayer) {
+        String layerFrame = ((TfLayer) layer).getFrame();
+        // TODO(moesenle): throw a warning that no transform could be found and
+        // the layer has been ignored.
+        if (layerFrame != null
+            && transformListener.getTransformer().canTransform(layerFrame, referenceFrame)) {
+          GlTransformer.applyTransforms(gl,
+              transformListener.getTransformer().lookupTransforms(layerFrame, referenceFrame));
+        }
+      }
       layer.draw(gl);
       gl.glPopMatrix();
     }
@@ -190,6 +240,33 @@ public class NavigationViewRenderer implements GLSurfaceView.Renderer {
 
   public void setScalingFactor(float scalingFactor) {
     this.scalingFactor = scalingFactor;
+  }
+
+  public String getReferenceFrame() {
+    return referenceFrame;
+  }
+
+  public void setReferenceFrame(String referenceFrame) {
+    this.referenceFrame = referenceFrame;
+    // To prevent odd camera jumps, we always center on the referenceFrame when
+    // it is reset.
+    cameraPoint = new Point();
+  }
+
+  public List<VisualizationLayer> getLayers() {
+    return layers;
+  }
+
+  public void setLayers(List<VisualizationLayer> layers) {
+    this.layers = layers;
+  }
+
+  public String getTargetFrame() {
+    return targetFrame;
+  }
+
+  public void setTargetFrame(String targetFrame) {
+    this.targetFrame = targetFrame;
   }
 
 }

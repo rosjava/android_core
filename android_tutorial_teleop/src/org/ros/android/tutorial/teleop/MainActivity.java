@@ -29,12 +29,12 @@ import org.ros.android.views.PanTiltView;
 import org.ros.android.views.RosImageView;
 import org.ros.android.views.VirtualJoystickView;
 import org.ros.android.views.ZoomMode;
-import org.ros.android.views.navigation.CameraLayer;
-import org.ros.android.views.navigation.CompressedBitmapLayer;
-import org.ros.android.views.navigation.NavigationGoalLayer;
-import org.ros.android.views.navigation.NavigationView;
-import org.ros.android.views.navigation.RobotLayer;
-import org.ros.android.views.navigation.SetPoseStampedLayer;
+import org.ros.android.views.visualization.CameraLayer;
+import org.ros.android.views.visualization.CompressedBitmapLayer;
+import org.ros.android.views.visualization.PosePublisherLayer;
+import org.ros.android.views.visualization.PoseSubscriberLayer;
+import org.ros.android.views.visualization.RobotLayer;
+import org.ros.android.views.visualization.VisualizationView;
 import org.ros.message.sensor_msgs.CompressedImage;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeRunner;
@@ -68,7 +68,7 @@ public class MainActivity extends RosActivity {
   /**
    * Instance of an interactive map view.
    */
-  private NavigationView navigationView;
+  private VisualizationView visualizationView;
   /**
    * Instance of {@link RosImageView} that can display video from a compressed
    * image source.
@@ -79,8 +79,6 @@ public class MainActivity extends RosActivity {
    * The root layout that contains the different views.
    */
   private RelativeLayout mainLayout;
-
-  private NodeRunner nodeRunner;
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -165,12 +163,12 @@ public class MainActivity extends RosActivity {
     distanceView = new DistanceView(this);
     distanceView.setTopicName("base_scan");
     // panTiltView = new PanTiltView(this);
-    navigationView = new NavigationView(this);
-    navigationView.addLayer(new CameraLayer());
-    navigationView.addLayer(new CompressedBitmapLayer("~compressed_map"));
-    navigationView.addLayer(new RobotLayer("~pose"));
-    navigationView.addLayer(new NavigationGoalLayer("simple_waypoints_server/goal_pose"));
-    navigationView.addLayer(new SetPoseStampedLayer("simple_waypoints_server/goal_pose", "map"));
+    visualizationView = new VisualizationView(this);
+    visualizationView.addLayer(new CameraLayer());
+    visualizationView.addLayer(new CompressedBitmapLayer("~compressed_map"));
+    visualizationView.addLayer(new RobotLayer("base_footprint"));
+    visualizationView.addLayer(new PoseSubscriberLayer("simple_waypoints_server/goal_pose"));
+    visualizationView.addLayer(new PosePublisherLayer("simple_waypoints_server/goal_pose"));
     initViews();
   }
 
@@ -201,29 +199,19 @@ public class MainActivity extends RosActivity {
     RelativeLayout.LayoutParams paramsMapView = new RelativeLayout.LayoutParams(600, 600);
     paramsMapView.addRule(RelativeLayout.CENTER_VERTICAL);
     paramsMapView.addRule(RelativeLayout.CENTER_HORIZONTAL);
-    mainLayout.addView(navigationView, paramsMapView);
+    mainLayout.addView(visualizationView, paramsMapView);
   }
 
   @Override
   protected void init(NodeRunner nodeRunner) {
-    this.nodeRunner = nodeRunner;
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(
             InetAddressFactory.newNonLoopback().getHostAddress().toString(), getMasterUri());
     // Start the nodes.
     nodeRunner.run(distanceView, nodeConfiguration.setNodeName("android/distance_view"));
-    nodeRunner.run(navigationView, nodeConfiguration.setNodeName("android/map_view"));
+    nodeRunner.run(visualizationView, nodeConfiguration.setNodeName("android/map_view"));
     nodeRunner.run(virtualJoy, nodeConfiguration.setNodeName("virtual_joystick"));
     // nodeRunner.run(video,
     // nodeConfiguration.setNodeName("android/video_view"));
-  }
-
-  @Override
-  protected void onPause() {
-    super.onPause();
-    if (nodeRunner != null) {
-      nodeRunner.shutdown();
-      nodeRunner = null;
-    }
   }
 }

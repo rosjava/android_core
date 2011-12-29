@@ -14,26 +14,15 @@
  * the License.
  */
 
-package org.ros.android.views.navigation;
-
-import android.content.Context;
-import android.view.MotionEvent;
+package org.ros.android.views.visualization;
 
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Interface for a drawable layer on a NavigationView.
- * 
- * @author moesenle@google.com (Lorenz Moesenlechner)
- * 
+ * @author damonkohler@google.com (Damon Kohler)
  */
-public interface NavigationViewLayer extends OpenGlDrawable {
+interface OpenGlDrawable {
 
-  public void draw(GL10 gl);
+  void draw(GL10 gl);
 
-  public boolean onTouchEvent(NavigationView view, MotionEvent event);
-
-  public void onRegister(Context context, NavigationView view);
-
-  public void onUnregister();
 }

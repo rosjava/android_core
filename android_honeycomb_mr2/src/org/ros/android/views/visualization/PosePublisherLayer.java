@@ -14,18 +14,18 @@
  * the License.
  */
 
-package org.ros.android.views.navigation;
+package org.ros.android.views.visualization;
 
 import com.google.common.base.Preconditions;
 
 import android.content.Context;
+import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import org.ros.message.geometry_msgs.Point;
 import org.ros.message.geometry_msgs.Pose;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.node.Node;
-import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 import org.ros.rosjava_geometry.Geometry;
 
@@ -35,7 +35,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * 
  */
-public class SetPoseStampedLayer implements NavigationViewLayer, NodeMain {
+public class PosePublisherLayer implements VisualizationLayer {
 
   private static final float vertices[] = { 0.0f, 0.0f, 0.0f, // center
       -0.251f, 0.0f, 0.0f, // bottom
@@ -55,16 +55,14 @@ public class SetPoseStampedLayer implements NavigationViewLayer, NodeMain {
   private Publisher<org.ros.message.geometry_msgs.PoseStamped> posePublisher;
   private boolean visible = false;
   private String topic;
-  private NavigationView navigationView;
+  private VisualizationView navigationView;
   private GestureDetector gestureDetector;
   private Pose pose;
-  private String frameId;
 
   private Node node;
 
-  public SetPoseStampedLayer(String topic, String frameId) {
+  public PosePublisherLayer(String topic) {
     this.topic = topic;
-    this.frameId = frameId;
     poseShape = new TriangleFanShape(vertices, color);
   }
 
@@ -78,7 +76,7 @@ public class SetPoseStampedLayer implements NavigationViewLayer, NodeMain {
   }
 
   @Override
-  public boolean onTouchEvent(NavigationView view, MotionEvent event) {
+  public boolean onTouchEvent(VisualizationView view, MotionEvent event) {
     if (visible) {
       Preconditions.checkNotNull(pose);
       if (event.getAction() == MotionEvent.ACTION_MOVE) {
@@ -94,7 +92,7 @@ public class SetPoseStampedLayer implements NavigationViewLayer, NodeMain {
         return true;
       } else if (event.getAction() == MotionEvent.ACTION_UP) {
         PoseStamped poseStamped = new PoseStamped();
-        poseStamped.header.frame_id = frameId;
+        poseStamped.header.frame_id = navigationView.getRenderer().getReferenceFrame();
         poseStamped.header.stamp = node.getCurrentTime();
         poseStamped.pose = pose;
         posePublisher.publish(poseStamped);
@@ -108,35 +106,33 @@ public class SetPoseStampedLayer implements NavigationViewLayer, NodeMain {
   }
 
   @Override
-  public void onRegister(Context context, NavigationView view) {
+  public void onStart(final Context context, VisualizationView view, Node node, Handler handler) {
     navigationView = view;
-    gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+    this.node = node;
+    posePublisher = node.newPublisher(topic, "geometry_msgs/PoseStamped");
+    handler.post(new Runnable() {
       @Override
-      public void onLongPress(MotionEvent e) {
-        pose = new Pose();
-        pose.position =
-            navigationView.getRenderer().toOpenGLCoordinates(
-                new android.graphics.Point((int) e.getX(), (int) e.getY()));
-        pose.orientation.w = 1.0;
-        poseShape.setPose(pose);
-        visible = true;
-        navigationView.requestRender();
+      public void run() {
+        gestureDetector =
+            new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+              @Override
+              public void onLongPress(MotionEvent e) {
+                pose = new Pose();
+                pose.position =
+                    navigationView.getRenderer().toOpenGLCoordinates(
+                        new android.graphics.Point((int) e.getX(), (int) e.getY()));
+                pose.orientation.w = 1.0;
+                poseShape.setPose(pose);
+                visible = true;
+                navigationView.requestRender();
+              }
+            });
       }
     });
   }
 
   @Override
-  public void onUnregister() {
-  }
-
-  @Override
-  public void onStart(Node node) {
-    this.node = node;
-    posePublisher = node.newPublisher(topic, "geometry_msgs/PoseStamped");
-  }
-
-  @Override
-  public void onShutdown(Node node) {
+  public void onShutdown(VisualizationView view, Node node) {
     posePublisher.shutdown();
   }
 }

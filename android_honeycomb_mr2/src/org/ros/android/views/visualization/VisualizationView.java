@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.android.views.navigation;
+package org.ros.android.views.visualization;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
@@ -26,25 +26,27 @@ import org.ros.node.NodeMain;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class NavigationView extends GLSurfaceView implements NodeMain {
-  private NavigationViewRenderer renderer;
+public class VisualizationView extends GLSurfaceView implements NodeMain {
+  private VisualizationViewRenderer renderer;
 
-  private LinkedList<NavigationViewLayer> layers;
+  private LinkedList<VisualizationLayer> layers;
 
   private Node node;
 
-  public NavigationView(Context context) {
+  private TransformListener transformListener = new TransformListener();
+
+  public VisualizationView(Context context) {
     super(context);
-    layers = new LinkedList<NavigationViewLayer>();
+    layers = new LinkedList<VisualizationLayer>();
     setEGLConfigChooser(8, 8, 8, 8, 0, 0);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
     setZOrderOnTop(true);
-    renderer = new NavigationViewRenderer(layers);
+    renderer = new VisualizationViewRenderer(transformListener);
     setRenderer(renderer);
   }
 
   public boolean onTouchEvent(MotionEvent event) {
-    Iterator<NavigationViewLayer> layerIterator = layers.descendingIterator();
+    Iterator<VisualizationLayer> layerIterator = layers.descendingIterator();
     while (layerIterator.hasNext()) {
       if (layerIterator.next().onTouchEvent(this, event)) {
         return true;
@@ -53,7 +55,7 @@ public class NavigationView extends GLSurfaceView implements NodeMain {
     return false;
   }
 
-  public NavigationViewRenderer getRenderer() {
+  public VisualizationViewRenderer getRenderer() {
     return renderer;
   }
   
@@ -64,10 +66,11 @@ public class NavigationView extends GLSurfaceView implements NodeMain {
    * @param layer
    *          layer to add
    */
-  public void addLayer(NavigationViewLayer layer) {
+  public void addLayer(VisualizationLayer layer) {
     layers.add(layer);
-    layer.onRegister(getContext(), this);
-    maybeStartLayerNode(node, layer);
+    if (node != null) {
+      layer.onStart(getContext(), this, node, getHandler());
+    }
     requestRender();
   }
 
@@ -79,58 +82,54 @@ public class NavigationView extends GLSurfaceView implements NodeMain {
    * @param layer
    *          layer to add
    */
-  public void addLayerAtIndex(int index, NavigationViewLayer layer) {
+  public void addLayerAtIndex(int index, VisualizationLayer layer) {
     layers.add(index, layer);
-    layer.onRegister(getContext(), this);
-    maybeStartLayerNode(node, layer);
+    if (node != null) {
+      layer.onStart(getContext(), this, node, getHandler());
+    }
     requestRender();
   }
 
-  public void addLayerBeforeOther(NavigationViewLayer other, NavigationViewLayer layer) {
+  public void addLayerBeforeOther(VisualizationLayer other, VisualizationLayer layer) {
     addLayerAtIndex(layers.indexOf(other), layer);
   }
   
-  public void addLayerAfterOther(NavigationViewLayer other, NavigationViewLayer layer) {
+  public void addLayerAfterOther(VisualizationLayer other, VisualizationLayer layer) {
     addLayerAtIndex(layers.indexOf(other) + 1, layer);
   }
 
-  public void removeLayer(NavigationViewLayer layer) {
-    layer.onUnregister();
+  public void removeLayer(VisualizationLayer layer) {
+    layer.onShutdown(this, node);
     layers.remove(layer);
-    maybeShutdownLayerNode(node, layer);
   }
 
   public void removeLayerAtIndex(int index) {
-    NavigationViewLayer layer = layers.remove(index);
-    layer.onUnregister();
-    maybeShutdownLayerNode(node, layer);
+    VisualizationLayer layer = layers.remove(index);
+    layer.onShutdown(this, node);
   }
 
   @Override
   public void onStart(Node node) {
     this.node = node;
-    for (NavigationViewLayer layer : layers) {
-      maybeStartLayerNode(node, layer);
+    transformListener.onStart(node);
+    for (VisualizationLayer layer : layers) {
+      layer.onStart(getContext(), this, node, getHandler());
     }
+    renderer.setLayers(layers);
   }
 
   @Override
   public void onShutdown(Node node) {
-    for (NavigationViewLayer layer: layers) {
-      maybeShutdownLayerNode(node, layer);
+    renderer.setLayers(null);
+    for (VisualizationLayer layer: layers) {
+      layer.onShutdown(this, node);
     }
+    transformListener.onShutdown(node);
     this.node = null;
   }
 
-  private void maybeStartLayerNode(Node node, NavigationViewLayer layer) {
-    if (node != null && layer instanceof NodeMain) {
-      ((NodeMain) layer).onStart(node);
-    }
+  public Transformer getTransformer() {
+    return transformListener.getTransformer();
   }
 
-  private void maybeShutdownLayerNode(Node node, NavigationViewLayer layer) {
-    if (node != null && layer instanceof NodeMain) {
-      ((NodeMain) layer).onShutdown(node);
-    }
-  }
 }

@@ -15,6 +15,7 @@
   <depend package="nav_msgs" />
   <depend package="rosjava_geometry" />
   <depend package="compressed_visualization_transport_msgs" />
+  <depend package="tf" />
 
   <export>
     <rosjava-android-lib target="android-13" />

@@ -14,15 +14,19 @@
  * the License.
  */
 
-package org.ros.android.views.navigation;
-
-import javax.microedition.khronos.opengles.GL10;
+package org.ros.android.views.visualization;
 
 /**
- * @author damonkohler@google.com (Damon Kohler)
+ * Interface for layers that are positioned by using Tf.
+ * 
+ * @author moesenle@google.com (Lorenz Moesenlechner)
+ * 
  */
-interface OpenGlDrawable {
+public interface TfLayer {
 
-  void draw(GL10 gl);
+  /**
+   * @return the frame id of the layer
+   */
+  String getFrame();
 
 }

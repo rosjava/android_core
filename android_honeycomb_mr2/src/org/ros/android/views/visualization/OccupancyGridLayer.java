@@ -14,14 +14,14 @@
  * the License.
  */
 
-package org.ros.android.views.navigation;
+package org.ros.android.views.visualization;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Handler;
 import android.view.MotionEvent;
 import org.ros.message.MessageListener;
 import org.ros.node.Node;
-import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -30,7 +30,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle
  *
  */
-public class OccupancyGridLayer implements NavigationViewLayer, NodeMain {
+public class OccupancyGridLayer implements VisualizationLayer {
   /**
    * Color of occupied cells in the map.
    */
@@ -46,11 +46,11 @@ public class OccupancyGridLayer implements NavigationViewLayer, NodeMain {
    */
   private static final int COLOR_UNKNOWN = 0xff000000;
 
-  private OccupancyGrid occupancyGrid = new OccupancyGrid();
+  private TextureDrawable occupancyGrid = new TextureDrawable();
 
   private Subscriber<org.ros.message.nav_msgs.OccupancyGrid> occupancyGridSubscriber;
 
-  private NavigationView navigationView;
+  private VisualizationView navigationView;
 
   private boolean initialized = false;
 
@@ -68,12 +68,28 @@ public class OccupancyGridLayer implements NavigationViewLayer, NodeMain {
   }
 
   @Override
-  public boolean onTouchEvent(NavigationView view, MotionEvent event) {
+  public boolean onTouchEvent(VisualizationView view, MotionEvent event) {
     return false;
   }
 
+  private static int[] occupancyGridToPixelArray(
+      org.ros.message.nav_msgs.OccupancyGrid occupancyGrid) {
+    int pixels[] = new int[occupancyGrid.data.length];
+    for (int i = 0; i < occupancyGrid.data.length; i++) {
+      if (occupancyGrid.data[i] == -1) {
+        pixels[i] = COLOR_UNKNOWN;
+      } else if (occupancyGrid.data[i] == 0) {
+        pixels[i] = COLOR_FREE;
+      } else {
+        pixels[i] = COLOR_OCCUPIED;
+      }
+    }
+    return pixels;
+  }
+
   @Override
-  public void onStart(Node node) {
+  public void onStart(Context context, VisualizationView view, Node node, Handler handler) {
+    navigationView = view;
     occupancyGridSubscriber =
         node.newSubscriber(topic, "nav_msgs/OccupancyGrid",
             new MessageListener<org.ros.message.nav_msgs.OccupancyGrid>() {
@@ -93,31 +109,7 @@ public class OccupancyGridLayer implements NavigationViewLayer, NodeMain {
   }
 
   @Override
-  public void onShutdown(Node node) {
+  public void onShutdown(VisualizationView view, Node node) {
     occupancyGridSubscriber.shutdown();
-  }
-
-  private static int[] occupancyGridToPixelArray(
-      org.ros.message.nav_msgs.OccupancyGrid occupancyGrid) {
-    int pixels[] = new int[occupancyGrid.data.length];
-    for (int i = 0; i < occupancyGrid.data.length; i++) {
-      if (occupancyGrid.data[i] == -1) {
-        pixels[i] = COLOR_UNKNOWN;
-      } else if (occupancyGrid.data[i] == 0) {
-        pixels[i] = COLOR_FREE;
-      } else {
-        pixels[i] = COLOR_OCCUPIED;
-      }
-    }
-    return pixels;
-  }
-
-  @Override
-  public void onRegister(Context context, NavigationView view) {
-    navigationView = view;
-  }
-
-  @Override
-  public void onUnregister() {
   }
 }

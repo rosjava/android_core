@@ -14,10 +14,9 @@
  * the License.
  */
 
-package org.ros.android.views.navigation;
+package org.ros.android.views.visualization;
 
 import com.google.common.base.Preconditions;
-
 
 import android.graphics.Bitmap;
 import org.ros.message.geometry_msgs.Pose;
@@ -34,8 +33,9 @@ import javax.microedition.khronos.opengles.GL10;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class OccupancyGrid implements OpenGlDrawable {
-  private OccupancyGridTexture texture;
+public class TextureDrawable implements OpenGlDrawable {
+
+  private Texture texture;
   private FloatBuffer vertexBuffer;
   private FloatBuffer textureBuffer;
   private Pose origin;
@@ -43,7 +43,7 @@ public class OccupancyGrid implements OpenGlDrawable {
   private double width;
   private double height;
 
-  public OccupancyGrid() {
+  public TextureDrawable() {
     float vertexCoordinates[] = {
         // Triangle 1
         0.0f, 0.0f, 0.0f, // Bottom left
@@ -71,7 +71,7 @@ public class OccupancyGrid implements OpenGlDrawable {
     textureBuffer = textureByteBuffer.asFloatBuffer();
     textureBuffer.put(textureCoordinates);
     textureBuffer.position(0);
-    texture = new OccupancyGridTexture();
+    texture = new Texture();
   }
   /**
    * Creates a new set of points to render based on the incoming occupancy grid.

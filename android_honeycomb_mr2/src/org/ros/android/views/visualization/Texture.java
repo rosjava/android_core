@@ -1,4 +1,4 @@
-package org.ros.android.views.navigation;
+package org.ros.android.views.visualization;
 
 import com.google.common.base.Preconditions;
 
@@ -7,12 +7,12 @@ import android.opengl.GLUtils;
 
 import javax.microedition.khronos.opengles.GL10;
 
-public class OccupancyGridTexture {
+public class Texture {
   private boolean needReload;
   private Bitmap textureBitmap;
   private int[] textureHandle;
 
-  public OccupancyGridTexture() {
+  public Texture() {
     needReload = false;
   }
 

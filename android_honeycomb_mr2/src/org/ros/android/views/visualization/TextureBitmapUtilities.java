@@ -1,4 +1,4 @@
-package org.ros.android.views.navigation;
+package org.ros.android.views.visualization;
 
 import android.graphics.Bitmap;
 

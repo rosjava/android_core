@@ -14,15 +14,15 @@
  * the License.
  */
 
-package org.ros.android.views.navigation;
+package org.ros.android.views.visualization;
 
 import android.content.Context;
+import android.os.Handler;
 import android.view.MotionEvent;
 import org.ros.message.MessageListener;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.message.nav_msgs.Path;
 import org.ros.node.Node;
-import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
 
 import java.nio.ByteBuffer;
@@ -35,7 +35,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * 
  */
-public class PathLayer implements NavigationViewLayer, NodeMain {
+public class PathLayer implements VisualizationLayer {
 
   static final float color[] = { 0.2f, 0.8f, 0.2f, 1.0f };
   
@@ -44,7 +44,7 @@ public class PathLayer implements NavigationViewLayer, NodeMain {
 
   private Subscriber<Path> pathSubscriber;
 
-  private NavigationView navigationView;
+  private VisualizationView navigationView;
 
   private String topic;
 
@@ -64,21 +64,13 @@ public class PathLayer implements NavigationViewLayer, NodeMain {
   }
 
   @Override
-  public boolean onTouchEvent(NavigationView view, MotionEvent event) {
+  public boolean onTouchEvent(VisualizationView view, MotionEvent event) {
     return false;
   }
 
   @Override
-  public void onRegister(Context context, NavigationView view) {
+  public void onStart(Context context, VisualizationView view, Node node, Handler handler) {
     navigationView = view;
-  }
-
-  @Override
-  public void onUnregister() {
-  }
-
-  @Override
-  public void onStart(Node node) {
     pathSubscriber = node.newSubscriber(topic, "nav_msgs/Path", new MessageListener<Path>() {
       @Override
       public void onNewMessage(Path path) {
@@ -90,7 +82,7 @@ public class PathLayer implements NavigationViewLayer, NodeMain {
   }
 
   @Override
-  public void onShutdown(Node node) {
+  public void onShutdown(VisualizationView view, Node node) {
     pathSubscriber.shutdown();
   }
 

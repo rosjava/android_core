@@ -14,16 +14,16 @@
  * the License.
  */
 
-package org.ros.android.views.navigation;
+package org.ros.android.views.visualization;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
 import android.view.MotionEvent;
 import org.ros.message.MessageListener;
 import org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap;
 import org.ros.node.Node;
-import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
 
 import java.nio.IntBuffer;
@@ -34,13 +34,13 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle
  *
  */
-public class CompressedBitmapLayer implements NavigationViewLayer, NodeMain {
+public class CompressedBitmapLayer implements VisualizationLayer {
 
-  private OccupancyGrid occupancyGrid = new OccupancyGrid();
+  private TextureDrawable occupancyGrid = new TextureDrawable();
 
   private Subscriber<org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap> compressedOccupancyGridSubscriber;
 
-  private NavigationView navigationView;
+  private VisualizationView navigationView;
 
   private boolean initialized = false;
 
@@ -51,7 +51,20 @@ public class CompressedBitmapLayer implements NavigationViewLayer, NodeMain {
   }
 
   @Override
-  public void onStart(Node node) {
+  public void draw(GL10 gl) {
+    if (initialized) {
+      occupancyGrid.draw(gl);
+    }
+  }
+
+  @Override
+  public boolean onTouchEvent(VisualizationView view, MotionEvent event) {
+    return false;
+  }
+
+  @Override
+  public void onStart(Context context, VisualizationView view, Node node, Handler handler) {
+    navigationView = view;
     compressedOccupancyGridSubscriber =
         node.newSubscriber(
             topic,
@@ -79,29 +92,8 @@ public class CompressedBitmapLayer implements NavigationViewLayer, NodeMain {
   }
 
   @Override
-  public void onShutdown(Node node) {
+  public void onShutdown(VisualizationView view, Node node) {
     compressedOccupancyGridSubscriber.shutdown();
-  }
-
-  @Override
-  public void draw(GL10 gl) {
-    if (initialized) {
-      occupancyGrid.draw(gl);
-    }
-  }
-
-  @Override
-  public boolean onTouchEvent(NavigationView view, MotionEvent event) {
-    return false;
-  }
-
-  @Override
-  public void onRegister(Context context, NavigationView view) {
-    navigationView = view;
-  }
-
-  @Override
-  public void onUnregister() {
   }
 
 }
