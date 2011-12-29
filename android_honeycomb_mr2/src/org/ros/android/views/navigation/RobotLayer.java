@@ -49,7 +49,10 @@ public class RobotLayer implements NavigationViewLayer, NodeMain {
   private GestureDetector gestureDetector;
   private boolean followingRobot = false;
 
-  public RobotLayer() {
+  private String topic;
+
+  public RobotLayer(String topic) {
+    this.topic = topic;
     robotShape = new TriangleFanShape(vertices, color);
   }
 
@@ -75,7 +78,7 @@ public class RobotLayer implements NavigationViewLayer, NodeMain {
   @Override
   public void onStart(Node node) {
     poseSubscriber =
-        node.newSubscriber("~pose", "geometry_msgs/PoseStamped",
+        node.newSubscriber(topic, "geometry_msgs/PoseStamped",
             new MessageListener<org.ros.message.geometry_msgs.PoseStamped>() {
               @Override
               public void onNewMessage(PoseStamped pose) {

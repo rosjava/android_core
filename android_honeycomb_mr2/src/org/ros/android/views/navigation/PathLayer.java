@@ -46,6 +46,12 @@ public class PathLayer implements NavigationViewLayer, NodeMain {
 
   private NavigationView navigationView;
 
+  private String topic;
+
+  public PathLayer(String topic) {
+    this.topic = topic;
+  }
+
   @Override
   public void draw(GL10 gl) {
     if (!visible) {
@@ -73,7 +79,7 @@ public class PathLayer implements NavigationViewLayer, NodeMain {
 
   @Override
   public void onStart(Node node) {
-    pathSubscriber = node.newSubscriber("~path", "nav_msgs/Path", new MessageListener<Path>() {
+    pathSubscriber = node.newSubscriber(topic, "nav_msgs/Path", new MessageListener<Path>() {
       @Override
       public void onNewMessage(Path path) {
         pathVertexBuffer = makePathVertices(path);

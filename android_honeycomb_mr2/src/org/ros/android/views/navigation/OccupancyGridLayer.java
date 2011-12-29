@@ -54,6 +54,12 @@ public class OccupancyGridLayer implements NavigationViewLayer, NodeMain {
 
   private boolean initialized = false;
 
+  private String topic;
+
+  public OccupancyGridLayer(String topic) {
+    this.topic = topic;
+  }
+
   @Override
   public void draw(GL10 gl) {
     if (initialized) {
@@ -69,7 +75,7 @@ public class OccupancyGridLayer implements NavigationViewLayer, NodeMain {
   @Override
   public void onStart(Node node) {
     occupancyGridSubscriber =
-        node.newSubscriber("~map", "nav_msgs/OccupancyGrid",
+        node.newSubscriber(topic, "nav_msgs/OccupancyGrid",
             new MessageListener<org.ros.message.nav_msgs.OccupancyGrid>() {
               @Override
               public void onNewMessage(org.ros.message.nav_msgs.OccupancyGrid occupancyGridMessage) {

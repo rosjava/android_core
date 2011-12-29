@@ -34,7 +34,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle
  *
  */
-public class CompressedOccupancyGridLayer implements NavigationViewLayer, NodeMain {
+public class CompressedBitmapLayer implements NavigationViewLayer, NodeMain {
 
   private OccupancyGrid occupancyGrid = new OccupancyGrid();
 
@@ -44,11 +44,17 @@ public class CompressedOccupancyGridLayer implements NavigationViewLayer, NodeMa
 
   private boolean initialized = false;
 
+  private String topic;
+
+  public CompressedBitmapLayer(String topic) {
+    this.topic = topic;
+  }
+
   @Override
   public void onStart(Node node) {
     compressedOccupancyGridSubscriber =
         node.newSubscriber(
-            "~compressed_map",
+            topic,
             "compressed_visualization_transport_msgs/CompressedBitmap",
             new MessageListener<org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap>() {
               @Override
