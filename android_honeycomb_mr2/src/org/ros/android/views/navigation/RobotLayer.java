@@ -17,6 +17,7 @@
 package org.ros.android.views.navigation;
 
 import android.content.Context;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import org.ros.message.MessageListener;
 import org.ros.message.geometry_msgs.PoseStamped;
@@ -45,6 +46,8 @@ public class RobotLayer implements NavigationViewLayer, NodeMain {
   private Subscriber<org.ros.message.geometry_msgs.PoseStamped> poseSubscriber;
   private NavigationView navigationView;
   private boolean initialized = false;
+  private GestureDetector gestureDetector;
+  private boolean followingRobot = false;
 
   public RobotLayer() {
     robotShape = new TriangleFanShape(vertices, color);
@@ -55,6 +58,9 @@ public class RobotLayer implements NavigationViewLayer, NodeMain {
     if (!initialized) {
       return;
     }
+    if (followingRobot) {
+      navigationView.getRenderer().setCamera(robotShape.getPose().position);
+    }
     // To keep the robot's size constant even when scaled, we apply the inverse
     // scaling factor before drawing.
     robotShape.setScaleFactor(1 / navigationView.getRenderer().getScalingFactor());
@@ -63,7 +69,7 @@ public class RobotLayer implements NavigationViewLayer, NodeMain {
 
   @Override
   public boolean onTouchEvent(NavigationView view, MotionEvent event) {
-    return false;
+    return gestureDetector.onTouchEvent(event);
   }
 
   @Override
@@ -87,6 +93,29 @@ public class RobotLayer implements NavigationViewLayer, NodeMain {
   @Override
   public void onRegister(Context context, NavigationView view) {
     navigationView = view;
+    gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+      @Override
+      public boolean onDoubleTap(MotionEvent event) {
+        followingRobot = true;
+        if (initialized) {
+          navigationView.requestRender();
+          return true;
+        }
+        return false;
+      }
+
+      @Override
+      public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
+          float distanceY) {
+        followingRobot = false;
+        return false;
+      }
+
+      @Override
+      public void onShowPress(MotionEvent event) {
+        followingRobot = false;
+      }
+    });
   }
 
   @Override
