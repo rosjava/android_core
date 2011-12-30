@@ -39,6 +39,12 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
    * TODO(moesenle): make this the root of the TF tree.
    */
   private static final String DEFAULT_REFERENCE_FRAME = "/map";
+
+  /**
+   * The default target frame is null which means that the renderer uses the
+   * user set camera.
+   */
+  private static final String DEFAULT_TARGET_FRAME = null;
       
   /**
    * Most the user can zoom in.
@@ -57,6 +63,14 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
    * Real world (x,y) coordinates of the camera.
    */
   private Vector3 cameraPoint = new Vector3(0, 0, 0);
+
+  /**
+   * The TF frame the camera is locked on. If set, the camera point is set to
+   * the location of this frame in referenceFrame. If the camera is set or
+   * moved, the lock is removed.
+   */
+  String targetFrame;
+
   /**
    * The current zoom factor used to scale the world.
    */
@@ -74,7 +88,7 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
    * instance, base_link, the view follows the robot and the robot itself is in
    * the origin.
    */
-  private String referenceFrame = DEFAULT_REFERENCE_FRAME;
+  private String fixedFrame = DEFAULT_REFERENCE_FRAME;
 
   private TransformListener transformListener;
 
@@ -114,6 +128,11 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
     // coordinate system, x is pointing left.
     gl.glScalef(getScalingFactor(), getScalingFactor(), 1);
     gl.glRotatef(90, 0, 0, 1);
+    if (targetFrame != null && transformListener.getTransformer().canTransform(fixedFrame, targetFrame)) {
+      cameraPoint =
+          transformListener.getTransformer().lookupTransform(targetFrame, fixedFrame)
+              .getTranslation();
+    }
     gl.glTranslatef((float) -cameraPoint.getX(), (float) -cameraPoint.getY(),
         (float) -cameraPoint.getZ());
   }
@@ -131,6 +150,7 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
    *          distance to move in y in world coordinates
    */
   public void moveCamera(float distanceX, float distanceY) {
+    resetTargetFrame();
     cameraPoint.setX(cameraPoint.getX() + distanceX);
     cameraPoint.setY(cameraPoint.getY() + distanceY);
   }
@@ -152,6 +172,7 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
   }
 
   public void setCamera(Vector3 newCameraPoint) {
+    resetTargetFrame();
     cameraPoint = newCameraPoint;
   }
 
@@ -208,9 +229,9 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
         // TODO(moesenle): throw a warning that no transform could be found and
         // the layer has been ignored.
         if (layerFrame != null
-            && transformListener.getTransformer().canTransform(layerFrame, referenceFrame)) {
+            && transformListener.getTransformer().canTransform(layerFrame, fixedFrame)) {
           GlTransformer.applyTransforms(gl,
-              transformListener.getTransformer().lookupTransforms(layerFrame, referenceFrame));
+              transformListener.getTransformer().lookupTransforms(layerFrame, fixedFrame));
         }
       }
       layer.draw(gl);
@@ -226,19 +247,19 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
     this.scalingFactor = scalingFactor;
   }
 
-  public String getReferenceFrame() {
-    return referenceFrame;
+  public String getFixedFrame() {
+    return fixedFrame;
   }
 
-  public void setReferenceFrame(String referenceFrame) {
-    this.referenceFrame = referenceFrame;
+  public void setFixedFrame(String referenceFrame) {
+    this.fixedFrame = referenceFrame;
     // To prevent odd camera jumps, we always center on the referenceFrame when
     // it is reset.
     cameraPoint = Vector3.makeIdentityVector3();
   }
 
-  public void resetReferenceFrame() {
-    referenceFrame = DEFAULT_REFERENCE_FRAME;
+  public void resetFixedFrame() {
+    fixedFrame = DEFAULT_REFERENCE_FRAME;
   }
 
   public List<VisualizationLayer> getLayers() {
@@ -247,6 +268,18 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
 
   public void setLayers(List<VisualizationLayer> layers) {
     this.layers = layers;
+  }
+
+  public void setTargetFrame(String frame) {
+    targetFrame = frame;
+  }
+
+  public void resetTargetFrame() {
+    targetFrame = DEFAULT_TARGET_FRAME;
+  }
+
+  public String getLockedFrame() {
+    return targetFrame;
   }
 
 }

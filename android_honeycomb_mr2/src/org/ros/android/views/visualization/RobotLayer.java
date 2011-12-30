@@ -23,7 +23,6 @@ import android.view.MotionEvent;
 import org.ros.message.Time;
 import org.ros.message.geometry_msgs.TransformStamped;
 import org.ros.node.Node;
-import org.ros.rosjava_geometry.Transform;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -97,18 +96,7 @@ public class RobotLayer implements VisualizationLayer, TfLayer {
             new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
               @Override
               public boolean onDoubleTap(MotionEvent event) {
-                if (navigationView.getRenderer().getReferenceFrame().equals(robotFrame)) {
-                  navigationView.getRenderer().resetReferenceFrame();
-                  String newReferenceFrame = navigationView.getRenderer().getReferenceFrame(); 
-                  if (navigationView.getTransformer().canTransform(robotFrame, newReferenceFrame)) {
-                    Transform cameraTransform =
-                        navigationView.getTransformer().lookupTransform(robotFrame,
-                            newReferenceFrame);
-                    navigationView.getRenderer().setCamera(cameraTransform.getTranslation());
-                  }
-                } else {
-                  navigationView.getRenderer().setReferenceFrame(robotFrame);
-                }
+                navigationView.getRenderer().setTargetFrame(robotFrame);
                 navigationView.requestRender();
                 return true;
               }

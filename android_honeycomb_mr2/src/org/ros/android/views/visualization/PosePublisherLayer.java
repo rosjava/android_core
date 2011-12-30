@@ -88,7 +88,7 @@ public class PosePublisherLayer implements VisualizationLayer {
         return true;
       } else if (event.getAction() == MotionEvent.ACTION_UP) {
         posePublisher.publish(pose.toPoseStampedMessage(navigationView.getRenderer()
-            .getReferenceFrame(), node.getCurrentTime()));
+            .getFixedFrame(), node.getCurrentTime()));
         visible = false;
         navigationView.requestRender();
         return true;
