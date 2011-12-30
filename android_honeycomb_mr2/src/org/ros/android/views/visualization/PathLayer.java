@@ -106,7 +106,6 @@ public class PathLayer implements VisualizationLayer {
       vertexBuffer.put((float) pose.pose.position.z);
     }
     vertexBuffer.position(0);
-
-    return null;
+    return vertexBuffer;
   }
 }
