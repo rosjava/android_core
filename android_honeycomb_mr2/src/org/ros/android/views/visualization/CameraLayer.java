@@ -55,14 +55,14 @@ public class CameraLayer implements VisualizationLayer {
         // TODO Auto-generated method stub
         gestureDetector =
             new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
-          @Override
+              @Override
               public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
                   float distanceY) {
                 view.getRenderer().moveCameraScreenCoordinates(-distanceX, -distanceY);
                 view.requestRender();
-            return true;
-          }
-        });
+                return true;
+              }
+            });
         scaleGestureDetector =
             new ScaleGestureDetector(context,
                 new ScaleGestureDetector.SimpleOnScaleGestureListener() {

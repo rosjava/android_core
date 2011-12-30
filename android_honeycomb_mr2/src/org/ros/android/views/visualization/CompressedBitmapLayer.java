@@ -34,7 +34,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle
  *
  */
-public class CompressedBitmapLayer implements VisualizationLayer {
+public class CompressedBitmapLayer implements VisualizationLayer, TfLayer {
 
   private TextureDrawable occupancyGrid = new TextureDrawable();
 
@@ -45,6 +45,8 @@ public class CompressedBitmapLayer implements VisualizationLayer {
   private boolean initialized = false;
 
   private String topic;
+
+  private String frame;
 
   public CompressedBitmapLayer(String topic) {
     this.topic = topic;
@@ -85,6 +87,7 @@ public class CompressedBitmapLayer implements VisualizationLayer {
                         bitmap.getHeight(), 0xff000000);
                 occupancyGrid.update(compressedBitmap.origin, compressedBitmap.resolution_x,
                     occupancyGridBitmap);
+                frame = compressedBitmap.header.frame_id;
                 initialized = true;
                 navigationView.requestRender();
               }
@@ -94,6 +97,11 @@ public class CompressedBitmapLayer implements VisualizationLayer {
   @Override
   public void onShutdown(VisualizationView view, Node node) {
     compressedOccupancyGridSubscriber.shutdown();
+  }
+
+  @Override
+  public String getFrame() {
+    return frame;
   }
 
 }

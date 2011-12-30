@@ -30,7 +30,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle
  *
  */
-public class OccupancyGridLayer implements VisualizationLayer {
+public class OccupancyGridLayer implements VisualizationLayer, TfLayer {
   /**
    * Color of occupied cells in the map.
    */
@@ -55,6 +55,8 @@ public class OccupancyGridLayer implements VisualizationLayer {
   private boolean initialized = false;
 
   private String topic;
+
+  private String frame;
 
   public OccupancyGridLayer(String topic) {
     this.topic = topic;
@@ -102,6 +104,7 @@ public class OccupancyGridLayer implements VisualizationLayer {
                         (int) occupancyGridMessage.info.height, COLOR_UNKNOWN);
                 occupancyGrid.update(occupancyGridMessage.info.origin,
                     occupancyGridMessage.info.resolution, occupancyGridBitmap);
+                frame = occupancyGridMessage.header.frame_id;
                 initialized = true;
                 navigationView.requestRender();
               }
@@ -111,5 +114,10 @@ public class OccupancyGridLayer implements VisualizationLayer {
   @Override
   public void onShutdown(VisualizationView view, Node node) {
     occupancyGridSubscriber.shutdown();
+  }
+
+  @Override
+  public String getFrame() {
+    return frame;
   }
 }
