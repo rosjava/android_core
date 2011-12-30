@@ -19,10 +19,8 @@ package org.ros.android.views.visualization;
 import android.opengl.GLSurfaceView;
 import org.ros.message.geometry_msgs.Point;
 import org.ros.message.geometry_msgs.Pose;
-import org.ros.message.geometry_msgs.Transform;
 import org.ros.rosjava_geometry.Geometry;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -35,6 +33,13 @@ import javax.microedition.khronos.opengles.GL10;
  * 
  */
 public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
+  /**
+   * The default reference frame.
+   * 
+   * TODO(moesenle): make this the root of the TF tree.
+   */
+  private static final String DEFAULT_REFERENCE_FRAME = "/map";
+      
   /**
    * Most the user can zoom in.
    */
@@ -69,12 +74,7 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
    * instance, base_link, the view follows the robot and the robot itself is in
    * the origin.
    */
-  private String referenceFrame = "/map";
-
-  /**
-   * The frame to follow.
-   */
-  private String targetFrame;
+  private String referenceFrame = DEFAULT_REFERENCE_FRAME;
 
   private TransformListener transformListener;
 
@@ -115,21 +115,6 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
     gl.glScalef(getScalingFactor(), getScalingFactor(), 1);
     gl.glRotatef(90, 0, 0, 1);
     gl.glTranslatef((float) -cameraPoint.x, (float) -cameraPoint.y, (float) -cameraPoint.z);
-    if (getTargetFrame() != null && transformListener.getTransformer().canTransform(getTargetFrame(), referenceFrame)) {
-      List<Transform> transforms = transformListener.getTransformer().lookupTransforms(referenceFrame, getTargetFrame());
-      GlTransformer.applyTransforms(gl, ignoreRotations(transforms));
-    }
-  }
-
-  private List<Transform> ignoreRotations(List<Transform> transforms) {
-    List<Transform> result = new ArrayList<Transform>(transforms.size());
-    for (Transform transform : transforms) {
-      Transform transformWithoutRotation = new Transform();
-      transformWithoutRotation.translation = transform.translation;
-      transformWithoutRotation.rotation.w = 1.0;
-      result.add(transformWithoutRotation);
-    }
-    return result;
   }
 
   @Override
@@ -253,20 +238,16 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
     cameraPoint = new Point();
   }
 
+  public void resetReferenceFrame() {
+    referenceFrame = DEFAULT_REFERENCE_FRAME;
+  }
+
   public List<VisualizationLayer> getLayers() {
     return layers;
   }
 
   public void setLayers(List<VisualizationLayer> layers) {
     this.layers = layers;
-  }
-
-  public String getTargetFrame() {
-    return targetFrame;
-  }
-
-  public void setTargetFrame(String targetFrame) {
-    this.targetFrame = targetFrame;
   }
 
 }

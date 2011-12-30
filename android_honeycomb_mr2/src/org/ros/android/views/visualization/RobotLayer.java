@@ -21,7 +21,6 @@ import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import org.ros.message.Time;
-import org.ros.message.geometry_msgs.Point;
 import org.ros.message.geometry_msgs.TransformStamped;
 import org.ros.node.Node;
 
@@ -97,8 +96,11 @@ public class RobotLayer implements VisualizationLayer, TfLayer {
             new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
               @Override
               public boolean onDoubleTap(MotionEvent event) {
-                navigationView.getRenderer().setTargetFrame(robotFrame);
-                navigationView.getRenderer().setCamera(new Point());
+                if (navigationView.getRenderer().getReferenceFrame().equals(robotFrame)) {
+                  navigationView.getRenderer().resetReferenceFrame();
+                } else {
+                  navigationView.getRenderer().setReferenceFrame(robotFrame);
+                }
                 navigationView.requestRender();
                 return true;
               }
@@ -106,17 +108,11 @@ public class RobotLayer implements VisualizationLayer, TfLayer {
               @Override
               public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
                   float distanceY) {
-                if (robotFrame.equals(navigationView.getRenderer().getTargetFrame())) {
-                  navigationView.getRenderer().setTargetFrame(null);
-                }
                 return false;
               }
 
               @Override
               public void onShowPress(MotionEvent event) {
-                if (robotFrame.equals(navigationView.getRenderer().getTargetFrame())) {
-                  navigationView.getRenderer().setTargetFrame(null);
-                }
               }
             });
       }
