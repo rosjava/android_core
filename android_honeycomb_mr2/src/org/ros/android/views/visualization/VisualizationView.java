@@ -16,6 +16,9 @@
 
 package org.ros.android.views.visualization;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
@@ -23,39 +26,46 @@ import android.view.MotionEvent;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
 
 public class VisualizationView extends GLSurfaceView implements NodeMain {
-  private VisualizationViewRenderer renderer;
 
-  private LinkedList<VisualizationLayer> layers;
+  private final RenderRequestListener renderRequestListener;
+  private final TransformListener transformListener;
+  private final Camera camera;
+  private final XYOrthoraphicRenderer renderer;
+  private final List<VisualizationLayer> layers;
 
   private Node node;
 
-  private TransformListener transformListener = new TransformListener();
-
   public VisualizationView(Context context) {
     super(context);
-    layers = new LinkedList<VisualizationLayer>();
+    renderRequestListener = new RenderRequestListener() {
+      @Override
+      public void onRenderRequest() {
+        requestRender();
+      }
+    };
+    transformListener = new TransformListener();
+    camera = new Camera(transformListener.getTransformer());
+    renderer = new XYOrthoraphicRenderer(transformListener.getTransformer(), camera);
+    layers = Lists.newArrayList();
     setEGLConfigChooser(8, 8, 8, 8, 0, 0);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
     setZOrderOnTop(true);
-    renderer = new VisualizationViewRenderer(transformListener);
     setRenderer(renderer);
   }
 
   public boolean onTouchEvent(MotionEvent event) {
-    Iterator<VisualizationLayer> layerIterator = layers.descendingIterator();
-    while (layerIterator.hasNext()) {
-      if (layerIterator.next().onTouchEvent(this, event)) {
+    for (VisualizationLayer layer : Iterables.reverse(layers)) {
+      if (layer.onTouchEvent(this, event)) {
         return true;
       }
     }
     return false;
   }
 
-  public VisualizationViewRenderer getRenderer() {
+  public XYOrthoraphicRenderer getRenderer() {
     return renderer;
   }
   
@@ -68,34 +78,11 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
    */
   public void addLayer(VisualizationLayer layer) {
     layers.add(layer);
+    layer.addRenderListener(renderRequestListener);
     if (node != null) {
-      layer.onStart(getContext(), this, node, getHandler());
+      layer.onStart(node, getHandler(), camera, transformListener.getTransformer());
     }
     requestRender();
-  }
-
-  /**
-   * Adds the layer at a specific index.
-   * 
-   * @param index
-   *          position of the added layer
-   * @param layer
-   *          layer to add
-   */
-  public void addLayerAtIndex(int index, VisualizationLayer layer) {
-    layers.add(index, layer);
-    if (node != null) {
-      layer.onStart(getContext(), this, node, getHandler());
-    }
-    requestRender();
-  }
-
-  public void addLayerBeforeOther(VisualizationLayer other, VisualizationLayer layer) {
-    addLayerAtIndex(layers.indexOf(other), layer);
-  }
-  
-  public void addLayerAfterOther(VisualizationLayer other, VisualizationLayer layer) {
-    addLayerAtIndex(layers.indexOf(other) + 1, layer);
   }
 
   public void removeLayer(VisualizationLayer layer) {
@@ -103,17 +90,12 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     layers.remove(layer);
   }
 
-  public void removeLayerAtIndex(int index) {
-    VisualizationLayer layer = layers.remove(index);
-    layer.onShutdown(this, node);
-  }
-
   @Override
   public void onStart(Node node) {
     this.node = node;
     transformListener.onStart(node);
     for (VisualizationLayer layer : layers) {
-      layer.onStart(getContext(), this, node, getHandler());
+      layer.onStart(node, getHandler(), camera, transformListener.getTransformer());
     }
     renderer.setLayers(layers);
   }
@@ -127,9 +109,4 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     transformListener.onShutdown(node);
     this.node = null;
   }
-
-  public Transformer getTransformer() {
-    return transformListener.getTransformer();
-  }
-
 }

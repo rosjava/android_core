@@ -16,11 +16,10 @@
 
 package org.ros.android.views.visualization;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
-import android.view.MotionEvent;
 import org.ros.message.MessageListener;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.topic.Subscriber;
 
@@ -30,7 +29,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle
  *
  */
-public class OccupancyGridLayer implements VisualizationLayer, TfLayer {
+public class OccupancyGridLayer extends DefaultVisualizationLayer implements TfLayer {
   /**
    * Color of occupied cells in the map.
    */
@@ -46,20 +45,21 @@ public class OccupancyGridLayer implements VisualizationLayer, TfLayer {
    */
   private static final int COLOR_UNKNOWN = 0xff000000;
 
-  private TextureDrawable occupancyGrid = new TextureDrawable();
+  private final GraphName topic;
+  private final TextureDrawable occupancyGrid;
 
+  private boolean initialized;
   private Subscriber<org.ros.message.nav_msgs.OccupancyGrid> occupancyGridSubscriber;
-
-  private VisualizationView navigationView;
-
-  private boolean initialized = false;
-
-  private String topic;
-
   private String frame;
 
   public OccupancyGridLayer(String topic) {
+    this(new GraphName(topic));
+  }
+
+  public OccupancyGridLayer(GraphName topic) {
     this.topic = topic;
+    occupancyGrid = new TextureDrawable();
+    initialized = false;
   }
 
   @Override
@@ -67,11 +67,6 @@ public class OccupancyGridLayer implements VisualizationLayer, TfLayer {
     if (initialized) {
       occupancyGrid.draw(gl);
     }
-  }
-
-  @Override
-  public boolean onTouchEvent(VisualizationView view, MotionEvent event) {
-    return false;
   }
 
   private static int[] occupancyGridToPixelArray(
@@ -90,8 +85,7 @@ public class OccupancyGridLayer implements VisualizationLayer, TfLayer {
   }
 
   @Override
-  public void onStart(Context context, VisualizationView view, Node node, Handler handler) {
-    navigationView = view;
+  public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
     occupancyGridSubscriber =
         node.newSubscriber(topic, "nav_msgs/OccupancyGrid",
             new MessageListener<org.ros.message.nav_msgs.OccupancyGrid>() {
@@ -106,7 +100,7 @@ public class OccupancyGridLayer implements VisualizationLayer, TfLayer {
                     occupancyGridMessage.info.resolution, occupancyGridBitmap);
                 frame = occupancyGridMessage.header.frame_id;
                 initialized = true;
-                navigationView.requestRender();
+                requestRender();
               }
             });
   }

@@ -16,11 +16,11 @@
 
 package org.ros.android.views.visualization;
 
-import android.content.Context;
 import android.os.Handler;
 import android.view.MotionEvent;
 import org.ros.message.MessageListener;
 import org.ros.message.geometry_msgs.PoseStamped;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.topic.Subscriber;
 import org.ros.rosjava_geometry.Transform;
@@ -31,7 +31,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * 
  */
-public class PoseSubscriberLayer implements VisualizationLayer, TfLayer {
+public class PoseSubscriberLayer extends DefaultVisualizationLayer implements TfLayer {
 
   private static final float vertices[] = {
     0.0f, 0.0f, 0.0f, // center
@@ -48,19 +48,21 @@ public class PoseSubscriberLayer implements VisualizationLayer, TfLayer {
   
   private static final float color[] = { 0.180392157f, 0.71372549f, 0.909803922f, 0.5f };
 
-  private TriangleFanShape goalShape;
+  private final GraphName topic;
+  private final TriangleFanShape goalShape;
+
+  private boolean visible;
   private Subscriber<org.ros.message.geometry_msgs.PoseStamped> poseSubscriber;
-  private boolean visible = false;
-
-  private VisualizationView navigationView;
-
-  private String topic;
-
   private String poseFrame;
-  
+
   public PoseSubscriberLayer(String topic) {
+    this(new GraphName(topic));
+  }
+
+  public PoseSubscriberLayer(GraphName topic) {
     this.topic = topic;
     goalShape = new TriangleFanShape(vertices, color);
+    visible = false;
   }
 
   @Override
@@ -76,8 +78,7 @@ public class PoseSubscriberLayer implements VisualizationLayer, TfLayer {
   }
 
   @Override
-  public void onStart(Context context, VisualizationView view, Node node, Handler handler) {
-    navigationView = view;
+  public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
     poseSubscriber =
         node.newSubscriber(topic, "geometry_msgs/PoseStamped",
             new MessageListener<org.ros.message.geometry_msgs.PoseStamped>() {
@@ -86,7 +87,7 @@ public class PoseSubscriberLayer implements VisualizationLayer, TfLayer {
                 goalShape.setPose(Transform.makeFromPoseMessage(pose.pose));
                 poseFrame = pose.header.frame_id;
                 visible = true;
-                navigationView.requestRender();
+                requestRender();
               }
             });
   }
@@ -108,5 +109,4 @@ public class PoseSubscriberLayer implements VisualizationLayer, TfLayer {
   public String getFrame() {
     return poseFrame;
   }
-
 }

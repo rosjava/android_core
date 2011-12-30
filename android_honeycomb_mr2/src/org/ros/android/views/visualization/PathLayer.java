@@ -16,12 +16,11 @@
 
 package org.ros.android.views.visualization;
 
-import android.content.Context;
 import android.os.Handler;
-import android.view.MotionEvent;
 import org.ros.message.MessageListener;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.message.nav_msgs.Path;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.topic.Subscriber;
 
@@ -35,21 +34,22 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * 
  */
-public class PathLayer implements VisualizationLayer {
+public class PathLayer extends DefaultVisualizationLayer {
 
   static final float color[] = { 0.2f, 0.8f, 0.2f, 1.0f };
   
   private FloatBuffer pathVertexBuffer;
-  private boolean visible = false;
-
+  private boolean visible;
   private Subscriber<Path> pathSubscriber;
-
-  private VisualizationView navigationView;
-
-  private String topic;
+  private GraphName topic;
 
   public PathLayer(String topic) {
+    this(new GraphName(topic));
+  }
+
+  public PathLayer(GraphName topic) {
     this.topic = topic;
+    visible = false;
   }
 
   @Override
@@ -64,19 +64,13 @@ public class PathLayer implements VisualizationLayer {
   }
 
   @Override
-  public boolean onTouchEvent(VisualizationView view, MotionEvent event) {
-    return false;
-  }
-
-  @Override
-  public void onStart(Context context, VisualizationView view, Node node, Handler handler) {
-    navigationView = view;
+  public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
     pathSubscriber = node.newSubscriber(topic, "nav_msgs/Path", new MessageListener<Path>() {
       @Override
       public void onNewMessage(Path path) {
         pathVertexBuffer = makePathVertices(path);
         setVisible(true);
-        navigationView.requestRender();
+        requestRender();
       }
     });
   }

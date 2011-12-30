@@ -33,7 +33,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * 
  */
-public class RobotLayer implements VisualizationLayer, TfLayer {
+public class RobotLayer extends DefaultVisualizationLayer implements TfLayer {
 
   private static final float vertices[] = {
     0.0f, 0.0f, 0.0f, // Top
@@ -44,14 +44,17 @@ public class RobotLayer implements VisualizationLayer, TfLayer {
 
   private static final float color[] = { 0.0f, 0.635f, 1.0f, 0.5f };
 
-  private TriangleFanShape robotShape;
-  private VisualizationView navigationView;
-  private GestureDetector gestureDetector;
-  private String robotFrame;
-  private Timer redrawTimer;
+  private final String robotFrame;
+  private final Context context;
+  private final TriangleFanShape robotShape;
 
-  public RobotLayer(String robotFrame) {
+  private GestureDetector gestureDetector;
+  private Timer redrawTimer;
+  private Camera camera;
+
+  public RobotLayer(String robotFrame, Context context) {
     this.robotFrame = robotFrame;
+    this.context = context;
     robotShape = new TriangleFanShape(vertices, color);
   }
 
@@ -59,7 +62,7 @@ public class RobotLayer implements VisualizationLayer, TfLayer {
   public void draw(GL10 gl) {
     // To keep the robot's size constant even when scaled, we apply the inverse
     // scaling factor before drawing.
-    robotShape.setScaleFactor(1 / navigationView.getRenderer().getScalingFactor());
+    robotShape.setScaleFactor(1 / camera.getScalingFactor());
     robotShape.draw(gl);
   }
 
@@ -69,8 +72,8 @@ public class RobotLayer implements VisualizationLayer, TfLayer {
   }
 
   @Override
-  public void onStart(final Context context, VisualizationView view, Node node, Handler handler) {
-    navigationView = view;
+  public void onStart(Node node, Handler handler, final Camera camera, final Transformer transformer) {
+    this.camera = camera;
 
     redrawTimer = new Timer();
     redrawTimer.scheduleAtFixedRate(new TimerTask() {
@@ -78,11 +81,11 @@ public class RobotLayer implements VisualizationLayer, TfLayer {
       
       @Override
       public void run() {
-        TransformStamped transform = navigationView.getTransformer().getTransform(robotFrame);
+        TransformStamped transform = transformer.getTransform(robotFrame);
         if (transform != null) {
           if (lastRobotTime != null
             && !transform.header.stamp.equals(lastRobotTime)) {
-            navigationView.requestRender();
+            requestRender();
           }
           lastRobotTime = transform.header.stamp;
         }
@@ -96,8 +99,8 @@ public class RobotLayer implements VisualizationLayer, TfLayer {
             new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
               @Override
               public boolean onDoubleTap(MotionEvent event) {
-                navigationView.getRenderer().setTargetFrame(robotFrame);
-                navigationView.requestRender();
+                camera.setTargetFrame(robotFrame);
+                requestRender();
                 return true;
               }
 
@@ -113,10 +116,6 @@ public class RobotLayer implements VisualizationLayer, TfLayer {
             });
       }
     });
-  }
-
-  @Override
-  public void onShutdown(VisualizationView view, Node node) {
   }
 
   @Override

@@ -23,6 +23,7 @@ import android.graphics.Point;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
 import org.ros.rosjava_geometry.Quaternion;
@@ -35,7 +36,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * 
  */
-public class PosePublisherLayer implements VisualizationLayer {
+public class PosePublisherLayer extends DefaultVisualizationLayer {
 
   private static final float vertices[] = { 0.0f, 0.0f, 0.0f, // center
       -0.251f, 0.0f, 0.0f, // bottom
@@ -51,18 +52,25 @@ public class PosePublisherLayer implements VisualizationLayer {
 
   private static final float color[] = { 0.847058824f, 0.243137255f, 0.8f, 1f };
 
+  private final Context context;
+
   private TriangleFanShape poseShape;
   private Publisher<org.ros.message.geometry_msgs.PoseStamped> posePublisher;
-  private boolean visible = false;
-  private String topic;
-  private VisualizationView navigationView;
+  private boolean visible;
+  private GraphName topic;
   private GestureDetector gestureDetector;
   private Transform pose;
-
+  private Camera camera;
   private Node node;
 
-  public PosePublisherLayer(String topic) {
+  public PosePublisherLayer(String topic, Context context) {
+    this(new GraphName(topic), context);
+  }
+
+  public PosePublisherLayer(GraphName topic, Context context) {
     this.topic = topic;
+    this.context = context;
+    visible = false;
     poseShape = new TriangleFanShape(vertices, color);
   }
 
@@ -70,7 +78,7 @@ public class PosePublisherLayer implements VisualizationLayer {
   public void draw(GL10 gl) {
     if (visible) {
       Preconditions.checkNotNull(pose);
-      poseShape.setScaleFactor(1 / navigationView.getRenderer().getScalingFactor());
+      poseShape.setScaleFactor(1 / camera.getScalingFactor());
       poseShape.draw(gl);
     }
   }
@@ -80,17 +88,18 @@ public class PosePublisherLayer implements VisualizationLayer {
     if (visible) {
       Preconditions.checkNotNull(pose);
       if (event.getAction() == MotionEvent.ACTION_MOVE) {
-        pose.setRotation(Quaternion.rotationBetweenVectors(new Vector3(1, 0, 0), navigationView
-            .getRenderer().toOpenGLCoordinates(new Point((int) event.getX(), (int) event.getY()))
+        pose.setRotation(Quaternion.rotationBetweenVectors(
+            new Vector3(1, 0, 0),
+            camera.toOpenGLCoordinates(new Point((int) event.getX(), (int) event.getY()))
             .subtract(pose.getTranslation())));
         poseShape.setPose(pose);
-        navigationView.requestRender();
+        requestRender();
         return true;
       } else if (event.getAction() == MotionEvent.ACTION_UP) {
-        posePublisher.publish(pose.toPoseStampedMessage(navigationView.getRenderer()
-            .getFixedFrame(), node.getCurrentTime()));
+        posePublisher.publish(pose.toPoseStampedMessage(camera.getFixedFrame(),
+            node.getCurrentTime()));
         visible = false;
-        navigationView.requestRender();
+        requestRender();
         return true;
       }
     }
@@ -99,9 +108,9 @@ public class PosePublisherLayer implements VisualizationLayer {
   }
 
   @Override
-  public void onStart(final Context context, VisualizationView view, Node node, Handler handler) {
-    navigationView = view;
+  public void onStart(Node node, Handler handler, final Camera camera, Transformer transformer) {
     this.node = node;
+    this.camera = camera;
     posePublisher = node.newPublisher(topic, "geometry_msgs/PoseStamped");
     handler.post(new Runnable() {
       @Override
@@ -111,11 +120,11 @@ public class PosePublisherLayer implements VisualizationLayer {
               @Override
               public void onLongPress(MotionEvent e) {
                 pose =
-                    new Transform(navigationView.getRenderer().toOpenGLCoordinates(
+                    new Transform(camera.toOpenGLCoordinates(
                         new Point((int) e.getX(), (int) e.getY())), new Quaternion(0, 0, 0, 1));
                 poseShape.setPose(pose);
                 visible = true;
-                navigationView.requestRender();
+                requestRender();
               }
             });
       }

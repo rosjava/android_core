@@ -29,7 +29,7 @@ import org.ros.android.views.PanTiltView;
 import org.ros.android.views.RosImageView;
 import org.ros.android.views.VirtualJoystickView;
 import org.ros.android.views.ZoomMode;
-import org.ros.android.views.visualization.CameraLayer;
+import org.ros.android.views.visualization.CameraControlLayer;
 import org.ros.android.views.visualization.CompressedBitmapLayer;
 import org.ros.android.views.visualization.PosePublisherLayer;
 import org.ros.android.views.visualization.PoseSubscriberLayer;
@@ -164,11 +164,11 @@ public class MainActivity extends RosActivity {
     distanceView.setTopicName("base_scan");
     // panTiltView = new PanTiltView(this);
     visualizationView = new VisualizationView(this);
-    visualizationView.addLayer(new CameraLayer());
+    visualizationView.addLayer(new CameraControlLayer(this));
     visualizationView.addLayer(new CompressedBitmapLayer("~compressed_map"));
-    visualizationView.addLayer(new RobotLayer("base_footprint"));
+    visualizationView.addLayer(new RobotLayer("base_footprint", this));
     visualizationView.addLayer(new PoseSubscriberLayer("simple_waypoints_server/goal_pose"));
-    visualizationView.addLayer(new PosePublisherLayer("simple_waypoints_server/goal_pose"));
+    visualizationView.addLayer(new PosePublisherLayer("simple_waypoints_server/goal_pose", this));
     initViews();
   }
 

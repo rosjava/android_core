@@ -23,19 +23,19 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import org.ros.node.Node;
 
-import javax.microedition.khronos.opengles.GL10;
-
 /**
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * 
  */
-public class CameraLayer implements VisualizationLayer {
+public class CameraControlLayer extends DefaultVisualizationLayer {
+
+  private final Context context;
 
   private GestureDetector gestureDetector;
   private ScaleGestureDetector scaleGestureDetector;
 
-  @Override
-  public void draw(GL10 gl) {
+  public CameraControlLayer(Context context) {
+    this.context = context;
   }
 
   @Override
@@ -47,8 +47,8 @@ public class CameraLayer implements VisualizationLayer {
   }
 
   @Override
-  public void onStart(final Context context, final VisualizationView view, Node node,
-      Handler handler) {
+  public void onStart(Node node, Handler handler, final Camera camera,
+      Transformer transformer) {
     handler.post(new Runnable() {
       @Override
       public void run() {
@@ -58,8 +58,8 @@ public class CameraLayer implements VisualizationLayer {
               @Override
               public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
                   float distanceY) {
-                view.getRenderer().moveCameraScreenCoordinates(-distanceX, -distanceY);
-                view.requestRender();
+                camera.moveCameraScreenCoordinates(-distanceX, -distanceY);
+                requestRender();
                 return true;
               }
             });
@@ -68,17 +68,12 @@ public class CameraLayer implements VisualizationLayer {
                 new ScaleGestureDetector.SimpleOnScaleGestureListener() {
                   @Override
                   public boolean onScale(ScaleGestureDetector detector) {
-                    view.getRenderer().zoomCamera(detector.getScaleFactor());
-                    view.requestRender();
+                    camera.zoomCamera(detector.getScaleFactor());
+                    requestRender();
                     return true;
                   }
                 });
       }
     });
   }
-
-  @Override
-  public void onShutdown(VisualizationView view, Node node) {
-  }
-
 }

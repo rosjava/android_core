@@ -1,38 +1,12 @@
-/*
- * Copyright (C) 2011 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
-
 package org.ros.android.views.visualization;
 
-import android.opengl.GLSurfaceView;
 import org.ros.rosjava_geometry.Quaternion;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
 
-import java.util.List;
-
-import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-/**
- * Renders all layers of a navigation view.
- * 
- * @author moesenle@google.com (Lorenz Moesenlechner)
- * 
- */
-public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
+public class Camera {
   /**
    * The default reference frame.
    * 
@@ -45,7 +19,7 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
    * user set camera.
    */
   private static final String DEFAULT_TARGET_FRAME = null;
-      
+
   /**
    * Most the user can zoom in.
    */
@@ -77,12 +51,6 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
   private float scalingFactor = 0.1f;
 
   /**
-   * List of layers to draw. Layers are drawn in-order, i.e. the layer with
-   * index 0 is the bottom layer and is drawn first.
-   */
-  private List<VisualizationLayer> layers;
-
-  /**
    * The frame in which to render everything. The default value is /map which
    * indicates that everything is rendered in map. If this is changed to, for
    * instance, base_link, the view follows the robot and the robot itself is in
@@ -90,55 +58,22 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
    */
   private String fixedFrame = DEFAULT_REFERENCE_FRAME;
 
-  private TransformListener transformListener;
+  private Transformer transformer;
 
-  public VisualizationViewRenderer(TransformListener transformListener) {
-    this.setLayers(layers);
-    this.transformListener = transformListener;
+  public Camera(Transformer transformer) {
+    this.transformer = transformer;
   }
 
-  @Override
-  public void onSurfaceChanged(GL10 gl, int width, int height) {
-    gl.glViewport(0, 0, width, height);
-    gl.glMatrixMode(GL10.GL_PROJECTION);
-    gl.glLoadIdentity();
-    gl.glOrthof(-width / 2, -height / 2, width / 2, height / 2, -10.0f, 10.0f);
-    viewport = new android.graphics.Point(width, height);
-    gl.glMatrixMode(GL10.GL_MODELVIEW);
-    gl.glLoadIdentity();
-    gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
-    gl.glEnable(GL10.GL_BLEND);
-    gl.glHint(GL10.GL_POLYGON_SMOOTH_HINT, GL10.GL_NICEST);
-    gl.glDisable(GL10.GL_LIGHTING);
-    gl.glDisable(GL10.GL_DEPTH_TEST);
-    gl.glEnable(GL10.GL_COLOR_MATERIAL);
-  }
-
-  @Override
-  public void onDrawFrame(GL10 gl) {
-    gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-    gl.glLoadIdentity();
-    applyCameraTransform(gl);
-    drawLayers(gl);
-  }
-
-  private void applyCameraTransform(GL10 gl) {
+  public void applyCameraTransform(GL10 gl) {
     // We need to negate cameraLocation.x because at this point, in the OpenGL
     // coordinate system, x is pointing left.
     gl.glScalef(getScalingFactor(), getScalingFactor(), 1);
     gl.glRotatef(90, 0, 0, 1);
-    if (targetFrame != null && transformListener.getTransformer().canTransform(fixedFrame, targetFrame)) {
-      cameraPoint =
-          transformListener.getTransformer().lookupTransform(targetFrame, fixedFrame)
-              .getTranslation();
+    if (targetFrame != null && transformer.canTransform(fixedFrame, targetFrame)) {
+      cameraPoint = transformer.lookupTransform(targetFrame, fixedFrame).getTranslation();
     }
     gl.glTranslatef((float) -cameraPoint.getX(), (float) -cameraPoint.getY(),
         (float) -cameraPoint.getZ());
-  }
-
-  @Override
-  public void onSurfaceCreated(GL10 gl, EGLConfig config) {
   }
 
   /**
@@ -218,35 +153,6 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
         new Vector3(0, 0, -1), orientation + Math.PI / 2));
   }
 
-  private void drawLayers(GL10 gl) {
-    if (layers == null) {
-      return;
-    }
-    for (VisualizationLayer layer : getLayers()) {
-      gl.glPushMatrix();
-      if (layer instanceof TfLayer) {
-        String layerFrame = ((TfLayer) layer).getFrame();
-        // TODO(moesenle): throw a warning that no transform could be found and
-        // the layer has been ignored.
-        if (layerFrame != null
-            && transformListener.getTransformer().canTransform(layerFrame, fixedFrame)) {
-          GlTransformer.applyTransforms(gl,
-              transformListener.getTransformer().lookupTransforms(layerFrame, fixedFrame));
-        }
-      }
-      layer.draw(gl);
-      gl.glPopMatrix();
-    }
-  }
-
-  public float getScalingFactor() {
-    return scalingFactor;
-  }
-
-  public void setScalingFactor(float scalingFactor) {
-    this.scalingFactor = scalingFactor;
-  }
-
   public String getFixedFrame() {
     return fixedFrame;
   }
@@ -262,14 +168,6 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
     fixedFrame = DEFAULT_REFERENCE_FRAME;
   }
 
-  public List<VisualizationLayer> getLayers() {
-    return layers;
-  }
-
-  public void setLayers(List<VisualizationLayer> layers) {
-    this.layers = layers;
-  }
-
   public void setTargetFrame(String frame) {
     targetFrame = frame;
   }
@@ -278,8 +176,23 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
     targetFrame = DEFAULT_TARGET_FRAME;
   }
 
-  public String getLockedFrame() {
+  public String getTargetFrame() {
     return targetFrame;
   }
 
+  public android.graphics.Point getViewport() {
+    return viewport;
+  }
+
+  public void setViewport(android.graphics.Point viewport) {
+    this.viewport = viewport;
+  }
+
+  public float getScalingFactor() {
+    return scalingFactor;
+  }
+
+  public void setScalingFactor(float scalingFactor) {
+    this.scalingFactor = scalingFactor;
+  }
 }

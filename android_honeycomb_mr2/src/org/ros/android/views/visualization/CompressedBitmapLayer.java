@@ -16,13 +16,12 @@
 
 package org.ros.android.views.visualization;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
-import android.view.MotionEvent;
 import org.ros.message.MessageListener;
 import org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.topic.Subscriber;
 
@@ -34,22 +33,23 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle
  *
  */
-public class CompressedBitmapLayer implements VisualizationLayer, TfLayer {
+public class CompressedBitmapLayer extends DefaultVisualizationLayer implements TfLayer {
 
-  private TextureDrawable occupancyGrid = new TextureDrawable();
+  private final GraphName topic;
+  private final TextureDrawable occupancyGrid;
 
+  private boolean initialized;
   private Subscriber<org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap> compressedOccupancyGridSubscriber;
-
-  private VisualizationView navigationView;
-
-  private boolean initialized = false;
-
-  private String topic;
-
   private String frame;
 
   public CompressedBitmapLayer(String topic) {
+    this(new GraphName(topic));
+  }
+
+  public CompressedBitmapLayer(GraphName topic) {
     this.topic = topic;
+    occupancyGrid = new TextureDrawable();
+    initialized = false;
   }
 
   @Override
@@ -60,13 +60,7 @@ public class CompressedBitmapLayer implements VisualizationLayer, TfLayer {
   }
 
   @Override
-  public boolean onTouchEvent(VisualizationView view, MotionEvent event) {
-    return false;
-  }
-
-  @Override
-  public void onStart(Context context, VisualizationView view, Node node, Handler handler) {
-    navigationView = view;
+  public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
     compressedOccupancyGridSubscriber =
         node.newSubscriber(
             topic,
@@ -89,7 +83,7 @@ public class CompressedBitmapLayer implements VisualizationLayer, TfLayer {
                     occupancyGridBitmap);
                 frame = compressedBitmap.header.frame_id;
                 initialized = true;
-                navigationView.requestRender();
+                requestRender();
               }
             });
   }
@@ -103,5 +97,4 @@ public class CompressedBitmapLayer implements VisualizationLayer, TfLayer {
   public String getFrame() {
     return frame;
   }
-
 }

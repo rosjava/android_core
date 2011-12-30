@@ -16,7 +16,6 @@
 
 package org.ros.android.views.visualization;
 
-import android.content.Context;
 import android.os.Handler;
 import android.view.MotionEvent;
 import org.ros.node.Node;
@@ -42,17 +41,24 @@ public interface VisualizationLayer extends OpenGlDrawable {
 
   /**
    * Called when the layer is registered at the navigation view.
-   * 
-   * @param context
-   *          the application context
-   * @param view
-   *          the view this layer belongs to
    * @param handler TODO
    */
-  void onStart(Context context, VisualizationView view, Node node, Handler handler);
+  void onStart(Node node, Handler handler, Camera camera, Transformer transformer);
 
   /**
    * Called when the view is removed from the view.
    */
   void onShutdown(VisualizationView view, Node node);
+
+  /**
+   * @param listener
+   *          the {@link RenderRequestListener} to add
+   */
+  void addRenderListener(RenderRequestListener listener);
+
+  /**
+   * @param listener
+   *          the {@link RenderRequestListener} to remove
+   */
+  void removeRenderListener(RenderRequestListener listener);
 }
