@@ -23,6 +23,7 @@ import org.ros.message.MessageListener;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.node.Node;
 import org.ros.node.topic.Subscriber;
+import org.ros.rosjava_geometry.Transform;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -82,7 +83,7 @@ public class PoseSubscriberLayer implements VisualizationLayer, TfLayer {
             new MessageListener<org.ros.message.geometry_msgs.PoseStamped>() {
               @Override
               public void onNewMessage(PoseStamped pose) {
-                goalShape.setPose(pose.pose);
+                goalShape.setPose(Transform.makeFromPoseMessage(pose.pose));
                 poseFrame = pose.header.frame_id;
                 visible = true;
                 navigationView.requestRender();

@@ -19,15 +19,15 @@ package org.ros.android.views.visualization;
 import com.google.common.base.Preconditions;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import org.ros.message.geometry_msgs.Point;
-import org.ros.message.geometry_msgs.Pose;
-import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
-import org.ros.rosjava_geometry.Geometry;
+import org.ros.rosjava_geometry.Quaternion;
+import org.ros.rosjava_geometry.Transform;
+import org.ros.rosjava_geometry.Vector3;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -57,7 +57,7 @@ public class PosePublisherLayer implements VisualizationLayer {
   private String topic;
   private VisualizationView navigationView;
   private GestureDetector gestureDetector;
-  private Pose pose;
+  private Transform pose;
 
   private Node node;
 
@@ -80,22 +80,15 @@ public class PosePublisherLayer implements VisualizationLayer {
     if (visible) {
       Preconditions.checkNotNull(pose);
       if (event.getAction() == MotionEvent.ACTION_MOVE) {
-        Point xAxis = new Point();
-        xAxis.x = 1.0;
-        pose.orientation =
-            Geometry.calculateRotationBetweenVectors(xAxis, Geometry.vectorMinus(
-                navigationView.getRenderer().toOpenGLCoordinates(
-                    new android.graphics.Point((int) event.getX(), (int) event.getY())),
-                pose.position));
+        pose.setRotation(Quaternion.rotationBetweenVectors(new Vector3(1, 0, 0), navigationView
+            .getRenderer().toOpenGLCoordinates(new Point((int) event.getX(), (int) event.getY()))
+            .subtract(pose.getTranslation())));
         poseShape.setPose(pose);
         navigationView.requestRender();
         return true;
       } else if (event.getAction() == MotionEvent.ACTION_UP) {
-        PoseStamped poseStamped = new PoseStamped();
-        poseStamped.header.frame_id = navigationView.getRenderer().getReferenceFrame();
-        poseStamped.header.stamp = node.getCurrentTime();
-        poseStamped.pose = pose;
-        posePublisher.publish(poseStamped);
+        posePublisher.publish(pose.toPoseStampedMessage(navigationView.getRenderer()
+            .getReferenceFrame(), node.getCurrentTime()));
         visible = false;
         navigationView.requestRender();
         return true;
@@ -117,11 +110,9 @@ public class PosePublisherLayer implements VisualizationLayer {
             new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
               @Override
               public void onLongPress(MotionEvent e) {
-                pose = new Pose();
-                pose.position =
-                    navigationView.getRenderer().toOpenGLCoordinates(
-                        new android.graphics.Point((int) e.getX(), (int) e.getY()));
-                pose.orientation.w = 1.0;
+                pose =
+                    new Transform(navigationView.getRenderer().toOpenGLCoordinates(
+                        new Point((int) e.getX(), (int) e.getY())), new Quaternion(0, 0, 0, 1));
                 poseShape.setPose(pose);
                 visible = true;
                 navigationView.requestRender();

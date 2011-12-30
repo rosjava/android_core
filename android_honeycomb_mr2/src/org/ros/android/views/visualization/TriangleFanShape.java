@@ -16,9 +16,9 @@
 
 package org.ros.android.views.visualization;
 
-import org.ros.message.geometry_msgs.Pose;
-import org.ros.message.geometry_msgs.Vector3;
-import org.ros.rosjava_geometry.Geometry;
+import org.ros.rosjava_geometry.Quaternion;
+import org.ros.rosjava_geometry.Transform;
+import org.ros.rosjava_geometry.Vector3;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -37,7 +37,7 @@ public class TriangleFanShape implements OpenGlDrawable {
 
   private FloatBuffer vertexBuffer;
   private float scaleFactor = 1.0f;
-  private Pose pose;
+  private Transform pose;
   private float[] color;
 
   /**
@@ -51,8 +51,7 @@ public class TriangleFanShape implements OpenGlDrawable {
    *          RGBA color values
    */
   public TriangleFanShape(float[] vertices, float[] color) {
-    pose = new Pose();
-    pose.orientation.w = 1.0;
+    pose = new Transform(new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 1));
     ByteBuffer goalVertexByteBuffer = ByteBuffer.allocateDirect(vertices.length * Float.SIZE / 8);
     goalVertexByteBuffer.order(ByteOrder.nativeOrder());
     vertexBuffer = goalVertexByteBuffer.asFloatBuffer();
@@ -63,10 +62,11 @@ public class TriangleFanShape implements OpenGlDrawable {
 
   @Override
   public void draw(GL10 gl) {
-    gl.glTranslatef((float) pose.position.x, (float) pose.position.y, (float) pose.position.z);
-    Vector3 axis = Geometry.calculateRotationAxis(pose.orientation);
-    float angle = (float) Math.toDegrees(Geometry.calculateRotationAngle(pose.orientation));
-    gl.glRotatef(angle, (float) axis.x, (float) axis.y, (float) axis.z);
+    gl.glTranslatef((float) pose.getTranslation().getX(), (float) pose.getTranslation().getY(),
+        (float) pose.getTranslation().getZ());
+    Vector3 axis = pose.getRotation().getAxis();
+    float angle = (float) Math.toDegrees(pose.getRotation().getAngle());
+    gl.glRotatef(angle, (float) axis.getX(), (float) axis.getY(), (float) axis.getZ());
     gl.glScalef(getScaleFactor(), getScaleFactor(), getScaleFactor());
     gl.glDisable(GL10.GL_CULL_FACE);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
@@ -78,11 +78,11 @@ public class TriangleFanShape implements OpenGlDrawable {
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
   }
 
-  public Pose getPose() {
+  public Transform getPose() {
     return pose;
   }
 
-  public void setPose(Pose pose) {
+  public void setPose(Transform pose) {
     this.pose = pose;
   }
 

@@ -20,7 +20,8 @@ import com.google.common.base.Preconditions;
 
 import android.graphics.Bitmap;
 import org.ros.message.geometry_msgs.Pose;
-import org.ros.rosjava_geometry.Geometry;
+import org.ros.rosjava_geometry.Transform;
+import org.ros.rosjava_geometry.Vector3;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -38,7 +39,7 @@ public class TextureDrawable implements OpenGlDrawable {
   private Texture texture;
   private FloatBuffer vertexBuffer;
   private FloatBuffer textureBuffer;
-  private Pose origin;
+  private Transform origin;
   private double resolution;
   private double width;
   private double height;
@@ -80,7 +81,7 @@ public class TextureDrawable implements OpenGlDrawable {
    *          OccupancyGrid representing the map data.
    */
   public void update(Pose newOrigin, double newResolution, Bitmap newBitmap) {
-    origin = newOrigin;
+    origin = Transform.makeFromPoseMessage(newOrigin);
     resolution = newResolution;
     width = newBitmap.getWidth() * resolution;
     height = newBitmap.getHeight() * resolution;
@@ -103,10 +104,11 @@ public class TextureDrawable implements OpenGlDrawable {
       return;
     }
     gl.glPushMatrix();
-    gl.glTranslatef((float) origin.position.x, (float) origin.position.y, (float) origin.position.z);
-    org.ros.message.geometry_msgs.Vector3 axis = Geometry.calculateRotationAxis(origin.orientation);
-    gl.glRotatef((float) Math.toDegrees(Geometry.calculateRotationAngle(origin.orientation)),
-        (float) axis.x, (float) axis.y, (float) axis.z);
+    gl.glTranslatef((float) origin.getTranslation().getX(), (float) origin.getTranslation().getY(),
+        (float) origin.getTranslation().getZ());
+    Vector3 axis = origin.getRotation().getAxis();
+    gl.glRotatef((float) Math.toDegrees(origin.getRotation().getAngle()), (float) axis.getX(),
+        (float) axis.getY(), (float) axis.getZ());
     gl.glScalef((float) width, (float) height, 1.0f);
     gl.glEnable(GL10.GL_TEXTURE_2D);
     gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);

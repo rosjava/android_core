@@ -18,9 +18,8 @@ package org.ros.android.views.visualization;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.message.geometry_msgs.Transform;
 import org.ros.message.geometry_msgs.TransformStamped;
-import org.ros.rosjava_geometry.Geometry;
+import org.ros.rosjava_geometry.Transform;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -92,23 +91,35 @@ public class Transformer {
     if (makeFullyQualified(targetFrame).equals(makeFullyQualified(sourceFrame))) {
       return new ArrayList<Transform>();
     }
-    List<Transform> downTransforms = transformsToRoot(sourceFrame);
-    List<Transform> upTransforms = transformsToRoot(targetFrame);
+    List<Transform> upTransforms = transformsToRoot(sourceFrame);
+    List<Transform> downTransforms = transformsToRoot(targetFrame);
     // TODO(moesenle): check that if the transform chain has 0 length the frame
     // id is the root frame.
-    Preconditions.checkState(downTransforms.size() > 0 || upTransforms.size() > 0,
+    Preconditions.checkState(upTransforms.size() > 0 || downTransforms.size() > 0,
         "Frames unknown: " + sourceFrame + " " + targetFrame);
-    downTransforms = invertTransforms(downTransforms);
-    Collections.reverse(upTransforms);
-    if (downTransforms.size() > 0 && upTransforms.size() > 0) {
+    upTransforms = invertTransforms(upTransforms);
+    Collections.reverse(downTransforms);
+    if (upTransforms.size() > 0 && downTransforms.size() > 0) {
       Preconditions.checkState(
-          downTransforms.get(downTransforms.size() - 1).equals(upTransforms.get(0)),
+          upTransforms.get(upTransforms.size() - 1).equals(downTransforms.get(0)),
           "Cannot find transforms from " + sourceFrame + " to " + targetFrame
               + ". Transform trees not connected.");
     }
-    List<Transform> result = new ArrayList<Transform>(downTransforms.size() + upTransforms.size());
-    result.addAll(downTransforms);
+    List<Transform> result = new ArrayList<Transform>(upTransforms.size() + downTransforms.size());
     result.addAll(upTransforms);
+    result.addAll(downTransforms);
+    return result;
+  }
+  
+  /**
+   * Returns the transform from source frame to target frame.
+   */
+  public Transform lookupTransform(String targetFrame, String sourceFrame) {
+    List<Transform> transforms = lookupTransforms(targetFrame, sourceFrame);
+    Transform result = Transform.makeIdentityTransform();
+    for (Transform transform : transforms) {
+      result = result.multiply(transform);
+    }
     return result;
   }
 
@@ -121,7 +132,7 @@ public class Transformer {
   private List<Transform> invertTransforms(List<Transform> transforms) {
     List<Transform> result = new ArrayList<Transform>(transforms.size());
     for (Transform transform: transforms) {
-      result.add(Geometry.invertTransform(transform));
+      result.add(transform.invert());
     }
     return result;
   }
@@ -142,7 +153,7 @@ public class Transformer {
       if (currentTransform == null) {
         break;
       }
-      result.add(currentTransform.transform);
+      result.add(Transform.makeFromTransformMessage(currentTransform.transform));
       qualifiedFrame = makeFullyQualified(currentTransform.header.frame_id);
     }
     return result;

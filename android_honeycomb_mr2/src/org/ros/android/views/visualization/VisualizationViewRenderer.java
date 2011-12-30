@@ -17,9 +17,9 @@
 package org.ros.android.views.visualization;
 
 import android.opengl.GLSurfaceView;
-import org.ros.message.geometry_msgs.Point;
-import org.ros.message.geometry_msgs.Pose;
-import org.ros.rosjava_geometry.Geometry;
+import org.ros.rosjava_geometry.Quaternion;
+import org.ros.rosjava_geometry.Transform;
+import org.ros.rosjava_geometry.Vector3;
 
 import java.util.List;
 
@@ -56,7 +56,7 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
   /**
    * Real world (x,y) coordinates of the camera.
    */
-  private Point cameraPoint = new Point();
+  private Vector3 cameraPoint = new Vector3(0, 0, 0);
   /**
    * The current zoom factor used to scale the world.
    */
@@ -114,7 +114,8 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
     // coordinate system, x is pointing left.
     gl.glScalef(getScalingFactor(), getScalingFactor(), 1);
     gl.glRotatef(90, 0, 0, 1);
-    gl.glTranslatef((float) -cameraPoint.x, (float) -cameraPoint.y, (float) -cameraPoint.z);
+    gl.glTranslatef((float) -cameraPoint.getX(), (float) -cameraPoint.getY(),
+        (float) -cameraPoint.getZ());
   }
 
   @Override
@@ -130,8 +131,8 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
    *          distance to move in y in world coordinates
    */
   public void moveCamera(float distanceX, float distanceY) {
-    cameraPoint.x += distanceX;
-    cameraPoint.y += distanceY;
+    cameraPoint.setX(cameraPoint.getX() + distanceX);
+    cameraPoint.setY(cameraPoint.getY() + distanceY);
   }
 
   /**
@@ -146,12 +147,16 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
   public void moveCameraScreenCoordinates(float distanceX, float distanceY) {
     // Point is the relative movement in pixels on the viewport. We need to
     // scale this by width end height of the viewport.
-    cameraPoint.x += distanceY / viewport.y / getScalingFactor();
-    cameraPoint.y += distanceX / viewport.x / getScalingFactor();
+    moveCamera(distanceY / viewport.y / getScalingFactor(), distanceX / viewport.x
+        / getScalingFactor());
   }
 
-  public void setCamera(Point newCameraPoint) {
+  public void setCamera(Vector3 newCameraPoint) {
     cameraPoint = newCameraPoint;
+  }
+
+  public Vector3 getCamera() {
+    return cameraPoint;
   }
 
   public void zoomCamera(float factor) {
@@ -172,14 +177,10 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
    *          Coordinate of the view in pixels.
    * @return Real world coordinate.
    */
-  public Point toOpenGLCoordinates(android.graphics.Point screenPoint) {
-    Point worldCoordinate = new Point();
-    worldCoordinate.x =
-        (0.5 - (double) screenPoint.y / viewport.y) / (0.5 * getScalingFactor()) + cameraPoint.x;
-    worldCoordinate.y =
-        (0.5 - (double) screenPoint.x / viewport.x) / (0.5 * getScalingFactor()) + cameraPoint.y;
-    worldCoordinate.z = 0;
-    return worldCoordinate;
+  public Vector3 toOpenGLCoordinates(android.graphics.Point screenPoint) {
+    return new Vector3((0.5 - (double) screenPoint.y / viewport.y) / (0.5 * getScalingFactor())
+        + cameraPoint.getX(), (0.5 - (double) screenPoint.x / viewport.x)
+        / (0.5 * getScalingFactor()) + cameraPoint.getY(), 0);
   }
 
   /**
@@ -191,11 +192,9 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
    * @param orientation
    *          the orientation of the pose on the screen
    */
-  public Pose toOpenGLPose(android.graphics.Point goalScreenPoint, float orientation) {
-    Pose goal = new Pose();
-    goal.position = toOpenGLCoordinates(goalScreenPoint);
-    goal.orientation = Geometry.axisAngleToQuaternion(0, 0, -1, orientation + Math.PI / 2);
-    return goal;
+  public Transform toOpenGLPose(android.graphics.Point goalScreenPoint, float orientation) {
+    return new Transform(toOpenGLCoordinates(goalScreenPoint), Quaternion.makeFromAxisAngle(
+        new Vector3(0, 0, -1), orientation + Math.PI / 2));
   }
 
   private void drawLayers(GL10 gl) {
@@ -235,7 +234,7 @@ public class VisualizationViewRenderer implements GLSurfaceView.Renderer {
     this.referenceFrame = referenceFrame;
     // To prevent odd camera jumps, we always center on the referenceFrame when
     // it is reset.
-    cameraPoint = new Point();
+    cameraPoint = Vector3.makeIdentityVector3();
   }
 
   public void resetReferenceFrame() {

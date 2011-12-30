@@ -16,9 +16,8 @@
 
 package org.ros.android.views.visualization;
 
-import org.ros.message.geometry_msgs.Transform;
-import org.ros.message.geometry_msgs.Vector3;
-import org.ros.rosjava_geometry.Geometry;
+import org.ros.rosjava_geometry.Transform;
+import org.ros.rosjava_geometry.Vector3;
 
 import java.util.List;
 
@@ -34,11 +33,12 @@ public class GlTransformer {
 
   public static void applyTransforms(GL10 gl, List<Transform> transforms) {
     for (Transform transform : transforms) {
-      gl.glTranslatef((float) transform.translation.x, (float) transform.translation.y,
-          (float) transform.translation.z);
-      double angleDegrees = Math.toDegrees(Geometry.calculateRotationAngle(transform.rotation));
-      Vector3 axis = Geometry.calculateRotationAxis(transform.rotation);
-      gl.glRotatef((float) angleDegrees, (float) axis.x, (float) axis.y, (float) axis.z);
+      gl.glTranslatef((float) transform.getTranslation().getX(), (float) transform.getTranslation()
+          .getY(), (float) transform.getTranslation().getZ());
+      double angleDegrees = Math.toDegrees(transform.getRotation().getAngle());
+      Vector3 axis = transform.getRotation().getAxis();
+      gl.glRotatef((float) angleDegrees, (float) axis.getX(), (float) axis.getY(),
+          (float) axis.getZ());
     }
   }
 
