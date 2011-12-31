@@ -14,21 +14,25 @@
  * the License.
  */
 
-package org.ros.android.views.visualization;
+package org.ros.android.views.visualization.layer;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
+import org.ros.android.views.visualization.Camera;
+import org.ros.android.views.visualization.TextureBitmapUtilities;
+import org.ros.android.views.visualization.TextureDrawable;
+import org.ros.android.views.visualization.Transformer;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
-import org.ros.node.topic.Subscriber;
 
 import javax.microedition.khronos.opengles.GL10;
 
 /**
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public class OccupancyGridLayer extends DefaultVisualizationLayer implements TfLayer {
+public class OccupancyGridLayer extends SubscriberLayer<org.ros.message.nav_msgs.OccupancyGrid>
+    implements TfLayer {
   /**
    * Color of occupied cells in the map.
    */
@@ -44,11 +48,9 @@ public class OccupancyGridLayer extends DefaultVisualizationLayer implements TfL
    */
   private static final int COLOR_UNKNOWN = 0xff000000;
 
-  private final GraphName topic;
   private final TextureDrawable occupancyGrid;
 
-  private boolean initialized;
-  private Subscriber<org.ros.message.nav_msgs.OccupancyGrid> occupancyGridSubscriber;
+  private boolean ready;
   private String frame;
 
   public OccupancyGridLayer(String topic) {
@@ -56,14 +58,14 @@ public class OccupancyGridLayer extends DefaultVisualizationLayer implements TfL
   }
 
   public OccupancyGridLayer(GraphName topic) {
-    this.topic = topic;
+    super(topic, "nav_msgs/OccupancyGrid");
     occupancyGrid = new TextureDrawable();
-    initialized = false;
+    ready = false;
   }
 
   @Override
   public void draw(GL10 gl) {
-    if (initialized) {
+    if (ready) {
       occupancyGrid.draw(gl);
     }
   }
@@ -85,9 +87,9 @@ public class OccupancyGridLayer extends DefaultVisualizationLayer implements TfL
 
   @Override
   public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
-    occupancyGridSubscriber = node.newSubscriber(topic, "nav_msgs/OccupancyGrid");
-    occupancyGridSubscriber
-        .addMessageListener(new MessageListener<org.ros.message.nav_msgs.OccupancyGrid>() {
+    super.onStart(node, handler, camera, transformer);
+    getSubscriber().addMessageListener(
+        new MessageListener<org.ros.message.nav_msgs.OccupancyGrid>() {
           @Override
           public void onNewMessage(org.ros.message.nav_msgs.OccupancyGrid occupancyGridMessage) {
             Bitmap occupancyGridBitmap =
@@ -98,15 +100,10 @@ public class OccupancyGridLayer extends DefaultVisualizationLayer implements TfL
             occupancyGrid.update(occupancyGridMessage.info.origin,
                 occupancyGridMessage.info.resolution, occupancyGridBitmap);
             frame = occupancyGridMessage.header.frame_id;
-            initialized = true;
+            ready = true;
             requestRender();
           }
         });
-  }
-
-  @Override
-  public void onShutdown(VisualizationView view, Node node) {
-    occupancyGridSubscriber.shutdown();
   }
 
   @Override

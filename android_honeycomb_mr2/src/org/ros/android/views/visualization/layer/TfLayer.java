@@ -14,19 +14,16 @@
  * the License.
  */
 
-package org.ros.android.views.visualization;
+package org.ros.android.views.visualization.layer;
 
 /**
  * Interface for layers that are positioned by using Tf.
  * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
- * 
  */
 public interface TfLayer {
-
   /**
    * @return the frame id of the layer
    */
   String getFrame();
-
 }

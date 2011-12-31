@@ -14,7 +14,13 @@
  * the License.
  */
 
-package org.ros.android.views.visualization;
+package org.ros.android.views.visualization.layer;
+
+import org.ros.android.views.visualization.Camera;
+import org.ros.android.views.visualization.OpenGlDrawable;
+import org.ros.android.views.visualization.RenderRequestListener;
+import org.ros.android.views.visualization.Transformer;
+import org.ros.android.views.visualization.VisualizationView;
 
 import android.os.Handler;
 import android.view.MotionEvent;
@@ -26,7 +32,7 @@ import org.ros.node.Node;
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * 
  */
-public interface VisualizationLayer extends OpenGlDrawable {
+public interface Layer extends OpenGlDrawable {
 
   /**
    * Event handler for touch events.

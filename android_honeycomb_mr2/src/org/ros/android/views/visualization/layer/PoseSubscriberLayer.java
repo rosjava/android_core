@@ -14,15 +14,18 @@
  * the License.
  */
 
-package org.ros.android.views.visualization;
+package org.ros.android.views.visualization.layer;
 
 import android.os.Handler;
 import android.view.MotionEvent;
+import org.ros.android.views.visualization.Camera;
+import org.ros.android.views.visualization.Transformer;
+import org.ros.android.views.visualization.TriangleFanShape;
+import org.ros.android.views.visualization.VisualizationView;
 import org.ros.message.MessageListener;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
-import org.ros.node.topic.Subscriber;
 import org.ros.rosjava_geometry.Transform;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -30,7 +33,8 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public class PoseSubscriberLayer extends DefaultVisualizationLayer implements TfLayer {
+public class PoseSubscriberLayer extends
+    SubscriberLayer<org.ros.message.geometry_msgs.PoseStamped> implements TfLayer {
 
   private static final float vertices[] = { 0.0f, 0.0f, 0.0f, // center
       -0.105f, 0.0f, 0.0f, // bottom
@@ -43,14 +47,11 @@ public class PoseSubscriberLayer extends DefaultVisualizationLayer implements Tf
       -0.15f, 0.15f, 0.0f, // bottom left
       -0.105f, 0.0f, 0.0f // bottom
       };
-
   private static final float color[] = { 0.180392157f, 0.71372549f, 0.909803922f, 0.5f };
 
-  private final GraphName topic;
   private final TriangleFanShape goalShape;
 
   private boolean visible;
-  private Subscriber<org.ros.message.geometry_msgs.PoseStamped> poseSubscriber;
   private String poseFrame;
 
   public PoseSubscriberLayer(String topic) {
@@ -58,7 +59,7 @@ public class PoseSubscriberLayer extends DefaultVisualizationLayer implements Tf
   }
 
   public PoseSubscriberLayer(GraphName topic) {
-    this.topic = topic;
+    super(topic, "geometry_msgs/PoseStamped");
     goalShape = new TriangleFanShape(vertices, color);
     visible = false;
   }
@@ -77,9 +78,9 @@ public class PoseSubscriberLayer extends DefaultVisualizationLayer implements Tf
 
   @Override
   public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
-    poseSubscriber = node.newSubscriber(topic, "geometry_msgs/PoseStamped");
-    poseSubscriber
-        .addMessageListener(new MessageListener<org.ros.message.geometry_msgs.PoseStamped>() {
+    super.onStart(node, handler, camera, transformer);
+    getSubscriber().addMessageListener(
+        new MessageListener<org.ros.message.geometry_msgs.PoseStamped>() {
           @Override
           public void onNewMessage(PoseStamped pose) {
             goalShape.setPose(Transform.makeFromPoseMessage(pose.pose));
@@ -88,11 +89,6 @@ public class PoseSubscriberLayer extends DefaultVisualizationLayer implements Tf
             requestRender();
           }
         });
-  }
-
-  @Override
-  public void onShutdown(VisualizationView view, Node node) {
-    poseSubscriber.shutdown();
   }
 
   public boolean isVisible() {

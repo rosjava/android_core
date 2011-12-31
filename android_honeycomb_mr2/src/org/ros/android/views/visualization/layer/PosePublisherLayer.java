@@ -14,9 +14,14 @@
  * the License.
  */
 
-package org.ros.android.views.visualization;
+package org.ros.android.views.visualization.layer;
 
 import com.google.common.base.Preconditions;
+
+import org.ros.android.views.visualization.Camera;
+import org.ros.android.views.visualization.Transformer;
+import org.ros.android.views.visualization.TriangleFanShape;
+import org.ros.android.views.visualization.VisualizationView;
 
 import android.content.Context;
 import android.graphics.Point;
@@ -36,7 +41,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * 
  */
-public class PosePublisherLayer extends DefaultVisualizationLayer {
+public class PosePublisherLayer extends DefaultLayer {
 
   private static final float vertices[] = { 0.0f, 0.0f, 0.0f, // center
       -0.251f, 0.0f, 0.0f, // bottom

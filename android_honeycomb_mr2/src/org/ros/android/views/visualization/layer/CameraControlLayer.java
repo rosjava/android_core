@@ -14,7 +14,11 @@
  * the License.
  */
 
-package org.ros.android.views.visualization;
+package org.ros.android.views.visualization.layer;
+
+import org.ros.android.views.visualization.Camera;
+import org.ros.android.views.visualization.Transformer;
+import org.ros.android.views.visualization.VisualizationView;
 
 import android.content.Context;
 import android.os.Handler;
@@ -26,7 +30,7 @@ import org.ros.node.Node;
 /**
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public class CameraControlLayer extends DefaultVisualizationLayer {
+public class CameraControlLayer extends DefaultLayer {
 
   private final Context context;
 

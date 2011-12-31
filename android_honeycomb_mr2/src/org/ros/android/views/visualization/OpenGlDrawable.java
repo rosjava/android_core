@@ -21,8 +21,6 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-interface OpenGlDrawable {
-
+public interface OpenGlDrawable {
   void draw(GL10 gl);
-
 }

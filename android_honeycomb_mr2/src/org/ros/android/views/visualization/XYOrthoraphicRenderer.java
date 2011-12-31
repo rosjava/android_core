@@ -16,6 +16,9 @@
 
 package org.ros.android.views.visualization;
 
+import org.ros.android.views.visualization.layer.TfLayer;
+import org.ros.android.views.visualization.layer.Layer;
+
 import android.opengl.GLSurfaceView;
 
 import java.util.List;
@@ -34,7 +37,7 @@ public class XYOrthoraphicRenderer implements GLSurfaceView.Renderer {
    * List of layers to draw. Layers are drawn in-order, i.e. the layer with
    * index 0 is the bottom layer and is drawn first.
    */
-  private List<VisualizationLayer> layers;
+  private List<Layer> layers;
 
   private Transformer transformer;
 
@@ -80,7 +83,7 @@ public class XYOrthoraphicRenderer implements GLSurfaceView.Renderer {
     if (layers == null) {
       return;
     }
-    for (VisualizationLayer layer : getLayers()) {
+    for (Layer layer : getLayers()) {
       gl.glPushMatrix();
       if (layer instanceof TfLayer) {
         String layerFrame = ((TfLayer) layer).getFrame();
@@ -96,11 +99,11 @@ public class XYOrthoraphicRenderer implements GLSurfaceView.Renderer {
     }
   }
 
-  public List<VisualizationLayer> getLayers() {
+  public List<Layer> getLayers() {
     return layers;
   }
 
-  public void setLayers(List<VisualizationLayer> layers) {
+  public void setLayers(List<Layer> layers) {
     this.layers = layers;
   }
 

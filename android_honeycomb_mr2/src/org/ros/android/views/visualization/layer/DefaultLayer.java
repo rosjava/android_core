@@ -14,9 +14,14 @@
  * the License.
  */
 
-package org.ros.android.views.visualization;
+package org.ros.android.views.visualization.layer;
 
 import com.google.common.collect.Lists;
+
+import org.ros.android.views.visualization.Camera;
+import org.ros.android.views.visualization.RenderRequestListener;
+import org.ros.android.views.visualization.Transformer;
+import org.ros.android.views.visualization.VisualizationView;
 
 import android.os.Handler;
 import android.view.MotionEvent;
@@ -31,11 +36,11 @@ import javax.microedition.khronos.opengles.GL10;
  * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public abstract class DefaultVisualizationLayer implements VisualizationLayer {
+public abstract class DefaultLayer implements Layer {
 
   private final Collection<RenderRequestListener> renderListeners;
 
-  public DefaultVisualizationLayer() {
+  public DefaultLayer() {
     renderListeners = Lists.newArrayList();
   }
 

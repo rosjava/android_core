@@ -19,6 +19,8 @@ package org.ros.android.views.visualization;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
+import org.ros.android.views.visualization.layer.Layer;
+
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
@@ -34,7 +36,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   private final TransformListener transformListener;
   private final Camera camera;
   private final XYOrthoraphicRenderer renderer;
-  private final List<VisualizationLayer> layers;
+  private final List<Layer> layers;
 
   private Node node;
 
@@ -58,7 +60,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
 
   @Override
   public boolean onTouchEvent(MotionEvent event) {
-    for (VisualizationLayer layer : Iterables.reverse(layers)) {
+    for (Layer layer : Iterables.reverse(layers)) {
       if (layer.onTouchEvent(this, event)) {
         return true;
       }
@@ -77,7 +79,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
    * @param layer
    *          layer to add
    */
-  public void addLayer(VisualizationLayer layer) {
+  public void addLayer(Layer layer) {
     layers.add(layer);
     layer.addRenderListener(renderRequestListener);
     if (node != null) {
@@ -86,7 +88,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     requestRender();
   }
 
-  public void removeLayer(VisualizationLayer layer) {
+  public void removeLayer(Layer layer) {
     layer.onShutdown(this, node);
     layers.remove(layer);
   }
@@ -95,7 +97,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   public void onStart(Node node) {
     this.node = node;
     transformListener.onStart(node);
-    for (VisualizationLayer layer : layers) {
+    for (Layer layer : layers) {
       layer.onStart(node, getHandler(), camera, transformListener.getTransformer());
     }
     renderer.setLayers(layers);
@@ -104,7 +106,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   @Override
   public void onShutdown(Node node) {
     renderer.setLayers(null);
-    for (VisualizationLayer layer: layers) {
+    for (Layer layer: layers) {
       layer.onShutdown(this, node);
     }
     transformListener.onShutdown(node);

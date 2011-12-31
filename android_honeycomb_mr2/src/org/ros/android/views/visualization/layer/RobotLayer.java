@@ -14,12 +14,16 @@
  * the License.
  */
 
-package org.ros.android.views.visualization;
+package org.ros.android.views.visualization.layer;
 
 import android.content.Context;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import org.ros.android.views.visualization.Camera;
+import org.ros.android.views.visualization.Transformer;
+import org.ros.android.views.visualization.TriangleFanShape;
+import org.ros.android.views.visualization.VisualizationView;
 import org.ros.message.Time;
 import org.ros.message.geometry_msgs.TransformStamped;
 import org.ros.node.Node;
@@ -31,9 +35,8 @@ import javax.microedition.khronos.opengles.GL10;
 
 /**
  * @author moesenle@google.com (Lorenz Moesenlechner)
- * 
  */
-public class RobotLayer extends DefaultVisualizationLayer implements TfLayer {
+public class RobotLayer extends DefaultLayer implements TfLayer {
 
   private static final float vertices[] = {
     0.0f, 0.0f, 0.0f, // Top
