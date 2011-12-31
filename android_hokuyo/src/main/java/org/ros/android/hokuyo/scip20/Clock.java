@@ -28,7 +28,6 @@ class Clock {
 
   private final Device device;
 
-  private long timestamp;
   private long offset;
   private long previousOffset;
   private double deltaOffset;

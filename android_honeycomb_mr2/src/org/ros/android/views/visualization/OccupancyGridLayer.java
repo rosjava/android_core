@@ -26,8 +26,7 @@ import org.ros.node.topic.Subscriber;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * @author moesenle
- *
+ * @author moesenle@google.com (Lorenz Moesenlechner)
  */
 public class OccupancyGridLayer extends DefaultVisualizationLayer implements TfLayer {
   /**
@@ -86,23 +85,23 @@ public class OccupancyGridLayer extends DefaultVisualizationLayer implements TfL
 
   @Override
   public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
-    occupancyGridSubscriber =
-        node.newSubscriber(topic, "nav_msgs/OccupancyGrid",
-            new MessageListener<org.ros.message.nav_msgs.OccupancyGrid>() {
-              @Override
-              public void onNewMessage(org.ros.message.nav_msgs.OccupancyGrid occupancyGridMessage) {
-                Bitmap occupancyGridBitmap =
-                    TextureBitmapUtilities.createSquareBitmap(
-                        occupancyGridToPixelArray(occupancyGridMessage),
-                        (int) occupancyGridMessage.info.width,
-                        (int) occupancyGridMessage.info.height, COLOR_UNKNOWN);
-                occupancyGrid.update(occupancyGridMessage.info.origin,
-                    occupancyGridMessage.info.resolution, occupancyGridBitmap);
-                frame = occupancyGridMessage.header.frame_id;
-                initialized = true;
-                requestRender();
-              }
-            });
+    occupancyGridSubscriber = node.newSubscriber(topic, "nav_msgs/OccupancyGrid");
+    occupancyGridSubscriber
+        .addMessageListener(new MessageListener<org.ros.message.nav_msgs.OccupancyGrid>() {
+          @Override
+          public void onNewMessage(org.ros.message.nav_msgs.OccupancyGrid occupancyGridMessage) {
+            Bitmap occupancyGridBitmap =
+                TextureBitmapUtilities.createSquareBitmap(
+                    occupancyGridToPixelArray(occupancyGridMessage),
+                    (int) occupancyGridMessage.info.width, (int) occupancyGridMessage.info.height,
+                    COLOR_UNKNOWN);
+            occupancyGrid.update(occupancyGridMessage.info.origin,
+                occupancyGridMessage.info.resolution, occupancyGridBitmap);
+            frame = occupancyGridMessage.header.frame_id;
+            initialized = true;
+            requestRender();
+          }
+        });
   }
 
   @Override

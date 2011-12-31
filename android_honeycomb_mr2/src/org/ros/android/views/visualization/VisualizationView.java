@@ -56,6 +56,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     setRenderer(renderer);
   }
 
+  @Override
   public boolean onTouchEvent(MotionEvent event) {
     for (VisualizationLayer layer : Iterables.reverse(layers)) {
       if (layer.onTouchEvent(this, event)) {
@@ -108,5 +109,9 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     }
     transformListener.onShutdown(node);
     this.node = null;
+  }
+  
+  @Override
+  public void onShutdownComplete(Node node) {
   }
 }

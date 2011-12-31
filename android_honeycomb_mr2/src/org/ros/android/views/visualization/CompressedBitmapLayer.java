@@ -30,8 +30,7 @@ import java.nio.IntBuffer;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * @author moesenle
- *
+ * @author moesenle@google.com (Lorenz Moesenlechner)
  */
 public class CompressedBitmapLayer extends DefaultVisualizationLayer implements TfLayer {
 
@@ -62,30 +61,29 @@ public class CompressedBitmapLayer extends DefaultVisualizationLayer implements 
   @Override
   public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
     compressedOccupancyGridSubscriber =
-        node.newSubscriber(
-            topic,
-            "compressed_visualization_transport_msgs/CompressedBitmap",
-            new MessageListener<org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap>() {
-              @Override
-              public void onNewMessage(CompressedBitmap compressedBitmap) {
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                Bitmap bitmap =
-                    BitmapFactory.decodeByteArray(compressedBitmap.data, 0,
-                        compressedBitmap.data.length, options);
-                IntBuffer pixels = IntBuffer.allocate(bitmap.getWidth() * bitmap.getHeight());
-                bitmap.copyPixelsToBuffer(pixels);
-                bitmap.recycle();
-                Bitmap occupancyGridBitmap =
-                    TextureBitmapUtilities.createSquareBitmap(pixels.array(), bitmap.getWidth(),
-                        bitmap.getHeight(), 0xff000000);
-                occupancyGrid.update(compressedBitmap.origin, compressedBitmap.resolution_x,
-                    occupancyGridBitmap);
-                frame = compressedBitmap.header.frame_id;
-                initialized = true;
-                requestRender();
-              }
-            });
+        node.newSubscriber(topic, "compressed_visualization_transport_msgs/CompressedBitmap");
+    compressedOccupancyGridSubscriber
+        .addMessageListener(new MessageListener<org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap>() {
+          @Override
+          public void onNewMessage(CompressedBitmap compressedBitmap) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            Bitmap bitmap =
+                BitmapFactory.decodeByteArray(compressedBitmap.data, 0,
+                    compressedBitmap.data.length, options);
+            IntBuffer pixels = IntBuffer.allocate(bitmap.getWidth() * bitmap.getHeight());
+            bitmap.copyPixelsToBuffer(pixels);
+            bitmap.recycle();
+            Bitmap occupancyGridBitmap =
+                TextureBitmapUtilities.createSquareBitmap(pixels.array(), bitmap.getWidth(),
+                    bitmap.getHeight(), 0xff000000);
+            occupancyGrid.update(compressedBitmap.origin, compressedBitmap.resolution_x,
+                occupancyGridBitmap);
+            frame = compressedBitmap.header.frame_id;
+            initialized = true;
+            requestRender();
+          }
+        });
   }
 
   @Override

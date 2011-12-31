@@ -24,6 +24,7 @@ import org.ros.android.MessageCallable;
 import org.ros.message.MessageListener;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
+import org.ros.node.topic.Subscriber;
 
 /**
  * A camera node that publishes images and camera_info
@@ -63,7 +64,8 @@ public class RosImageView<T> extends ImageView implements NodeMain {
 
   @Override
   public void onStart(Node node) {
-    node.newSubscriber(topicName, messageType, new MessageListener<T>() {
+    Subscriber<T> subscriber = node.newSubscriber(topicName, messageType);
+    subscriber.addMessageListener(new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {
         post(new Runnable() {
@@ -79,5 +81,9 @@ public class RosImageView<T> extends ImageView implements NodeMain {
 
   @Override
   public void onShutdown(Node node) {
+  }
+  
+  @Override
+  public void onShutdownComplete(Node node) {
   }
 }

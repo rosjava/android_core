@@ -35,6 +35,7 @@ import org.ros.message.nav_msgs.Odometry;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -236,8 +237,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     // All the virtual joystick elements must be centered on the parent.
     setGravity(Gravity.CENTER);
     // Instantiate the elements from the layout XML file.
-    LayoutInflater.from(context).inflate(org.ros.android.R.layout.virtual_joystick, this,
-        true);
+    LayoutInflater.from(context).inflate(org.ros.android.R.layout.virtual_joystick, this, true);
     initVirtualJoystick();
   }
 
@@ -513,8 +513,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    * Sets up the visual elements of the virtual joystick.
    */
   private void initVirtualJoystick() {
-    mainLayout =
-        (RelativeLayout) findViewById(org.ros.android.R.id.virtual_joystick_layout);
+    mainLayout = (RelativeLayout) findViewById(org.ros.android.R.id.virtual_joystick_layout);
     magnitudeText = (TextView) findViewById(org.ros.android.R.id.magnitude);
     intensity = (ImageView) findViewById(org.ros.android.R.id.intensity);
     thumbDivet = (ImageView) findViewById(org.ros.android.R.id.thumb_divet);
@@ -526,40 +525,23 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     orientationWidget[4] = (ImageView) findViewById(org.ros.android.R.id.widget_60_degrees);
     orientationWidget[5] = (ImageView) findViewById(org.ros.android.R.id.widget_75_degrees);
     orientationWidget[6] = (ImageView) findViewById(org.ros.android.R.id.widget_90_degrees);
-    orientationWidget[7] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_105_degrees);
-    orientationWidget[8] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_120_degrees);
-    orientationWidget[9] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_135_degrees);
-    orientationWidget[10] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_150_degrees);
-    orientationWidget[11] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_165_degrees);
-    orientationWidget[12] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_180_degrees);
-    orientationWidget[13] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_195_degrees);
-    orientationWidget[14] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_210_degrees);
-    orientationWidget[15] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_225_degrees);
-    orientationWidget[16] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_240_degrees);
-    orientationWidget[17] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_255_degrees);
-    orientationWidget[18] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_270_degrees);
-    orientationWidget[19] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_285_degrees);
-    orientationWidget[20] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_300_degrees);
-    orientationWidget[21] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_315_degrees);
-    orientationWidget[22] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_330_degrees);
-    orientationWidget[23] =
-        (ImageView) findViewById(org.ros.android.R.id.widget_345_degrees);
+    orientationWidget[7] = (ImageView) findViewById(org.ros.android.R.id.widget_105_degrees);
+    orientationWidget[8] = (ImageView) findViewById(org.ros.android.R.id.widget_120_degrees);
+    orientationWidget[9] = (ImageView) findViewById(org.ros.android.R.id.widget_135_degrees);
+    orientationWidget[10] = (ImageView) findViewById(org.ros.android.R.id.widget_150_degrees);
+    orientationWidget[11] = (ImageView) findViewById(org.ros.android.R.id.widget_165_degrees);
+    orientationWidget[12] = (ImageView) findViewById(org.ros.android.R.id.widget_180_degrees);
+    orientationWidget[13] = (ImageView) findViewById(org.ros.android.R.id.widget_195_degrees);
+    orientationWidget[14] = (ImageView) findViewById(org.ros.android.R.id.widget_210_degrees);
+    orientationWidget[15] = (ImageView) findViewById(org.ros.android.R.id.widget_225_degrees);
+    orientationWidget[16] = (ImageView) findViewById(org.ros.android.R.id.widget_240_degrees);
+    orientationWidget[17] = (ImageView) findViewById(org.ros.android.R.id.widget_255_degrees);
+    orientationWidget[18] = (ImageView) findViewById(org.ros.android.R.id.widget_270_degrees);
+    orientationWidget[19] = (ImageView) findViewById(org.ros.android.R.id.widget_285_degrees);
+    orientationWidget[20] = (ImageView) findViewById(org.ros.android.R.id.widget_300_degrees);
+    orientationWidget[21] = (ImageView) findViewById(org.ros.android.R.id.widget_315_degrees);
+    orientationWidget[22] = (ImageView) findViewById(org.ros.android.R.id.widget_330_degrees);
+    orientationWidget[23] = (ImageView) findViewById(org.ros.android.R.id.widget_345_degrees);
     // Initially hide all the widgets.
     for (ImageView tack : orientationWidget) {
       tack.setAlpha(0.0f);
@@ -580,8 +562,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     // Hide the slices/arcs used during the turn-in-place mode.
     currentRotationRange.setAlpha(0.0f);
     previousRotationRange.setAlpha(0.0f);
-    lastVelocityDivet =
-        (ImageView) findViewById(org.ros.android.R.id.previous_velocity_divet);
+    lastVelocityDivet = (ImageView) findViewById(org.ros.android.R.id.previous_velocity_divet);
     contactUpLocation = new Point(0, 0);
     for (ImageView tack : orientationWidget) {
       tack.setVisibility(INVISIBLE);
@@ -905,7 +886,9 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   public void onStart(Node node) {
     publisher = node.newPublisher("~cmd_vel", "geometry_msgs/Twist");
     publisher.setQueueLimit(1);
-    node.newSubscriber("odom", "nav_msgs/Odometry", this);
+    Subscriber<org.ros.message.nav_msgs.Odometry> subscriber =
+        node.newSubscriber("odom", "nav_msgs/Odometry");
+    subscriber.addMessageListener(this);
     publisherTimer = new Timer();
     publisherTimer.schedule(new TimerTask() {
       @Override
@@ -919,8 +902,11 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
 
   @Override
   public void onShutdown(Node node) {
+  }
+
+  @Override
+  public void onShutdownComplete(Node node) {
     publisherTimer.cancel();
     publisherTimer.purge();
   }
-
 }

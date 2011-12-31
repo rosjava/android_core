@@ -25,7 +25,6 @@ import org.ros.node.Node;
 
 /**
  * @author moesenle@google.com (Lorenz Moesenlechner)
- * 
  */
 public class CameraControlLayer extends DefaultVisualizationLayer {
 

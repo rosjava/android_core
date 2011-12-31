@@ -59,9 +59,13 @@ public class LaserScanPublisher implements NodeMain {
       }
     });
   }
-
+  
   @Override
   public void onShutdown(Node node) {
+  }
+
+  @Override
+  public void onShutdownComplete(Node node) {
     laserScannerDevice.shutdown();
   }
 

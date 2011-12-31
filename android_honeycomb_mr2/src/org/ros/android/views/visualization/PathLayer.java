@@ -32,7 +32,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 /**
  * @author moesenle@google.com (Lorenz Moesenlechner)
- * 
  */
 public class PathLayer extends DefaultVisualizationLayer {
 
@@ -65,7 +64,8 @@ public class PathLayer extends DefaultVisualizationLayer {
 
   @Override
   public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
-    pathSubscriber = node.newSubscriber(topic, "nav_msgs/Path", new MessageListener<Path>() {
+    pathSubscriber = node.newSubscriber(topic, "nav_msgs/Path");
+    pathSubscriber.addMessageListener(new MessageListener<Path>() {
       @Override
       public void onNewMessage(Path path) {
         pathVertexBuffer = makePathVertices(path);

@@ -55,6 +55,10 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
 
   @Override
   public void onShutdown(Node node) {
+  }
+
+  @Override
+  public void onShutdownComplete(Node arg0) {
     releaseCamera();
   }
 }
