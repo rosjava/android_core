@@ -22,8 +22,9 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.Transformer;
-import org.ros.android.views.visualization.TriangleFanShape;
 import org.ros.android.views.visualization.VisualizationView;
+import org.ros.android.views.visualization.shape.RobotShape;
+import org.ros.android.views.visualization.shape.Shape;
 import org.ros.message.Time;
 import org.ros.message.geometry_msgs.TransformStamped;
 import org.ros.node.Node;
@@ -38,18 +39,9 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class RobotLayer extends DefaultLayer implements TfLayer {
 
-  private static final float vertices[] = {
-    0.0f, 0.0f, 0.0f, // Top
-    -0.1f, -0.1f, 0.0f, // Bottom left
-    0.25f, 0.0f, 0.0f, // Bottom center
-    -0.1f, 0.1f, 0.0f, // Bottom right
-  };
-
-  private static final float color[] = { 0.0f, 0.635f, 1.0f, 0.5f };
-
   private final String robotFrame;
   private final Context context;
-  private final TriangleFanShape robotShape;
+  private final Shape robotShape;
 
   private GestureDetector gestureDetector;
   private Timer redrawTimer;
@@ -58,7 +50,7 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
   public RobotLayer(String robotFrame, Context context) {
     this.robotFrame = robotFrame;
     this.context = context;
-    robotShape = new TriangleFanShape(vertices, color);
+    robotShape = new RobotShape();
   }
 
   @Override

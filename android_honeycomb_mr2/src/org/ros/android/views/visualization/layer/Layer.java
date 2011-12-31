@@ -16,21 +16,19 @@
 
 package org.ros.android.views.visualization.layer;
 
+import android.os.Handler;
+import android.view.MotionEvent;
 import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.OpenGlDrawable;
 import org.ros.android.views.visualization.RenderRequestListener;
 import org.ros.android.views.visualization.Transformer;
 import org.ros.android.views.visualization.VisualizationView;
-
-import android.os.Handler;
-import android.view.MotionEvent;
 import org.ros.node.Node;
 
 /**
  * Interface for a drawable layer on a VisualizationView.
  * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
- * 
  */
 public interface Layer extends OpenGlDrawable {
 

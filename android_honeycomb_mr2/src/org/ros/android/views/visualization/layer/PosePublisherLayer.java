@@ -18,16 +18,16 @@ package org.ros.android.views.visualization.layer;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.android.views.visualization.Camera;
-import org.ros.android.views.visualization.Transformer;
-import org.ros.android.views.visualization.TriangleFanShape;
-import org.ros.android.views.visualization.VisualizationView;
-
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import org.ros.android.views.visualization.Camera;
+import org.ros.android.views.visualization.Transformer;
+import org.ros.android.views.visualization.VisualizationView;
+import org.ros.android.views.visualization.shape.PoseShape;
+import org.ros.android.views.visualization.shape.Shape;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
@@ -43,23 +43,9 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class PosePublisherLayer extends DefaultLayer {
 
-  private static final float vertices[] = { 0.0f, 0.0f, 0.0f, // center
-      -0.251f, 0.0f, 0.0f, // bottom
-      -0.075f, -0.075f, 0.0f, // bottom right
-      0.0f, -0.251f, 0.0f, // right
-      0.075f, -0.075f, 0.0f, // top right
-      0.510f, 0.0f, 0.0f, // top
-      0.075f, 0.075f, 0.0f, // top left
-      0.0f, 0.251f, 0.0f, // left
-      -0.075f, 0.075f, 0.0f, // bottom left
-      -0.251f, 0.0f, 0.0f // bottom again
-      };
-
-  private static final float color[] = { 0.847058824f, 0.243137255f, 0.8f, 1f };
-
   private final Context context;
 
-  private TriangleFanShape poseShape;
+  private Shape poseShape;
   private Publisher<org.ros.message.geometry_msgs.PoseStamped> posePublisher;
   private boolean visible;
   private GraphName topic;
@@ -76,7 +62,7 @@ public class PosePublisherLayer extends DefaultLayer {
     this.topic = topic;
     this.context = context;
     visible = false;
-    poseShape = new TriangleFanShape(vertices, color);
+    poseShape = new PoseShape();
   }
 
   @Override

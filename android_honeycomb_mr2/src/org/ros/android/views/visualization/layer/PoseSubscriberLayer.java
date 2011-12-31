@@ -20,8 +20,9 @@ import android.os.Handler;
 import android.view.MotionEvent;
 import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.Transformer;
-import org.ros.android.views.visualization.TriangleFanShape;
 import org.ros.android.views.visualization.VisualizationView;
+import org.ros.android.views.visualization.shape.GoalShape;
+import org.ros.android.views.visualization.shape.Shape;
 import org.ros.message.MessageListener;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.namespace.GraphName;
@@ -36,21 +37,9 @@ import javax.microedition.khronos.opengles.GL10;
 public class PoseSubscriberLayer extends
     SubscriberLayer<org.ros.message.geometry_msgs.PoseStamped> implements TfLayer {
 
-  private static final float vertices[] = { 0.0f, 0.0f, 0.0f, // center
-      -0.105f, 0.0f, 0.0f, // bottom
-      -0.15f, -0.15f, 0.0f, // bottom right
-      0.0f, -0.525f, 0.0f, // right
-      0.15f, -0.15f, 0.0f, // top right
-      0.524f, 0.0f, 0.0f, // top
-      0.15f, 0.15f, 0.0f, // top left
-      0.0f, 0.525f, 0.0f, // left
-      -0.15f, 0.15f, 0.0f, // bottom left
-      -0.105f, 0.0f, 0.0f // bottom
-      };
-  private static final float color[] = { 0.180392157f, 0.71372549f, 0.909803922f, 0.5f };
+  private final Shape goalShape;
 
-  private final TriangleFanShape goalShape;
-
+  private boolean ready;
   private boolean visible;
   private String poseFrame;
 
@@ -60,13 +49,14 @@ public class PoseSubscriberLayer extends
 
   public PoseSubscriberLayer(GraphName topic) {
     super(topic, "geometry_msgs/PoseStamped");
-    goalShape = new TriangleFanShape(vertices, color);
-    visible = false;
+    goalShape = new GoalShape();
+    visible = true;
+    ready = false;
   }
 
   @Override
   public void draw(GL10 gl) {
-    if (visible) {
+    if (ready && visible) {
       goalShape.draw(gl);
     }
   }
@@ -85,7 +75,7 @@ public class PoseSubscriberLayer extends
           public void onNewMessage(PoseStamped pose) {
             goalShape.setPose(Transform.makeFromPoseMessage(pose.pose));
             poseFrame = pose.header.frame_id;
-            visible = true;
+            ready = true;
             requestRender();
           }
         });
