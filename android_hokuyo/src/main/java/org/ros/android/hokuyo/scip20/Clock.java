@@ -36,7 +36,7 @@ class Clock {
   public Clock(Device device) {
     this.device = device;
   }
-
+  
   public void init() {
     offset = device.calculateClockOffset();
     previousOffset = offset;

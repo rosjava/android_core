@@ -88,8 +88,8 @@ public class OrientationPublisher implements NodeMain {
           node.newPublisher("android/orientation", "geometry_msgs/PoseStamped");
       orientationListener = new OrientationListener(publisher);
       Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-      sensorManager.registerListener(orientationListener, sensor, 500000); // 10
-                                                                           // Hz
+      // 10 Hz
+      sensorManager.registerListener(orientationListener, sensor, 500000);
     } catch (Exception e) {
       node.getLog().fatal(e);
     }
@@ -98,7 +98,7 @@ public class OrientationPublisher implements NodeMain {
   @Override
   public void onShutdown(Node node) {
   }
-  
+
   @Override
   public void onShutdownComplete(Node node) {
   }
