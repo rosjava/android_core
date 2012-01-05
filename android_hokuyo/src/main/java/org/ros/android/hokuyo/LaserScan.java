@@ -16,44 +16,41 @@
 
 package org.ros.android.hokuyo;
 
+import org.ros.message.Time;
+
 import java.util.List;
 
 /**
- * Represents one range reading coming from the laser.
+ * Represents a collection of range reading from the sensor.
  * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public class LaserScan {
-  /**
-   * The timestamp when this scan has been taken in milliseconds since epoch.
-   */
-  private final long timestamp;
 
-  /**
-   * The sequence of range scans.
-   */
+  private final Time time;
   private final List<Integer> ranges;
 
   /**
-   * @param timestamp
-   *          the timestamp of this scan in milliseconds since epoch
+   * @param time
+   *          the {@link Time} at which this scan was created
    * @param ranges
-   *          the sequence of range readings of the laser sensor
+   *          the sequence of range readings from the sensor in millimeters
    */
-  public LaserScan(long timestamp, List<Integer> ranges) {
-    this.timestamp = timestamp;
+  public LaserScan(Time time, List<Integer> ranges) {
+    this.time = time;
     this.ranges = ranges;
   }
 
   /**
-   * @return the timestamp of this scan in milliseconds since epoch
+   * @return the {@link Time} this scan was created
    */
-  public long getTimestamp() {
-    return timestamp;
+  public Time getTime() {
+    return time;
   }
 
   /**
-   * @return the range readings of this scan in millimeters
+   * @return the sequence of range readings from the sensor in millimeters
    */
   public List<Integer> getRanges() {
     return ranges;

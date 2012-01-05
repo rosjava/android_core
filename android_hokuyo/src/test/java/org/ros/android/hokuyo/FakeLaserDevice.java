@@ -16,6 +16,8 @@
 
 package org.ros.android.hokuyo;
 
+import org.ros.message.Time;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,6 +87,6 @@ public class FakeLaserDevice implements LaserScannerDevice {
     for (int i = 0; i < numberOfRangeValues; i++) {
       fakeRangeMeasurements.add(0);
     }
-    return new LaserScan(0, fakeRangeMeasurements);
+    return new LaserScan(new Time(), fakeRangeMeasurements);
   }
 }

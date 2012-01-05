@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -33,7 +33,7 @@ import org.ros.tutorials.pubsub.Talker;
 public class MainActivity extends Activity {
 
   private final NodeRunner nodeRunner;
-  
+
   private RosCore rosCore;
   private RosTextView<org.ros.message.std_msgs.String> rosTextView;
   private Talker talker;
@@ -41,7 +41,7 @@ public class MainActivity extends Activity {
   public MainActivity() {
     nodeRunner = DefaultNodeRunner.newDefault();
   }
-  
+
   @SuppressWarnings("unchecked")
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
           }
         });
   }
-  
+
   @Override
   protected void onResume() {
     super.onResume();
@@ -67,6 +67,7 @@ public class MainActivity extends Activity {
       rosCore.start();
       rosCore.awaitStart();
       NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate();
+      nodeConfiguration.setNodeName("pubsub_tutorial");
       nodeConfiguration.setMasterUri(rosCore.getUri());
       talker = new Talker();
       nodeRunner.run(talker, nodeConfiguration);
@@ -82,5 +83,4 @@ public class MainActivity extends Activity {
     nodeRunner.shutdown();
     rosCore.shutdown();
   }
-
 }

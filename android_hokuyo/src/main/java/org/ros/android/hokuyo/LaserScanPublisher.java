@@ -19,8 +19,6 @@ package org.ros.android.hokuyo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
-import org.ros.message.Duration;
-import org.ros.message.Time;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.parameter.ParameterTree;
@@ -109,8 +107,7 @@ public class LaserScanPublisher implements NodeMain {
     message.range_min = (float) (configuration.getMinimumMeasurment() / 1000.0);
     message.range_max = (float) (configuration.getMaximumMeasurement() / 1000.0);
     message.header.frame_id = laserFrame;
-    Duration offset = node.getCurrentTime().subtract(Time.fromMillis(System.currentTimeMillis()));
-    message.header.stamp = Time.fromMillis(scan.getTimestamp()).add(offset);
+    message.header.stamp = scan.getTime();
     return message;
   }
 

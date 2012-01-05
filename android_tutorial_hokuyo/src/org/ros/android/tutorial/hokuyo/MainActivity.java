@@ -63,16 +63,17 @@ public class MainActivity extends AcmDeviceActivity {
     } catch (InterruptedException e) {
       throw new RosRuntimeException(e);
     }
-    Device scipDevice = new Device(acmDevice.getInputStream(), acmDevice.getOutputStream());
-    LaserScanPublisher laserScanPublisher = new LaserScanPublisher(scipDevice);
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress(),
             getMasterUri());
     nodeConfiguration.setNodeName(GraphName.newAnonymous());
     NtpTimeProvider ntpTimeProvider =
         new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"));
-    ntpTimeProvider.startPeriodicUpdates(5, TimeUnit.MINUTES);
+    ntpTimeProvider.startPeriodicUpdates(1, TimeUnit.MINUTES);
     nodeConfiguration.setTimeProvider(ntpTimeProvider);
+    Device scipDevice =
+        new Device(acmDevice.getInputStream(), acmDevice.getOutputStream(), ntpTimeProvider);
+    LaserScanPublisher laserScanPublisher = new LaserScanPublisher(scipDevice);
     nodeRunner.run(laserScanPublisher, nodeConfiguration);
   }
 

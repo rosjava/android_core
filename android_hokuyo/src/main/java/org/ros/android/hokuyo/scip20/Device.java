@@ -25,6 +25,9 @@ import org.ros.android.hokuyo.LaserScanListener;
 import org.ros.android.hokuyo.LaserScannerConfiguration;
 import org.ros.android.hokuyo.LaserScannerDevice;
 import org.ros.exception.RosRuntimeException;
+import org.ros.message.Time;
+import org.ros.time.RemoteUptimeClock;
+import org.ros.time.TimeProvider;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -36,6 +39,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -47,12 +52,18 @@ public class Device implements LaserScannerDevice {
 
   private static final int STREAM_BUFFER_SIZE = 8192;
   private static final String EXPECTED_SENSOR_DIAGNOSTIC = "Sensor works well.";
+  private static final double DRIFT_SENSITIVITY = 0.3;
+  private static final double ERROR_REDUCTION_COEFFICIENT_SENSITIVITY = 0.3;
+  private static final double LATENCY_FILTER_THRESHOLD = 1.05;
+  private static final int LATENCY_FILTER_SAMPLE_SIZE = 10;
+  private static final int CALIBRATION_SAMPLE_SIZE = 20;
+  private static final int CALIBRATION_SAMPLING_DELAY_MILLIS = 500;
 
   private final BufferedInputStream bufferedInputStream;
   private final BufferedReader reader;
   private final BufferedWriter writer;
   private final LaserScannerConfiguration configuration;
-  private final Clock clock;
+  private final RemoteUptimeClock remoteUptimeClock;
 
   /**
    * It is not necessary to provide buffered streams. Buffering is handled
@@ -62,15 +73,23 @@ public class Device implements LaserScannerDevice {
    *          the {@link InputStream} for the ACM serial device
    * @param outputStream
    *          the {@link OutputStream} for the ACM serial device
+   * @param epochTimeProvider
    */
-  public Device(InputStream inputStream, OutputStream outputStream) {
+  public Device(InputStream inputStream, OutputStream outputStream, TimeProvider epochTimeProvider) {
     bufferedInputStream = new BufferedInputStream(inputStream, STREAM_BUFFER_SIZE);
     reader =
         new BufferedReader(new InputStreamReader(bufferedInputStream, Charset.forName("US-ASCII")));
     writer =
         new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(outputStream,
             STREAM_BUFFER_SIZE), Charset.forName("US-ASCII")));
-    clock = new Clock(this);
+    remoteUptimeClock =
+        RemoteUptimeClock.newDefault(epochTimeProvider, new Callable<Double>() {
+          @Override
+          public Double call() throws Exception {
+            return (double) queryUptime();
+          }
+        }, DRIFT_SENSITIVITY, ERROR_REDUCTION_COEFFICIENT_SENSITIVITY, LATENCY_FILTER_SAMPLE_SIZE,
+            LATENCY_FILTER_THRESHOLD);
     init();
     configuration = queryConfiguration();
   }
@@ -90,6 +109,7 @@ public class Device implements LaserScannerDevice {
     Preconditions.checkState(sensorDiagnostic.equals(EXPECTED_SENSOR_DIAGNOSTIC),
         "Sensor diagnostic check failed: \"" + sensorDiagnostic + "\"");
     waitUntilReady();
+    remoteUptimeClock.calibrate(CALIBRATION_SAMPLE_SIZE, CALIBRATION_SAMPLING_DELAY_MILLIS);
   }
 
   private void waitUntilReady() {
@@ -234,19 +254,19 @@ public class Device implements LaserScannerDevice {
 
   @Override
   public void startScanning(final LaserScanListener listener) {
+    // TODO(damonkohler): Use NodeRunner ExecutorService.
     new Thread() {
       @Override
       public void run() {
-        clock.init();
         while (true) {
           String command = "MD00000768000%02d";
           write(String.format(command, 99));
           checkMdmsStatus();
           checkTerminator();
-          int scansRemaining = 99;
-          while (scansRemaining > 0) {
+          String scansRemaining = "99";
+          while (!scansRemaining.equals("00")) {
             String commandEcho = read();
-            scansRemaining = Integer.valueOf(commandEcho.substring(commandEcho.length() - 3));
+            scansRemaining = commandEcho.substring(commandEcho.length() - 2);
             checkMdmsStatus();
             long timestamp = readTimestamp();
             StringBuilder data = new StringBuilder();
@@ -256,9 +276,9 @@ public class Device implements LaserScannerDevice {
               if (line.length() == 0) {
                 if (checksumOk) {
                   try {
-                    long predictedOffset = clock.calculateOffset(scansRemaining, 99);
-                    listener.onNewLaserScan(new LaserScan(timestamp - predictedOffset, Decoder
-                        .decodeValues(data.toString(), 3)));
+                    Time time = new Time(remoteUptimeClock.toLocalUptime(timestamp));
+                    List<Integer> ranges = Decoder.decodeValues(data.toString(), 3);
+                    listener.onNewLaserScan(new LaserScan(time, ranges));
                   } catch (IllegalArgumentException e) {
                     log.error("Failed to decode scan data.", e);
                     break;
@@ -278,7 +298,7 @@ public class Device implements LaserScannerDevice {
               }
             }
           }
-          clock.update();
+          remoteUptimeClock.update();
         }
       }
     }.start();
@@ -321,6 +341,25 @@ public class Device implements LaserScannerDevice {
     return builder.build();
   }
 
+  private long queryUptime() {
+    // Enter time adjust mode
+    write("TM0");
+    checkTmStatus();
+    checkTerminator();
+    // Read the current time stamp
+    write("TM1");
+    checkTmStatus();
+    // We assume that the communication lag is symmetrical meaning that the
+    // sensor's time is exactly in between the start time and the current time.
+    long timestamp = readTimestamp();
+    checkTerminator();
+    // Leave adjust mode
+    write("TM2");
+    checkTmStatus();
+    checkTerminator();
+    return timestamp;
+  }
+
   @Override
   public void shutdown() {
     try {
@@ -335,36 +374,5 @@ public class Device implements LaserScannerDevice {
       // Ignore spurious shutdown errors.
       e.printStackTrace();
     }
-  }
-
-  /**
-   * @return the offset in milliseconds from epoch time to the sensor's internal
-   *         uptime clock (i.e.
-   *         {@code long sensorTime = System.currentTimeMillis() + offset} and
-   *         {@code long epochTime = sensorTime - offset})
-   */
-  public long calculateClockOffset() {
-    long startTime = System.currentTimeMillis();
-    // Enter time adjust mode
-    write("TM0");
-    checkTmStatus();
-    checkTerminator();
-    // Read the current time stamp
-    final long start = System.currentTimeMillis();
-    write("TM1");
-    checkTmStatus();
-    // We assume that the communication lag is symmetrical meaning that the
-    // sensor's time is exactly in between the start time and the current time.
-    long offset = readTimestamp() - (start + System.currentTimeMillis()) / 2;
-    checkTerminator();
-    // Leave adjust mode
-    write("TM2");
-    checkTmStatus();
-    checkTerminator();
-    if (DEBUG) {
-      log.info(String.format("%d Clock offset is %dms (took %dms).", this.hashCode(), offset,
-          System.currentTimeMillis() - startTime));
-    }
-    return offset;
   }
 }

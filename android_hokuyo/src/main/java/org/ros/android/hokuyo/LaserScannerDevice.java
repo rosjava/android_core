@@ -21,10 +21,21 @@ package org.ros.android.hokuyo;
  */
 public interface LaserScannerDevice {
 
+  /**
+   * Starts continuously scanning.
+   * 
+   * @param listener
+   *          called for each new scan
+   */
   void startScanning(LaserScanListener listener);
 
+  /**
+   * Shuts down the device and releases any shared resources.
+   */
   void shutdown();
 
+  /**
+   * @return the device configuration
+   */
   LaserScannerConfiguration getConfiguration();
-
 }
