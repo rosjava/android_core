@@ -68,22 +68,19 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
       public void onNewMessage(LaserScan laserScan) {
         frame = laserScan.header.frame_id;
         float[] ranges = laserScan.ranges;
-        float[] vertices = new float[ranges.length * 3 + 1];
-        float minimumRange = laserScan.range_min;
-        float maximumRange = laserScan.range_max;
-        float minimumAngle = laserScan.angle_min;
-        float angleIncrement = laserScan.angle_increment;
-        // The 90 degrees need to be added to offset the orientation differences
-        // between the ROS coordinate system and the one used by OpenGL.
-        minimumAngle += Math.toRadians(90.0);
-        // Adding the center coordinate since it's needed for
-        // GL10.GL_TRIANGLE_FAN to render the range polygons.
+        // vertices is an array of x, y, z values starting with the origin of
+        // the triangle fan.
+        float[] vertices = new float[(ranges.length + 1) * 3];
         vertices[0] = 0;
         vertices[1] = 0;
         vertices[2] = 0;
-        // Calculate the coordinates for the range points. If the range is out
-        // of bounds then do not display them.
-        for (int i = 3; i < ranges.length; i += 3) {
+
+        float minimumRange = laserScan.range_min;
+        float maximumRange = laserScan.range_max;
+        float angle = laserScan.angle_min;
+        float angleIncrement = laserScan.angle_increment;
+        // Calculate the coordinates of the laser range values.
+        for (int i = 0; i < ranges.length; i++) {
           float range = ranges[i];
           // Display the point if it's within the min and max valid range.
           if (range < minimumRange) {
@@ -92,17 +89,13 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
           if (range > maximumRange) {
             range = maximumRange;
           }
-          // x
-          vertices[i] = (float) (range * Math.cos(minimumAngle));
-          // y
-          vertices[i + 1] = (float) (range * Math.sin(minimumAngle));
-          // z
-          vertices[i + 2] = 0;
-          // Increment the angle for the next iteration.
-          minimumAngle += angleIncrement;
+          // x, y, z
+          vertices[3 * i + 3] = (float) (range * Math.cos(angle));
+          vertices[3 * i + 4] = (float) (range * Math.sin(angle));
+          vertices[3 * i + 5] = 0;
+          angle += angleIncrement;
         }
         shape = new TriangleFanShape(vertices, new Color(0, 1.0f, 0, 0.3f));
-        // Request to render the surface.
         requestRender();
       }
     });

@@ -67,8 +67,6 @@ public class TriangleFanShape extends DefaultShape {
     gl.glDisable(GL10.GL_CULL_FACE);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
-    gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-    gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
     gl.glColor4f(getColor().getRed(), getColor().getGreen(), getColor().getBlue(), getColor()
         .getAlpha());
     gl.glDrawArrays(GL10.GL_TRIANGLE_FAN, 0, vertexBuffer.limit() / 3);

@@ -39,26 +39,26 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class RobotLayer extends DefaultLayer implements TfLayer {
 
-  private final String robotFrame;
+  private final String frame;
   private final Context context;
-  private final Shape robotShape;
+  private final Shape shape;
 
   private GestureDetector gestureDetector;
   private Timer redrawTimer;
   private Camera camera;
 
   public RobotLayer(String robotFrame, Context context) {
-    this.robotFrame = robotFrame;
+    this.frame = robotFrame;
     this.context = context;
-    robotShape = new RobotShape();
+    shape = new RobotShape();
   }
 
   @Override
   public void draw(GL10 gl) {
     // To keep the robot's size constant even when scaled, we apply the inverse
     // scaling factor before drawing.
-    robotShape.setScaleFactor(1 / camera.getScalingFactor());
-    robotShape.draw(gl);
+    shape.setScaleFactor(1 / camera.getScalingFactor());
+    shape.draw(gl);
   }
 
   @Override
@@ -76,7 +76,7 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
       
       @Override
       public void run() {
-        TransformStamped transform = transformer.getTransform(robotFrame);
+        TransformStamped transform = transformer.getTransform(frame);
         if (transform != null) {
           if (lastRobotTime != null
             && !transform.header.stamp.equals(lastRobotTime)) {
@@ -94,7 +94,7 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
             new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
               @Override
               public boolean onDoubleTap(MotionEvent event) {
-                camera.setTargetFrame(robotFrame);
+                camera.setTargetFrame(frame);
                 requestRender();
                 return true;
               }
@@ -115,6 +115,6 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
 
   @Override
   public String getFrame() {
-    return robotFrame;
+    return frame;
   }
 }
