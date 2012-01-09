@@ -89,11 +89,19 @@ class DistancePoints {
     }
     rangeVertexCount = rangeVertexArray.length / 3;
     // Update the buffers with the latest coordinates.
-    rangeVertexByteBuffer = ByteBuffer.allocateDirect(rangeVertices.size() * Float.SIZE / 8);
-    rangeVertexByteBuffer.order(ByteOrder.nativeOrder());
-    rangeVertexBuffer = rangeVertexByteBuffer.asFloatBuffer();
+    initRangeVertexBuffer();
     rangeVertexBuffer.put(rangeVertexArray);
     rangeVertexBuffer.position(0);
+  }
+
+  private void initRangeVertexBuffer() {
+    int requiredVertexByteBufferCapacity = rangeVertices.size() * Float.SIZE / 8;
+    if (rangeVertexByteBuffer == null
+        || requiredVertexByteBufferCapacity > rangeVertexByteBuffer.capacity()) {
+      rangeVertexByteBuffer = ByteBuffer.allocateDirect(requiredVertexByteBufferCapacity);
+      rangeVertexByteBuffer.order(ByteOrder.nativeOrder());
+    }
+    rangeVertexBuffer = rangeVertexByteBuffer.asFloatBuffer();
   }
 
   /**
