@@ -31,20 +31,20 @@ import org.ros.node.topic.Subscriber;
  */
 public class SubscriberLayer<T> extends DefaultLayer {
 
-  private final GraphName topic;
+  private final GraphName topicName;
   private final String messageType;
 
   private Subscriber<T> subscriber;
 
-  public SubscriberLayer(GraphName topic, String messageType) {
-    this.topic = topic;
+  public SubscriberLayer(GraphName topicName, String messageType) {
+    this.topicName = topicName;
     this.messageType = messageType;
   }
  
   @Override
   public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
     super.onStart(node, handler, camera, transformer);
-    subscriber = node.newSubscriber(topic, messageType);
+    subscriber = node.newSubscriber(topicName, messageType);
   }
   
   @Override

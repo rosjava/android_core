@@ -32,6 +32,7 @@ import org.ros.android.views.ZoomMode;
 import org.ros.android.views.visualization.VisualizationView;
 import org.ros.android.views.visualization.layer.CameraControlLayer;
 import org.ros.android.views.visualization.layer.CompressedBitmapLayer;
+import org.ros.android.views.visualization.layer.LaserScanLayer;
 import org.ros.android.views.visualization.layer.PosePublisherLayer;
 import org.ros.android.views.visualization.layer.PoseSubscriberLayer;
 import org.ros.android.views.visualization.layer.RobotLayer;
@@ -166,6 +167,7 @@ public class MainActivity extends RosActivity {
     visualizationView = new VisualizationView(this);
     visualizationView.addLayer(new CameraControlLayer(this));
     visualizationView.addLayer(new CompressedBitmapLayer("~compressed_map"));
+    visualizationView.addLayer(new LaserScanLayer("base_scan"));
     visualizationView.addLayer(new RobotLayer("base_footprint", this));
     visualizationView.addLayer(new PoseSubscriberLayer("simple_waypoints_server/goal_pose"));
     visualizationView.addLayer(new PosePublisherLayer("simple_waypoints_server/goal_pose", this));

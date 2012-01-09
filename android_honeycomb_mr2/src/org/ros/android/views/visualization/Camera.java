@@ -16,6 +16,8 @@
 
 package org.ros.android.views.visualization;
 
+import com.google.common.base.Preconditions;
+
 import org.ros.rosjava_geometry.Quaternion;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
@@ -31,7 +33,7 @@ public class Camera {
    * 
    * TODO(moesenle): make this the root of the TF tree.
    */
-  private static final String DEFAULT_REFERENCE_FRAME = "/map";
+  private static final String DEFAULT_FIXED_FRAME = "/map";
 
   /**
    * The default target frame is null which means that the renderer uses the
@@ -43,10 +45,12 @@ public class Camera {
    * Most the user can zoom in.
    */
   private static final float MIN_ZOOM_SCALE_FACTOR = 0.01f;
+
   /**
    * Most the user can zoom out.
    */
   private static final float MAX_ZOOM_SCALE_FACTOR = 1.0f;
+
   /**
    * Size of the viewport.
    */
@@ -55,19 +59,19 @@ public class Camera {
   /**
    * Real world (x,y) coordinates of the camera.
    */
-  private Vector3 cameraPoint = new Vector3(0, 0, 0);
+  private Vector3 cameraPoint;
 
   /**
    * The TF frame the camera is locked on. If set, the camera point is set to
-   * the location of this frame in referenceFrame. If the camera is set or
-   * moved, the lock is removed.
+   * the location of this frame in fixedFrame. If the camera is set or moved,
+   * the lock is removed.
    */
   String targetFrame;
 
   /**
    * The current zoom factor used to scale the world.
    */
-  private float scalingFactor = 0.1f;
+  private float scalingFactor;
 
   /**
    * The frame in which to render everything. The default value is /map which
@@ -75,12 +79,15 @@ public class Camera {
    * instance, base_link, the view follows the robot and the robot itself is in
    * the origin.
    */
-  private String fixedFrame = DEFAULT_REFERENCE_FRAME;
+  private String fixedFrame;
 
   private Transformer transformer;
 
   public Camera(Transformer transformer) {
     this.transformer = transformer;
+    cameraPoint = new Vector3(0, 0, 0);
+    scalingFactor = 0.1f;
+    fixedFrame = DEFAULT_FIXED_FRAME;
   }
 
   public void applyCameraTransform(GL10 gl) {
@@ -147,10 +154,10 @@ public class Camera {
    * Returns the real world equivalent of the viewport coordinates specified.
    * 
    * @param x
-   *          Coordinate of the view in pixels.
+   *          coordinate of the view in pixels
    * @param y
-   *          Coordinate of the view in pixels.
-   * @return Real world coordinate.
+   *          coordinate of the view in pixels
+   * @return real world coordinate
    */
   public Vector3 toOpenGLCoordinates(android.graphics.Point screenPoint) {
     return new Vector3((0.5 - (double) screenPoint.y / viewport.y) / (0.5 * getScalingFactor())
@@ -176,15 +183,16 @@ public class Camera {
     return fixedFrame;
   }
 
-  public void setFixedFrame(String referenceFrame) {
-    this.fixedFrame = referenceFrame;
-    // To prevent odd camera jumps, we always center on the referenceFrame when
+  public void setFixedFrame(String fixedFrame) {
+    Preconditions.checkNotNull(fixedFrame, "Fixed frame must be specified.");
+    this.fixedFrame = fixedFrame;
+    // To prevent camera jumps, we always center on the fixedFrame when
     // it is reset.
     cameraPoint = Vector3.makeIdentityVector3();
   }
 
   public void resetFixedFrame() {
-    fixedFrame = DEFAULT_REFERENCE_FRAME;
+    fixedFrame = DEFAULT_FIXED_FRAME;
   }
 
   public void setTargetFrame(String frame) {

@@ -44,7 +44,7 @@ public class TriangleFanShape extends DefaultShape {
    * @param vertices
    *          array of vertices
    * @param color
-   *          RGBA color values
+   *          the {@link Color} of the shape
    */
   public TriangleFanShape(float[] vertices, Color color) {
     ByteBuffer goalVertexByteBuffer = ByteBuffer.allocateDirect(vertices.length * Float.SIZE / 8);

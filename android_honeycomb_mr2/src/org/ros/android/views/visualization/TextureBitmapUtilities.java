@@ -16,6 +16,8 @@
 
 package org.ros.android.views.visualization;
 
+import com.google.common.base.Preconditions;
+
 import android.graphics.Bitmap;
 
 /**
@@ -24,6 +26,9 @@ import android.graphics.Bitmap;
 public class TextureBitmapUtilities {
 
   public static Bitmap createSquareBitmap(int[] pixels, int width, int height, int fillColor) {
+    Preconditions.checkArgument(pixels.length == width * height, String.format(
+        "Pixel data does not match specified dimensions: %d != %d * %d", pixels.length, width,
+        height));
     int bitmapSize = Math.max(width, height);
     int[] squarePixelArray = makeSquarePixelArray(pixels, width, height, bitmapSize, fillColor);
     return Bitmap.createBitmap(squarePixelArray, bitmapSize, bitmapSize, Bitmap.Config.ARGB_8888);
