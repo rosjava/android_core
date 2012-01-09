@@ -31,6 +31,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author munjaldesai@google.com (Munjal Desai)
  */
 class DistancePoints {
+
   // Members for displaying the range vertices and polygons.
   private FloatBuffer rangeVertexBuffer;
   private ByteBuffer rangeVertexByteBuffer;

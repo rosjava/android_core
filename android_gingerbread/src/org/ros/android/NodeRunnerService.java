@@ -29,6 +29,8 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
+import org.ros.concurrent.ListenerCollection;
+import org.ros.concurrent.ListenerCollection.SignalRunnable;
 import org.ros.node.DefaultNodeRunner;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeListener;
@@ -36,11 +38,15 @@ import org.ros.node.NodeMain;
 import org.ros.node.NodeRunner;
 
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class NodeRunnerService extends Service implements NodeRunner {
+
+  private static final String TAG = "NodeRunnerService";
 
   // NOTE(damonkohler): If this is 0, the notification does not show up.
   private static final int ONGOING_NOTIFICATION = 1;
@@ -52,6 +58,7 @@ public class NodeRunnerService extends Service implements NodeRunner {
 
   private final NodeRunner nodeRunner;
   private final IBinder binder;
+  private final ListenerCollection<NodeRunnerServiceListener> listeners;
 
   private WakeLock wakeLock;
   private WifiLock wifiLock;
@@ -68,24 +75,26 @@ public class NodeRunnerService extends Service implements NodeRunner {
 
   public NodeRunnerService() {
     super();
-    nodeRunner = DefaultNodeRunner.newDefault();
+    ExecutorService executorService = Executors.newCachedThreadPool();
+    nodeRunner = DefaultNodeRunner.newDefault(executorService);
     binder = new LocalBinder();
+    listeners = new ListenerCollection<NodeRunnerServiceListener>(executorService);
   }
 
   @Override
   public void onCreate() {
     PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-    wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "NodeRunnerService");
+    wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
     wakeLock.acquire();
     int wifiLockType = WifiManager.WIFI_MODE_FULL;
     try {
       wifiLockType = WifiManager.class.getField("WIFI_MODE_FULL_HIGH_PERF").getInt(null);
     } catch (Exception e) {
       // We must be running on a pre-Honeycomb device.
-      Log.w("NodeRunnerService", "Unable to acquire high performance wifi lock.");
+      Log.w(TAG, "Unable to acquire high performance wifi lock.");
     }
     WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
-    wifiLock = wifiManager.createWifiLock(wifiLockType, "NodeRunnerService");
+    wifiLock = wifiManager.createWifiLock(wifiLockType, TAG);
     wifiLock.acquire();
   }
 
@@ -101,21 +110,48 @@ public class NodeRunnerService extends Service implements NodeRunner {
   }
 
   @Override
+  public void execute(Runnable runnable) {
+    nodeRunner.execute(runnable);
+  }
+
+  @Override
   public void shutdownNodeMain(NodeMain nodeMain) {
     nodeRunner.shutdownNodeMain(nodeMain);
   }
 
   @Override
   public void shutdown() {
+    signalOnShutdown();
+    // NOTE(damonkohler): This may be called multiple times. Shutting down a
+    // NodeRunner multiple times is safe. It simply calls shutdown on all
+    // NodeMains.
+    nodeRunner.shutdown();
+    if (wakeLock.isHeld()) {
+      wakeLock.release();
+    }
+    if (wifiLock.isHeld()) {
+      wifiLock.release();
+    }
     stopForeground(true);
     stopSelf();
+  }
+  
+  public void addListener(NodeRunnerServiceListener listener) {
+    listeners.add(listener);
+  }
+
+  private void signalOnShutdown() {
+    listeners.signal(new SignalRunnable<NodeRunnerServiceListener>() {
+      @Override
+      public void run(NodeRunnerServiceListener nodeRunnerServiceListener) {
+        nodeRunnerServiceListener.onShutdown(NodeRunnerService.this);
+      }
+    });
   }
 
   @Override
   public void onDestroy() {
-    nodeRunner.shutdown();
-    wakeLock.release();
-    wifiLock.release();
+    shutdown();
     super.onDestroy();
   }
 

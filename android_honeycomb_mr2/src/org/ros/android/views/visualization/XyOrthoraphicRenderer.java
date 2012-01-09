@@ -16,10 +16,9 @@
 
 package org.ros.android.views.visualization;
 
-import org.ros.android.views.visualization.layer.TfLayer;
-import org.ros.android.views.visualization.layer.Layer;
-
 import android.opengl.GLSurfaceView;
+import org.ros.android.views.visualization.layer.Layer;
+import org.ros.android.views.visualization.layer.TfLayer;
 
 import java.util.List;
 
@@ -30,9 +29,8 @@ import javax.microedition.khronos.opengles.GL10;
  * Renders all layers of a navigation view.
  * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
- * 
  */
-public class XYOrthoraphicRenderer implements GLSurfaceView.Renderer {
+public class XyOrthoraphicRenderer implements GLSurfaceView.Renderer {
   /**
    * List of layers to draw. Layers are drawn in-order, i.e. the layer with
    * index 0 is the bottom layer and is drawn first.
@@ -43,7 +41,7 @@ public class XYOrthoraphicRenderer implements GLSurfaceView.Renderer {
 
   private Camera camera;
 
-  public XYOrthoraphicRenderer(Transformer transformer, Camera camera) {
+  public XyOrthoraphicRenderer(Transformer transformer, Camera camera) {
     this.setLayers(layers);
     this.transformer = transformer;
     this.camera = camera;
@@ -106,5 +104,4 @@ public class XYOrthoraphicRenderer implements GLSurfaceView.Renderer {
   public void setLayers(List<Layer> layers) {
     this.layers = layers;
   }
-
 }

@@ -36,9 +36,10 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class TextureDrawable implements OpenGlDrawable {
 
-  private Texture texture;
-  private FloatBuffer vertexBuffer;
-  private FloatBuffer textureBuffer;
+  private final Texture texture;
+  private final FloatBuffer vertexBuffer;
+  private final FloatBuffer textureBuffer;
+  
   private Transform origin;
   private double resolution;
   private double width;

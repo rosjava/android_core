@@ -16,6 +16,8 @@
 
 package org.ros.android.views.visualization.layer;
 
+import com.google.common.base.Preconditions;
+
 import android.os.Handler;
 import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.Transformer;
@@ -47,11 +49,12 @@ public class SubscriberLayer<T> extends DefaultLayer {
   
   @Override
   public void onShutdown(VisualizationView view, Node node) {
-    super.onShutdown(view, node);
     subscriber.shutdown();
+    super.onShutdown(view, node);
   }
 
   public Subscriber<T> getSubscriber() {
+    Preconditions.checkNotNull(subscriber);
     return subscriber;
   }
 }

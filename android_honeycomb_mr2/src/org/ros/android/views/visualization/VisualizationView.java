@@ -35,7 +35,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   private final RenderRequestListener renderRequestListener;
   private final TransformListener transformListener;
   private final Camera camera;
-  private final XYOrthoraphicRenderer renderer;
+  private final XyOrthoraphicRenderer renderer;
   private final List<Layer> layers;
 
   private Node node;
@@ -50,7 +50,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     };
     transformListener = new TransformListener();
     camera = new Camera(transformListener.getTransformer());
-    renderer = new XYOrthoraphicRenderer(transformListener.getTransformer(), camera);
+    renderer = new XyOrthoraphicRenderer(transformListener.getTransformer(), camera);
     layers = Lists.newArrayList();
     setEGLConfigChooser(8, 8, 8, 8, 0, 0);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
@@ -68,7 +68,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     return false;
   }
 
-  public XYOrthoraphicRenderer getRenderer() {
+  public XyOrthoraphicRenderer getRenderer() {
     return renderer;
   }
   

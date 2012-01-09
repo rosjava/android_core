@@ -19,6 +19,7 @@ package org.ros.android.views.visualization.layer;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
+import android.util.Log;
 import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.TextureBitmapUtilities;
 import org.ros.android.views.visualization.TextureDrawable;
@@ -27,6 +28,7 @@ import org.ros.message.MessageListener;
 import org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
+import org.ros.node.topic.Subscriber;
 
 import java.nio.IntBuffer;
 
@@ -39,7 +41,9 @@ public class CompressedBitmapLayer extends
     SubscriberLayer<org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap>
     implements TfLayer {
 
-  private final TextureDrawable occupancyGrid;
+  private static final String TAG = "CompressedBitmapLayer";
+
+  private final TextureDrawable textureDrawable;
 
   private boolean ready;
   private String frame;
@@ -50,43 +54,61 @@ public class CompressedBitmapLayer extends
 
   public CompressedBitmapLayer(GraphName topic) {
     super(topic, "compressed_visualization_transport_msgs/CompressedBitmap");
-    occupancyGrid = new TextureDrawable();
+    textureDrawable = new TextureDrawable();
     ready = false;
   }
 
   @Override
   public void draw(GL10 gl) {
     if (ready) {
-      occupancyGrid.draw(gl);
+      textureDrawable.draw(gl);
     }
   }
 
   @Override
   public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
     super.onStart(node, handler, camera, transformer);
-    getSubscriber()
-        .addMessageListener(
-            new MessageListener<org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap>() {
-              @Override
-              public void onNewMessage(CompressedBitmap compressedBitmap) {
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                Bitmap bitmap =
-                    BitmapFactory.decodeByteArray(compressedBitmap.data, 0,
-                        compressedBitmap.data.length, options);
-                IntBuffer pixels = IntBuffer.allocate(bitmap.getWidth() * bitmap.getHeight());
-                bitmap.copyPixelsToBuffer(pixels);
-                bitmap.recycle();
-                Bitmap occupancyGridBitmap =
-                    TextureBitmapUtilities.createSquareBitmap(pixels.array(), bitmap.getWidth(),
-                        bitmap.getHeight(), 0xff000000);
-                occupancyGrid.update(compressedBitmap.origin, compressedBitmap.resolution_x,
-                    occupancyGridBitmap);
-                frame = compressedBitmap.header.frame_id;
-                ready = true;
-                requestRender();
-              }
-            });
+    Subscriber<CompressedBitmap> subscriber = getSubscriber();
+    subscriber.setQueueLimit(1);
+    subscriber
+        .addMessageListener(new MessageListener<org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap>() {
+          @Override
+          public void onNewMessage(CompressedBitmap compressedBitmap) {
+            update(compressedBitmap);
+          }
+        });
+  }
+
+  void update(CompressedBitmap compressedBitmap) {
+    Bitmap bitmap;
+    IntBuffer pixels;
+    try {
+      BitmapFactory.Options options = new BitmapFactory.Options();
+      options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+      bitmap =
+          BitmapFactory.decodeByteArray(compressedBitmap.data, 0, compressedBitmap.data.length,
+              options);
+      pixels = IntBuffer.allocate(bitmap.getWidth() * bitmap.getHeight());
+      bitmap.copyPixelsToBuffer(pixels);
+      bitmap.recycle();
+    } catch (OutOfMemoryError e) {
+      Log.e(TAG, "Not enough memory to decode incoming compressed bitmap.", e);
+      return;
+    }
+    Bitmap squareBitmap;
+    try {
+      squareBitmap =
+          TextureBitmapUtilities.createSquareBitmap(pixels.array(), bitmap.getWidth(),
+              bitmap.getHeight(), 0xff000000);
+    } catch (OutOfMemoryError e) {
+      Log.e(TAG, String.format("Not enough memory to render %d x %d pixel bitmap.",
+          bitmap.getWidth(), bitmap.getHeight()), e);
+      return;
+    }
+    textureDrawable.update(compressedBitmap.origin, compressedBitmap.resolution_x, squareBitmap);
+    frame = compressedBitmap.header.frame_id;
+    ready = true;
+    requestRender();
   }
 
   @Override

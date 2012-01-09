@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.widget.Toast;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeRunner;
 
@@ -36,26 +37,27 @@ public abstract class RosActivity extends Activity {
 
   private static final int MASTER_CHOOSER_REQUEST_CODE = 0;
 
-  private URI masterUri;
-  private NodeRunner nodeRunner;
-
   private final ServiceConnection nodeRunnerServiceConnection;
   private final String notificationTicker;
   private final String notificationTitle;
 
+  private URI masterUri;
+  private NodeRunnerService nodeRunnerService;
+
   private class NodeRunnerServiceConnection implements ServiceConnection {
     @Override
     public void onServiceConnected(ComponentName name, IBinder binder) {
-      // NOTE(damonkohler): This must be synchronized in case the activity is
-      // paused while we are connecting to the service. Pausing the activity
-      // causes the nodeRunner field to be nulled.
-      synchronized (RosActivity.this) {
-        nodeRunner = ((NodeRunnerService.LocalBinder) binder).getService();
-        // Run init() in a new thread as a convenience since it often requires
-        // network access. Also, this allows us to keep a reference to the
-        // NodeRunner separate from this class.
-        new Thread(new InitRunnable(RosActivity.this, nodeRunner)).start();
-      }
+      nodeRunnerService = ((NodeRunnerService.LocalBinder) binder).getService();
+      nodeRunnerService.addListener(new NodeRunnerServiceListener() {
+        @Override
+        public void onShutdown(NodeRunnerService nodeRunnerService) {
+          RosActivity.this.finish();
+        }
+      });
+      // Run init() in a new thread as a convenience since it often requires
+      // network access. Also, this allows us to keep a reference to the
+      // NodeRunner separate from this class.
+      nodeRunnerService.execute(new InitRunnable(RosActivity.this, nodeRunnerService));
     }
 
     @Override
@@ -72,16 +74,16 @@ public abstract class RosActivity extends Activity {
 
   @Override
   protected void onResume() {
-    super.onResume();
     if (getMasterUri() == null) {
       // Call this method on super to avoid triggering our precondition in the
       // overridden startActivityForResult().
       super.startActivityForResult(new Intent(this, MasterChooser.class), 0);
-    } else if (nodeRunner == null) {
+    } else if (nodeRunnerService == null) {
       // TODO(damonkohler): The NodeRunnerService should maintain its own copy
       // of master URI that we can query if we're restarting this activity.
       startNodeRunnerService();
     }
+    super.onResume();
   }
 
   private void startNodeRunnerService() {
@@ -95,21 +97,23 @@ public abstract class RosActivity extends Activity {
   }
 
   @Override
-  protected void onPause() {
-    super.onPause();
-    synchronized (this) {
-      if (nodeRunner != null) {
-        unbindService(nodeRunnerServiceConnection);
-        nodeRunner = null;
-      }
+  protected void onDestroy() {
+    if (nodeRunnerService != null) {
+      nodeRunnerService.shutdown();
+      unbindService(nodeRunnerServiceConnection);
+      // NOTE(damonkohler): The activity could still be restarted. In that case,
+      // nodeRunner needs to be null for everything to be started up again.
+      nodeRunnerService = null;
     }
+    Toast.makeText(this, notificationTitle + " shut down.", Toast.LENGTH_SHORT).show();
+    super.onDestroy();
   }
 
   /**
    * This method is called in a background thread once this {@link Activity} has
    * been initialized with a master {@link URI} via the {@link MasterChooser}
    * and a {@link NodeRunnerService} has started. Your {@link NodeMain}s should
-   * be started here.
+   * be started here using the provided {@link NodeRunner}.
    * 
    * @param nodeRunner
    *          the {@link NodeRunner} created for this {@link Activity}
