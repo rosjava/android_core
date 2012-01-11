@@ -16,35 +16,26 @@
 
 package org.ros.android.tutorial.image_transport;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import org.ros.address.InetAddressFactory;
 import org.ros.android.BitmapFromCompressedImage;
-import org.ros.android.MasterChooser;
+import org.ros.android.RosActivity;
 import org.ros.android.views.RosImageView;
 import org.ros.message.sensor_msgs.CompressedImage;
-import org.ros.node.DefaultNodeRunner;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeRunner;
-import org.ros.tutorials.image_transport.R;
-
-import java.net.URI;
-import java.net.URISyntaxException;
+import org.ros.android.tutorial.image_transport.R;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MainActivity extends Activity {
+public class MainActivity extends RosActivity {
 
-  private final NodeRunner nodeRunner;
-
-  private URI masterUri;
   private RosImageView<CompressedImage> image;
 
   public MainActivity() {
-    nodeRunner = DefaultNodeRunner.newDefault();
+    super("ImageTransportTutorial", "ImageTransportTutorial");
   }
 
   @SuppressWarnings("unchecked")
@@ -56,36 +47,11 @@ public class MainActivity extends Activity {
     image.setTopicName("/usb_cam/image_raw/compressed");
     image.setMessageType("sensor_msgs/CompressedImage");
     image.setMessageToBitmapCallable(new BitmapFromCompressedImage());
-    startActivityForResult(new Intent(this, MasterChooser.class), 0);
   }
 
   @Override
-  protected void onResume() {
-    super.onResume();
-    if (masterUri != null) {
-      NodeConfiguration nodeConfiguration =
-          NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName(), masterUri);
-      nodeRunner.run(image, nodeConfiguration);
-    }
+  protected void init(NodeRunner nodeRunner) {
+    NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress().toString(), getMasterUri());
+    nodeRunner.run(image, nodeConfiguration.setNodeName("android/video_view"));
   }
-
-  @Override
-  protected void onPause() {
-    super.onPause();
-    if (masterUri != null) {
-      nodeRunner.shutdownNodeMain(image);
-    }
-  }
-
-  @Override
-  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (requestCode == 0 && resultCode == RESULT_OK) {
-      try {
-        masterUri = new URI(data.getStringExtra("ROS_MASTER_URI"));
-      } catch (URISyntaxException e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
-
 }
