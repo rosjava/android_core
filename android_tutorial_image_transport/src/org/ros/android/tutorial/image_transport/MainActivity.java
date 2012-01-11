@@ -27,7 +27,7 @@ import org.ros.message.sensor_msgs.CompressedImage;
 import org.ros.node.DefaultNodeRunner;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeRunner;
-import org.ros.tutorials.image_transport.R;
+import org.ros.android.tutorial.image_transport.R;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -64,8 +64,8 @@ public class MainActivity extends Activity {
     super.onResume();
     if (masterUri != null) {
       NodeConfiguration nodeConfiguration =
-          NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName(), masterUri);
-      nodeRunner.run(image, nodeConfiguration);
+          NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress().toString(), masterUri);
+      nodeRunner.run(image, nodeConfiguration.setNodeName("android/video_view"));
     }
   }
 
