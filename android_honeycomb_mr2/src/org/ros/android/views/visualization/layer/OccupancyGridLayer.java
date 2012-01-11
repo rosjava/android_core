@@ -33,6 +33,7 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class OccupancyGridLayer extends SubscriberLayer<org.ros.message.nav_msgs.OccupancyGrid>
     implements TfLayer {
+
   /**
    * Color of occupied cells in the map.
    */
@@ -51,7 +52,7 @@ public class OccupancyGridLayer extends SubscriberLayer<org.ros.message.nav_msgs
   private final TextureDrawable occupancyGrid;
 
   private boolean ready;
-  private String frame;
+  private GraphName frame;
 
   public OccupancyGridLayer(String topic) {
     this(new GraphName(topic));
@@ -99,7 +100,7 @@ public class OccupancyGridLayer extends SubscriberLayer<org.ros.message.nav_msgs
                     COLOR_UNKNOWN);
             occupancyGrid.update(occupancyGridMessage.info.origin,
                 occupancyGridMessage.info.resolution, occupancyGridBitmap);
-            frame = occupancyGridMessage.header.frame_id;
+            frame = new GraphName(occupancyGridMessage.header.frame_id);
             ready = true;
             requestRender();
           }
@@ -107,7 +108,7 @@ public class OccupancyGridLayer extends SubscriberLayer<org.ros.message.nav_msgs
   }
 
   @Override
-  public String getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 }

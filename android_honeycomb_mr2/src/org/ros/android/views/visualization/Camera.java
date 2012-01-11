@@ -19,6 +19,7 @@ package org.ros.android.views.visualization;
 import com.google.common.base.Preconditions;
 
 import android.graphics.Point;
+import org.ros.namespace.GraphName;
 import org.ros.rosjava_geometry.Quaternion;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
@@ -34,13 +35,13 @@ public class Camera {
    * 
    * TODO(moesenle): make this the root of the TF tree.
    */
-  private static final String DEFAULT_FIXED_FRAME = "/map";
+  private static final GraphName DEFAULT_FIXED_FRAME = new GraphName("/map");
 
   /**
    * The default target frame is null which means that the renderer uses the
    * user set camera.
    */
-  private static final String DEFAULT_TARGET_FRAME = null;
+  private static final GraphName DEFAULT_TARGET_FRAME = null;
 
   /**
    * Most the user can zoom in.
@@ -67,7 +68,7 @@ public class Camera {
    * the location of this frame in fixedFrame. If the camera is set or moved,
    * the lock is removed.
    */
-  String targetFrame;
+  private GraphName targetFrame;
 
   /**
    * The frame in which to render everything. The default value is /map which
@@ -75,7 +76,7 @@ public class Camera {
    * instance, base_link, the view follows the robot and the robot itself is in
    * the origin.
    */
-  private String fixedFrame;
+  private GraphName fixedFrame;
 
   private Transformer transformer;
 
@@ -180,27 +181,27 @@ public class Camera {
    *          the orientation of the pose on the screen
    */
   public Transform toOpenGLPose(Point goalScreenPoint, float orientation) {
-    return new Transform(toWorldCoordinates(goalScreenPoint), Quaternion.makeFromAxisAngle(
+    return new Transform(toWorldCoordinates(goalScreenPoint), Quaternion.newFromAxisAngle(
         new Vector3(0, 0, -1), orientation + Math.PI / 2));
   }
 
-  public String getFixedFrame() {
+  public GraphName getFixedFrame() {
     return fixedFrame;
   }
 
-  public void setFixedFrame(String fixedFrame) {
+  public void setFixedFrame(GraphName fixedFrame) {
     Preconditions.checkNotNull(fixedFrame, "Fixed frame must be specified.");
     this.fixedFrame = fixedFrame;
     // To prevent camera jumps, we always center on the fixedFrame when
     // it is reset.
-    location = Vector3.makeIdentityVector3();
+    location = Vector3.newIdentityVector3();
   }
 
   public void resetFixedFrame() {
     fixedFrame = DEFAULT_FIXED_FRAME;
   }
 
-  public void setTargetFrame(String frame) {
+  public void setTargetFrame(GraphName frame) {
     targetFrame = frame;
   }
 
@@ -208,7 +209,7 @@ public class Camera {
     targetFrame = DEFAULT_TARGET_FRAME;
   }
 
-  public String getTargetFrame() {
+  public GraphName getTargetFrame() {
     return targetFrame;
   }
 

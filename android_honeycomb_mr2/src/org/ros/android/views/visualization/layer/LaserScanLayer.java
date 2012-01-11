@@ -41,7 +41,7 @@ import javax.microedition.khronos.opengles.GL10;
 public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.LaserScan>
     implements TfLayer {
 
-  private String frame;
+  private GraphName frame;
   private Shape shape;
 
   public LaserScanLayer(String topicName) {
@@ -67,7 +67,7 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
     subscriber.addMessageListener(new MessageListener<LaserScan>() {
       @Override
       public void onNewMessage(LaserScan laserScan) {
-        frame = laserScan.header.frame_id;
+        frame = new GraphName(laserScan.header.frame_id);
         float[] ranges = laserScan.ranges;
         // vertices is an array of x, y, z values starting with the origin of
         // the triangle fan.
@@ -103,7 +103,7 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
   }
 
   @Override
-  public String getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 }

@@ -38,9 +38,9 @@ public class PoseSubscriberLayer extends
     SubscriberLayer<org.ros.message.geometry_msgs.PoseStamped> implements TfLayer {
 
   private Shape goalShape;
+  private GraphName frame;
   private boolean ready;
   private boolean visible;
-  private String poseFrame;
 
   public PoseSubscriberLayer(String topic) {
     this(new GraphName(topic));
@@ -72,8 +72,8 @@ public class PoseSubscriberLayer extends
         new MessageListener<org.ros.message.geometry_msgs.PoseStamped>() {
           @Override
           public void onNewMessage(PoseStamped pose) {
-            goalShape.setPose(Transform.makeFromPoseMessage(pose.pose));
-            poseFrame = pose.header.frame_id;
+            goalShape.setPose(Transform.newFromPoseMessage(pose.pose));
+            frame = new GraphName(pose.header.frame_id);
             ready = true;
             requestRender();
           }
@@ -89,7 +89,7 @@ public class PoseSubscriberLayer extends
   }
 
   @Override
-  public String getFrame() {
-    return poseFrame;
+  public GraphName getFrame() {
+    return frame;
   }
 }

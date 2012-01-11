@@ -27,6 +27,7 @@ import org.ros.android.views.visualization.shape.RobotShape;
 import org.ros.android.views.visualization.shape.Shape;
 import org.ros.message.Time;
 import org.ros.message.geometry_msgs.TransformStamped;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 
 import java.util.Timer;
@@ -39,15 +40,15 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class RobotLayer extends DefaultLayer implements TfLayer {
 
-  private final String frame;
+  private final GraphName frame;
   private final Context context;
   private final Shape shape;
 
   private GestureDetector gestureDetector;
   private Timer redrawTimer;
 
-  public RobotLayer(String robotFrame, Context context) {
-    this.frame = robotFrame;
+  public RobotLayer(String frame, Context context) {
+    this.frame = new GraphName(frame);
     this.context = context;
     shape = new RobotShape();
   }
@@ -68,13 +69,12 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
     redrawTimer = new Timer();
     redrawTimer.scheduleAtFixedRate(new TimerTask() {
       private Time lastRobotTime;
-      
+
       @Override
       public void run() {
         TransformStamped transform = transformer.getTransform(frame);
         if (transform != null) {
-          if (lastRobotTime != null
-            && !transform.header.stamp.equals(lastRobotTime)) {
+          if (lastRobotTime != null && !transform.header.stamp.equals(lastRobotTime)) {
             requestRender();
           }
           lastRobotTime = transform.header.stamp;
@@ -109,7 +109,7 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
   }
 
   @Override
-  public String getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 }

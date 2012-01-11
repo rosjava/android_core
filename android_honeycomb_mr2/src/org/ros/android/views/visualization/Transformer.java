@@ -18,41 +18,52 @@ package org.ros.android.views.visualization;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import org.ros.message.geometry_msgs.TransformStamped;
+import org.ros.namespace.GraphName;
 import org.ros.rosjava_geometry.Transform;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Very simple implementation of a TF transformer.
  * 
- * Currently, the class does not support time. Lookups always use the newest transforms.
+ * Currently, the class does not support time. Lookups always use the newest
+ * transforms.
  * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
- *
+ * 
  */
 public class Transformer {
+
   /**
-   * Mapping from child frame IDs to the respective transforms.
+   * Mapping from child frame IDs to their respective transforms.
    */
-  private HashMap<String, TransformStamped> transforms = new HashMap<String, TransformStamped>();
-  private String prefix = "";
+  private final Map<GraphName, TransformStamped> transforms;
+
+  private GraphName prefix;
+
+  public Transformer() {
+    transforms = Maps.newConcurrentMap();
+    prefix = null;
+  }
 
   /**
    * Adds a transform.
    * 
-   * @param transform the transform to add
+   * @param transform
+   *          the transform to add
    */
   public void updateTransform(TransformStamped transform) {
-    transforms.put(transform.child_frame_id, transform);
+    GraphName frame = new GraphName(transform.child_frame_id);
+    transforms.put(frame, transform);
   }
 
-  public TransformStamped getTransform(String frameId) {
-    return transforms.get(makeFullyQualified(frameId));
+  public TransformStamped getTransform(GraphName frame) {
+    return transforms.get(makeFullyQualified(frame));
   }
 
   /**
@@ -62,7 +73,7 @@ public class Transformer {
    * @param sourceFrame
    * @return true if there exists a transform from sourceFrame to targetFrame
    */
-  public boolean canTransform(String targetFrame, String sourceFrame) {
+  public boolean canTransform(GraphName targetFrame, GraphName sourceFrame) {
     if (targetFrame == null || sourceFrame == null) {
       return false;
     }
@@ -84,11 +95,12 @@ public class Transformer {
   }
 
   /**
-   * Returns the list of transforms to apply to transform from source frame to target frame.
-   *  
+   * Returns the list of transforms to apply to transform from source frame to
+   * target frame.
+   * 
    * @return list of transforms from source frame to target frame
    */
-  public List<Transform> lookupTransforms(String targetFrame, String sourceFrame) {
+  public List<Transform> lookupTransforms(GraphName targetFrame, GraphName sourceFrame) {
     List<Transform> result = Lists.newArrayList();
     if (makeFullyQualified(targetFrame).equals(makeFullyQualified(sourceFrame))) {
       return result;
@@ -111,13 +123,13 @@ public class Transformer {
     result.addAll(downTransforms);
     return result;
   }
-  
+
   /**
    * Returns the transform from source frame to target frame.
    */
-  public Transform lookupTransform(String targetFrame, String sourceFrame) {
+  public Transform lookupTransform(GraphName targetFrame, GraphName sourceFrame) {
     List<Transform> transforms = lookupTransforms(targetFrame, sourceFrame);
-    Transform result = Transform.makeIdentityTransform();
+    Transform result = Transform.newIdentityTransform();
     for (Transform transform : transforms) {
       result = result.multiply(transform);
     }
@@ -131,8 +143,8 @@ public class Transformer {
    *          the transforms to invert
    */
   private List<Transform> invertTransforms(List<Transform> transforms) {
-    List<Transform> result = new ArrayList<Transform>(transforms.size());
-    for (Transform transform: transforms) {
+    List<Transform> result = Lists.newArrayList();
+    for (Transform transform : transforms) {
       result.add(transform.invert());
     }
     return result;
@@ -146,29 +158,31 @@ public class Transformer {
    *          the start frame
    * @return the list of transforms from frame to root
    */
-  private List<Transform> transformsToRoot(String frame) {
-    String qualifiedFrame = makeFullyQualified(frame);
-    List<Transform> result = new ArrayList<Transform>();
+  private List<Transform> transformsToRoot(GraphName frame) {
+    GraphName qualifiedFrame = makeFullyQualified(frame);
+    List<Transform> result = Lists.newArrayList();
     while (true) {
       TransformStamped currentTransform = transforms.get(qualifiedFrame);
       if (currentTransform == null) {
         break;
       }
-      result.add(Transform.makeFromTransformMessage(currentTransform.transform));
-      qualifiedFrame = makeFullyQualified(currentTransform.header.frame_id);
+      result.add(Transform.newFromTransformMessage(currentTransform.transform));
+      qualifiedFrame = makeFullyQualified(new GraphName(currentTransform.header.frame_id));
     }
     return result;
   }
 
-  public void setPrefix(String prefix) {
+  public void setPrefix(GraphName prefix) {
     this.prefix = prefix;
   }
 
-  public String makeFullyQualified(String frame) {
+  public GraphName makeFullyQualified(GraphName frame) {
     Preconditions.checkNotNull(frame, "Frame not specified.");
-    if (frame.charAt(0) == '/') {
-      return frame;
+    if (prefix != null) {
+      return prefix.join(frame);
     }
-    return prefix + "/" + frame;
+    GraphName global = frame.toGlobal();
+    Preconditions.checkState(global.isGlobal());
+    return global;
   }
 }

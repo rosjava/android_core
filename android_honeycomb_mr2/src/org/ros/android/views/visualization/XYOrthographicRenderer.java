@@ -19,6 +19,7 @@ package org.ros.android.views.visualization;
 import android.opengl.GLSurfaceView;
 import org.ros.android.views.visualization.layer.Layer;
 import org.ros.android.views.visualization.layer.TfLayer;
+import org.ros.namespace.GraphName;
 
 import java.util.List;
 
@@ -89,7 +90,7 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
     for (Layer layer : getLayers()) {
       gl.glPushMatrix();
       if (layer instanceof TfLayer) {
-        String layerFrame = ((TfLayer) layer).getFrame();
+        GraphName layerFrame = ((TfLayer) layer).getFrame();
         // TODO(moesenle): throw a warning that no transform could be found and
         // the layer has been ignored.
         if (layerFrame != null && transformer.canTransform(layerFrame, camera.getFixedFrame())) {

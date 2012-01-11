@@ -19,6 +19,7 @@ package org.ros.android.views.visualization;
 import org.ros.message.MessageListener;
 import org.ros.message.geometry_msgs.TransformStamped;
 import org.ros.message.tf.tfMessage;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
@@ -41,7 +42,10 @@ public class TransformListener implements NodeMain {
 
   @Override
   public void onStart(Node node) {
-    transformer.setPrefix(node.newParameterTree().getString("~tf_prefix", ""));
+    String tfPrefix = node.newParameterTree().getString("~tf_prefix", "");
+    if (!tfPrefix.isEmpty()) {
+      transformer.setPrefix(new GraphName(tfPrefix));
+    }
     tfSubscriber = node.newSubscriber("tf", "tf/tfMessage");
     tfSubscriber.addMessageListener(new MessageListener<tfMessage>() {
       @Override

@@ -46,7 +46,7 @@ public class CompressedBitmapLayer extends
   private final TextureDrawable textureDrawable;
 
   private boolean ready;
-  private String frame;
+  private GraphName frame;
 
   public CompressedBitmapLayer(String topic) {
     this(new GraphName(topic));
@@ -106,13 +106,13 @@ public class CompressedBitmapLayer extends
       return;
     }
     textureDrawable.update(compressedBitmap.origin, compressedBitmap.resolution_x, squareBitmap);
-    frame = compressedBitmap.header.frame_id;
+    frame = new GraphName(compressedBitmap.header.frame_id);
     ready = true;
     requestRender();
   }
 
   @Override
-  public String getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 }
