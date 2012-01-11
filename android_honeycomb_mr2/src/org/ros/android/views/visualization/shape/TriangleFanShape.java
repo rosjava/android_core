@@ -30,9 +30,14 @@ import javax.microedition.khronos.opengles.GL10;
  * Draws a shape based on an array of vertices using OpenGl's GL_TRIANGLE_FAN
  * method.
  * 
+ * <p>
+ * Note that this class is intended to be wrapped. No transformations are
+ * performed in the {@link #draw(GL10)} method.
+ * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
+ * @author damonkohler@google.com (Damon Kohler)
  */
-public class TriangleFanShape extends DefaultShape {
+class TriangleFanShape extends BaseShape {
 
   private final FloatBuffer vertexBuffer;
 
@@ -58,12 +63,6 @@ public class TriangleFanShape extends DefaultShape {
 
   @Override
   public void draw(GL10 gl) {
-    gl.glTranslatef((float) getPose().getTranslation().getX(), (float) getPose().getTranslation()
-        .getY(), (float) getPose().getTranslation().getZ());
-    Vector3 axis = getPose().getRotation().getAxis();
-    float angle = (float) Math.toDegrees(getPose().getRotation().getAngle());
-    gl.glRotatef(angle, (float) axis.getX(), (float) axis.getY(), (float) axis.getZ());
-    gl.glScalef(getScaleFactor(), getScaleFactor(), getScaleFactor());
     gl.glDisable(GL10.GL_CULL_FACE);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);

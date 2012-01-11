@@ -30,7 +30,7 @@ import javax.microedition.khronos.opengles.GL10;
  * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public class XyOrthoraphicRenderer implements GLSurfaceView.Renderer {
+public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
   /**
    * List of layers to draw. Layers are drawn in-order, i.e. the layer with
    * index 0 is the bottom layer and is drawn first.
@@ -41,7 +41,7 @@ public class XyOrthoraphicRenderer implements GLSurfaceView.Renderer {
 
   private Camera camera;
 
-  public XyOrthoraphicRenderer(Transformer transformer, Camera camera) {
+  public XYOrthographicRenderer(Transformer transformer, Camera camera) {
     this.setLayers(layers);
     this.transformer = transformer;
     this.camera = camera;
@@ -49,13 +49,14 @@ public class XyOrthoraphicRenderer implements GLSurfaceView.Renderer {
 
   @Override
   public void onSurfaceChanged(GL10 gl, int width, int height) {
-    gl.glViewport(0, 0, width, height);
-    gl.glMatrixMode(GL10.GL_PROJECTION);
-    gl.glLoadIdentity();
-    gl.glOrthof(-width / 2, -height / 2, width / 2, height / 2, -10.0f, 10.0f);
-    camera.setViewport(new android.graphics.Point(width, height));
+    // Set the viewport.
+    Viewport viewport = new Viewport(width, height);
+    viewport.apply(gl);
+    camera.setViewport(viewport);
+    // Set camera location transformation.
     gl.glMatrixMode(GL10.GL_MODELVIEW);
     gl.glLoadIdentity();
+    // Set texture rendering hints.
     gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
     gl.glEnable(GL10.GL_BLEND);
     gl.glHint(GL10.GL_POLYGON_SMOOTH_HINT, GL10.GL_NICEST);
@@ -69,8 +70,12 @@ public class XyOrthoraphicRenderer implements GLSurfaceView.Renderer {
     gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
     gl.glLoadIdentity();
-    camera.applyCameraTransform(gl);
+    camera.apply(gl);
     drawLayers(gl);
+    int error = gl.glGetError();
+    if (error != GL10.GL_NO_ERROR) {
+      System.err.println("OpenGL error: " + error);
+    }
   }
 
   @Override

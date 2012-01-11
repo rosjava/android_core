@@ -16,25 +16,23 @@
 
 package org.ros.android.views.visualization.shape;
 
-import org.ros.android.views.visualization.Camera;
+import javax.microedition.khronos.opengles.GL10;
 
 /**
- * A large pink arrow typically used to indicate where a new pose will be
- * published (e.g. a navigation goal).
- * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class PoseShape extends PixelTriangleFanShape {
+public class MetricTriangleFanShape extends MetricShape {
 
-  private static final Color color = new Color(0.847058824f, 0.243137255f, 0.8f, 1.0f);
-  private static final float vertices[] = {
-      50.0f, 0.0f, 0.0f, // Top
-      -100.0f, -70.0f, 0.0f, // Bottom left
-      -50.0f, 0.0f, 0.0f, // Bottom center
-      -100.0f, 70.0f, 0.0f, // Bottom right
-  };
+  private final Shape shape;
 
-  public PoseShape(Camera camera) {
-    super(vertices, color, camera);
+  public MetricTriangleFanShape(float[] vertices, Color color) {
+    shape = new TriangleFanShape(vertices, color);
+    setPose(shape.getPose());
+  }
+
+  @Override
+  public void draw(GL10 gl) {
+    super.draw(gl);
+    shape.draw(gl);
   }
 }

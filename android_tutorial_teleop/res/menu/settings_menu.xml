@@ -1,34 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-  <item android:id="@+id/map_view_properties" android:title="Map view"
-    android:showAsAction="ifRoom|withText">
+  <item
+      android:id="@+id/virtual_joystick_properties"
+      android:title="Virtual joystick">
     <menu>
-      <item android:id="@+id/map_view_initial_pose" android:title="Set initial pose" />
-      <group android:checkableBehavior="all">
-        <item android:id="@+id/map_view_robot_centric_view" android:title="Lock to robot" />
+      <group
+          android:checkableBehavior="all">
+        <item
+            android:id="@+id/virtual_joystick_snap"
+            android:title="Auto snapping" />
       </group>
     </menu>
   </item>
-  <item android:id="@+id/distance_view_properties" android:title="Distance view"
-    android:showAsAction="ifRoom|withText">
-    <menu>
-      <group android:checkableBehavior="single">
-        <item android:id="@+id/distance_view_velocity_mode" android:title="Velocity mode" />
-        <item android:id="@+id/distance_view_clutter_mode" android:title="Clutter mode" />
-        <item android:id="@+id/distance_view_user_mode" android:title="User mode" />
-      </group>
-      <group android:checkableBehavior="all">
-        <item android:id="@+id/distance_view_lock_zoom" android:title="Lock Zoom" />
-      </group>
-    </menu>
-  </item>
-  <item android:id="@+id/virtual_joystick_properties" android:title="Virtual joystick">
-    <menu>
-      <group android:checkableBehavior="all">
-        <item android:id="@+id/virtual_joystick_snap" android:title="Auto snapping" />
-      </group>
-    </menu>
-  </item>
-  <item android:id="@+id/help" android:title="Help" />
 </menu>
-

@@ -47,7 +47,7 @@ public interface Layer extends OpenGlDrawable {
    * Called when the layer is registered at the navigation view.
    * @param handler TODO
    */
-  void onStart(Node node, Handler handler, Camera camera, Transformer transformer);
+  void onStart(Node node, Handler handler, Transformer transformer, Camera camera);
 
   /**
    * Called when the view is removed from the view.

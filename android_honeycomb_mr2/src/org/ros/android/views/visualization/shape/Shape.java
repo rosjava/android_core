@@ -28,10 +28,6 @@ public interface Shape extends OpenGlDrawable {
 
   Color getColor();
 
-  void setScaleFactor(float scaleFactor);
-
-  float getScaleFactor();
-
   void setPose(Transform pose);
 
   Transform getPose();

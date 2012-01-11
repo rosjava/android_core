@@ -86,8 +86,8 @@ public class OccupancyGridLayer extends SubscriberLayer<org.ros.message.nav_msgs
   }
 
   @Override
-  public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
-    super.onStart(node, handler, camera, transformer);
+  public void onStart(Node node, Handler handler, Transformer transformer, Camera camera) {
+    super.onStart(node, handler, transformer, camera);
     getSubscriber().addMessageListener(
         new MessageListener<org.ros.message.nav_msgs.OccupancyGrid>() {
           @Override

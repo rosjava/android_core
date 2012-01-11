@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:id="@+id/relativeLayout"
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="fill_parent" android:layout_height="fill_parent"
-  android:background="#FF000000">
-
-  <org.ros.android.views.RosImageView
-    android:layout_height="fill_parent" android:id="@+id/video_display"
-    android:layout_width="fill_parent">
-  </org.ros.android.views.RosImageView>
-</RelativeLayout>
-
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+  <org.ros.android.views.visualization.VisualizationView
+      android:id="@+id/visualization"
+      android:layout_width="0dip"
+      android:layout_height="match_parent"
+      android:layout_weight="1" />
+  <org.ros.android.views.VirtualJoystickView
+      android:id="@+id/virtual_joystick"
+      android:layout_gravity="bottom"
+      android:layout_width="300dip"
+      android:layout_height="300dip" />
+</LinearLayout>

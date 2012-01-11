@@ -45,7 +45,6 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
 
   private GestureDetector gestureDetector;
   private Timer redrawTimer;
-  private Camera camera;
 
   public RobotLayer(String robotFrame, Context context) {
     this.frame = robotFrame;
@@ -55,9 +54,6 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
 
   @Override
   public void draw(GL10 gl) {
-    // To keep the robot's size constant even when scaled, we apply the inverse
-    // scaling factor before drawing.
-    shape.setScaleFactor(1 / camera.getScalingFactor());
     shape.draw(gl);
   }
 
@@ -67,9 +63,8 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
   }
 
   @Override
-  public void onStart(Node node, Handler handler, final Camera camera, final Transformer transformer) {
-    this.camera = camera;
-
+  public void
+      onStart(Node node, Handler handler, final Transformer transformer, final Camera camera) {
     redrawTimer = new Timer();
     redrawTimer.scheduleAtFixedRate(new TimerTask() {
       private Time lastRobotTime;

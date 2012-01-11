@@ -37,8 +37,7 @@ import javax.microedition.khronos.opengles.GL10;
 public class PoseSubscriberLayer extends
     SubscriberLayer<org.ros.message.geometry_msgs.PoseStamped> implements TfLayer {
 
-  private final Shape goalShape;
-
+  private Shape goalShape;
   private boolean ready;
   private boolean visible;
   private String poseFrame;
@@ -49,7 +48,6 @@ public class PoseSubscriberLayer extends
 
   public PoseSubscriberLayer(GraphName topic) {
     super(topic, "geometry_msgs/PoseStamped");
-    goalShape = new GoalShape();
     visible = true;
     ready = false;
   }
@@ -67,8 +65,9 @@ public class PoseSubscriberLayer extends
   }
 
   @Override
-  public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
-    super.onStart(node, handler, camera, transformer);
+  public void onStart(Node node, Handler handler, Transformer transformer, Camera camera) {
+    super.onStart(node, handler, transformer, camera);
+    goalShape = new GoalShape(camera);
     getSubscriber().addMessageListener(
         new MessageListener<org.ros.message.geometry_msgs.PoseStamped>() {
           @Override

@@ -7,16 +7,14 @@ import org.ros.rosjava_geometry.Transform;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public abstract class DefaultShape implements Shape {
+abstract class BaseShape implements Shape {
 
   private Color color;
   private Transform pose;
-  private float scaleFactor;
 
-  public DefaultShape() {
+  public BaseShape() {
     color = null;
     pose = null;
-    scaleFactor = 1.0f;
   }
 
   @Override
@@ -39,15 +37,5 @@ public abstract class DefaultShape implements Shape {
   @Override
   public void setPose(Transform pose) {
     this.pose = pose;
-  }
-
-  @Override
-  public float getScaleFactor() {
-    return scaleFactor;
-  }
-
-  @Override
-  public void setScaleFactor(float scaleFactor) {
-    this.scaleFactor = scaleFactor;
   }
 }

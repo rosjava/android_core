@@ -62,14 +62,13 @@ public class PosePublisherLayer extends DefaultLayer {
     this.topic = topic;
     this.context = context;
     visible = false;
-    poseShape = new PoseShape();
   }
 
   @Override
   public void draw(GL10 gl) {
     if (visible) {
       Preconditions.checkNotNull(pose);
-      poseShape.setScaleFactor(1 / camera.getScalingFactor());
+      // poseShape.setScaleFactor(1 / camera.getZoom());
       poseShape.draw(gl);
     }
   }
@@ -81,7 +80,7 @@ public class PosePublisherLayer extends DefaultLayer {
       if (event.getAction() == MotionEvent.ACTION_MOVE) {
         pose.setRotation(Quaternion.rotationBetweenVectors(
             new Vector3(1, 0, 0),
-            camera.toOpenGLCoordinates(new Point((int) event.getX(), (int) event.getY()))
+            camera.toWorldCoordinates(new Point((int) event.getX(), (int) event.getY()))
             .subtract(pose.getTranslation())));
         poseShape.setPose(pose);
         requestRender();
@@ -99,9 +98,10 @@ public class PosePublisherLayer extends DefaultLayer {
   }
 
   @Override
-  public void onStart(Node node, Handler handler, final Camera camera, Transformer transformer) {
+  public void onStart(Node node, Handler handler, Transformer transformer, final Camera camera) {
     this.node = node;
     this.camera = camera;
+    poseShape = new PoseShape(camera);
     posePublisher = node.newPublisher(topic, "geometry_msgs/PoseStamped");
     handler.post(new Runnable() {
       @Override
@@ -111,7 +111,7 @@ public class PosePublisherLayer extends DefaultLayer {
               @Override
               public void onLongPress(MotionEvent e) {
                 pose =
-                    new Transform(camera.toOpenGLCoordinates(
+                    new Transform(camera.toWorldCoordinates(
                         new Point((int) e.getX(), (int) e.getY())), new Quaternion(0, 0, 0, 1));
                 poseShape.setPose(pose);
                 visible = true;

@@ -17,6 +17,7 @@
 package org.ros.android.views.visualization;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import org.ros.message.geometry_msgs.TransformStamped;
 import org.ros.rosjava_geometry.Transform;
@@ -88,12 +89,13 @@ public class Transformer {
    * @return list of transforms from source frame to target frame
    */
   public List<Transform> lookupTransforms(String targetFrame, String sourceFrame) {
+    List<Transform> result = Lists.newArrayList();
     if (makeFullyQualified(targetFrame).equals(makeFullyQualified(sourceFrame))) {
-      return new ArrayList<Transform>();
+      return result;
     }
     List<Transform> upTransforms = transformsToRoot(sourceFrame);
     List<Transform> downTransforms = transformsToRoot(targetFrame);
-    // TODO(moesenle): check that if the transform chain has 0 length the frame
+    // TODO(moesenle): Check that if the transform chain has 0 length the frame
     // id is the root frame.
     Preconditions.checkState(upTransforms.size() > 0 || downTransforms.size() > 0,
         "Frames unknown: " + sourceFrame + " " + targetFrame);
@@ -105,7 +107,6 @@ public class Transformer {
           "Cannot find transforms from " + sourceFrame + " to " + targetFrame
               + ". Transform trees not connected.");
     }
-    List<Transform> result = new ArrayList<Transform>(upTransforms.size() + downTransforms.size());
     result.addAll(upTransforms);
     result.addAll(downTransforms);
     return result;
@@ -164,6 +165,7 @@ public class Transformer {
   }
 
   public String makeFullyQualified(String frame) {
+    Preconditions.checkNotNull(frame, "Frame not specified.");
     if (frame.charAt(0) == '/') {
       return frame;
     }

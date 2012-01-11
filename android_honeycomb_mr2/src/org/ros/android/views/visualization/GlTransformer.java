@@ -24,10 +24,9 @@ import java.util.List;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Provides Functionality to apply a list of transforms to an OpenGL context.
+ * Applies a list of transforms to an OpenGL context.
  * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
- * 
  */
 public class GlTransformer {
 
@@ -41,5 +40,4 @@ public class GlTransformer {
           (float) axis.getZ());
     }
   }
-
 }

@@ -16,15 +16,14 @@
 
 package org.ros.android.views.visualization.layer;
 
-import org.ros.android.views.visualization.Camera;
-import org.ros.android.views.visualization.Transformer;
-import org.ros.android.views.visualization.VisualizationView;
-
 import android.content.Context;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import org.ros.android.views.visualization.Camera;
+import org.ros.android.views.visualization.Transformer;
+import org.ros.android.views.visualization.VisualizationView;
 import org.ros.node.Node;
 
 /**
@@ -50,8 +49,7 @@ public class CameraControlLayer extends DefaultLayer {
   }
 
   @Override
-  public void onStart(Node node, Handler handler, final Camera camera,
-      Transformer transformer) {
+  public void onStart(Node node, Handler handler, Transformer transformer, final Camera camera) {
     handler.post(new Runnable() {
       @Override
       public void run() {
@@ -61,7 +59,7 @@ public class CameraControlLayer extends DefaultLayer {
               @Override
               public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
                   float distanceY) {
-                camera.moveCameraScreenCoordinates(-distanceX, -distanceY);
+                camera.moveCameraScreenCoordinates(distanceX, distanceY);
                 requestRender();
                 return true;
               }

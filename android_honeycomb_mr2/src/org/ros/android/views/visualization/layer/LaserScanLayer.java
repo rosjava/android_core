@@ -16,9 +16,11 @@
 
 package org.ros.android.views.visualization.layer;
 
+import org.ros.android.views.visualization.Camera;
+import org.ros.android.views.visualization.Transformer;
 import org.ros.android.views.visualization.shape.Color;
+import org.ros.android.views.visualization.shape.MetricTriangleFanShape;
 import org.ros.android.views.visualization.shape.Shape;
-import org.ros.android.views.visualization.shape.TriangleFanShape;
 import org.ros.message.MessageListener;
 import org.ros.message.sensor_msgs.LaserScan;
 import org.ros.namespace.GraphName;
@@ -58,10 +60,9 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
   }
 
   @Override
-  public void onStart(Node node, android.os.Handler handler,
-      org.ros.android.views.visualization.Camera camera,
-      org.ros.android.views.visualization.Transformer transformer) {
-    super.onStart(node, handler, camera, transformer);
+  public void
+      onStart(Node node, android.os.Handler handler, Transformer transformer, Camera camera) {
+    super.onStart(node, handler, transformer, camera);
     Subscriber<LaserScan> subscriber = getSubscriber();
     subscriber.addMessageListener(new MessageListener<LaserScan>() {
       @Override
@@ -95,7 +96,7 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
           vertices[3 * i + 5] = 0;
           angle += angleIncrement;
         }
-        shape = new TriangleFanShape(vertices, new Color(0, 1.0f, 0, 0.3f));
+        shape = new MetricTriangleFanShape(vertices, new Color(0, 1.0f, 0, 0.3f));
         requestRender();
       }
     });

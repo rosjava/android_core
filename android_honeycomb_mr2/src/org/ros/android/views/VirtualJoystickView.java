@@ -18,6 +18,7 @@ package org.ros.android.views;
 
 import android.content.Context;
 import android.graphics.Point;
+import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -234,11 +235,16 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
 
   public VirtualJoystickView(Context context) {
     super(context);
-    // All the virtual joystick elements must be centered on the parent.
-    setGravity(Gravity.CENTER);
-    // Instantiate the elements from the layout XML file.
-    LayoutInflater.from(context).inflate(org.ros.android.R.layout.virtual_joystick, this, true);
-    initVirtualJoystick();
+    initVirtualJoystick(context);
+  }
+
+  public VirtualJoystickView(Context context, AttributeSet attrs) {
+    super(context, attrs);
+    initVirtualJoystick(context);
+  }
+
+  public VirtualJoystickView(Context context, AttributeSet attrs, int defStyle) {
+    super(context, attrs, defStyle);
   }
 
   @Override
@@ -286,64 +292,63 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   public boolean onTouchEvent(MotionEvent event) {
     final int action = event.getAction();
     switch (action & MotionEvent.ACTION_MASK) {
-      case MotionEvent.ACTION_MOVE: {
-        // If the primary contact point is no longer on the screen then ignore
-        // the event.
-        if (pointerId != INVALID_POINTER_ID) {
-          // If the virtual joystick is in resume-previous-velocity mode.
-          if (previousVelocityMode) {
-            // And the current contact is close to the contact location prior to
-            // ContactUp.
-            if (inLastContactRange(event.getX(event.getActionIndex()),
-                event.getY(event.getActionIndex()))) {
-              // Then use the previous velocity.
-              onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y
-                  + joystickRadius);
-            }
-            // Since the current contact is not close to the prior location.
-            else {
-              // Exit the resume-previous-velocity mode.
-              previousVelocityMode = false;
-            }
+    case MotionEvent.ACTION_MOVE: {
+      // If the primary contact point is no longer on the screen then ignore
+      // the event.
+      if (pointerId != INVALID_POINTER_ID) {
+        // If the virtual joystick is in resume-previous-velocity mode.
+        if (previousVelocityMode) {
+          // And the current contact is close to the contact location prior to
+          // ContactUp.
+          if (inLastContactRange(event.getX(event.getActionIndex()),
+              event.getY(event.getActionIndex()))) {
+            // Then use the previous velocity.
+            onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y
+                + joystickRadius);
           }
-          // Since the resume-previous-velocity mode is not active generate
-          // velocities based on current contact position.
+          // Since the current contact is not close to the prior location.
           else {
-            onContactMove(event.getX(event.findPointerIndex(pointerId)),
-                event.getY(event.findPointerIndex(pointerId)));
+            // Exit the resume-previous-velocity mode.
+            previousVelocityMode = false;
           }
         }
-        break;
-      }
-      case MotionEvent.ACTION_DOWN: {
-        // Get the coordinates of the pointer that is initiating the
-        // interaction.
-        pointerId = event.getPointerId(event.getActionIndex());
-        onContactDown();
-        // If the current contact is close to the location of the contact prior
-        // to contactUp.
-        if (inLastContactRange(event.getX(event.getActionIndex()),
-            event.getY(event.getActionIndex()))) {
-          // Trigger resume-previous-velocity mode.
-          previousVelocityMode = true;
-          // The animation calculations/operations are performed in
-          // onContactMove(). If this is not called and the user's finger stays
-          // perfectly still after the down event, no operation is performed.
-          // Calling onContactMove avoids this.
-          onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y + joystickRadius);
-        } else {
-          onContactMove(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()));
+        // Since the resume-previous-velocity mode is not active generate
+        // velocities based on current contact position.
+        else {
+          onContactMove(event.getX(event.findPointerIndex(pointerId)),
+              event.getY(event.findPointerIndex(pointerId)));
         }
-        break;
       }
-      case MotionEvent.ACTION_POINTER_UP:
-      case MotionEvent.ACTION_UP: {
-        // Check if the contact that initiated the interaction is up.
-        if ((action & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent.ACTION_POINTER_ID_SHIFT == pointerId) {
-          onContactUp();
-        }
-        break;
+      break;
+    }
+    case MotionEvent.ACTION_DOWN: {
+      // Get the coordinates of the pointer that is initiating the
+      // interaction.
+      pointerId = event.getPointerId(event.getActionIndex());
+      onContactDown();
+      // If the current contact is close to the location of the contact prior
+      // to contactUp.
+      if (inLastContactRange(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()))) {
+        // Trigger resume-previous-velocity mode.
+        previousVelocityMode = true;
+        // The animation calculations/operations are performed in
+        // onContactMove(). If this is not called and the user's finger stays
+        // perfectly still after the down event, no operation is performed.
+        // Calling onContactMove avoids this.
+        onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y + joystickRadius);
+      } else {
+        onContactMove(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()));
       }
+      break;
+    }
+    case MotionEvent.ACTION_POINTER_UP:
+    case MotionEvent.ACTION_UP: {
+      // Check if the contact that initiated the interaction is up.
+      if ((action & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent.ACTION_POINTER_ID_SHIFT == pointerId) {
+        onContactUp();
+      }
+      break;
+    }
     }
     return true;
   }
@@ -512,7 +517,11 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   /**
    * Sets up the visual elements of the virtual joystick.
    */
-  private void initVirtualJoystick() {
+  private void initVirtualJoystick(Context context) {
+    // All the virtual joystick elements must be centered on the parent.
+    setGravity(Gravity.CENTER);
+    // Instantiate the elements from the layout XML file.
+    LayoutInflater.from(context).inflate(org.ros.android.R.layout.virtual_joystick, this, true);
     mainLayout = (RelativeLayout) findViewById(org.ros.android.R.id.virtual_joystick_layout);
     magnitudeText = (TextView) findViewById(org.ros.android.R.id.magnitude);
     intensity = (ImageView) findViewById(org.ros.android.R.id.intensity);

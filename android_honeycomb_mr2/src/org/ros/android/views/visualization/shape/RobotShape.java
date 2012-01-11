@@ -19,14 +19,14 @@ package org.ros.android.views.visualization.shape;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RobotShape extends TriangleFanShape {
+public class RobotShape extends MetricTriangleFanShape {
   
-  private static final Color color = new Color(0.0f, 0.635f, 1.0f, 0.5f);
+  private static final Color color = new Color(0.0f, 0.25f, 1.0f, 1.0f);
   private static final float vertices[] = {
       0.0f, 0.0f, 0.0f, // Top
-      -0.1f, -0.1f, 0.0f, // Bottom left
-      0.25f, 0.0f, 0.0f, // Bottom center
-      -0.1f, 0.1f, 0.0f, // Bottom right
+      -0.25f, -0.25f, 0.0f, // Bottom left
+      0.5f, 0.0f, 0.0f, // Bottom center
+      -0.25f, 0.25f, 0.0f, // Bottom right
       };
 
   public RobotShape() {
