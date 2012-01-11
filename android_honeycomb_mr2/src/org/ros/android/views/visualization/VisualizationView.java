@@ -66,7 +66,6 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     layers = Lists.newArrayList();
     setEGLConfigChooser(8, 8, 8, 8, 0, 0);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
-    setZOrderOnTop(true);
     setRenderer(renderer);
   }
 
