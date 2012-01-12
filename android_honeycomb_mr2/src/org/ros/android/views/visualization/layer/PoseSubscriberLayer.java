@@ -16,10 +16,11 @@
 
 package org.ros.android.views.visualization.layer;
 
+import org.ros.rosjava_geometry.FrameTransformTree;
+
 import android.os.Handler;
 import android.view.MotionEvent;
 import org.ros.android.views.visualization.Camera;
-import org.ros.android.views.visualization.Transformer;
 import org.ros.android.views.visualization.VisualizationView;
 import org.ros.android.views.visualization.shape.GoalShape;
 import org.ros.android.views.visualization.shape.Shape;
@@ -27,6 +28,7 @@ import org.ros.message.MessageListener;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
+import org.ros.rosjava_geometry.FrameTransform;
 import org.ros.rosjava_geometry.Transform;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -34,14 +36,13 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public class PoseSubscriberLayer extends
-    SubscriberLayer<org.ros.message.geometry_msgs.PoseStamped> implements TfLayer {
+public class PoseSubscriberLayer extends SubscriberLayer<org.ros.message.geometry_msgs.PoseStamped>
+    implements TfLayer {
 
-  private final Shape goalShape;
-
+  private Shape shape;
   private boolean ready;
   private boolean visible;
-  private String poseFrame;
+  private GraphName targetFrame;
 
   public PoseSubscriberLayer(String topic) {
     this(new GraphName(topic));
@@ -49,15 +50,15 @@ public class PoseSubscriberLayer extends
 
   public PoseSubscriberLayer(GraphName topic) {
     super(topic, "geometry_msgs/PoseStamped");
-    goalShape = new GoalShape();
     visible = true;
     ready = false;
+    targetFrame = new GraphName("/map");
   }
 
   @Override
   public void draw(GL10 gl) {
     if (ready && visible) {
-      goalShape.draw(gl);
+      shape.draw(gl);
     }
   }
 
@@ -67,16 +68,21 @@ public class PoseSubscriberLayer extends
   }
 
   @Override
-  public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
-    super.onStart(node, handler, camera, transformer);
+  public void onStart(Node node, Handler handler, final FrameTransformTree frameTransformTree, Camera camera) {
+    super.onStart(node, handler, frameTransformTree, camera);
+    shape = new GoalShape(camera);
     getSubscriber().addMessageListener(
         new MessageListener<org.ros.message.geometry_msgs.PoseStamped>() {
           @Override
           public void onNewMessage(PoseStamped pose) {
-            goalShape.setPose(Transform.makeFromPoseMessage(pose.pose));
-            poseFrame = pose.header.frame_id;
-            ready = true;
-            requestRender();
+            GraphName frame = new GraphName(pose.header.frame_id);
+            if (frameTransformTree.canTransform(frame, targetFrame)) {
+              Transform poseTransform = Transform.newFromPoseMessage(pose.pose);
+              FrameTransform targetFrameTransform = frameTransformTree.newFrameTransform(frame, targetFrame);
+              shape.setTransform(targetFrameTransform.getTransform().multiply(poseTransform));
+              ready = true;
+              requestRender();
+            }
           }
         });
   }
@@ -90,7 +96,7 @@ public class PoseSubscriberLayer extends
   }
 
   @Override
-  public String getFrame() {
-    return poseFrame;
+  public GraphName getFrame() {
+    return targetFrame;
   }
 }

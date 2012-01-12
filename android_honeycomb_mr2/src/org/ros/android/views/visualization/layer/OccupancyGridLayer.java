@@ -16,12 +16,13 @@
 
 package org.ros.android.views.visualization.layer;
 
+import org.ros.rosjava_geometry.FrameTransformTree;
+
 import android.graphics.Bitmap;
 import android.os.Handler;
 import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.TextureBitmapUtilities;
 import org.ros.android.views.visualization.TextureDrawable;
-import org.ros.android.views.visualization.Transformer;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
@@ -33,6 +34,7 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class OccupancyGridLayer extends SubscriberLayer<org.ros.message.nav_msgs.OccupancyGrid>
     implements TfLayer {
+
   /**
    * Color of occupied cells in the map.
    */
@@ -51,7 +53,7 @@ public class OccupancyGridLayer extends SubscriberLayer<org.ros.message.nav_msgs
   private final TextureDrawable occupancyGrid;
 
   private boolean ready;
-  private String frame;
+  private GraphName frame;
 
   public OccupancyGridLayer(String topic) {
     this(new GraphName(topic));
@@ -86,8 +88,8 @@ public class OccupancyGridLayer extends SubscriberLayer<org.ros.message.nav_msgs
   }
 
   @Override
-  public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
-    super.onStart(node, handler, camera, transformer);
+  public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree, Camera camera) {
+    super.onStart(node, handler, frameTransformTree, camera);
     getSubscriber().addMessageListener(
         new MessageListener<org.ros.message.nav_msgs.OccupancyGrid>() {
           @Override
@@ -99,7 +101,7 @@ public class OccupancyGridLayer extends SubscriberLayer<org.ros.message.nav_msgs
                     COLOR_UNKNOWN);
             occupancyGrid.update(occupancyGridMessage.info.origin,
                 occupancyGridMessage.info.resolution, occupancyGridBitmap);
-            frame = occupancyGridMessage.header.frame_id;
+            frame = new GraphName(occupancyGridMessage.header.frame_id);
             ready = true;
             requestRender();
           }
@@ -107,7 +109,7 @@ public class OccupancyGridLayer extends SubscriberLayer<org.ros.message.nav_msgs
   }
 
   @Override
-  public String getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 }

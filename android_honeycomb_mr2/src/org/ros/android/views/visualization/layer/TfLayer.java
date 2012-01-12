@@ -16,6 +16,8 @@
 
 package org.ros.android.views.visualization.layer;
 
+import org.ros.namespace.GraphName;
+
 /**
  * Interface for layers that are positioned by using Tf.
  * 
@@ -26,5 +28,5 @@ public interface TfLayer {
   /**
    * @return the {@link Layer}'s reference frame
    */
-  String getFrame();
+  GraphName getFrame();
 }

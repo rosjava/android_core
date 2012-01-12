@@ -18,13 +18,13 @@ package org.ros.android.views.visualization.layer;
 
 import com.google.common.collect.Lists;
 
-import org.ros.android.views.visualization.Camera;
-import org.ros.android.views.visualization.RenderRequestListener;
-import org.ros.android.views.visualization.Transformer;
-import org.ros.android.views.visualization.VisualizationView;
+import org.ros.rosjava_geometry.FrameTransformTree;
 
 import android.os.Handler;
 import android.view.MotionEvent;
+import org.ros.android.views.visualization.Camera;
+import org.ros.android.views.visualization.RenderRequestListener;
+import org.ros.android.views.visualization.VisualizationView;
 import org.ros.node.Node;
 
 import java.util.Collection;
@@ -54,7 +54,7 @@ public abstract class DefaultLayer implements Layer {
   }
 
   @Override
-  public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
+  public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree, Camera camera) {
   }
 
   @Override

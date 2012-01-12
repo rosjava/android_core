@@ -27,24 +27,24 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Draws a shape based on an array of vertices using OpenGl's GL_TRIANGLE_FAN
- * method.
+ * A {@link Shape} defined by vertices using OpenGl's GL_TRIANGLE_FAN method.
+ * 
+ * <p>
+ * Note that this class is intended to be wrapped. No transformations are
+ * performed in the {@link #draw(GL10)} method.
  * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
+ * @author damonkohler@google.com (Damon Kohler)
  */
-public class TriangleFanShape extends DefaultShape {
+class TriangleFanShape extends BaseShape {
 
   private final FloatBuffer vertexBuffer;
 
   /**
-   * Constructs a TriangleFanShape, i.e. an OpenGL shape represented by
-   * triangles. The format of vertices is according to OpenGL's GL_TRIANGLE_FAN
-   * method.
-   * 
    * @param vertices
-   *          array of vertices
+   *          an array of vertices as defined by OpenGL's GL_TRIANGLE_FAN method
    * @param color
-   *          the {@link Color} of the shape
+   *          the {@link Color} of the {@link Shape}
    */
   public TriangleFanShape(float[] vertices, Color color) {
     ByteBuffer goalVertexByteBuffer = ByteBuffer.allocateDirect(vertices.length * Float.SIZE / 8);
@@ -53,17 +53,11 @@ public class TriangleFanShape extends DefaultShape {
     vertexBuffer.put(vertices);
     vertexBuffer.position(0);
     setColor(color);
-    setPose(new Transform(new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 1)));
+    setTransform(new Transform(new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 1)));
   }
 
   @Override
   public void draw(GL10 gl) {
-    gl.glTranslatef((float) getPose().getTranslation().getX(), (float) getPose().getTranslation()
-        .getY(), (float) getPose().getTranslation().getZ());
-    Vector3 axis = getPose().getRotation().getAxis();
-    float angle = (float) Math.toDegrees(getPose().getRotation().getAngle());
-    gl.glRotatef(angle, (float) axis.getX(), (float) axis.getY(), (float) axis.getZ());
-    gl.glScalef(getScaleFactor(), getScaleFactor(), getScaleFactor());
     gl.glDisable(GL10.GL_CULL_FACE);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);

@@ -82,7 +82,7 @@ public class TextureDrawable implements OpenGlDrawable {
    *          OccupancyGrid representing the map data.
    */
   public void update(Pose newOrigin, double newResolution, Bitmap newBitmap) {
-    origin = Transform.makeFromPoseMessage(newOrigin);
+    origin = Transform.newFromPoseMessage(newOrigin);
     resolution = newResolution;
     width = newBitmap.getWidth() * resolution;
     height = newBitmap.getHeight() * resolution;

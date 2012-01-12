@@ -16,9 +16,12 @@
 
 package org.ros.android.views.visualization.layer;
 
+import org.ros.rosjava_geometry.FrameTransformTree;
+
+import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.shape.Color;
+import org.ros.android.views.visualization.shape.MetricTriangleFanShape;
 import org.ros.android.views.visualization.shape.Shape;
-import org.ros.android.views.visualization.shape.TriangleFanShape;
 import org.ros.message.MessageListener;
 import org.ros.message.sensor_msgs.LaserScan;
 import org.ros.namespace.GraphName;
@@ -39,7 +42,7 @@ import javax.microedition.khronos.opengles.GL10;
 public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.LaserScan>
     implements TfLayer {
 
-  private String frame;
+  private GraphName frame;
   private Shape shape;
 
   public LaserScanLayer(String topicName) {
@@ -58,15 +61,14 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
   }
 
   @Override
-  public void onStart(Node node, android.os.Handler handler,
-      org.ros.android.views.visualization.Camera camera,
-      org.ros.android.views.visualization.Transformer transformer) {
-    super.onStart(node, handler, camera, transformer);
+  public void
+      onStart(Node node, android.os.Handler handler, FrameTransformTree frameTransformTree, Camera camera) {
+    super.onStart(node, handler, frameTransformTree, camera);
     Subscriber<LaserScan> subscriber = getSubscriber();
     subscriber.addMessageListener(new MessageListener<LaserScan>() {
       @Override
       public void onNewMessage(LaserScan laserScan) {
-        frame = laserScan.header.frame_id;
+        frame = new GraphName(laserScan.header.frame_id);
         float[] ranges = laserScan.ranges;
         // vertices is an array of x, y, z values starting with the origin of
         // the triangle fan.
@@ -95,14 +97,14 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
           vertices[3 * i + 5] = 0;
           angle += angleIncrement;
         }
-        shape = new TriangleFanShape(vertices, new Color(0, 1.0f, 0, 0.3f));
+        shape = new MetricTriangleFanShape(vertices, new Color(0, 1.0f, 0, 0.3f));
         requestRender();
       }
     });
   }
 
   @Override
-  public String getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 }

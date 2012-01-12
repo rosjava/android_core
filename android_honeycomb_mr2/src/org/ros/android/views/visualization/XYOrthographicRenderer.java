@@ -19,6 +19,9 @@ package org.ros.android.views.visualization;
 import android.opengl.GLSurfaceView;
 import org.ros.android.views.visualization.layer.Layer;
 import org.ros.android.views.visualization.layer.TfLayer;
+import org.ros.namespace.GraphName;
+import org.ros.rosjava_geometry.FrameTransformTree;
+import org.ros.rosjava_geometry.Transform;
 
 import java.util.List;
 
@@ -30,32 +33,32 @@ import javax.microedition.khronos.opengles.GL10;
  * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public class XyOrthoraphicRenderer implements GLSurfaceView.Renderer {
+public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
   /**
    * List of layers to draw. Layers are drawn in-order, i.e. the layer with
    * index 0 is the bottom layer and is drawn first.
    */
   private List<Layer> layers;
 
-  private Transformer transformer;
+  private FrameTransformTree frameTransformTree;
 
   private Camera camera;
 
-  public XyOrthoraphicRenderer(Transformer transformer, Camera camera) {
-    this.setLayers(layers);
-    this.transformer = transformer;
+  public XYOrthographicRenderer(FrameTransformTree frameTransformTree, Camera camera) {
+    this.frameTransformTree = frameTransformTree;
     this.camera = camera;
   }
 
   @Override
   public void onSurfaceChanged(GL10 gl, int width, int height) {
-    gl.glViewport(0, 0, width, height);
-    gl.glMatrixMode(GL10.GL_PROJECTION);
-    gl.glLoadIdentity();
-    gl.glOrthof(-width / 2, -height / 2, width / 2, height / 2, -10.0f, 10.0f);
-    camera.setViewport(new android.graphics.Point(width, height));
+    // Set the viewport.
+    Viewport viewport = new Viewport(width, height);
+    viewport.apply(gl);
+    camera.setViewport(viewport);
+    // Set camera location transformation.
     gl.glMatrixMode(GL10.GL_MODELVIEW);
     gl.glLoadIdentity();
+    // Set texture rendering hints.
     gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
     gl.glEnable(GL10.GL_BLEND);
     gl.glHint(GL10.GL_POLYGON_SMOOTH_HINT, GL10.GL_NICEST);
@@ -69,8 +72,12 @@ public class XyOrthoraphicRenderer implements GLSurfaceView.Renderer {
     gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
     gl.glLoadIdentity();
-    camera.applyCameraTransform(gl);
+    camera.apply(gl);
     drawLayers(gl);
+    int error = gl.glGetError();
+    if (error != GL10.GL_NO_ERROR) {
+      System.err.println("OpenGL error: " + error);
+    }
   }
 
   @Override
@@ -84,12 +91,15 @@ public class XyOrthoraphicRenderer implements GLSurfaceView.Renderer {
     for (Layer layer : getLayers()) {
       gl.glPushMatrix();
       if (layer instanceof TfLayer) {
-        String layerFrame = ((TfLayer) layer).getFrame();
+        GraphName layerFrame = ((TfLayer) layer).getFrame();
         // TODO(moesenle): throw a warning that no transform could be found and
         // the layer has been ignored.
-        if (layerFrame != null && transformer.canTransform(layerFrame, camera.getFixedFrame())) {
-          GlTransformer.applyTransforms(gl,
-              transformer.lookupTransforms(layerFrame, camera.getFixedFrame()));
+        if (layerFrame != null
+            && frameTransformTree.canTransform(layerFrame, camera.getFixedFrame())) {
+          Transform transform =
+              frameTransformTree.newFrameTransform(layerFrame, camera.getFixedFrame())
+                  .getTransform();
+          OpenGlTransform.apply(gl, transform);
         }
       }
       layer.draw(gl);

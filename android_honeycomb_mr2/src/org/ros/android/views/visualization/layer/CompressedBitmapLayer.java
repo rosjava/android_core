@@ -16,6 +16,8 @@
 
 package org.ros.android.views.visualization.layer;
 
+import org.ros.rosjava_geometry.FrameTransformTree;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
@@ -23,7 +25,6 @@ import android.util.Log;
 import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.TextureBitmapUtilities;
 import org.ros.android.views.visualization.TextureDrawable;
-import org.ros.android.views.visualization.Transformer;
 import org.ros.message.MessageListener;
 import org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap;
 import org.ros.namespace.GraphName;
@@ -46,7 +47,7 @@ public class CompressedBitmapLayer extends
   private final TextureDrawable textureDrawable;
 
   private boolean ready;
-  private String frame;
+  private GraphName frame;
 
   public CompressedBitmapLayer(String topic) {
     this(new GraphName(topic));
@@ -66,8 +67,8 @@ public class CompressedBitmapLayer extends
   }
 
   @Override
-  public void onStart(Node node, Handler handler, Camera camera, Transformer transformer) {
-    super.onStart(node, handler, camera, transformer);
+  public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree, Camera camera) {
+    super.onStart(node, handler, frameTransformTree, camera);
     Subscriber<CompressedBitmap> subscriber = getSubscriber();
     subscriber.setQueueLimit(1);
     subscriber
@@ -106,13 +107,13 @@ public class CompressedBitmapLayer extends
       return;
     }
     textureDrawable.update(compressedBitmap.origin, compressedBitmap.resolution_x, squareBitmap);
-    frame = compressedBitmap.header.frame_id;
+    frame = new GraphName(compressedBitmap.header.frame_id);
     ready = true;
     requestRender();
   }
 
   @Override
-  public String getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 }

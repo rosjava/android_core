@@ -19,47 +19,56 @@ package org.ros.android.views.visualization;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-import org.ros.android.views.visualization.layer.Layer;
-
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import org.ros.android.views.visualization.layer.Layer;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
+import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.util.List;
 
+/**
+ * @author moesenle@google.com (Lorenz Moesenlechner)
+ */
 public class VisualizationView extends GLSurfaceView implements NodeMain {
 
-  private final RenderRequestListener renderRequestListener;
-  private final TransformListener transformListener;
-  private final Camera camera;
-  private final XyOrthoraphicRenderer renderer;
-  private final List<Layer> layers;
+  private RenderRequestListener renderRequestListener;
+  private FrameTransformTree frameTransformTree;
+  private TransformListener transformListener;
+  private Camera camera;
+  private XYOrthographicRenderer renderer;
+  private List<Layer> layers;
 
   private Node node;
 
   public VisualizationView(Context context) {
-    this(context, null);
+    super(context);
+    init();
   }
 
   public VisualizationView(Context context, AttributeSet attrs) {
     super(context, attrs);
+    init();
+  }
+
+  private void init() {
     renderRequestListener = new RenderRequestListener() {
       @Override
       public void onRenderRequest() {
         requestRender();
       }
     };
-    transformListener = new TransformListener();
-    camera = new Camera(transformListener.getTransformer());
-    renderer = new XyOrthoraphicRenderer(transformListener.getTransformer(), camera);
+    frameTransformTree = new FrameTransformTree();
+    transformListener = new TransformListener(frameTransformTree);
+    camera = new Camera(frameTransformTree);
+    renderer = new XYOrthographicRenderer(frameTransformTree, camera);
     layers = Lists.newArrayList();
     setEGLConfigChooser(8, 8, 8, 8, 0, 0);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
-    setZOrderOnTop(true);
     setRenderer(renderer);
   }
 
@@ -73,10 +82,10 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     return false;
   }
 
-  public XyOrthoraphicRenderer getRenderer() {
+  public XYOrthographicRenderer getRenderer() {
     return renderer;
   }
-  
+
   /**
    * Adds a new layer at the end of the layers collection. The new layer will be
    * drawn last, i.e. on top of all other layers.
@@ -88,7 +97,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     layers.add(layer);
     layer.addRenderListener(renderRequestListener);
     if (node != null) {
-      layer.onStart(node, getHandler(), camera, transformListener.getTransformer());
+      layer.onStart(node, getHandler(), frameTransformTree, camera);
     }
     requestRender();
   }
@@ -103,7 +112,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     this.node = node;
     transformListener.onStart(node);
     for (Layer layer : layers) {
-      layer.onStart(node, getHandler(), camera, transformListener.getTransformer());
+      layer.onStart(node, getHandler(), frameTransformTree, camera);
     }
     renderer.setLayers(layers);
   }
@@ -111,13 +120,13 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   @Override
   public void onShutdown(Node node) {
     renderer.setLayers(null);
-    for (Layer layer: layers) {
+    for (Layer layer : layers) {
       layer.onShutdown(this, node);
     }
     transformListener.onShutdown(node);
     this.node = null;
   }
-  
+
   @Override
   public void onShutdownComplete(Node node) {
   }

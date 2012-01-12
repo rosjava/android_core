@@ -16,16 +16,15 @@
 
 package org.ros.android.views.visualization.layer;
 
-import org.ros.android.views.visualization.Camera;
-import org.ros.android.views.visualization.Transformer;
-import org.ros.android.views.visualization.VisualizationView;
-
 import android.content.Context;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import org.ros.android.views.visualization.Camera;
+import org.ros.android.views.visualization.VisualizationView;
 import org.ros.node.Node;
+import org.ros.rosjava_geometry.FrameTransformTree;
 
 /**
  * @author moesenle@google.com (Lorenz Moesenlechner)
@@ -50,18 +49,17 @@ public class CameraControlLayer extends DefaultLayer {
   }
 
   @Override
-  public void onStart(Node node, Handler handler, final Camera camera,
-      Transformer transformer) {
+  public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree,
+      final Camera camera) {
     handler.post(new Runnable() {
       @Override
       public void run() {
-        // TODO Auto-generated method stub
         gestureDetector =
             new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
               @Override
               public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
                   float distanceY) {
-                camera.moveCameraScreenCoordinates(-distanceX, -distanceY);
+                camera.moveCameraScreenCoordinates(distanceX, distanceY);
                 requestRender();
                 return true;
               }
