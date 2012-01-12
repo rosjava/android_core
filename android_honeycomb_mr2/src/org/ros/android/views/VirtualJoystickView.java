@@ -18,6 +18,7 @@ package org.ros.android.views;
 
 import android.content.Context;
 import android.graphics.Point;
+import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -233,7 +234,15 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
       new org.ros.message.geometry_msgs.Twist();
 
   public VirtualJoystickView(Context context) {
-    super(context);
+    this(context, null, 0);
+  }
+  
+  public VirtualJoystickView(Context context, AttributeSet attrs) {
+    this(context, attrs, 0);
+  }
+
+  public VirtualJoystickView(Context context, AttributeSet attrs, int defStyle) {
+  	super(context, attrs, defStyle);
     // All the virtual joystick elements must be centered on the parent.
     setGravity(Gravity.CENTER);
     // Instantiate the elements from the layout XML file.

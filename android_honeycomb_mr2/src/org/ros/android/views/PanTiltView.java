@@ -18,6 +18,7 @@ package org.ros.android.views;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -146,7 +147,15 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener {
   private int zoomValue = 0;
 
   public PanTiltView(Context context) {
-    super(context);
+    this(context, null, 0);
+  }
+  
+  public PanTiltView(Context context, AttributeSet attrs) {
+    this(context, attrs, 0);
+  }
+
+  public PanTiltView(Context context, AttributeSet attrs, int defStyle) {
+    super(context, attrs, defStyle);
     // Instantiate the elements from the layout XML file.
     LayoutInflater.from(context).inflate(org.ros.android.R.layout.pan_tilt, this, true);
     // Load settings (minPan, maxPan, etc) from the shared preferences.

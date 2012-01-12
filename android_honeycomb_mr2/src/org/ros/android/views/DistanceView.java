@@ -19,6 +19,7 @@ package org.ros.android.views;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -70,7 +71,11 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
    * @param context
    */
   public DistanceView(Context context) {
-    super(context);
+    this(context, null);
+  }
+  
+  public DistanceView(Context context, AttributeSet attrs) {
+    super(context, attrs);
     distanceRenderer = new DistanceRenderer();
     setEGLConfigChooser(8, 8, 8, 8, 16, 0);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);

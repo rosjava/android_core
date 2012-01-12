@@ -24,6 +24,7 @@ import org.ros.android.views.visualization.layer.Layer;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
@@ -41,7 +42,11 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   private Node node;
 
   public VisualizationView(Context context) {
-    super(context);
+    this(context, null);
+  }
+
+  public VisualizationView(Context context, AttributeSet attrs) {
+    super(context, attrs);
     renderRequestListener = new RenderRequestListener() {
       @Override
       public void onRenderRequest() {
