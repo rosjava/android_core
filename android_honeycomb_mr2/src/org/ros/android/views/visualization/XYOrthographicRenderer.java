@@ -20,6 +20,8 @@ import android.opengl.GLSurfaceView;
 import org.ros.android.views.visualization.layer.Layer;
 import org.ros.android.views.visualization.layer.TfLayer;
 import org.ros.namespace.GraphName;
+import org.ros.rosjava_geometry.FrameTransformTree;
+import org.ros.rosjava_geometry.Transform;
 
 import java.util.List;
 
@@ -38,13 +40,12 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
    */
   private List<Layer> layers;
 
-  private Transformer transformer;
+  private FrameTransformTree frameTransformTree;
 
   private Camera camera;
 
-  public XYOrthographicRenderer(Transformer transformer, Camera camera) {
-    this.setLayers(layers);
-    this.transformer = transformer;
+  public XYOrthographicRenderer(FrameTransformTree frameTransformTree, Camera camera) {
+    this.frameTransformTree = frameTransformTree;
     this.camera = camera;
   }
 
@@ -93,9 +94,12 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
         GraphName layerFrame = ((TfLayer) layer).getFrame();
         // TODO(moesenle): throw a warning that no transform could be found and
         // the layer has been ignored.
-        if (layerFrame != null && transformer.canTransform(layerFrame, camera.getFixedFrame())) {
-          GlTransformer.applyTransforms(gl,
-              transformer.lookupTransforms(layerFrame, camera.getFixedFrame()));
+        if (layerFrame != null
+            && frameTransformTree.canTransform(layerFrame, camera.getFixedFrame())) {
+          Transform transform =
+              frameTransformTree.newFrameTransform(layerFrame, camera.getFixedFrame())
+                  .getTransform();
+          OpenGlTransform.apply(gl, transform);
         }
       }
       layer.draw(gl);

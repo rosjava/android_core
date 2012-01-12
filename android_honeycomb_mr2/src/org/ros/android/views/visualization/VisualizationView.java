@@ -27,6 +27,7 @@ import android.view.MotionEvent;
 import org.ros.android.views.visualization.layer.Layer;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
+import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.util.List;
 
@@ -36,6 +37,7 @@ import java.util.List;
 public class VisualizationView extends GLSurfaceView implements NodeMain {
 
   private RenderRequestListener renderRequestListener;
+  private FrameTransformTree frameTransformTree;
   private TransformListener transformListener;
   private Camera camera;
   private XYOrthographicRenderer renderer;
@@ -60,9 +62,10 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
         requestRender();
       }
     };
-    transformListener = new TransformListener();
-    camera = new Camera(transformListener.getTransformer());
-    renderer = new XYOrthographicRenderer(transformListener.getTransformer(), camera);
+    frameTransformTree = new FrameTransformTree();
+    transformListener = new TransformListener(frameTransformTree);
+    camera = new Camera(frameTransformTree);
+    renderer = new XYOrthographicRenderer(frameTransformTree, camera);
     layers = Lists.newArrayList();
     setEGLConfigChooser(8, 8, 8, 8, 0, 0);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
@@ -94,7 +97,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     layers.add(layer);
     layer.addRenderListener(renderRequestListener);
     if (node != null) {
-      layer.onStart(node, getHandler(), transformListener.getTransformer(), camera);
+      layer.onStart(node, getHandler(), frameTransformTree, camera);
     }
     requestRender();
   }
@@ -109,7 +112,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     this.node = node;
     transformListener.onStart(node);
     for (Layer layer : layers) {
-      layer.onStart(node, getHandler(), transformListener.getTransformer(), camera);
+      layer.onStart(node, getHandler(), frameTransformTree, camera);
     }
     renderer.setLayers(layers);
   }

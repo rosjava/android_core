@@ -19,25 +19,33 @@ package org.ros.android.views.visualization;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
 
-import java.util.List;
-
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Applies a list of transforms to an OpenGL context.
+ * An adapter for using {@link Transform}s with OpenGL.
  * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public class GlTransformer {
+public class OpenGlTransform {
 
-  public static void applyTransforms(GL10 gl, List<Transform> transforms) {
-    for (Transform transform : transforms) {
-      gl.glTranslatef((float) transform.getTranslation().getX(), (float) transform.getTranslation()
-          .getY(), (float) transform.getTranslation().getZ());
-      double angleDegrees = Math.toDegrees(transform.getRotation().getAngle());
-      Vector3 axis = transform.getRotation().getAxis();
-      gl.glRotatef((float) angleDegrees, (float) axis.getX(), (float) axis.getY(),
-          (float) axis.getZ());
-    }
+  private OpenGlTransform() {
+    // Utility class.
+  }
+
+  /**
+   * Applies a {@link Transform} to an OpenGL context.
+   * 
+   * @param gl
+   *          the context
+   * @param transform
+   *          the {@link Transform} to apply
+   */
+  public static void apply(GL10 gl, Transform transform) {
+    gl.glTranslatef((float) transform.getTranslation().getX(), (float) transform.getTranslation()
+        .getY(), (float) transform.getTranslation().getZ());
+    double angleDegrees = Math.toDegrees(transform.getRotation().getAngle());
+    Vector3 axis = transform.getRotation().getAxis();
+    gl.glRotatef((float) angleDegrees, (float) axis.getX(), (float) axis.getY(),
+        (float) axis.getZ());
   }
 }

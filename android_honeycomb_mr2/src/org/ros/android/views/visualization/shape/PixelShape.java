@@ -5,7 +5,7 @@ import org.ros.android.views.visualization.Camera;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * A shape where dimensions are defined in pixels.
+ * A {@link Shape} where dimensions are defined in pixels.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */

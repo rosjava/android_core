@@ -27,7 +27,7 @@ public class MetricTriangleFanShape extends MetricShape {
 
   public MetricTriangleFanShape(float[] vertices, Color color) {
     shape = new TriangleFanShape(vertices, color);
-    setPose(shape.getPose());
+    setTransform(shape.getTransform());
   }
 
   @Override

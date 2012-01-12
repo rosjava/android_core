@@ -20,15 +20,34 @@ import org.ros.android.views.visualization.OpenGlDrawable;
 import org.ros.rosjava_geometry.Transform;
 
 /**
+ * A {@link Shape} is a {@link OpenGlDrawable} that has a {@link Color} and a
+ * {@link Transform} that is applied to the OpenGL matrix stack before drawing.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public interface Shape extends OpenGlDrawable {
-  
+
+  /**
+   * @param color
+   *          the {@link Color} of this {@link Shape}
+   */
   void setColor(Color color);
 
+  /**
+   * @return the {@link Color} of this {@link Shape}
+   */
   Color getColor();
 
-  void setPose(Transform pose);
+  /**
+   * @param transform
+   *          the {@link Transform} that will be applied to this {@link Shape}
+   *          before it is drawn
+   */
+  void setTransform(Transform transform);
 
-  Transform getPose();
+  /**
+   * @return the {@link Transform} that will be applied to this {@link Shape}
+   *         before it is drawn
+   */
+  Transform getTransform();
 }

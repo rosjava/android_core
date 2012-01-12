@@ -16,9 +16,10 @@
 
 package org.ros.android.views.visualization.layer;
 
+import org.ros.rosjava_geometry.FrameTransformTree;
+
 import android.os.Handler;
 import org.ros.android.views.visualization.Camera;
-import org.ros.android.views.visualization.Transformer;
 import org.ros.message.MessageListener;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.message.nav_msgs.Path;
@@ -63,8 +64,8 @@ public class PathLayer extends SubscriberLayer<org.ros.message.nav_msgs.Path> {
   }
 
   @Override
-  public void onStart(Node node, Handler handler, Transformer transformer, Camera camera) {
-    super.onStart(node, handler, transformer, camera);
+  public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree, Camera camera) {
+    super.onStart(node, handler, frameTransformTree, camera);
     getSubscriber().addMessageListener(new MessageListener<Path>() {
       @Override
       public void onNewMessage(Path path) {

@@ -23,35 +23,33 @@ import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
+import org.ros.rosjava_geometry.FrameTransformTree;
 
 /**
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
 public class TransformListener implements NodeMain {
 
-  private Transformer transformer = new Transformer();
+  private final FrameTransformTree frameTransformTree;
+
   private Subscriber<tfMessage> tfSubscriber;
 
-  public Transformer getTransformer() {
-    return transformer;
-  }
-
-  public void setTransformer(Transformer transformer) {
-    this.transformer = transformer;
+  public TransformListener(FrameTransformTree frameTransformTree) {
+    this.frameTransformTree = frameTransformTree;
   }
 
   @Override
   public void onStart(Node node) {
     String tfPrefix = node.newParameterTree().getString("~tf_prefix", "");
     if (!tfPrefix.isEmpty()) {
-      transformer.setPrefix(new GraphName(tfPrefix));
+      frameTransformTree.setPrefix(new GraphName(tfPrefix));
     }
     tfSubscriber = node.newSubscriber("tf", "tf/tfMessage");
     tfSubscriber.addMessageListener(new MessageListener<tfMessage>() {
       @Override
       public void onNewMessage(tfMessage message) {
         for (TransformStamped transform : message.transforms) {
-          transformer.updateTransform(transform);
+          frameTransformTree.updateTransform(transform);
         }
       }
     });

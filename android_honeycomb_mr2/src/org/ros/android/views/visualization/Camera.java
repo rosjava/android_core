@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 
 import android.graphics.Point;
 import org.ros.namespace.GraphName;
+import org.ros.rosjava_geometry.FrameTransformTree;
 import org.ros.rosjava_geometry.Quaternion;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
@@ -78,10 +79,10 @@ public class Camera {
    */
   private GraphName fixedFrame;
 
-  private Transformer transformer;
+  private FrameTransformTree frameTransformTree;
 
-  public Camera(Transformer transformer) {
-    this.transformer = transformer;
+  public Camera(FrameTransformTree frameTransformTree) {
+    this.frameTransformTree = frameTransformTree;
     location = new Vector3(0, 0, 0);
     fixedFrame = DEFAULT_FIXED_FRAME;
   }
@@ -91,8 +92,9 @@ public class Camera {
     // Rotate coordinate system to match ROS standard (x is forward, y is left).
     gl.glRotatef(90, 0, 0, 1);
     // Apply target frame transformation.
-    if (targetFrame != null && transformer.canTransform(fixedFrame, targetFrame)) {
-      location = transformer.lookupTransform(targetFrame, fixedFrame).getTranslation();
+    if (targetFrame != null && frameTransformTree.canTransform(fixedFrame, targetFrame)) {
+      location =
+          frameTransformTree.newFrameTransform(fixedFrame, targetFrame).getTransform().getTranslation();
     }
     // Translate view to line up with camera.
     gl.glTranslatef((float) -location.getX(), (float) -location.getY(), (float) -location.getZ());

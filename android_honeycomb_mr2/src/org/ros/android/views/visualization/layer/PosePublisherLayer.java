@@ -18,13 +18,14 @@ package org.ros.android.views.visualization.layer;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.rosjava_geometry.FrameTransformTree;
+
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import org.ros.android.views.visualization.Camera;
-import org.ros.android.views.visualization.Transformer;
 import org.ros.android.views.visualization.VisualizationView;
 import org.ros.android.views.visualization.shape.PoseShape;
 import org.ros.android.views.visualization.shape.Shape;
@@ -45,7 +46,7 @@ public class PosePublisherLayer extends DefaultLayer {
 
   private final Context context;
 
-  private Shape poseShape;
+  private Shape shape;
   private Publisher<org.ros.message.geometry_msgs.PoseStamped> posePublisher;
   private boolean visible;
   private GraphName topic;
@@ -68,8 +69,7 @@ public class PosePublisherLayer extends DefaultLayer {
   public void draw(GL10 gl) {
     if (visible) {
       Preconditions.checkNotNull(pose);
-      // poseShape.setScaleFactor(1 / camera.getZoom());
-      poseShape.draw(gl);
+      shape.draw(gl);
     }
   }
 
@@ -82,7 +82,7 @@ public class PosePublisherLayer extends DefaultLayer {
             new Vector3(1, 0, 0),
             camera.toWorldCoordinates(new Point((int) event.getX(), (int) event.getY()))
             .subtract(pose.getTranslation())));
-        poseShape.setPose(pose);
+        shape.setTransform(pose);
         requestRender();
         return true;
       } else if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -98,10 +98,10 @@ public class PosePublisherLayer extends DefaultLayer {
   }
 
   @Override
-  public void onStart(Node node, Handler handler, Transformer transformer, final Camera camera) {
+  public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree, final Camera camera) {
     this.node = node;
     this.camera = camera;
-    poseShape = new PoseShape(camera);
+    shape = new PoseShape(camera);
     posePublisher = node.newPublisher(topic, "geometry_msgs/PoseStamped");
     handler.post(new Runnable() {
       @Override
@@ -113,7 +113,7 @@ public class PosePublisherLayer extends DefaultLayer {
                 pose =
                     new Transform(camera.toWorldCoordinates(
                         new Point((int) e.getX(), (int) e.getY())), new Quaternion(0, 0, 0, 1));
-                poseShape.setPose(pose);
+                shape.setTransform(pose);
                 visible = true;
                 requestRender();
               }

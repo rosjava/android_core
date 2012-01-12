@@ -27,8 +27,7 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Draws a shape based on an array of vertices using OpenGl's GL_TRIANGLE_FAN
- * method.
+ * A {@link Shape} defined by vertices using OpenGl's GL_TRIANGLE_FAN method.
  * 
  * <p>
  * Note that this class is intended to be wrapped. No transformations are
@@ -42,14 +41,10 @@ class TriangleFanShape extends BaseShape {
   private final FloatBuffer vertexBuffer;
 
   /**
-   * Constructs a TriangleFanShape, i.e. an OpenGL shape represented by
-   * triangles. The format of vertices is according to OpenGL's GL_TRIANGLE_FAN
-   * method.
-   * 
    * @param vertices
-   *          array of vertices
+   *          an array of vertices as defined by OpenGL's GL_TRIANGLE_FAN method
    * @param color
-   *          the {@link Color} of the shape
+   *          the {@link Color} of the {@link Shape}
    */
   public TriangleFanShape(float[] vertices, Color color) {
     ByteBuffer goalVertexByteBuffer = ByteBuffer.allocateDirect(vertices.length * Float.SIZE / 8);
@@ -58,7 +53,7 @@ class TriangleFanShape extends BaseShape {
     vertexBuffer.put(vertices);
     vertexBuffer.position(0);
     setColor(color);
-    setPose(new Transform(new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 1)));
+    setTransform(new Transform(new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 1)));
   }
 
   @Override

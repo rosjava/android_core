@@ -21,14 +21,12 @@ import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import org.ros.android.views.visualization.Camera;
-import org.ros.android.views.visualization.Transformer;
 import org.ros.android.views.visualization.VisualizationView;
 import org.ros.android.views.visualization.shape.RobotShape;
 import org.ros.android.views.visualization.shape.Shape;
-import org.ros.message.Time;
-import org.ros.message.geometry_msgs.TransformStamped;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
+import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -64,20 +62,14 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
   }
 
   @Override
-  public void
-      onStart(Node node, Handler handler, final Transformer transformer, final Camera camera) {
+  public void onStart(Node node, Handler handler, final FrameTransformTree frameTransformTree,
+      final Camera camera) {
     redrawTimer = new Timer();
     redrawTimer.scheduleAtFixedRate(new TimerTask() {
-      private Time lastRobotTime;
-
       @Override
       public void run() {
-        TransformStamped transform = transformer.getTransform(frame);
-        if (transform != null) {
-          if (lastRobotTime != null && !transform.header.stamp.equals(lastRobotTime)) {
-            requestRender();
-          }
-          lastRobotTime = transform.header.stamp;
+        if (frameTransformTree.canTransform(camera.getFixedFrame(), frame)) {
+          requestRender();
         }
       }
     }, 0, 100);
@@ -89,7 +81,7 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
             new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
               @Override
               public boolean onDoubleTap(MotionEvent event) {
-                camera.setTargetFrame(frame);
+                camera.setFixedFrame(frame);
                 requestRender();
                 return true;
               }

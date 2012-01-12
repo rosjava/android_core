@@ -5,17 +5,15 @@ import com.google.common.base.Preconditions;
 import org.ros.rosjava_geometry.Transform;
 
 /**
+ * Defines the getters and setters that are required for all {@link Shape}
+ * implementors.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 abstract class BaseShape implements Shape {
 
   private Color color;
-  private Transform pose;
-
-  public BaseShape() {
-    color = null;
-    pose = null;
-  }
+  private Transform transform;
 
   @Override
   public Color getColor() {
@@ -29,13 +27,13 @@ abstract class BaseShape implements Shape {
   }
 
   @Override
-  public Transform getPose() {
-    Preconditions.checkNotNull(pose);
-    return pose;
+  public Transform getTransform() {
+    Preconditions.checkNotNull(transform);
+    return transform;
   }
 
   @Override
-  public void setPose(Transform pose) {
-    this.pose = pose;
+  public void setTransform(Transform pose) {
+    this.transform = pose;
   }
 }

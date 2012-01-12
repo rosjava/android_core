@@ -16,12 +16,13 @@
 
 package org.ros.android.views.visualization.layer;
 
+import org.ros.rosjava_geometry.FrameTransformTree;
+
 import android.os.Handler;
 import android.view.MotionEvent;
 import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.OpenGlDrawable;
 import org.ros.android.views.visualization.RenderRequestListener;
-import org.ros.android.views.visualization.Transformer;
 import org.ros.android.views.visualization.VisualizationView;
 import org.ros.node.Node;
 
@@ -47,7 +48,7 @@ public interface Layer extends OpenGlDrawable {
    * Called when the layer is registered at the navigation view.
    * @param handler TODO
    */
-  void onStart(Node node, Handler handler, Transformer transformer, Camera camera);
+  void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree, Camera camera);
 
   /**
    * Called when the view is removed from the view.

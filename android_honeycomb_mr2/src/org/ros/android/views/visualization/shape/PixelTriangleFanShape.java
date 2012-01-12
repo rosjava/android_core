@@ -30,7 +30,7 @@ public class PixelTriangleFanShape extends PixelShape {
   public PixelTriangleFanShape(float[] vertices, Color color, Camera camera) {
     super(camera);
     shape = new TriangleFanShape(vertices, color);
-    setPose(shape.getPose());
+    setTransform(shape.getTransform());
   }
 
   @Override

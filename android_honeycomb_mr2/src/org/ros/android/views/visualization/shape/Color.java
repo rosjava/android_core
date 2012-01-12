@@ -17,6 +17,8 @@
 package org.ros.android.views.visualization.shape;
 
 /**
+ * Defines a color based on RGBA values in the range [0, 1].
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class Color {

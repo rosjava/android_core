@@ -16,8 +16,9 @@
 
 package org.ros.android.views.visualization.layer;
 
+import org.ros.rosjava_geometry.FrameTransformTree;
+
 import org.ros.android.views.visualization.Camera;
-import org.ros.android.views.visualization.Transformer;
 import org.ros.android.views.visualization.shape.Color;
 import org.ros.android.views.visualization.shape.MetricTriangleFanShape;
 import org.ros.android.views.visualization.shape.Shape;
@@ -61,8 +62,8 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
 
   @Override
   public void
-      onStart(Node node, android.os.Handler handler, Transformer transformer, Camera camera) {
-    super.onStart(node, handler, transformer, camera);
+      onStart(Node node, android.os.Handler handler, FrameTransformTree frameTransformTree, Camera camera) {
+    super.onStart(node, handler, frameTransformTree, camera);
     Subscriber<LaserScan> subscriber = getSubscriber();
     subscriber.addMessageListener(new MessageListener<LaserScan>() {
       @Override
