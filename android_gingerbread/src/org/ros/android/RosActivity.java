@@ -25,7 +25,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.widget.Toast;
 import org.ros.node.NodeMain;
-import org.ros.node.NodeRunner;
+import org.ros.node.NodeMainExecutor;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -56,7 +56,7 @@ public abstract class RosActivity extends Activity {
       });
       // Run init() in a new thread as a convenience since it often requires
       // network access. Also, this allows us to keep a reference to the
-      // NodeRunner separate from this class.
+      // NodeMainExecutor separate from this class.
       nodeRunnerService.execute(new InitRunnable(RosActivity.this, nodeRunnerService));
     }
 
@@ -113,12 +113,12 @@ public abstract class RosActivity extends Activity {
    * This method is called in a background thread once this {@link Activity} has
    * been initialized with a master {@link URI} via the {@link MasterChooser}
    * and a {@link NodeRunnerService} has started. Your {@link NodeMain}s should
-   * be started here using the provided {@link NodeRunner}.
+   * be started here using the provided {@link NodeMainExecutor}.
    * 
-   * @param nodeRunner
-   *          the {@link NodeRunner} created for this {@link Activity}
+   * @param nodeMainExecutor
+   *          the {@link NodeMainExecutor} created for this {@link Activity}
    */
-  protected abstract void init(NodeRunner nodeRunner);
+  protected abstract void init(NodeMainExecutor nodeMainExecutor);
 
   @Override
   public void startActivityForResult(Intent intent, int requestCode) {

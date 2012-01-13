@@ -21,9 +21,9 @@ import android.os.Bundle;
 import org.ros.RosCore;
 import org.ros.android.MessageCallable;
 import org.ros.android.views.RosTextView;
-import org.ros.node.DefaultNodeRunner;
+import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeRunner;
+import org.ros.node.NodeMainExecutor;
 import org.ros.tutorials.pubsub.R;
 import org.ros.tutorials.pubsub.Talker;
 
@@ -32,14 +32,14 @@ import org.ros.tutorials.pubsub.Talker;
  */
 public class MainActivity extends Activity {
 
-  private final NodeRunner nodeRunner;
+  private final NodeMainExecutor nodeMainExecutor;
 
   private RosCore rosCore;
   private RosTextView<org.ros.message.std_msgs.String> rosTextView;
   private Talker talker;
 
   public MainActivity() {
-    nodeRunner = DefaultNodeRunner.newDefault();
+    nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
   }
 
   @SuppressWarnings("unchecked")
@@ -70,8 +70,8 @@ public class MainActivity extends Activity {
       nodeConfiguration.setNodeName("pubsub_tutorial");
       nodeConfiguration.setMasterUri(rosCore.getUri());
       talker = new Talker();
-      nodeRunner.run(talker, nodeConfiguration);
-      nodeRunner.run(rosTextView, nodeConfiguration);
+      nodeMainExecutor.run(talker, nodeConfiguration);
+      nodeMainExecutor.run(rosTextView, nodeConfiguration);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -80,7 +80,7 @@ public class MainActivity extends Activity {
   @Override
   protected void onPause() {
     super.onPause();
-    nodeRunner.shutdown();
+    nodeMainExecutor.shutdown();
     rosCore.shutdown();
   }
 }

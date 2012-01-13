@@ -254,7 +254,7 @@ public class Device implements LaserScannerDevice {
 
   @Override
   public void startScanning(final LaserScanListener listener) {
-    // TODO(damonkohler): Use NodeRunner ExecutorService.
+    // TODO(damonkohler): Use NodeMainExecutor ExecutorService.
     new Thread() {
       @Override
       public void run() {

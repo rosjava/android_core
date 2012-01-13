@@ -23,7 +23,7 @@ import org.ros.android.RosActivity;
 import org.ros.android.views.RosImageView;
 import org.ros.message.sensor_msgs.CompressedImage;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeRunner;
+import org.ros.node.NodeMainExecutor;
 import org.ros.android.tutorial.image_transport.R;
 
 /**
@@ -50,8 +50,8 @@ public class MainActivity extends RosActivity {
   }
 
   @Override
-  protected void init(NodeRunner nodeRunner) {
+  protected void init(NodeMainExecutor nodeMainExecutor) {
     NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress().toString(), getMasterUri());
-    nodeRunner.run(image, nodeConfiguration.setNodeName("android/video_view"));
+    nodeMainExecutor.run(image, nodeConfiguration.setNodeName("android/video_view"));
   }
 }

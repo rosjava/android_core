@@ -31,7 +31,7 @@ import org.ros.android.views.visualization.layer.PosePublisherLayer;
 import org.ros.android.views.visualization.layer.PoseSubscriberLayer;
 import org.ros.android.views.visualization.layer.RobotLayer;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeRunner;
+import org.ros.node.NodeMainExecutor;
 
 /**
  * An app that can be used to control a remote robot. This app also demonstrates
@@ -88,11 +88,11 @@ public class MainActivity extends RosActivity {
   }
 
   @Override
-  protected void init(NodeRunner nodeRunner) {
+  protected void init(NodeMainExecutor nodeMainExecutor) {
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(
             InetAddressFactory.newNonLoopback().getHostAddress().toString(), getMasterUri());
-    nodeRunner.run(virtualJoystickView, nodeConfiguration.setNodeName("virtual_joystick"));
-    nodeRunner.run(visualizationView, nodeConfiguration.setNodeName("android/map_view"));
+    nodeMainExecutor.run(virtualJoystickView, nodeConfiguration.setNodeName("virtual_joystick"));
+    nodeMainExecutor.run(visualizationView, nodeConfiguration.setNodeName("android/map_view"));
   }
 }

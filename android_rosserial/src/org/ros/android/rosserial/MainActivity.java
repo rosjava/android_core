@@ -27,7 +27,7 @@ import org.ros.android.acm_serial.PollingInputStream;
 import org.ros.android.acm_serial.StopBits;
 import org.ros.exception.RosRuntimeException;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeRunner;
+import org.ros.node.NodeMainExecutor;
 import org.ros.rosserial.RosSerial;
 import org.ros.time.NtpTimeProvider;
 
@@ -56,7 +56,7 @@ public class MainActivity extends AcmDeviceActivity {
   }
 
   @Override
-  protected void init(NodeRunner nodeRunner) {
+  protected void init(NodeMainExecutor nodeMainExecutor) {
     try {
       acmDeviceLatch.await();
     } catch (InterruptedException e) {
@@ -72,7 +72,7 @@ public class MainActivity extends AcmDeviceActivity {
         new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"));
     ntpTimeProvider.startPeriodicUpdates(1, TimeUnit.MINUTES);
     nodeConfiguration.setTimeProvider(ntpTimeProvider);
-    nodeRunner.run(
+    nodeMainExecutor.run(
         new RosSerial(new PollingInputStream(acmDevice.getInputStream(), Executors
             .newCachedThreadPool()), acmDevice.getOutputStream()), nodeConfiguration);
   }

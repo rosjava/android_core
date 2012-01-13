@@ -31,11 +31,11 @@ import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import org.ros.concurrent.ListenerCollection;
 import org.ros.concurrent.ListenerCollection.SignalRunnable;
-import org.ros.node.DefaultNodeRunner;
+import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeListener;
 import org.ros.node.NodeMain;
-import org.ros.node.NodeRunner;
+import org.ros.node.NodeMainExecutor;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -44,7 +44,7 @@ import java.util.concurrent.Executors;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class NodeRunnerService extends Service implements NodeRunner {
+public class NodeRunnerService extends Service implements NodeMainExecutor {
 
   private static final String TAG = "NodeRunnerService";
 
@@ -56,7 +56,7 @@ public class NodeRunnerService extends Service implements NodeRunner {
   static final String EXTRA_NOTIFICATION_TITLE = "org.ros.android.EXTRA_NOTIFICATION_TITLE";
   static final String EXTRA_NOTIFICATION_TICKER = "org.ros.android.EXTRA_NOTIFICATION_TICKER";
 
-  private final NodeRunner nodeRunner;
+  private final NodeMainExecutor nodeMainExecutor;
   private final IBinder binder;
   private final ListenerCollection<NodeRunnerServiceListener> listeners;
 
@@ -76,7 +76,7 @@ public class NodeRunnerService extends Service implements NodeRunner {
   public NodeRunnerService() {
     super();
     ExecutorService executorService = Executors.newCachedThreadPool();
-    nodeRunner = DefaultNodeRunner.newDefault(executorService);
+    nodeMainExecutor = DefaultNodeMainExecutor.newDefault(executorService);
     binder = new LocalBinder();
     listeners = new ListenerCollection<NodeRunnerServiceListener>(executorService);
   }
@@ -101,7 +101,7 @@ public class NodeRunnerService extends Service implements NodeRunner {
   @Override
   public void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
       Collection<NodeListener> nodeListeneners) {
-    nodeRunner.run(nodeMain, nodeConfiguration, nodeListeneners);
+    nodeMainExecutor.run(nodeMain, nodeConfiguration, nodeListeneners);
   }
 
   @Override
@@ -111,21 +111,21 @@ public class NodeRunnerService extends Service implements NodeRunner {
 
   @Override
   public void execute(Runnable runnable) {
-    nodeRunner.execute(runnable);
+    nodeMainExecutor.execute(runnable);
   }
 
   @Override
   public void shutdownNodeMain(NodeMain nodeMain) {
-    nodeRunner.shutdownNodeMain(nodeMain);
+    nodeMainExecutor.shutdownNodeMain(nodeMain);
   }
 
   @Override
   public void shutdown() {
     signalOnShutdown();
     // NOTE(damonkohler): This may be called multiple times. Shutting down a
-    // NodeRunner multiple times is safe. It simply calls shutdown on all
+    // NodeMainExecutor multiple times is safe. It simply calls shutdown on all
     // NodeMains.
-    nodeRunner.shutdown();
+    nodeMainExecutor.shutdown();
     if (wakeLock.isHeld()) {
       wakeLock.release();
     }

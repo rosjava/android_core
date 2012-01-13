@@ -28,9 +28,9 @@ import org.ros.address.InetAddressFactory;
 import org.ros.android.MasterChooser;
 import org.ros.android.camera.R;
 import org.ros.android.views.RosCameraPreviewView;
-import org.ros.node.DefaultNodeRunner;
+import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeRunner;
+import org.ros.node.NodeMainExecutor;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -41,14 +41,14 @@ import java.net.URISyntaxException;
  */
 public class MainActivity extends Activity {
 
-  private final NodeRunner nodeRunner;
+  private final NodeMainExecutor nodeMainExecutor;
 
   private int cameraId;
   private URI masterUri;
   private RosCameraPreviewView preview;
 
   public MainActivity() {
-    nodeRunner = DefaultNodeRunner.newDefault();
+    nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
   }
 
   @Override
@@ -70,7 +70,7 @@ public class MainActivity extends Activity {
       NodeConfiguration nodeConfiguration =
           NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName());
       nodeConfiguration.setMasterUri(masterUri);
-      nodeRunner.run(preview, nodeConfiguration);
+      nodeMainExecutor.run(preview, nodeConfiguration);
     }
   }
 
@@ -100,7 +100,7 @@ public class MainActivity extends Activity {
   @Override
   protected void onPause() {
     super.onPause();
-    nodeRunner.shutdownNodeMain(preview);
+    nodeMainExecutor.shutdownNodeMain(preview);
   }
 
   @Override

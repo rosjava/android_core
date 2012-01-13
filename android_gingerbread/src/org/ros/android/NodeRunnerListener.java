@@ -16,7 +16,7 @@
 
 package org.ros.android;
 
-import org.ros.node.NodeRunner;
+import org.ros.node.NodeMainExecutor;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -24,9 +24,9 @@ import org.ros.node.NodeRunner;
 public interface NodeRunnerListener {
 
   /**
-   * @param nodeRunner
-   *          the newly created {@link NodeRunner}
+   * @param nodeMainExecutor
+   *          the newly created {@link NodeMainExecutor}
    */
-  void onNewNodeRunner(NodeRunner nodeRunner);
+  void onNewNodeRunner(NodeMainExecutor nodeMainExecutor);
 
 }

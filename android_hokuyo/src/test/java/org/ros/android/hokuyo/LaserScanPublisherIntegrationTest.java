@@ -25,10 +25,10 @@ import org.junit.Test;
 import org.ros.RosCore;
 import org.ros.internal.node.DefaultNode;
 import org.ros.namespace.GraphName;
-import org.ros.node.DefaultNodeRunner;
+import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeRunner;
+import org.ros.node.NodeMainExecutor;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class LaserScanPublisherIntegrationTest {
 
-  private NodeRunner nodeRunner;
+  private NodeMainExecutor nodeMainExecutor;
   private RosCore rosCore;
   private NodeConfiguration nodeConfiguration;
 
@@ -48,12 +48,12 @@ public class LaserScanPublisherIntegrationTest {
     rosCore.start();
     assertTrue(rosCore.awaitStart(1, TimeUnit.SECONDS));
     nodeConfiguration = NodeConfiguration.newPrivate(rosCore.getUri());
-    nodeRunner = DefaultNodeRunner.newDefault();
+    nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
   }
 
   @After
   public void after() {
-    nodeRunner.shutdown();
+    nodeMainExecutor.shutdown();
     rosCore.shutdown();
   }
 
@@ -61,11 +61,11 @@ public class LaserScanPublisherIntegrationTest {
   public void testLaserScanPublisher() throws InterruptedException {
     FakeLaserDevice fakeLaserDevice = new FakeLaserDevice(3);
     LaserScanPublisher laserScanPublisher = new LaserScanPublisher(fakeLaserDevice);
-    nodeRunner.run(laserScanPublisher, nodeConfiguration.setNodeName("laser_node"));
+    nodeMainExecutor.run(laserScanPublisher, nodeConfiguration.setNodeName("laser_node"));
 
     final CountDownLatch laserScanReceived = new CountDownLatch(1);
     LaserScanSubscriber laserScanSubscriber = new LaserScanSubscriber(laserScanReceived);
-    nodeRunner.run(laserScanSubscriber, nodeConfiguration.setNodeName("subscriber_node"));
+    nodeMainExecutor.run(laserScanSubscriber, nodeConfiguration.setNodeName("subscriber_node"));
     // NOTE(damonkohler): This can take awhile when running from ant test.
     assertTrue(laserScanReceived.await(10, TimeUnit.SECONDS));
 

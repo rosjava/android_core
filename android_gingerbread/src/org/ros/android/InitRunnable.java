@@ -16,26 +16,26 @@
 
 package org.ros.android;
 
-import org.ros.node.NodeRunner;
+import org.ros.node.NodeMainExecutor;
 
 /**
  * Initializes instances of classes derived from {@link RosActivity} with the
- * parent {@link RosActivity} and {@link NodeRunner}.
+ * parent {@link RosActivity} and {@link NodeMainExecutor}.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 class InitRunnable implements Runnable {
 
   private final RosActivity rosActivity;
-  private final NodeRunner nodeRunner;
+  private final NodeMainExecutor nodeMainExecutor;
 
-  public InitRunnable(RosActivity rosActivity, NodeRunner nodeRunner) {
+  public InitRunnable(RosActivity rosActivity, NodeMainExecutor nodeMainExecutor) {
     this.rosActivity = rosActivity;
-    this.nodeRunner = nodeRunner;
+    this.nodeMainExecutor = nodeMainExecutor;
   }
 
   @Override
   public void run() {
-    rosActivity.init(nodeRunner);
+    rosActivity.init(nodeMainExecutor);
   }
 }
