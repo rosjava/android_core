@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import org.ros.message.sensor_msgs.CameraInfo;
 import org.ros.message.sensor_msgs.CompressedImage;
+import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
@@ -40,6 +41,11 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
 
   public RosCameraPreviewView(Context context, AttributeSet attrs, int defStyle) {
     super(context, attrs, defStyle);
+  }
+
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("android_gingerbread/ros_camera_preview_view");
   }
 
   @Override

@@ -70,7 +70,7 @@ public class MainActivity extends Activity {
       NodeConfiguration nodeConfiguration =
           NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName());
       nodeConfiguration.setMasterUri(masterUri);
-      nodeMainExecutor.run(preview, nodeConfiguration);
+      nodeMainExecutor.executeNodeMain(preview, nodeConfiguration);
     }
   }
 
@@ -113,5 +113,4 @@ public class MainActivity extends Activity {
       }
     }
   }
-
 }

@@ -22,6 +22,7 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 import org.ros.android.MessageCallable;
 import org.ros.message.MessageListener;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
@@ -60,6 +61,11 @@ public class RosImageView<T> extends ImageView implements NodeMain {
 
   public void setMessageToBitmapCallable(MessageCallable<Bitmap, T> callable) {
     this.callable = callable;
+  }
+
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("android_gingerbread/ros_image_view");
   }
 
   @Override

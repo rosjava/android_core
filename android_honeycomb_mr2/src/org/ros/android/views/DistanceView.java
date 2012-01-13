@@ -26,6 +26,7 @@ import android.view.View.OnTouchListener;
 import org.ros.message.MessageListener;
 import org.ros.message.geometry_msgs.Twist;
 import org.ros.message.sensor_msgs.LaserScan;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
@@ -94,6 +95,11 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
    */
   public void setTopicName(String topicName) {
     this.laserTopic = topicName;
+  }
+
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("android_honeycomb_mr2/distance_view");
   }
 
   @Override

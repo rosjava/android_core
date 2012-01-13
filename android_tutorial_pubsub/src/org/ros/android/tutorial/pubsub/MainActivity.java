@@ -16,12 +16,11 @@
 
 package org.ros.android.tutorial.pubsub;
 
-import android.app.Activity;
 import android.os.Bundle;
 import org.ros.RosCore;
 import org.ros.android.MessageCallable;
+import org.ros.android.RosActivity;
 import org.ros.android.views.RosTextView;
-import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.tutorials.pubsub.R;
@@ -30,16 +29,14 @@ import org.ros.tutorials.pubsub.Talker;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MainActivity extends Activity {
-
-  private final NodeMainExecutor nodeMainExecutor;
+public class MainActivity extends RosActivity {
 
   private RosCore rosCore;
   private RosTextView<org.ros.message.std_msgs.String> rosTextView;
   private Talker talker;
 
   public MainActivity() {
-    nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
+    super("Pubsub Tutorial", "Pubsub Tutorial");
   }
 
   @SuppressWarnings("unchecked")
@@ -60,27 +57,26 @@ public class MainActivity extends Activity {
   }
 
   @Override
-  protected void onResume() {
-    super.onResume();
+  protected void init(NodeMainExecutor nodeMainExecutor) {
+    rosCore = RosCore.newPrivate();
+    rosCore.start();
     try {
-      rosCore = RosCore.newPrivate();
-      rosCore.start();
       rosCore.awaitStart();
-      NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate();
-      nodeConfiguration.setNodeName("pubsub_tutorial");
-      nodeConfiguration.setMasterUri(rosCore.getUri());
-      talker = new Talker();
-      nodeMainExecutor.run(talker, nodeConfiguration);
-      nodeMainExecutor.run(rosTextView, nodeConfiguration);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+    talker = new Talker();
+    NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate();
+    nodeConfiguration.setMasterUri(rosCore.getUri());
+    nodeMainExecutor.executeNodeMain(talker, nodeConfiguration);
+    nodeMainExecutor.executeNodeMain(rosTextView, nodeConfiguration);
   }
 
   @Override
-  protected void onPause() {
-    super.onPause();
-    nodeMainExecutor.shutdown();
+  protected void onDestroy() {
+    super.onDestroy();
+    // RosCore should be shut down last since running Nodes will attempt to
+    // unregister at shutdown.
     rosCore.shutdown();
   }
 }

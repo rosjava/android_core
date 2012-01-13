@@ -19,6 +19,7 @@ package org.ros.android.hokuyo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.parameter.ParameterTree;
@@ -40,6 +41,11 @@ public class LaserScanPublisher implements NodeMain {
    */
   public LaserScanPublisher(LaserScannerDevice laserScannerDevice) {
     this.laserScannerDevice = laserScannerDevice;
+  }
+
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("android_hokuyo/laser_scan_publisher");
   }
 
   @Override

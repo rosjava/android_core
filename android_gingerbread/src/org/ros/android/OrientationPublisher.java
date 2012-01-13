@@ -23,6 +23,7 @@ import android.hardware.SensorManager;
 import org.ros.message.Time;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.message.geometry_msgs.Quaternion;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
@@ -79,6 +80,11 @@ public class OrientationPublisher implements NodeMain {
 
   public OrientationPublisher(SensorManager sensorManager) {
     this.sensorManager = sensorManager;
+  }
+
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("android/orientiation_sensor");
   }
 
   @Override

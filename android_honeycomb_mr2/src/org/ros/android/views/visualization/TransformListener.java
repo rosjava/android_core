@@ -39,6 +39,11 @@ public class TransformListener implements NodeMain {
   }
 
   @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("android_honeycomb_mr2/transform_listener");
+  }
+
+  @Override
   public void onStart(Node node) {
     String tfPrefix = node.newParameterTree().getString("~tf_prefix", "");
     if (!tfPrefix.isEmpty()) {

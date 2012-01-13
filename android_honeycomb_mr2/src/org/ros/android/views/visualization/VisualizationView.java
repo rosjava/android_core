@@ -25,6 +25,7 @@ import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import org.ros.android.views.visualization.layer.Layer;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.rosjava_geometry.FrameTransformTree;
@@ -105,6 +106,11 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   public void removeLayer(Layer layer) {
     layer.onShutdown(this, node);
     layers.remove(layer);
+  }
+
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("android_honeycomb_mr2/visualization_view");
   }
 
   @Override

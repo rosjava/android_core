@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.ros.message.MessageListener;
 import org.ros.message.sensor_msgs.LaserScan;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
@@ -35,6 +36,11 @@ public class LaserScanSubscriber implements NodeMain {
 
   LaserScanSubscriber(CountDownLatch laserScanReceived) {
     this.laserScanReceived = laserScanReceived;
+  }
+
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("android_hokuyo/laser_scan_subscriber");
   }
 
   @Override

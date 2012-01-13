@@ -61,11 +61,11 @@ public class LaserScanPublisherIntegrationTest {
   public void testLaserScanPublisher() throws InterruptedException {
     FakeLaserDevice fakeLaserDevice = new FakeLaserDevice(3);
     LaserScanPublisher laserScanPublisher = new LaserScanPublisher(fakeLaserDevice);
-    nodeMainExecutor.run(laserScanPublisher, nodeConfiguration.setNodeName("laser_node"));
+    nodeMainExecutor.executeNodeMain(laserScanPublisher, nodeConfiguration.setNodeName("laser_node"));
 
     final CountDownLatch laserScanReceived = new CountDownLatch(1);
     LaserScanSubscriber laserScanSubscriber = new LaserScanSubscriber(laserScanReceived);
-    nodeMainExecutor.run(laserScanSubscriber, nodeConfiguration.setNodeName("subscriber_node"));
+    nodeMainExecutor.executeNodeMain(laserScanSubscriber, nodeConfiguration.setNodeName("subscriber_node"));
     // NOTE(damonkohler): This can take awhile when running from ant test.
     assertTrue(laserScanReceived.await(10, TimeUnit.SECONDS));
 

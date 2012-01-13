@@ -74,7 +74,7 @@ public class MainActivity extends AcmDeviceActivity {
     Device scipDevice =
         new Device(acmDevice.getInputStream(), acmDevice.getOutputStream(), ntpTimeProvider);
     LaserScanPublisher laserScanPublisher = new LaserScanPublisher(scipDevice);
-    nodeMainExecutor.run(laserScanPublisher, nodeConfiguration);
+    nodeMainExecutor.executeNodeMain(laserScanPublisher, nodeConfiguration);
   }
 
   @Override

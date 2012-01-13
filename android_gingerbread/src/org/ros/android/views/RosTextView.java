@@ -21,6 +21,7 @@ import android.util.AttributeSet;
 import android.widget.TextView;
 import org.ros.android.MessageCallable;
 import org.ros.message.MessageListener;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
@@ -56,6 +57,11 @@ public class RosTextView<T> extends TextView implements NodeMain {
 
   public void setMessageToStringCallable(MessageCallable<String, T> callable) {
     this.callable = callable;
+  }
+
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("android_gingerbread/ros_text_view");
   }
 
   @Override

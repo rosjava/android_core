@@ -99,14 +99,14 @@ public class NodeRunnerService extends Service implements NodeMainExecutor {
   }
 
   @Override
-  public void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
+  public void executeNodeMain(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
       Collection<NodeListener> nodeListeneners) {
-    nodeMainExecutor.run(nodeMain, nodeConfiguration, nodeListeneners);
+    nodeMainExecutor.executeNodeMain(nodeMain, nodeConfiguration, nodeListeneners);
   }
 
   @Override
-  public void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration) {
-    run(nodeMain, nodeConfiguration, null);
+  public void executeNodeMain(NodeMain nodeMain, NodeConfiguration nodeConfiguration) {
+    executeNodeMain(nodeMain, nodeConfiguration, null);
   }
 
   @Override

@@ -33,6 +33,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import org.ros.message.MessageListener;
 import org.ros.message.nav_msgs.Odometry;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
@@ -889,6 +890,11 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
       return true;
     }
     return false;
+  }
+
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("android_honeycomb_mr2/virtual_joystick_view");
   }
 
   @Override
