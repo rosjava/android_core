@@ -1,10 +1,10 @@
 <launch>
   <node name="compressed_occupancy_grid" type="compressed_occupancy_grid_publisher.py"
         pkg="compressed_visualization_transport">
-    <remap from="~compressed_map" to="/android/map_view/compressed_map" />    
+    <remap from="~compressed_map" to="/android/map_view/compressed_map" />
     <rosparam>
-      width: 1024
-      height: 1024
+      width: 512
+      height: 512
       colors:
         # Colors are in RGBA format, i.e. the first value corresponds
         # to red, the last to alpha.

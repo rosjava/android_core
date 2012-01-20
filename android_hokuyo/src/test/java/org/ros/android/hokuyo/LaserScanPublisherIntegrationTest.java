@@ -61,11 +61,11 @@ public class LaserScanPublisherIntegrationTest {
   public void testLaserScanPublisher() throws InterruptedException {
     FakeLaserDevice fakeLaserDevice = new FakeLaserDevice(3);
     LaserScanPublisher laserScanPublisher = new LaserScanPublisher(fakeLaserDevice);
-    nodeMainExecutor.executeNodeMain(laserScanPublisher, nodeConfiguration.setNodeName("laser_node"));
+    nodeMainExecutor.execute(laserScanPublisher, nodeConfiguration);
 
     final CountDownLatch laserScanReceived = new CountDownLatch(1);
     LaserScanSubscriber laserScanSubscriber = new LaserScanSubscriber(laserScanReceived);
-    nodeMainExecutor.executeNodeMain(laserScanSubscriber, nodeConfiguration.setNodeName("subscriber_node"));
+    nodeMainExecutor.execute(laserScanSubscriber, nodeConfiguration);
     // NOTE(damonkohler): This can take awhile when running from ant test.
     assertTrue(laserScanReceived.await(10, TimeUnit.SECONDS));
 
@@ -77,7 +77,9 @@ public class LaserScanPublisherIntegrationTest {
     NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate(rosCore.getUri());
     FakeLaserDevice fakeLaser = new FakeLaserDevice(0);
     LaserScanPublisher scanPublisher = new LaserScanPublisher(fakeLaser);
-    Node node = new DefaultNode(nodeConfiguration.setNodeName(GraphName.newAnonymous()), null);
+    Node node =
+        new DefaultNode(nodeConfiguration.setNodeName(GraphName.newAnonymous()), null,
+            nodeMainExecutor.getScheduledExecutorService());
     scanPublisher.setNode(node);
     try {
       scanPublisher.toLaserScanMessage("/base_scan", fakeLaser.makeFakeScan());

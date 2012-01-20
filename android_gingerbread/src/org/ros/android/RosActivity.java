@@ -57,7 +57,8 @@ public abstract class RosActivity extends Activity {
       // Run init() in a new thread as a convenience since it often requires
       // network access. Also, this allows us to keep a reference to the
       // NodeMainExecutor separate from this class.
-      nodeRunnerService.execute(new InitRunnable(RosActivity.this, nodeRunnerService));
+      nodeRunnerService.getScheduledExecutorService().execute(
+          new InitRunnable(RosActivity.this, nodeRunnerService));
     }
 
     @Override

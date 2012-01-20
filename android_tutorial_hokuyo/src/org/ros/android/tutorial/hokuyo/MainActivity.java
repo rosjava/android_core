@@ -68,13 +68,13 @@ public class MainActivity extends AcmDeviceActivity {
             getMasterUri());
     nodeConfiguration.setNodeName(GraphName.newAnonymous());
     NtpTimeProvider ntpTimeProvider =
-        new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"));
+        new NtpTimeProvider(InetAddressFactory.newFromHostString("192.168.0.1"));
     ntpTimeProvider.startPeriodicUpdates(1, TimeUnit.MINUTES);
     nodeConfiguration.setTimeProvider(ntpTimeProvider);
     Device scipDevice =
         new Device(acmDevice.getInputStream(), acmDevice.getOutputStream(), ntpTimeProvider);
     LaserScanPublisher laserScanPublisher = new LaserScanPublisher(scipDevice);
-    nodeMainExecutor.executeNodeMain(laserScanPublisher, nodeConfiguration);
+    nodeMainExecutor.execute(laserScanPublisher, nodeConfiguration);
   }
 
   @Override

@@ -25,13 +25,11 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import org.ros.address.InetAddressFactory;
-import org.ros.internal.node.DefaultNodeFactory;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
-import java.net.URI;
 import java.util.ArrayList;
 
 /**
@@ -40,7 +38,7 @@ import java.util.ArrayList;
  * 
  * @author munjaldesai@google.com (Munjal Desai)
  */
-public class PanTiltView extends RelativeLayout implements OnTouchListener {
+public class PanTiltView extends RelativeLayout implements OnTouchListener, NodeMain {
 
   private static final int INVALID_POINTER_ID = -1;
   private static final int INVALID_POINTER_LOCATION = -1;
@@ -92,7 +90,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener {
   private static final String HOME_TILT_KEY_NAME = "HOME_TILT";
 
   private Publisher<org.ros.message.sensor_msgs.JointState> publisher;
-  private Node node;
+  
   /**
    * mainLayout The parent layout that contains all other elements.
    */
@@ -149,7 +147,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener {
   public PanTiltView(Context context) {
     this(context, null, 0);
   }
-  
+
   public PanTiltView(Context context, AttributeSet attrs) {
     this(context, attrs, 0);
   }
@@ -161,19 +159,6 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener {
     // Load settings (minPan, maxPan, etc) from the shared preferences.
     loadSettings();
     initPanTiltWidget();
-  }
-
-  /**
-   * Specify the location of the master node. Unless this method is called the
-   * widget will not be displayed and hence no messages will be published.
-   * 
-   * @param masterUri
-   *          The location of the master node.
-   */
-  public void setMasterUri(URI masterUri) {
-    // Setup the publisher first.
-    initPublisher(masterUri);
-    this.setOnTouchListener(this);
   }
 
   @Override
@@ -472,24 +457,6 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener {
     homeIcon = (ImageView) findViewById(org.ros.android.R.id.pt_home_marker);
   }
 
-  // TODO(damonkohler): PanTiltView should be a NodeMain.
-  public void initPublisher(URI masterUri) {
-    try {
-      NodeConfiguration nodeConfiguration =
-          NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress()
-              .toString(), masterUri);
-      nodeConfiguration.setNodeName("pan_tilt_view");
-      node = new DefaultNodeFactory().newNode(nodeConfiguration);
-      publisher = node.newPublisher("/ptu_cmd", "sensor_msgs/JointState");
-    } catch (Exception e) {
-      if (node != null) {
-        node.getLog().fatal(e);
-      } else {
-        e.printStackTrace();
-      }
-    }
-  }
-
   private void loadSettings() {
     // Load the settings from the shared preferences.
     SharedPreferences settings =
@@ -544,6 +511,24 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener {
     jointState.effort = new double[] {};
     jointState.velocity = new double[] {};
     publisher.publish(jointState);
+  }
+
+  @Override
+  public void onShutdown(Node node) {
+  }
+
+  @Override
+  public void onShutdownComplete(Node node) {
+  }
+
+  @Override
+  public void onStart(Node node) {
+    publisher = node.newPublisher("/ptu_cmd", "sensor_msgs/JointState");
+  }
+
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("android_honeycomb_mr2/pan_tilt_view");
   }
 
   // Future work.

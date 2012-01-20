@@ -68,8 +68,8 @@ public class MainActivity extends RosActivity {
     talker = new Talker();
     NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate();
     nodeConfiguration.setMasterUri(rosCore.getUri());
-    nodeMainExecutor.executeNodeMain(talker, nodeConfiguration);
-    nodeMainExecutor.executeNodeMain(rosTextView, nodeConfiguration);
+    nodeMainExecutor.execute(talker, nodeConfiguration);
+    nodeMainExecutor.execute(rosTextView, nodeConfiguration);
   }
 
   @Override

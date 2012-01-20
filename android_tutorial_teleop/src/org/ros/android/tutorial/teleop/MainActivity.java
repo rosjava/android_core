@@ -92,7 +92,7 @@ public class MainActivity extends RosActivity {
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(
             InetAddressFactory.newNonLoopback().getHostAddress().toString(), getMasterUri());
-    nodeMainExecutor.executeNodeMain(virtualJoystickView, nodeConfiguration.setNodeName("virtual_joystick"));
-    nodeMainExecutor.executeNodeMain(visualizationView, nodeConfiguration.setNodeName("android/map_view"));
+    nodeMainExecutor.execute(virtualJoystickView, nodeConfiguration.setNodeName("virtual_joystick"));
+    nodeMainExecutor.execute(visualizationView, nodeConfiguration.setNodeName("android/map_view"));
   }
 }

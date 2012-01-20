@@ -38,8 +38,7 @@ import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 
 import java.util.Collection;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -75,10 +74,11 @@ public class NodeRunnerService extends Service implements NodeMainExecutor {
 
   public NodeRunnerService() {
     super();
-    ExecutorService executorService = Executors.newCachedThreadPool();
-    nodeMainExecutor = DefaultNodeMainExecutor.newDefault(executorService);
+    nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
     binder = new LocalBinder();
-    listeners = new ListenerCollection<NodeRunnerServiceListener>(executorService);
+    listeners =
+        new ListenerCollection<NodeRunnerServiceListener>(
+            nodeMainExecutor.getScheduledExecutorService());
   }
 
   @Override
@@ -99,19 +99,19 @@ public class NodeRunnerService extends Service implements NodeMainExecutor {
   }
 
   @Override
-  public void executeNodeMain(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
+  public void execute(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
       Collection<NodeListener> nodeListeneners) {
-    nodeMainExecutor.executeNodeMain(nodeMain, nodeConfiguration, nodeListeneners);
+    nodeMainExecutor.execute(nodeMain, nodeConfiguration, nodeListeneners);
   }
 
   @Override
-  public void executeNodeMain(NodeMain nodeMain, NodeConfiguration nodeConfiguration) {
-    executeNodeMain(nodeMain, nodeConfiguration, null);
+  public void execute(NodeMain nodeMain, NodeConfiguration nodeConfiguration) {
+    execute(nodeMain, nodeConfiguration, null);
   }
 
   @Override
-  public void execute(Runnable runnable) {
-    nodeMainExecutor.execute(runnable);
+  public ScheduledExecutorService getScheduledExecutorService() {
+    return nodeMainExecutor.getScheduledExecutorService();
   }
 
   @Override
@@ -135,7 +135,7 @@ public class NodeRunnerService extends Service implements NodeMainExecutor {
     stopForeground(true);
     stopSelf();
   }
-  
+
   public void addListener(NodeRunnerServiceListener listener) {
     listeners.add(listener);
   }
