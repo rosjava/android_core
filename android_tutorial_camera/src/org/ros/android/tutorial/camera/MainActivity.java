@@ -16,7 +16,14 @@
 
 package org.ros.android.tutorial.camera;
 
-import android.app.Activity;
+import org.ros.address.InetAddressFactory;
+import org.ros.android.MasterChooser;
+import org.ros.android.RosActivity;
+import org.ros.android.camera.R;
+import org.ros.android.views.RosCameraPreviewView;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMainExecutor;
+
 import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -24,31 +31,18 @@ import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
-import org.ros.address.InetAddressFactory;
-import org.ros.android.MasterChooser;
-import org.ros.android.camera.R;
-import org.ros.android.views.RosCameraPreviewView;
-import org.ros.node.DefaultNodeMainExecutor;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeMainExecutor;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MainActivity extends Activity {
-
-  private final NodeMainExecutor nodeMainExecutor;
+public class MainActivity extends RosActivity {
 
   private int cameraId;
-  private URI masterUri;
   private RosCameraPreviewView preview;
 
   public MainActivity() {
-    nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
+    super("CameraTutorial", "CameraTutorial");
   }
 
   @Override
@@ -59,19 +53,6 @@ public class MainActivity extends Activity {
     setContentView(R.layout.main);
     preview = (RosCameraPreviewView) findViewById(R.id.camera_preview);
     startActivityForResult(new Intent(this, MasterChooser.class), 0);
-  }
-
-  @Override
-  protected void onResume() {
-    super.onResume();
-    if (masterUri != null) {
-      cameraId = 0;
-      preview.setCamera(Camera.open(cameraId));
-      NodeConfiguration nodeConfiguration =
-          NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName());
-      nodeConfiguration.setMasterUri(masterUri);
-      nodeMainExecutor.execute(preview, nodeConfiguration);
-    }
   }
 
   @Override
@@ -95,22 +76,14 @@ public class MainActivity extends Activity {
       });
     }
     return true;
-  }
-
+}
+  
   @Override
-  protected void onPause() {
-    super.onPause();
-    nodeMainExecutor.shutdownNodeMain(preview);
-  }
-
-  @Override
-  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (requestCode == 0 && resultCode == RESULT_OK) {
-      try {
-        masterUri = new URI(data.getStringExtra("ROS_MASTER_URI"));
-      } catch (URISyntaxException e) {
-        throw new RuntimeException(e);
-      }
-    }
+  protected void init(NodeMainExecutor nodeMainExecutor) {
+    cameraId = 0;
+    preview.setCamera(Camera.open(cameraId));
+    NodeConfiguration nodeConfiguration =NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName());
+    nodeConfiguration.setMasterUri(getMasterUri());
+    nodeMainExecutor.execute(preview, nodeConfiguration);
   }
 }
