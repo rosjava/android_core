@@ -68,7 +68,8 @@ public class MainActivity extends AcmDeviceActivity {
             getMasterUri());
     nodeConfiguration.setNodeName(GraphName.newAnonymous());
     NtpTimeProvider ntpTimeProvider =
-        new NtpTimeProvider(InetAddressFactory.newFromHostString("192.168.0.1"));
+        new NtpTimeProvider(InetAddressFactory.newFromHostString("192.168.0.1"),
+            nodeMainExecutor.getScheduledExecutorService());
     ntpTimeProvider.startPeriodicUpdates(1, TimeUnit.MINUTES);
     nodeConfiguration.setTimeProvider(ntpTimeProvider);
     Device scipDevice =

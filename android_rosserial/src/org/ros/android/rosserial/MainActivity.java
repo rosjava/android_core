@@ -32,7 +32,7 @@ import org.ros.rosserial.RosSerial;
 import org.ros.time.NtpTimeProvider;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -68,13 +68,15 @@ public class MainActivity extends AcmDeviceActivity {
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress(),
             getMasterUri());
     nodeConfiguration.setNodeName("rosserial");
+    ScheduledExecutorService scheduledExecutorService =
+        nodeMainExecutor.getScheduledExecutorService();
     NtpTimeProvider ntpTimeProvider =
-        new NtpTimeProvider(InetAddressFactory.newFromHostString("192.168.0.1"));
+        new NtpTimeProvider(InetAddressFactory.newFromHostString("192.168.0.1"),
+            scheduledExecutorService);
     ntpTimeProvider.startPeriodicUpdates(1, TimeUnit.MINUTES);
     nodeConfiguration.setTimeProvider(ntpTimeProvider);
-    nodeMainExecutor.execute(
-        new RosSerial(new PollingInputStream(acmDevice.getInputStream(), Executors
-            .newCachedThreadPool()), acmDevice.getOutputStream()), nodeConfiguration);
+    nodeMainExecutor.execute(new RosSerial(new PollingInputStream(acmDevice.getInputStream(),
+        scheduledExecutorService), acmDevice.getOutputStream()), nodeConfiguration);
   }
 
   @Override
