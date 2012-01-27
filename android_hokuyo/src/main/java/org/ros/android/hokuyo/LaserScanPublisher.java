@@ -55,6 +55,7 @@ public class LaserScanPublisher implements NodeMain {
     final String laserTopic = params.getString("~laser_topic", "laser");
     final String laserFrame = params.getString("~laser_frame", "laser");
     publisher = node.newPublisher(node.resolveName(laserTopic), "sensor_msgs/LaserScan");
+    publisher.setQueueLimit(5);
     laserScannerDevice.startScanning(new LaserScanListener() {
       @Override
       public void onNewLaserScan(LaserScan scan) {

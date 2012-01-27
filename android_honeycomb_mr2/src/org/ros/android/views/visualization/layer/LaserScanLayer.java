@@ -16,8 +16,6 @@
 
 package org.ros.android.views.visualization.layer;
 
-import org.ros.rosjava_geometry.FrameTransformTree;
-
 import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.shape.Color;
 import org.ros.android.views.visualization.shape.MetricTriangleFanShape;
@@ -27,17 +25,15 @@ import org.ros.message.sensor_msgs.LaserScan;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.topic.Subscriber;
+import org.ros.rosjava_geometry.FrameTransformTree;
 
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * An OpenGL view that displayed data from a laser scanner (or similar sensors
- * like a kinect). This view can zoom in/out based in one of three modes. The
- * user can change the zoom level through a pinch/reverse-pinch, the zoom level
- * can auto adjust based on the speed of the robot, and the zoom level can also
- * auto adjust based on the distance to the closest object around the robot.
+ * A {@link SubscriberLayer} that visualizes sensor_msgs/LaserScan messages.
  * 
  * @author munjaldesai@google.com (Munjal Desai)
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.LaserScan>
     implements TfLayer {
@@ -61,8 +57,8 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
   }
 
   @Override
-  public void
-      onStart(Node node, android.os.Handler handler, FrameTransformTree frameTransformTree, Camera camera) {
+  public void onStart(Node node, android.os.Handler handler, FrameTransformTree frameTransformTree,
+      Camera camera) {
     super.onStart(node, handler, frameTransformTree, camera);
     Subscriber<LaserScan> subscriber = getSubscriber();
     subscriber.addMessageListener(new MessageListener<LaserScan>() {
