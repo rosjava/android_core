@@ -32,15 +32,17 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
+ * Renders a nav_msgs/Path as a dotted line.
+ * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public class PathLayer extends SubscriberLayer<org.ros.message.nav_msgs.Path> implements TfLayer {
 
-  private static final float LINE_WIDTH = 3.0f;
+  private static final float POINT_SIZE = 5.0f;
+  private static final float COLOR[] = { 0.847058824f, 0.243137255f, 0.8f, 1.0f };
 
-  static final float color[] = { 0.847058824f, 0.243137255f, 0.8f, 1.0f };
-
-  private FloatBuffer pathVertexBuffer;
+  private FloatBuffer vertexBuffer;
   private boolean ready;
   private GraphName frame;
 
@@ -57,10 +59,10 @@ public class PathLayer extends SubscriberLayer<org.ros.message.nav_msgs.Path> im
   public void draw(GL10 gl) {
     if (ready) {
       gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-      gl.glVertexPointer(3, GL10.GL_FLOAT, 0, pathVertexBuffer);
-      gl.glColor4f(color[0], color[1], color[2], color[3]);
-      gl.glLineWidth(LINE_WIDTH);
-      gl.glDrawArrays(GL10.GL_LINE_STRIP, 0, pathVertexBuffer.limit() / 3);
+      gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
+      gl.glColor4f(COLOR[0], COLOR[1], COLOR[2], COLOR[3]);
+      gl.glPointSize(POINT_SIZE);
+      gl.glDrawArrays(GL10.GL_POINTS, 0, vertexBuffer.limit() / 3);
     }
   }
 
@@ -71,28 +73,36 @@ public class PathLayer extends SubscriberLayer<org.ros.message.nav_msgs.Path> im
     getSubscriber().addMessageListener(new MessageListener<Path>() {
       @Override
       public void onNewMessage(Path path) {
-        pathVertexBuffer = makePathVertices(path);
+        updateVertexBuffer(path);
         ready = true;
         requestRender();
       }
     });
   }
 
-  private FloatBuffer makePathVertices(Path path) {
+  private void updateVertexBuffer(Path path) {
     ByteBuffer goalVertexByteBuffer =
         ByteBuffer.allocateDirect(path.poses.size() * 3 * Float.SIZE / 8);
     goalVertexByteBuffer.order(ByteOrder.nativeOrder());
-    FloatBuffer vertexBuffer = goalVertexByteBuffer.asFloatBuffer();
+    vertexBuffer = goalVertexByteBuffer.asFloatBuffer();
     if (path.poses.size() > 0) {
       frame = new GraphName(path.poses.get(0).header.frame_id);
+      // Path poses are densely packed and will make the path look like a solid
+      // line even if it is drawn as points. Skipping poses provides the visual
+      // point separation were looking for.
+      int i = 0;
       for (PoseStamped pose : path.poses) {
-        vertexBuffer.put((float) pose.pose.position.x);
-        vertexBuffer.put((float) pose.pose.position.y);
-        vertexBuffer.put((float) pose.pose.position.z);
+        // TODO(damonkohler): Choose the separation between points as a pixel
+        // value. This will require inspecting the zoom level from the camera.
+        if (i % 20 == 0) {
+          vertexBuffer.put((float) pose.pose.position.x);
+          vertexBuffer.put((float) pose.pose.position.y);
+          vertexBuffer.put((float) pose.pose.position.z);
+        }
+        i++;
       }
     }
     vertexBuffer.position(0);
-    return vertexBuffer;
   }
 
   @Override

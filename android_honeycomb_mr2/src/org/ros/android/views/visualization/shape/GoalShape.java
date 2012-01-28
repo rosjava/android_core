@@ -23,8 +23,8 @@ import org.ros.android.views.visualization.Camera;
  */
 public class GoalShape extends PixelTriangleFanShape {
 
-  private static final Color color = new Color(0.180392157f, 0.71372549f, 0.909803922f, 0.5f);
-  private static final float vertices[] = {
+  private static final Color COLOR = new Color(0.180392157f, 0.71372549f, 0.909803922f, 0.5f);
+  private static final float VERTICES[] = {
       10.0f, 0.0f, 0.0f, // center
       0.0f, 0.0f, 0.0f, // bottom
       -15.0f, -15.0f, 0.0f, // bottom right
@@ -35,9 +35,9 @@ public class GoalShape extends PixelTriangleFanShape {
       0.0f, 52.0f, 0.0f, // left
       -15.0f, 15.0f, 0.0f, // bottom left
       0.0f, 0.0f, 0.0f // bottom
-  };
+	  };
 
   public GoalShape(Camera camera) {
-    super(vertices, color, camera);
+    super(VERTICES, COLOR, camera);
   }
 }

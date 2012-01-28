@@ -21,8 +21,8 @@ package org.ros.android.views.visualization.shape;
  */
 public class RobotShape extends MetricTriangleFanShape {
   
-  private static final Color color = new Color(0.0f, 0.25f, 1.0f, 1.0f);
-  private static final float vertices[] = {
+  private static final Color COLOR = new Color(0.0f, 0.25f, 1.0f, 1.0f);
+  private static final float VERTICES[] = {
       0.0f, 0.0f, 0.0f, // Top
       -0.25f, -0.25f, 0.0f, // Bottom left
       0.5f, 0.0f, 0.0f, // Bottom center
@@ -30,6 +30,6 @@ public class RobotShape extends MetricTriangleFanShape {
       };
 
   public RobotShape() {
-    super(vertices, color);
+    super(VERTICES, COLOR);
   }
 }

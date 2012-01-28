@@ -26,15 +26,15 @@ import org.ros.android.views.visualization.Camera;
  */
 public class PoseShape extends PixelTriangleFanShape {
 
-  private static final Color color = new Color(0.847058824f, 0.243137255f, 0.8f, 1.0f);
-  private static final float vertices[] = {
+  private static final Color COLOR = new Color(0.847058824f, 0.243137255f, 0.8f, 1.0f);
+  private static final float VERTICES[] = {
       50.0f, 0.0f, 0.0f, // Top
       -100.0f, -70.0f, 0.0f, // Bottom left
       -50.0f, 0.0f, 0.0f, // Bottom center
       -100.0f, 70.0f, 0.0f, // Bottom right
-  };
+	  };
 
   public PoseShape(Camera camera) {
-    super(vertices, color, camera);
+    super(VERTICES, COLOR, camera);
   }
 }
