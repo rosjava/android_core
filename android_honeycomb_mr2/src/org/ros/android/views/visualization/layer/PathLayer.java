@@ -18,6 +18,7 @@ package org.ros.android.views.visualization.layer;
 
 import android.os.Handler;
 import org.ros.android.views.visualization.Camera;
+import org.ros.android.views.visualization.shape.Color;
 import org.ros.message.MessageListener;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.message.nav_msgs.Path;
@@ -39,8 +40,8 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class PathLayer extends SubscriberLayer<org.ros.message.nav_msgs.Path> implements TfLayer {
 
+  private static final Color COLOR = Color.fromHexAndAlpha("03dfc9", 0.3f);
   private static final float POINT_SIZE = 5.0f;
-  private static final float COLOR[] = { 0.847058824f, 0.243137255f, 0.8f, 1.0f };
 
   private FloatBuffer vertexBuffer;
   private boolean ready;
@@ -60,7 +61,7 @@ public class PathLayer extends SubscriberLayer<org.ros.message.nav_msgs.Path> im
     if (ready) {
       gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
       gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
-      gl.glColor4f(COLOR[0], COLOR[1], COLOR[2], COLOR[3]);
+      gl.glColor4f(COLOR.getRed(), COLOR.getGreen(), COLOR.getBlue(), COLOR.getAlpha());
       gl.glPointSize(POINT_SIZE);
       gl.glDrawArrays(GL10.GL_POINTS, 0, vertexBuffer.limit() / 3);
     }

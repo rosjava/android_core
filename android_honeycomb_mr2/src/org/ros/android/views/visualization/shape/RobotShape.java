@@ -17,16 +17,22 @@
 package org.ros.android.views.visualization.shape;
 
 /**
+ * Represents the robot.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class RobotShape extends MetricTriangleFanShape {
   
-  private static final Color COLOR = new Color(0.0f, 0.25f, 1.0f, 1.0f);
+  private static final Color COLOR = Color.fromHexAndAlpha("ffa800", 1.0f);
   private static final float VERTICES[] = {
-      0.0f, 0.0f, 0.0f, // Top
-      -0.25f, -0.25f, 0.0f, // Bottom left
-      0.5f, 0.0f, 0.0f, // Bottom center
-      -0.25f, 0.25f, 0.0f, // Bottom right
+      0.0f, 0.0f, 0.0f,
+      -0.1f, 0.0f, 0.0f,
+      -0.2f, -0.05f, 0.0f,
+      -0.2f, -0.2f, 0.0f,
+      0.2f, 0.0f, 0.0f,
+      -0.2f, 0.2f, 0.0f,
+      -0.2f, 0.05f, 0.0f,
+      -0.1f, 0.0f, 0.0f
       };
 
   public RobotShape() {

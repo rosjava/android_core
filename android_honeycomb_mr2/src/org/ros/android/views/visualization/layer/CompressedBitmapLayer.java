@@ -16,8 +16,6 @@
 
 package org.ros.android.views.visualization.layer;
 
-import org.ros.rosjava_geometry.FrameTransformTree;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
@@ -30,6 +28,7 @@ import org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.topic.Subscriber;
+import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.nio.IntBuffer;
 
@@ -67,7 +66,8 @@ public class CompressedBitmapLayer extends
   }
 
   @Override
-  public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree, Camera camera) {
+  public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree,
+      Camera camera) {
     super.onStart(node, handler, frameTransformTree, camera);
     Subscriber<CompressedBitmap> subscriber = getSubscriber();
     subscriber.setQueueLimit(1);

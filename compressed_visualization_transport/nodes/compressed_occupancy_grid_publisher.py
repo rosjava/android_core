@@ -38,7 +38,7 @@ class CompressedOccupancyGridPublisher(object):
     resolution: the resolution of the output map
     width: the width in pixels of the output map
 
-  Either resolution _or_ width need to be specified.
+  Either resolution or width need to be specified.
   """
 
   def __init__(self):
@@ -52,7 +52,7 @@ class CompressedOccupancyGridPublisher(object):
     self._width = rospy.get_param('~width', None)
     self._height = rospy.get_param('~height', None)
     self._format = rospy.get_param('~format', 'png')
-    color_occupied = rospy.get_param('~colors/occupied', (00, 00, 00, 0xff))
+    color_occupied = rospy.get_param('~colors/occupied', (0, 0, 0, 0xff))
     color_free = rospy.get_param('~colors/free', (0xff, 0xff, 0xff, 0xff))
     color_unknown = rospy.get_param('~colors/unknown', (0xbf, 0xbf, 0xbf, 0xff))
     self._color_configuration = occupancy_grid.ColorConfiguration(
@@ -76,7 +76,7 @@ class CompressedOccupancyGridPublisher(object):
         compressed_visualization_transport_msgs.CompressedBitmap,
         latch=True)
     rospy.spin()
-    
+
   def _map_callback(self, data):
     resolution = self._resolution
     if resolution is None:

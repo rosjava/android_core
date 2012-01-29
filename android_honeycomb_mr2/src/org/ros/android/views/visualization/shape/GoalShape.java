@@ -16,28 +16,17 @@
 
 package org.ros.android.views.visualization.shape;
 
-import org.ros.android.views.visualization.Camera;
-
 /**
+ * Represents the robot's current goal pose.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class GoalShape extends PixelTriangleFanShape {
-
-  private static final Color COLOR = new Color(0.180392157f, 0.71372549f, 0.909803922f, 0.5f);
-  private static final float VERTICES[] = {
-      10.0f, 0.0f, 0.0f, // center
-      0.0f, 0.0f, 0.0f, // bottom
-      -15.0f, -15.0f, 0.0f, // bottom right
-      0.0f, -52.0f, 0.0f, // right
-      15.0f, -15.0f, 0.0f, // top right
-      75.0f, 0.0f, 0.0f, // top
-      15.0f, 15.0f, 0.0f, // top left
-      0.0f, 52.0f, 0.0f, // left
-      -15.0f, 15.0f, 0.0f, // bottom left
-      0.0f, 0.0f, 0.0f // bottom
-	  };
-
-  public GoalShape(Camera camera) {
-    super(VERTICES, COLOR, camera);
+public class GoalShape extends RobotShape {
+  
+  private static final Color COLOR = Color.fromHexAndAlpha("03d5c9", 0.3f);
+  
+  public GoalShape() {
+    super();
+    setColor(COLOR);
   }
 }

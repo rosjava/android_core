@@ -18,8 +18,6 @@ package org.ros.android.views.visualization.layer;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.rosjava_geometry.FrameTransformTree;
-
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Handler;
@@ -27,11 +25,12 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.VisualizationView;
-import org.ros.android.views.visualization.shape.PoseShape;
+import org.ros.android.views.visualization.shape.GoalShape;
 import org.ros.android.views.visualization.shape.Shape;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
+import org.ros.rosjava_geometry.FrameTransformTree;
 import org.ros.rosjava_geometry.Quaternion;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
@@ -101,7 +100,7 @@ public class PosePublisherLayer extends DefaultLayer {
   public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree, final Camera camera) {
     this.node = node;
     this.camera = camera;
-    shape = new PoseShape(camera);
+    shape = new PoseShape();
     posePublisher = node.newPublisher(topic, "geometry_msgs/PoseStamped");
     handler.post(new Runnable() {
       @Override

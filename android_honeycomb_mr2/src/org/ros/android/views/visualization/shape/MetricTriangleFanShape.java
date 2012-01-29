@@ -16,9 +16,13 @@
 
 package org.ros.android.views.visualization.shape;
 
+import org.ros.rosjava_geometry.Transform;
+
 import javax.microedition.khronos.opengles.GL10;
 
 /**
+ * A wrapper for {@link TriangleFanShape} that renders it in metric space.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MetricTriangleFanShape extends MetricShape {
@@ -27,7 +31,26 @@ public class MetricTriangleFanShape extends MetricShape {
 
   public MetricTriangleFanShape(float[] vertices, Color color) {
     shape = new TriangleFanShape(vertices, color);
-    setTransform(shape.getTransform());
+  }
+
+  @Override
+  public void setColor(Color color) {
+    shape.setColor(color);
+  }
+
+  @Override
+  public Color getColor() {
+    return shape.getColor();
+  }
+
+  @Override
+  public void setTransform(Transform pose) {
+    shape.setTransform(pose);
+  }
+
+  @Override
+  public Transform getTransform() {
+    return shape.getTransform();
   }
 
   @Override

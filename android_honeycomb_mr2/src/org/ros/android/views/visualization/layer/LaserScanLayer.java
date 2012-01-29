@@ -38,6 +38,8 @@ import javax.microedition.khronos.opengles.GL10;
 public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.LaserScan>
     implements TfLayer {
 
+  private static final Color FREE_SPACE_COLOR = Color.fromHexAndAlpha("00adff", 0.3f);
+  
   private GraphName frame;
   private Shape shape;
 
@@ -93,7 +95,7 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
           vertices[3 * i + 5] = 0;
           angle += angleIncrement;
         }
-        shape = new MetricTriangleFanShape(vertices, new Color(0, 1.0f, 0, 0.3f));
+        shape = new MetricTriangleFanShape(vertices, FREE_SPACE_COLOR);
         requestRender();
       }
     });

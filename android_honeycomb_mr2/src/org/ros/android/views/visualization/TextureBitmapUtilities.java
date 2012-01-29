@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import android.graphics.Bitmap;
 
 /**
+ * @author moesenle@google.com (Lorenz Moesenlechner)
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class TextureBitmapUtilities {
@@ -54,7 +55,6 @@ public class TextureBitmapUtilities {
       int fillColor) {
     int[] result = new int[outputSize * outputSize];
     int maxWidth = width > outputSize ? width : outputSize;
-
     for (int h = 0, i = 0; h < outputSize; h++) {
       for (int w = 0; w < maxWidth; w++, i++) {
         if (h < height && w < width) {
