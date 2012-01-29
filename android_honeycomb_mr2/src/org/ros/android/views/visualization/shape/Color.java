@@ -16,6 +16,8 @@
 
 package org.ros.android.views.visualization.shape;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Defines a color based on RGBA values in the range [0, 1].
  * 
@@ -28,7 +30,23 @@ public class Color {
   private float blue;
   private float alpha;
   
+  public static Color copyOf(Color color) {
+    return new Color(color.red, color.green, color.blue, color.alpha);
+  }
+  
+  public static Color fromHexAndAlpha(String hex, float alpha) {
+    Preconditions.checkArgument(hex.length() == 6);
+    float red = Integer.parseInt(hex.substring(0, 2), 16) / 255.0f;
+    float green = Integer.parseInt(hex.substring(2, 4), 16) / 255.0f;
+    float blue = Integer.parseInt(hex.substring(4), 16) / 255.0f;
+    return new Color(red, green, blue, alpha);
+  }
+  
   public Color(float red, float green, float blue, float alpha) {
+    Preconditions.checkArgument(0.0f <= red && red <= 1.0f);
+    Preconditions.checkArgument(0.0f <= green && green <= 1.0f);
+    Preconditions.checkArgument(0.0f <= blue && blue <= 1.0f);
+    Preconditions.checkArgument(0.0f <= alpha && alpha <= 1.0f);
     this.red = red;
     this.green = green;
     this.blue = blue;

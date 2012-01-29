@@ -16,8 +16,6 @@
 
 package org.ros.android.views.visualization.layer;
 
-import org.ros.rosjava_geometry.FrameTransformTree;
-
 import android.os.Handler;
 import android.view.MotionEvent;
 import org.ros.android.views.visualization.Camera;
@@ -29,6 +27,7 @@ import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.rosjava_geometry.FrameTransform;
+import org.ros.rosjava_geometry.FrameTransformTree;
 import org.ros.rosjava_geometry.Transform;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -70,7 +69,7 @@ public class PoseSubscriberLayer extends SubscriberLayer<org.ros.message.geometr
   @Override
   public void onStart(Node node, Handler handler, final FrameTransformTree frameTransformTree, Camera camera) {
     super.onStart(node, handler, frameTransformTree, camera);
-    shape = new GoalShape(camera);
+    shape = new GoalShape();
     getSubscriber().addMessageListener(
         new MessageListener<org.ros.message.geometry_msgs.PoseStamped>() {
           @Override

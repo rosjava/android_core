@@ -32,6 +32,7 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * Renders the points representing the empty and occupied spaces on the map.
  * 
+ * @author moesenle@google.com (Lorenz Moesenlechner)
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class TextureDrawable implements OpenGlDrawable {
@@ -75,6 +76,7 @@ public class TextureDrawable implements OpenGlDrawable {
     textureBuffer.position(0);
     texture = new Texture();
   }
+  
   /**
    * Creates a new set of points to render based on the incoming occupancy grid.
    * 
