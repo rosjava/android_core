@@ -25,7 +25,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.VisualizationView;
-import org.ros.android.views.visualization.shape.GoalShape;
+import org.ros.android.views.visualization.shape.PoseShape;
 import org.ros.android.views.visualization.shape.Shape;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
