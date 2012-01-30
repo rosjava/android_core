@@ -77,10 +77,15 @@ public class PosePublisherLayer extends DefaultLayer {
     if (visible) {
       Preconditions.checkNotNull(pose);
       if (event.getAction() == MotionEvent.ACTION_MOVE) {
-        pose.setRotation(Quaternion.rotationBetweenVectors(
-            new Vector3(1, 0, 0),
-            camera.toWorldCoordinates(new Point((int) event.getX(), (int) event.getY()))
-            .subtract(pose.getTranslation())));
+        Vector3 orientationVector =
+            camera.toWorldCoordinates(new Point((int) event.getX(), (int) event.getY())).subtract(
+                pose.getTranslation());
+        if (orientationVector.length() > 0) {
+          pose.setRotation(Quaternion.rotationBetweenVectors(new Vector3(1, 0, 0),
+              orientationVector));
+        } else {
+          pose.setRotation(Quaternion.newIdentityQuaternion());
+        }
         shape.setTransform(pose);
         requestRender();
         return true;
@@ -97,7 +102,8 @@ public class PosePublisherLayer extends DefaultLayer {
   }
 
   @Override
-  public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree, final Camera camera) {
+  public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree,
+      final Camera camera) {
     this.node = node;
     this.camera = camera;
     shape = new PoseShape();
@@ -110,8 +116,8 @@ public class PosePublisherLayer extends DefaultLayer {
               @Override
               public void onLongPress(MotionEvent e) {
                 pose =
-                    new Transform(camera.toWorldCoordinates(
-                        new Point((int) e.getX(), (int) e.getY())), new Quaternion(0, 0, 0, 1));
+                    new Transform(camera.toWorldCoordinates(new Point((int) e.getX(), (int) e
+                        .getY())), Quaternion.newIdentityQuaternion());
                 shape.setTransform(pose);
                 visible = true;
                 requestRender();
