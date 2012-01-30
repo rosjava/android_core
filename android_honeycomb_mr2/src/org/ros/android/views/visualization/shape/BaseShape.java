@@ -2,7 +2,10 @@ package org.ros.android.views.visualization.shape;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.android.views.visualization.OpenGlTransform;
 import org.ros.rosjava_geometry.Transform;
+
+import javax.microedition.khronos.opengles.GL10;
 
 /**
  * Defines the getters and setters that are required for all {@link Shape}
@@ -11,9 +14,27 @@ import org.ros.rosjava_geometry.Transform;
  * @author damonkohler@google.com (Damon Kohler)
  */
 abstract class BaseShape implements Shape {
-
+  
   private Color color;
   private Transform transform;
+  
+  @Override
+  public void draw(GL10 gl) {
+    OpenGlTransform.apply(gl, getTransform());
+    scale(gl);
+  }
+  
+  /**
+   * Scales the coordinate system.
+   * 
+   * <p>
+   * This is called after transforming the surface according to {@link #transform}.
+   * 
+   * @param gl 
+   */
+  protected void scale(GL10 gl) {
+    // The default scale is in metric space.
+  }
 
   @Override
   public Color getColor() {

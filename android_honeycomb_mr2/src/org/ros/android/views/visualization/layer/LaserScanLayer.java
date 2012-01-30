@@ -18,8 +18,8 @@ package org.ros.android.views.visualization.layer;
 
 import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.shape.Color;
-import org.ros.android.views.visualization.shape.MetricTriangleFanShape;
 import org.ros.android.views.visualization.shape.Shape;
+import org.ros.android.views.visualization.shape.TriangleFanShape;
 import org.ros.message.MessageListener;
 import org.ros.message.sensor_msgs.LaserScan;
 import org.ros.namespace.GraphName;
@@ -95,7 +95,7 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
           vertices[3 * i + 5] = 0;
           angle += angleIncrement;
         }
-        shape = new MetricTriangleFanShape(vertices, FREE_SPACE_COLOR);
+        shape = new TriangleFanShape(vertices, FREE_SPACE_COLOR);
         requestRender();
       }
     });

@@ -36,7 +36,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * @author damonkohler@google.com (Damon Kohler)
  */
-class TriangleFanShape extends BaseShape {
+public class TriangleFanShape extends BaseShape {
 
   private final FloatBuffer vertexBuffer;
 
@@ -58,6 +58,7 @@ class TriangleFanShape extends BaseShape {
 
   @Override
   public void draw(GL10 gl) {
+    super.draw(gl);
     gl.glDisable(GL10.GL_CULL_FACE);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);

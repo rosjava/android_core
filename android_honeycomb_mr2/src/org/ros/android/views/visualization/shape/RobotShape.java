@@ -21,7 +21,7 @@ package org.ros.android.views.visualization.shape;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RobotShape extends MetricTriangleFanShape {
+public class RobotShape extends TriangleFanShape {
   
   private static final Color COLOR = Color.fromHexAndAlpha("ffa800", 1.0f);
   private static final float VERTICES[] = {

@@ -106,7 +106,7 @@ public class PosePublisherLayer extends DefaultLayer {
       final Camera camera) {
     this.node = node;
     this.camera = camera;
-    shape = new PoseShape();
+    shape = new PoseShape(camera);
     posePublisher = node.newPublisher(topic, "geometry_msgs/PoseStamped");
     handler.post(new Runnable() {
       @Override
