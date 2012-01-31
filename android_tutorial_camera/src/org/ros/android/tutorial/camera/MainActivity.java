@@ -16,14 +16,6 @@
 
 package org.ros.android.tutorial.camera;
 
-import org.ros.address.InetAddressFactory;
-import org.ros.android.MasterChooser;
-import org.ros.android.RosActivity;
-import org.ros.android.camera.R;
-import org.ros.android.views.RosCameraPreviewView;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeMainExecutor;
-
 import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -31,6 +23,13 @@ import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
+import org.ros.address.InetAddressFactory;
+import org.ros.android.MasterChooser;
+import org.ros.android.RosActivity;
+import org.ros.android.camera.R;
+import org.ros.android.views.RosCameraPreviewView;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMainExecutor;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
@@ -76,13 +75,14 @@ public class MainActivity extends RosActivity {
       });
     }
     return true;
-}
-  
+  }
+
   @Override
   protected void init(NodeMainExecutor nodeMainExecutor) {
     cameraId = 0;
     preview.setCamera(Camera.open(cameraId));
-    NodeConfiguration nodeConfiguration =NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName());
+    NodeConfiguration nodeConfiguration =
+        NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
     nodeConfiguration.setMasterUri(getMasterUri());
     nodeMainExecutor.execute(preview, nodeConfiguration);
   }

@@ -50,7 +50,9 @@ public class MainActivity extends RosActivity {
 
   @Override
   protected void init(NodeMainExecutor nodeMainExecutor) {
-    NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress().toString(), getMasterUri());
+    NodeConfiguration nodeConfiguration =
+        NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress(),
+            getMasterUri());
     nodeMainExecutor.execute(image, nodeConfiguration.setNodeName("android/video_view"));
   }
 }
