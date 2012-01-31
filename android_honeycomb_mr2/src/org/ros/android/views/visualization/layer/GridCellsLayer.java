@@ -37,9 +37,9 @@ public class GridCellsLayer extends SubscriberLayer<org.ros.message.nav_msgs.Gri
     TfLayer {
 
   private final Color color;
-  private final GraphName targetFrame;
   private final Lock lock;
 
+  private GraphName frame;
   private Camera camera;
   private boolean ready;
   private org.ros.message.nav_msgs.GridCells message;
@@ -51,7 +51,7 @@ public class GridCellsLayer extends SubscriberLayer<org.ros.message.nav_msgs.Gri
   public GridCellsLayer(GraphName topicName, Color color) {
     super(topicName, "nav_msgs/GridCells");
     this.color = color;
-    targetFrame = new GraphName("/map");
+    frame = null;
     lock = new ReentrantLock();
     ready = false;
   }
@@ -89,8 +89,8 @@ public class GridCellsLayer extends SubscriberLayer<org.ros.message.nav_msgs.Gri
     getSubscriber().addMessageListener(new MessageListener<org.ros.message.nav_msgs.GridCells>() {
       @Override
       public void onNewMessage(org.ros.message.nav_msgs.GridCells data) {
-        GraphName frame = new GraphName(data.header.frame_id);
-        if (frameTransformTree.canTransform(frame, targetFrame)) {
+        frame = new GraphName(data.header.frame_id);
+        if (frameTransformTree.canTransform(frame, frame)) {
           if (lock.tryLock()) {
             message = data;
             ready = true;
@@ -104,6 +104,6 @@ public class GridCellsLayer extends SubscriberLayer<org.ros.message.nav_msgs.Gri
 
   @Override
   public GraphName getFrame() {
-    return targetFrame;
+    return frame;
   }
 }

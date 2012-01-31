@@ -39,7 +39,7 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
     implements TfLayer {
 
   private static final Color FREE_SPACE_COLOR = Color.fromHexAndAlpha("00adff", 0.3f);
-  
+
   private GraphName frame;
   private Shape shape;
 
@@ -74,7 +74,6 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
         vertices[0] = 0;
         vertices[1] = 0;
         vertices[2] = 0;
-
         float minimumRange = laserScan.range_min;
         float maximumRange = laserScan.range_max;
         float angle = laserScan.angle_min;
@@ -82,7 +81,7 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
         // Calculate the coordinates of the laser range values.
         for (int i = 0; i < ranges.length; i++) {
           float range = ranges[i];
-          // Display the point if it's within the min and max valid range.
+          // Clamp the range to the specified min and max.
           if (range < minimumRange) {
             range = minimumRange;
           }

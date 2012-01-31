@@ -26,13 +26,11 @@ import org.ros.android.views.VirtualJoystickView;
 import org.ros.android.views.visualization.VisualizationView;
 import org.ros.android.views.visualization.layer.CameraControlLayer;
 import org.ros.android.views.visualization.layer.CompressedBitmapLayer;
-import org.ros.android.views.visualization.layer.GridCellsLayer;
 import org.ros.android.views.visualization.layer.LaserScanLayer;
 import org.ros.android.views.visualization.layer.PathLayer;
 import org.ros.android.views.visualization.layer.PosePublisherLayer;
 import org.ros.android.views.visualization.layer.PoseSubscriberLayer;
 import org.ros.android.views.visualization.layer.RobotLayer;
-import org.ros.android.views.visualization.shape.Color;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
@@ -84,10 +82,6 @@ public class MainActivity extends RosActivity {
     visualizationView = (VisualizationView) findViewById(R.id.visualization);
     visualizationView.addLayer(new CameraControlLayer(this));
     visualizationView.addLayer(new CompressedBitmapLayer("~compressed_map"));
-    visualizationView.addLayer(new GridCellsLayer("move_base/local_costmap/inflated_obstacles",
-        Color.fromHexAndAlpha("0092ff", 0.15f)));
-    visualizationView.addLayer(new GridCellsLayer("move_base/local_costmap/obstacles", Color
-        .fromHexAndAlpha("f9fafb", 1.0f)));
     visualizationView.addLayer(new PathLayer("move_base/NavfnROS/plan"));
     visualizationView.addLayer(new PathLayer("move_base_dynamic/NavfnROS/plan"));
     visualizationView.addLayer(new LaserScanLayer("base_scan"));
