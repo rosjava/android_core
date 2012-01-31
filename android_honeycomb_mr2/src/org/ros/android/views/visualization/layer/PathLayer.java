@@ -96,7 +96,7 @@ public class PathLayer extends SubscriberLayer<org.ros.message.nav_msgs.Path> im
       for (PoseStamped pose : path.poses) {
         // TODO(damonkohler): Choose the separation between points as a pixel
         // value. This will require inspecting the zoom level from the camera.
-        if (i % 20 == 0) {
+        if (i % 15 == 0) {
           vertexBuffer.put((float) pose.pose.position.x);
           vertexBuffer.put((float) pose.pose.position.y);
           vertexBuffer.put((float) pose.pose.position.z);

@@ -86,8 +86,8 @@ public class MainActivity extends RosActivity {
     visualizationView.addLayer(new CompressedBitmapLayer("~compressed_map"));
     visualizationView.addLayer(new GridCellsLayer("move_base/local_costmap/inflated_obstacles",
         Color.fromHexAndAlpha("0092ff", 0.15f)));
-    visualizationView.addLayer(new GridCellsLayer("move_base/local_costmap/obstacles",
-        Color.fromHexAndAlpha("f9fafb", 1.0f)));
+    visualizationView.addLayer(new GridCellsLayer("move_base/local_costmap/obstacles", Color
+        .fromHexAndAlpha("f9fafb", 1.0f)));
     visualizationView.addLayer(new PathLayer("move_base/NavfnROS/plan"));
     visualizationView.addLayer(new PathLayer("move_base_dynamic/NavfnROS/plan"));
     visualizationView.addLayer(new LaserScanLayer("base_scan"));
