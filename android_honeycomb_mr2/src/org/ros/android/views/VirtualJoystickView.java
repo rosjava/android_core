@@ -223,6 +223,11 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    */
   private boolean magnetizedXAxis;
   /**
+   * {@code true} if the joystick should publish linear velocities along the Y
+   * axis instead of angular velocities along the Z axis, {@code false} otherwise.
+   */
+  private boolean holonomic;
+  /**
    * Velocity commands are published when this is true. Not published otherwise.
    * This is to prevent spamming velocity commands.
    */
@@ -246,6 +251,16 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
 
   public VirtualJoystickView(Context context, AttributeSet attrs, int defStyle) {
     super(context, attrs, defStyle);
+  }
+
+  /**
+   * @param enabled
+   *          {@code true} if this joystick should publish linear velocities
+   *          along the Y axis instead of angular velocities along the Z axis,
+   *          {@code false} otherwise
+   */
+  public void setHolonomic(boolean enabled) {
+    holonomic = enabled;
   }
 
   @Override
@@ -293,63 +308,64 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   public boolean onTouchEvent(MotionEvent event) {
     final int action = event.getAction();
     switch (action & MotionEvent.ACTION_MASK) {
-    case MotionEvent.ACTION_MOVE: {
-      // If the primary contact point is no longer on the screen then ignore
-      // the event.
-      if (pointerId != INVALID_POINTER_ID) {
-        // If the virtual joystick is in resume-previous-velocity mode.
-        if (previousVelocityMode) {
-          // And the current contact is close to the contact location prior to
-          // ContactUp.
-          if (inLastContactRange(event.getX(event.getActionIndex()),
-              event.getY(event.getActionIndex()))) {
-            // Then use the previous velocity.
-            onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y
-                + joystickRadius);
+      case MotionEvent.ACTION_MOVE: {
+        // If the primary contact point is no longer on the screen then ignore
+        // the event.
+        if (pointerId != INVALID_POINTER_ID) {
+          // If the virtual joystick is in resume-previous-velocity mode.
+          if (previousVelocityMode) {
+            // And the current contact is close to the contact location prior to
+            // ContactUp.
+            if (inLastContactRange(event.getX(event.getActionIndex()),
+                event.getY(event.getActionIndex()))) {
+              // Then use the previous velocity.
+              onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y
+                  + joystickRadius);
+            }
+            // Since the current contact is not close to the prior location.
+            else {
+              // Exit the resume-previous-velocity mode.
+              previousVelocityMode = false;
+            }
           }
-          // Since the current contact is not close to the prior location.
+          // Since the resume-previous-velocity mode is not active generate
+          // velocities based on current contact position.
           else {
-            // Exit the resume-previous-velocity mode.
-            previousVelocityMode = false;
+            onContactMove(event.getX(event.findPointerIndex(pointerId)),
+                event.getY(event.findPointerIndex(pointerId)));
           }
         }
-        // Since the resume-previous-velocity mode is not active generate
-        // velocities based on current contact position.
-        else {
-          onContactMove(event.getX(event.findPointerIndex(pointerId)),
-              event.getY(event.findPointerIndex(pointerId)));
+        break;
+      }
+      case MotionEvent.ACTION_DOWN: {
+        // Get the coordinates of the pointer that is initiating the
+        // interaction.
+        pointerId = event.getPointerId(event.getActionIndex());
+        onContactDown();
+        // If the current contact is close to the location of the contact prior
+        // to contactUp.
+        if (inLastContactRange(event.getX(event.getActionIndex()),
+            event.getY(event.getActionIndex()))) {
+          // Trigger resume-previous-velocity mode.
+          previousVelocityMode = true;
+          // The animation calculations/operations are performed in
+          // onContactMove(). If this is not called and the user's finger stays
+          // perfectly still after the down event, no operation is performed.
+          // Calling onContactMove avoids this.
+          onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y + joystickRadius);
+        } else {
+          onContactMove(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()));
         }
+        break;
       }
-      break;
-    }
-    case MotionEvent.ACTION_DOWN: {
-      // Get the coordinates of the pointer that is initiating the
-      // interaction.
-      pointerId = event.getPointerId(event.getActionIndex());
-      onContactDown();
-      // If the current contact is close to the location of the contact prior
-      // to contactUp.
-      if (inLastContactRange(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()))) {
-        // Trigger resume-previous-velocity mode.
-        previousVelocityMode = true;
-        // The animation calculations/operations are performed in
-        // onContactMove(). If this is not called and the user's finger stays
-        // perfectly still after the down event, no operation is performed.
-        // Calling onContactMove avoids this.
-        onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y + joystickRadius);
-      } else {
-        onContactMove(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()));
+      case MotionEvent.ACTION_POINTER_UP:
+      case MotionEvent.ACTION_UP: {
+        // Check if the contact that initiated the interaction is up.
+        if ((action & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent.ACTION_POINTER_ID_SHIFT == pointerId) {
+          onContactUp();
+        }
+        break;
       }
-      break;
-    }
-    case MotionEvent.ACTION_POINTER_UP:
-    case MotionEvent.ACTION_UP: {
-      // Check if the contact that initiated the interaction is up.
-      if ((action & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent.ACTION_POINTER_ID_SHIFT == pointerId) {
-        onContactUp();
-      }
-      break;
-    }
     }
     return true;
   }
@@ -574,6 +590,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     previousRotationRange.setAlpha(0.0f);
     lastVelocityDivet = (ImageView) findViewById(org.ros.android.R.id.previous_velocity_divet);
     contactUpLocation = new Point(0, 0);
+    holonomic = false;
     for (ImageView tack : orientationWidget) {
       tack.setVisibility(INVISIBLE);
     }
@@ -675,8 +692,14 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     updateThumbDivet(thumbDivetX, thumbDivetY);
     updateMagnitudeText();
     // Publish the velocities.
-    publishVelocity(normalizedMagnitude * Math.cos(contactTheta * Math.PI / 180.0),
-        normalizedMagnitude * Math.sin(contactTheta * Math.PI / 180.0));
+    if (holonomic) {
+      publishVelocity(normalizedMagnitude * Math.cos(contactTheta * Math.PI / 180.0),
+          normalizedMagnitude * Math.sin(contactTheta * Math.PI / 180.0), 0);
+    } else {
+      publishVelocity(normalizedMagnitude * Math.cos(contactTheta * Math.PI / 180.0), 0,
+          normalizedMagnitude * Math.sin(contactTheta * Math.PI / 180.0));
+    }
+
     // Check if the turn-in-place mode needs to be activated/deactivated.
     updateTurnInPlaceMode();
   }
@@ -750,7 +773,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     // Reset the pointer id.
     pointerId = INVALID_POINTER_ID;
     // The robot should stop moving.
-    publishVelocity(0, 0);
+    publishVelocity(0, 0, 0);
     // Stop publishing the velocity since the contact is no longer on the
     // screen.
     publishVelocity = false;
@@ -767,18 +790,19 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   /**
    * Publish the velocity as a ROS Twist message.
    * 
-   * @param linearV
+   * @param linearVelocityX
    *          The normalized linear velocity (-1 to 1).
-   * @param angularV
+   * @param angularVelocityZ
    *          The normalized angular velocity (-1 to 1).
    */
-  private void publishVelocity(double linearV, double angularV) {
-    currentVelocityCommand.linear.x = linearV;
-    currentVelocityCommand.linear.y = 0;
+  private void publishVelocity(double linearVelocityX, double linearVelocityY,
+      double angularVelocityZ) {
+    currentVelocityCommand.linear.x = linearVelocityX;
+    currentVelocityCommand.linear.y = -linearVelocityY;
     currentVelocityCommand.linear.z = 0;
     currentVelocityCommand.angular.x = 0;
     currentVelocityCommand.angular.y = 0;
-    currentVelocityCommand.angular.z = -angularV;
+    currentVelocityCommand.angular.z = -angularVelocityZ;
   }
 
   /**
