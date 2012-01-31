@@ -59,8 +59,10 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
     gl.glMatrixMode(GL10.GL_MODELVIEW);
     gl.glLoadIdentity();
     // Set texture rendering hints.
-    gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
     gl.glEnable(GL10.GL_BLEND);
+    gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+    gl.glEnable(GL10.GL_POINT_SMOOTH);
+    gl.glHint(GL10.GL_POINT_SMOOTH_HINT, GL10.GL_NICEST); 
     gl.glHint(GL10.GL_POLYGON_SMOOTH_HINT, GL10.GL_NICEST);
     gl.glDisable(GL10.GL_LIGHTING);
     gl.glDisable(GL10.GL_DEPTH_TEST);

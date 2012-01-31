@@ -21,6 +21,7 @@ __author__ = 'moesenle@google.com (Lorenz Moesenlechner)'
 import roslib; roslib.load_manifest('compressed_visualization_transport')
 import rospy
 
+from compressed_visualization_transport import color
 from compressed_visualization_transport import occupancy_grid
 
 import nav_msgs.msg as nav_msgs
@@ -55,10 +56,10 @@ class CompressedOccupancyGridPublisher(object):
     color_occupied = rospy.get_param('~colors/occupied', (0, 0, 0, 0xff))
     color_free = rospy.get_param('~colors/free', (0xff, 0xff, 0xff, 0xff))
     color_unknown = rospy.get_param('~colors/unknown', (0xbf, 0xbf, 0xbf, 0xff))
-    self._color_configuration = occupancy_grid.ColorConfiguration(
-        occupancy_grid.RGBAColor(*color_occupied),
-        occupancy_grid.RGBAColor(*color_free),
-        occupancy_grid.RGBAColor(*color_unknown))
+    self._color_configuration = color.ColorConfiguration(
+        color.RGBAColor(*color_occupied),
+        color.RGBAColor(*color_free),
+        color.RGBAColor(*color_unknown))
 
     if (self._resolution is None and
         (self._width is None or self._height is None)):

@@ -16,12 +16,11 @@
 
 package org.ros.android.views.visualization.shape;
 
+import org.ros.android.views.visualization.Vertices;
 import org.ros.rosjava_geometry.Quaternion;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -38,7 +37,7 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class TriangleFanShape extends BaseShape {
 
-  private final FloatBuffer vertexBuffer;
+  private final FloatBuffer vertices;
 
   /**
    * @param vertices
@@ -47,11 +46,7 @@ public class TriangleFanShape extends BaseShape {
    *          the {@link Color} of the {@link Shape}
    */
   public TriangleFanShape(float[] vertices, Color color) {
-    ByteBuffer goalVertexByteBuffer = ByteBuffer.allocateDirect(vertices.length * Float.SIZE / 8);
-    goalVertexByteBuffer.order(ByteOrder.nativeOrder());
-    vertexBuffer = goalVertexByteBuffer.asFloatBuffer();
-    vertexBuffer.put(vertices);
-    vertexBuffer.position(0);
+    this.vertices = Vertices.toFloatBuffer(vertices);
     setColor(color);
     setTransform(new Transform(new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 1)));
   }
@@ -61,10 +56,10 @@ public class TriangleFanShape extends BaseShape {
     super.draw(gl);
     gl.glDisable(GL10.GL_CULL_FACE);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-    gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
+    gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
     gl.glColor4f(getColor().getRed(), getColor().getGreen(), getColor().getBlue(), getColor()
         .getAlpha());
-    gl.glDrawArrays(GL10.GL_TRIANGLE_FAN, 0, vertexBuffer.limit() / 3);
+    gl.glDrawArrays(GL10.GL_TRIANGLE_FAN, 0, vertices.limit() / 3);
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
   }
 }

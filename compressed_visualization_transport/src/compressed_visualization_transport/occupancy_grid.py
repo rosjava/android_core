@@ -15,59 +15,15 @@
 """Draws an occupancy grid into a PIL image."""
 
 __author__ = 'moesenle@google.com (Lorenz Moesenlechner)'
+
 import io
 from PIL import Image
 
+from compressed_visualization_transport import color
 from compressed_visualization_transport import compressed_bitmap
 
 import nav_msgs.msg as nav_msgs
 import compressed_visualization_transport_msgs.msg as compressed_visualization_transport_msgs
-
-
-_DEFAULT_COLOR_UNKNOWN = 128
-_DEFAULT_COLOR_OCCUPIED = 0
-_DEFAULT_COLOR_FREE = 1
-
-
-class ColorConfiguration(object):
-  """Color specification to use when converting from an occupancy grid
-  to a bitmap."""
-
-  def __init__(self, color_occupied=None, color_free=None, color_unknown=None):
-    if color_occupied is None:
-      color_occupied = GrayColor(_DEFAULT_COLOR_OCCUPIED)
-    self.color_occupied = color_occupied
-    if color_free is None:
-      color_free = GrayColor(_DEFAULT_COLOR_FREE)
-    self.color_free = color_free
-    if color_unknown is None:
-      color_unknown = GrayColor(_DEFAULT_COLOR_UNKNOWN)
-    self.color_unknown = color_unknown
-    if not (color_occupied.format == color_free.format == color_unknown.format):
-      raise Exception('All colors need to have the same format.')
-    self.format = color_occupied.format
-
-
-class GrayColor(object):
-
-  def __init__(self, value):
-    self.value = value
-    self.byte_value = chr(value)
-    self.format = 'L'
-
-
-class RGBAColor(object):
-
-  def __init__(self, red, green, blue, alpha):
-    self.value = alpha << 24 | red << 16 | green << 8 | blue
-    self.byte_value = self._encode()
-    self.format = 'RGBA'
-
-  def _encode(self):
-    bytes = bytearray(4)
-    for i in range(4):
-      bytes[i] = (self.value >> (i * 8) & 0xff)
-    return bytes
 
 
 def _occupancy_to_bytes(data, color_configuration):
@@ -106,7 +62,7 @@ def _make_scaled_map_metadata(metadata, resolution):
     resolution=resolution,
     width=width, height=height,
     origin=metadata.origin)
-    
+
 
 def calculate_resolution(goal_size, current_size, current_resolution):
   goal_width, goal_height = goal_size
@@ -121,7 +77,7 @@ def calculate_resolution(goal_size, current_size, current_resolution):
 
 def occupancy_grid_to_image(occupancy_grid, color_configuration=None):
   if color_configuration is None:
-    color_configuration = ColorConfiguration()
+    color_configuration = color.ColorConfiguration()
   data_stream = io.BytesIO()
   for value in _occupancy_to_bytes(occupancy_grid.data, color_configuration):
     data_stream.write(value)
@@ -133,8 +89,8 @@ def occupancy_grid_to_image(occupancy_grid, color_configuration=None):
 
 def image_to_occupancy_grid_data(image, color_configuration=None):
   if color_configuration is None:
-    color_configuration = ColorConfiguration()
-  color_configuration = ColorConfiguration()  
+    color_configuration = color.ColorConfiguration()
+  color_configuration = color.ColorConfiguration()
   return _bytes_to_occupancy(
       image.getdata(), color_configuration)
 

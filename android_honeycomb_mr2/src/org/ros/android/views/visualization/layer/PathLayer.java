@@ -64,6 +64,7 @@ public class PathLayer extends SubscriberLayer<org.ros.message.nav_msgs.Path> im
       gl.glColor4f(COLOR.getRed(), COLOR.getGreen(), COLOR.getBlue(), COLOR.getAlpha());
       gl.glPointSize(POINT_SIZE);
       gl.glDrawArrays(GL10.GL_POINTS, 0, vertexBuffer.limit() / 3);
+      gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
     }
   }
 

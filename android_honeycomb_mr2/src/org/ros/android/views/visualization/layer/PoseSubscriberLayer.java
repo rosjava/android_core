@@ -17,9 +17,7 @@
 package org.ros.android.views.visualization.layer;
 
 import android.os.Handler;
-import android.view.MotionEvent;
 import org.ros.android.views.visualization.Camera;
-import org.ros.android.views.visualization.VisualizationView;
 import org.ros.android.views.visualization.shape.GoalShape;
 import org.ros.android.views.visualization.shape.Shape;
 import org.ros.message.MessageListener;
@@ -38,10 +36,10 @@ import javax.microedition.khronos.opengles.GL10;
 public class PoseSubscriberLayer extends SubscriberLayer<org.ros.message.geometry_msgs.PoseStamped>
     implements TfLayer {
 
+  private final GraphName targetFrame;
+  
   private Shape shape;
   private boolean ready;
-  private boolean visible;
-  private GraphName targetFrame;
 
   public PoseSubscriberLayer(String topic) {
     this(new GraphName(topic));
@@ -49,21 +47,15 @@ public class PoseSubscriberLayer extends SubscriberLayer<org.ros.message.geometr
 
   public PoseSubscriberLayer(GraphName topic) {
     super(topic, "geometry_msgs/PoseStamped");
-    visible = true;
-    ready = false;
     targetFrame = new GraphName("/map");
+    ready = false;
   }
 
   @Override
   public void draw(GL10 gl) {
-    if (ready && visible) {
+    if (ready) {
       shape.draw(gl);
     }
-  }
-
-  @Override
-  public boolean onTouchEvent(VisualizationView view, MotionEvent event) {
-    return false;
   }
 
   @Override
@@ -84,14 +76,6 @@ public class PoseSubscriberLayer extends SubscriberLayer<org.ros.message.geometr
             }
           }
         });
-  }
-
-  public boolean isVisible() {
-    return visible;
-  }
-
-  public void setVisible(boolean visible) {
-    this.visible = visible;
   }
 
   @Override
