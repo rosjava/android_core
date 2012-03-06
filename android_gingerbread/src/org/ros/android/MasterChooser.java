@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -18,7 +18,7 @@ package org.ros.android;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.android.R;
+import org.ros.android_gingerbread.R;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -40,7 +40,7 @@ import java.util.List;
  * Displays a text box to allow the user to enter a URI or scan a QR code. Then
  * it returns that uri to the calling activity. When this activity is started
  * the last used (or the default) uri is displayed to the user.
- * 
+ *
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  * @author munjaldesai@google.com (Munjal Desai)
@@ -136,7 +136,7 @@ public class MasterChooser extends Activity {
 
   /**
    * Check if the specified app is installed.
-   * 
+   *
    * @param intent
    *          The activity that you wish to look for.
    * @return true if the desired activity is install on the device, false

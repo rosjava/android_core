@@ -1,22 +1,12 @@
 <package>
   <description brief="android_gingerbread">
-
     android_gingerbread
-
   </description>
   <author>Damon Kohler</author>
   <license>Apache 2</license>
-  <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/android</url>
+  <review status="unreviewed" notes="" />
+  <url>http://ros.org/wiki/android_gingerbread</url>
 
-  <depend package="rosjava"/>
   <depend package="sensor_msgs" />
-
-  <export>
-    <rosjava-android-lib target="android-10" />
-    <rosjava-src location="src" />
-    <rosjava-src location="gen" />
-    <rosjava-src location="res" />
-  </export>
-
 </package>
+

@@ -1,12 +1,10 @@
 <stack>
   <description brief="android_core">android_core</description>
   <author>Maintained by Damon Kohler</author>
-  <license>BSD, Apache 2.0</license>
-  <review status="unreviewed" notes=""/>
+  <license>Apache License 2.0</license>
+  <review status="unreviewed" notes="" />
   <url>http://ros.org/wiki/android_core</url>
 
-  <depend stack="common_msgs" /> <!-- sensor_msgs -->
   <depend stack="ros" />
-  <depend stack="rosjava_core" /> <!-- rosjava -->
-
+  <depend stack="rosjava_core" />
 </stack>

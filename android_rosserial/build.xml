@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="android_rosserial" default="debug">
-  <property file="ros.properties" />
-  <property file="project.properties" />
-  <import file="${ros.pkg.rosjava_bootstrap.dir}/android.xml" />
-</project>
-
