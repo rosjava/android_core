@@ -32,16 +32,13 @@ subprojects {
   }
 
   task deployTransitiveLibs(type: Copy) {
-    from configurations.compile
+    from { configurations.compile }
     into "${projectDir}/libs"
   }
 
-  // TODO(damonkohler): See http://forums.gradle.org/gradle/topics/strange_copy_task_behavior
-  task deployLibs << {
-    copy {
-      from configurations.compile.copy().setTransitive(false)
-      into "${projectDir}/libs"
-    }
+  task deployLibs(type: Copy) {
+    from { configurations.compile.copy().setTransitive(false) }
+    into "${projectDir}/libs"
   }
 
   task clean << {
