@@ -19,7 +19,6 @@ task wrapper(type: Wrapper) {
 }
 
 subprojects {
-
   group 'ros.android_core'
   version = '0.0.0-SNAPSHOT'
 
