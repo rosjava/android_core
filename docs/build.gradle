@@ -14,6 +14,22 @@
  * the License.
  */
 
-include 'android_gingerbread', 'android_tutorial_pubsub', 'android_honeycomb_mr2',
-        'android_tutorial_teleop', 'android_tutorial_hokuyo', 'android_acm_serial',
-        'android_tutorial_camera', 'android_tutorial_image_transport', 'docs'
+import org.apache.tools.ant.filters.ReplaceTokens
+
+task copySphinxConf(type: Copy) {
+  from('src/main/sphinx/conf.py.in') {
+    filter(ReplaceTokens, tokens: ['version': rootProject.version])
+  }
+  into 'src/main/sphinx'
+  rename 'conf.py.in', 'conf.py'
+}
+
+task install(type: Exec, dependsOn: copySphinxConf) {
+  commandLine 'make', 'html'
+}
+
+task clean << {
+  ant.delete dir: 'build'
+  ant.delete file: 'src/main/sphinx/conf.py'
+}
+

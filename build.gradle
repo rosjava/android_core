@@ -18,40 +18,44 @@ task wrapper(type: Wrapper) {
   gradleVersion = '1.0-milestone-8a'
 }
 
-subprojects {
+allprojects {
   group 'ros.android_core'
   version = '0.0.0-SNAPSHOT'
+}
 
-  repositories {
-    mavenLocal()
-    maven {
-      url 'http://robotbrains.hideho.org/nexus/content/groups/ros-public'
+subprojects {
+  if (name != 'docs') {
+    repositories {
+      mavenLocal()
+      maven {
+        url 'http://robotbrains.hideho.org/nexus/content/groups/ros-public'
+      }
     }
-  }
 
-  configurations.add('compile') {
-    exclude group: 'junit'
-    exclude group: 'xml-apis'
-  }
+    configurations.add('compile') {
+      exclude group: 'junit'
+      exclude group: 'xml-apis'
+    }
 
-  task deployTransitiveLibs(type: Copy) {
-    from { configurations.compile }
-    into "${projectDir}/libs"
-  }
+    task deployTransitiveLibs(type: Copy) {
+      from { configurations.compile }
+      into "${projectDir}/libs"
+    }
 
-  task deployLibs(type: Copy) {
-    from { configurations.compile.copy().setTransitive(false) }
-    into "${projectDir}/libs"
-  }
+    task deployLibs(type: Copy) {
+      from { configurations.compile.copy().setTransitive(false) }
+      into "${projectDir}/libs"
+    }
 
-  task clean << {
-    ant.delete dir: "${projectDir}/bin"
-    ant.delete dir: "${projectDir}/gen"
-    ant.delete dir: "${projectDir}/libs"
-  }
+    task clean << {
+      ant.delete dir: "${projectDir}/bin"
+      ant.delete dir: "${projectDir}/gen"
+      ant.delete dir: "${projectDir}/libs"
+    }
 
-  task debug(type: Exec) {
-    commandLine 'ant', 'debug'
+    task debug(type: Exec) {
+      commandLine 'ant', 'debug'
+    }
   }
 }
 
