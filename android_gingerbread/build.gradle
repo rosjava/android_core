@@ -16,7 +16,6 @@
 
 dependencies {
   compile 'ros.rosjava_core:rosjava:0.0.0-SNAPSHOT'
-  compile 'ros:message.sensor_msgs:0.0.0-SNAPSHOT'
 }
 
 debug.dependsOn deployTransitiveLibs

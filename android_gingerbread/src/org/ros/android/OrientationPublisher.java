@@ -20,9 +20,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import geometry_msgs.PoseStamped;
 import org.ros.message.Time;
-import org.ros.message.geometry_msgs.PoseStamped;
-import org.ros.message.geometry_msgs.Quaternion;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
@@ -39,18 +38,10 @@ public class OrientationPublisher implements NodeMain {
 
   private final class OrientationListener implements SensorEventListener {
 
-    private final Publisher<PoseStamped> publisher;
-    private final org.ros.message.geometry_msgs.Point origin;
+    private final Publisher<geometry_msgs.PoseStamped> publisher;
 
-    private volatile int seq;
-
-    private OrientationListener(Publisher<PoseStamped> publisher) {
+    private OrientationListener(Publisher<geometry_msgs.PoseStamped> publisher) {
       this.publisher = publisher;
-      origin = new org.ros.message.geometry_msgs.Point();
-      origin.x = 0;
-      origin.y = 0;
-      origin.z = 0;
-      seq = 0;
     }
 
     @Override
@@ -62,17 +53,14 @@ public class OrientationPublisher implements NodeMain {
       if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
         float[] quaternion = new float[4];
         SensorManager.getQuaternionFromVector(quaternion, event.values);
-        Quaternion orientation = new Quaternion();
-        orientation.w = quaternion[0];
-        orientation.x = quaternion[1];
-        orientation.y = quaternion[2];
-        orientation.z = quaternion[3];
-        PoseStamped pose = new PoseStamped();
-        pose.header.frame_id = "/map";
-        pose.header.seq = seq++;
-        pose.header.stamp = Time.fromMillis(System.currentTimeMillis());
-        pose.pose.position = origin;
-        pose.pose.orientation = orientation;
+        PoseStamped pose = publisher.newMessage();
+        pose.header().frame_id("/map");
+        // TODO(damonkohler): Should get time from the Node.
+        pose.header().stamp(Time.fromMillis(System.currentTimeMillis()));
+        pose.pose().orientation().w(quaternion[0]);
+        pose.pose().orientation().x(quaternion[1]);
+        pose.pose().orientation().y(quaternion[2]);
+        pose.pose().orientation().z(quaternion[3]);
         publisher.publish(pose);
       }
     }
@@ -90,7 +78,7 @@ public class OrientationPublisher implements NodeMain {
   @Override
   public void onStart(Node node) {
     try {
-      Publisher<org.ros.message.geometry_msgs.PoseStamped> publisher =
+      Publisher<geometry_msgs.PoseStamped> publisher =
           node.newPublisher("android/orientation", "geometry_msgs/PoseStamped");
       orientationListener = new OrientationListener(publisher);
       Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);

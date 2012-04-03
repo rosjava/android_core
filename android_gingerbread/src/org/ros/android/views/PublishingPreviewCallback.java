@@ -21,10 +21,11 @@ import com.google.common.base.Preconditions;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
-import org.ros.message.sensor_msgs.CameraInfo;
-import org.ros.message.sensor_msgs.CompressedImage;
+import org.ros.message.Time;
 import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
+
+import java.util.ArrayList;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -32,11 +33,12 @@ import org.ros.node.topic.Publisher;
 class PublishingPreviewCallback implements PreviewCallback {
 
   private final Node node;
-  private final Publisher<CompressedImage> imagePublisher;
-  private final Publisher<CameraInfo> cameraInfoPublisher;
+  private final Publisher<sensor_msgs.CompressedImage> imagePublisher;
+  private final Publisher<sensor_msgs.CameraInfo> cameraInfoPublisher;
 
-  public PublishingPreviewCallback(Node node, Publisher<CompressedImage> imagePublisher,
-      Publisher<CameraInfo> cameraInfoPublisher) {
+  public PublishingPreviewCallback(Node node,
+      Publisher<sensor_msgs.CompressedImage> imagePublisher,
+      Publisher<sensor_msgs.CameraInfo> cameraInfoPublisher) {
     this.node = node;
     this.imagePublisher = imagePublisher;
     this.cameraInfoPublisher = cameraInfoPublisher;
@@ -47,26 +49,26 @@ class PublishingPreviewCallback implements PreviewCallback {
     Preconditions.checkNotNull(data);
     Preconditions.checkNotNull(camera);
 
-    CompressedImage image = new CompressedImage();
-    CameraInfo cameraInfo = new CameraInfo();
+    Time currentTime = node.getCurrentTime();
     String frameId = "camera";
 
-    // TODO(ethan): Right now serialization is deferred. When serialization
-    // happens inline, we won't need to copy.
-    image.data = new byte[data.length];
-    System.arraycopy(data, 0, image.data, 0, data.length);
-
-    image.format = "jpeg";
-    image.header.stamp = node.getCurrentTime();
-    image.header.frame_id = frameId;
+    sensor_msgs.CompressedImage image = imagePublisher.newMessage();
+    image.data(new ArrayList<Short>());
+    for (byte b : data) {
+      image.data().add((short) b);
+    }
+    image.format("jpeg");
+    image.header().stamp(currentTime);
+    image.header().frame_id(frameId);
     imagePublisher.publish(image);
 
-    cameraInfo.header.stamp = image.header.stamp;
-    cameraInfo.header.frame_id = frameId;
+    sensor_msgs.CameraInfo cameraInfo = cameraInfoPublisher.newMessage();
+    cameraInfo.header().stamp(currentTime);
+    cameraInfo.header().frame_id(frameId);
 
     Size previewSize = camera.getParameters().getPreviewSize();
-    cameraInfo.width = previewSize.width;
-    cameraInfo.height = previewSize.height;
+    cameraInfo.width(previewSize.width);
+    cameraInfo.height(previewSize.height);
     cameraInfoPublisher.publish(cameraInfo);
   }
 }

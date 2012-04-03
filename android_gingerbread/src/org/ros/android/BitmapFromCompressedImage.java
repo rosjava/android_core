@@ -18,16 +18,17 @@ package org.ros.android;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import org.ros.message.sensor_msgs.CompressedImage;
+import org.ros.collections.PrimitiveArrays;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class BitmapFromCompressedImage implements MessageCallable<Bitmap, CompressedImage> {
+public class BitmapFromCompressedImage implements
+    MessageCallable<Bitmap, sensor_msgs.CompressedImage> {
 
   @Override
-  public Bitmap call(CompressedImage message) {
-    return BitmapFactory.decodeByteArray(message.data, 0, message.data.length);
+  public Bitmap call(sensor_msgs.CompressedImage message) {
+    byte[] data = PrimitiveArrays.toByteArray(message.data());
+    return BitmapFactory.decodeByteArray(data, 0, data.length);
   }
-
 }

@@ -18,8 +18,6 @@ package org.ros.android.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import org.ros.message.sensor_msgs.CameraInfo;
-import org.ros.message.sensor_msgs.CompressedImage;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.Node;
@@ -51,10 +49,11 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
   @Override
   public void onStart(Node node) {
     NameResolver resolver = node.getResolver().newChild("camera");
-    Publisher<CompressedImage> imagePublisher =
-        node.newPublisher(resolver.resolve("image_raw/compressed"), "sensor_msgs/CompressedImage");
-    Publisher<CameraInfo> cameraInfoPublisher =
-        node.newPublisher(resolver.resolve("camera_info"), "sensor_msgs/CameraInfo");
+    Publisher<sensor_msgs.CompressedImage> imagePublisher =
+        node.newPublisher(resolver.resolve("image_raw/compressed"),
+            sensor_msgs.CompressedImage._TYPE);
+    Publisher<sensor_msgs.CameraInfo> cameraInfoPublisher =
+        node.newPublisher(resolver.resolve("camera_info"), sensor_msgs.CameraInfo._TYPE);
     setPreviewCallback(new PublishingPreviewCallback(node, imagePublisher, cameraInfoPublisher));
   }
 

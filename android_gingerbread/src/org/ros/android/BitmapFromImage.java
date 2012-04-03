@@ -20,23 +20,22 @@ import com.google.common.base.Preconditions;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import org.ros.message.sensor_msgs.Image;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class BitmapFromImage implements MessageCallable<Bitmap, Image> {
+public class BitmapFromImage implements MessageCallable<Bitmap, sensor_msgs.Image> {
 
   @Override
-  public Bitmap call(Image message) {
-    Preconditions.checkArgument(message.encoding.equals("rgb8"));
+  public Bitmap call(sensor_msgs.Image message) {
+    Preconditions.checkArgument(message.encoding().equals("rgb8"));
     Bitmap bitmap =
-        Bitmap.createBitmap((int) message.width, (int) message.height, Bitmap.Config.ARGB_8888);
-    for (int x = 0; x < message.width; x++) {
-      for (int y = 0; y < message.height; y++) {
-        byte red = message.data[(int) (y * message.step + 3 * x)];
-        byte green = message.data[(int) (y * message.step + 3 * x + 1)];
-        byte blue = message.data[(int) (y * message.step + 3 * x + 2)];
+        Bitmap.createBitmap((int) message.width(), (int) message.height(), Bitmap.Config.ARGB_8888);
+    for (int x = 0; x < message.width(); x++) {
+      for (int y = 0; y < message.height(); y++) {
+        byte red = message.data().get((int) (y * message.step() + 3 * x)).byteValue();
+        byte green = message.data().get((int) (y * message.step() + 3 * x + 1)).byteValue();
+        byte blue = message.data().get((int) (y * message.step() + 3 * x + 2)).byteValue();
         bitmap.setPixel(x, y, Color.argb(255, red & 0xFF, green & 0xFF, blue & 0xFF));
       }
     }
