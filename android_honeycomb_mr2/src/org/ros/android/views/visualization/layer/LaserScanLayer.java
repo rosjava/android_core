@@ -16,16 +16,17 @@
 
 package org.ros.android.views.visualization.layer;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.shape.Color;
 import org.ros.android.views.visualization.shape.Shape;
 import org.ros.android.views.visualization.shape.TriangleFanShape;
 import org.ros.message.MessageListener;
-import org.ros.message.sensor_msgs.LaserScan;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.topic.Subscriber;
 import org.ros.rosjava_geometry.FrameTransformTree;
+import sensor_msgs.LaserScan;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -35,8 +36,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author munjaldesai@google.com (Munjal Desai)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.LaserScan>
-    implements TfLayer {
+public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> implements TfLayer {
 
   private static final Color FREE_SPACE_COLOR = Color.fromHexAndAlpha("00adff", 0.3f);
 
@@ -66,18 +66,18 @@ public class LaserScanLayer extends SubscriberLayer<org.ros.message.sensor_msgs.
     subscriber.addMessageListener(new MessageListener<LaserScan>() {
       @Override
       public void onNewMessage(LaserScan laserScan) {
-        frame = new GraphName(laserScan.header.frame_id);
-        float[] ranges = laserScan.ranges;
+        frame = new GraphName(laserScan.header().frame_id());
+        float[] ranges = ArrayUtils.toPrimitive(laserScan.ranges().toArray(new Float[0]));
         // vertices is an array of x, y, z values starting with the origin of
         // the triangle fan.
         float[] vertices = new float[(ranges.length + 1) * 3];
         vertices[0] = 0;
         vertices[1] = 0;
         vertices[2] = 0;
-        float minimumRange = laserScan.range_min;
-        float maximumRange = laserScan.range_max;
-        float angle = laserScan.angle_min;
-        float angleIncrement = laserScan.angle_increment;
+        float minimumRange = laserScan.range_min();
+        float maximumRange = laserScan.range_max();
+        float angle = laserScan.angle_min();
+        float angleIncrement = laserScan.angle_increment();
         // Calculate the coordinates of the laser range values.
         for (int i = 0; i < ranges.length; i++) {
           float range = ranges[i];

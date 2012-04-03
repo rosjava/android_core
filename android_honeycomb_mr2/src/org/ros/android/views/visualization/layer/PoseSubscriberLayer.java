@@ -21,7 +21,6 @@ import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.shape.GoalShape;
 import org.ros.android.views.visualization.shape.Shape;
 import org.ros.message.MessageListener;
-import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.rosjava_geometry.FrameTransform;
@@ -33,11 +32,11 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public class PoseSubscriberLayer extends SubscriberLayer<org.ros.message.geometry_msgs.PoseStamped>
-    implements TfLayer {
+public class PoseSubscriberLayer extends SubscriberLayer<geometry_msgs.PoseStamped> implements
+    TfLayer {
 
   private final GraphName targetFrame;
-  
+
   private Shape shape;
   private boolean ready;
 
@@ -59,23 +58,24 @@ public class PoseSubscriberLayer extends SubscriberLayer<org.ros.message.geometr
   }
 
   @Override
-  public void onStart(Node node, Handler handler, final FrameTransformTree frameTransformTree, Camera camera) {
+  public void onStart(Node node, Handler handler, final FrameTransformTree frameTransformTree,
+      Camera camera) {
     super.onStart(node, handler, frameTransformTree, camera);
     shape = new GoalShape();
-    getSubscriber().addMessageListener(
-        new MessageListener<org.ros.message.geometry_msgs.PoseStamped>() {
-          @Override
-          public void onNewMessage(PoseStamped pose) {
-            GraphName frame = new GraphName(pose.header.frame_id);
-            if (frameTransformTree.canTransform(frame, targetFrame)) {
-              Transform poseTransform = Transform.newFromPoseMessage(pose.pose);
-              FrameTransform targetFrameTransform = frameTransformTree.newFrameTransform(frame, targetFrame);
-              shape.setTransform(targetFrameTransform.getTransform().multiply(poseTransform));
-              ready = true;
-              requestRender();
-            }
-          }
-        });
+    getSubscriber().addMessageListener(new MessageListener<geometry_msgs.PoseStamped>() {
+      @Override
+      public void onNewMessage(geometry_msgs.PoseStamped pose) {
+        GraphName frame = new GraphName(pose.header().frame_id());
+        if (frameTransformTree.canTransform(frame, targetFrame)) {
+          Transform poseTransform = Transform.newFromPoseMessage(pose.pose());
+          FrameTransform targetFrameTransform =
+              frameTransformTree.newFrameTransform(frame, targetFrame);
+          shape.setTransform(targetFrameTransform.getTransform().multiply(poseTransform));
+          ready = true;
+          requestRender();
+        }
+      }
+    });
   }
 
   @Override

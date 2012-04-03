@@ -156,11 +156,7 @@ public class Camera {
   /**
    * Returns the real world equivalent of the viewport coordinates specified.
    * 
-   * @param x
-   *          coordinate of the view in pixels
-   * @param y
-   *          coordinate of the view in pixels
-   * @return real world coordinate
+   * @return the world coordinates of the provided screen coordinates
    */
   public Vector3 toWorldCoordinates(Point screenPoint) {
     // Top left corner of the view is the origin.

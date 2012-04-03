@@ -24,12 +24,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import org.ros.message.MessageListener;
-import org.ros.message.geometry_msgs.Twist;
-import org.ros.message.sensor_msgs.LaserScan;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
+import sensor_msgs.LaserScan;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +43,7 @@ import java.util.List;
  * @author munjaldesai@google.com (Munjal Desai)
  */
 public class DistanceView extends GLSurfaceView implements OnTouchListener, NodeMain,
-    MessageListener<org.ros.message.sensor_msgs.LaserScan> {
+    MessageListener<sensor_msgs.LaserScan> {
 
   /**
    * Topic for the distance scans that this view subscribes to.
@@ -105,20 +104,20 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
   @Override
   public void onStart(Node node) {
     // Subscribe to the laser scans.
-    Subscriber<org.ros.message.sensor_msgs.LaserScan> laserScanSubscriber =
-        node.newSubscriber(laserTopic, "sensor_msgs/LaserScan");
+    Subscriber<sensor_msgs.LaserScan> laserScanSubscriber =
+        node.newSubscriber(laserTopic, sensor_msgs.LaserScan._TYPE);
     laserScanSubscriber.addMessageListener(this);
     // Subscribe to the command velocity. This is needed for auto adjusting the
     // zoom in ZoomMode.VELOCITY_ZOOM_MODE mode.
-    Subscriber<org.ros.message.geometry_msgs.Twist> twistSubscriber =
-        node.newSubscriber("cmd_vel", "geometry_msgs/Twist");
-    twistSubscriber.addMessageListener(new MessageListener<Twist>() {
+    Subscriber<geometry_msgs.Twist> twistSubscriber =
+        node.newSubscriber("cmd_vel", geometry_msgs.Twist._TYPE);
+    twistSubscriber.addMessageListener(new MessageListener<geometry_msgs.Twist>() {
       @Override
-      public void onNewMessage(final Twist robotVelocity) {
+      public void onNewMessage(final geometry_msgs.Twist robotVelocity) {
         post(new Runnable() {
           @Override
           public void run() {
-            distanceRenderer.currentSpeed(robotVelocity.linear.x);
+            distanceRenderer.currentSpeed(robotVelocity.linear().x());
           }
         });
       }
@@ -144,16 +143,16 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
       @Override
       public void run() {
         List<Float> outRanges = new ArrayList<Float>();
-        float minDistToObject = message.range_max;
+        float minDistToObject = message.range_max();
         // Find the distance to the closest object and also create an List
         // for the ranges.
-        for (float range : message.ranges) {
+        for (float range : message.ranges()) {
           outRanges.add(range);
           minDistToObject = (minDistToObject > range) ? range : minDistToObject;
         }
         // Update the renderer with the latest range values.
-        distanceRenderer.updateRange(outRanges, message.range_max, message.range_min,
-            message.angle_min, message.angle_increment, minDistToObject);
+        distanceRenderer.updateRange(outRanges, message.range_max(), message.range_min(),
+            message.angle_min(), message.angle_increment(), minDistToObject);
         // Request to render the surface.
         requestRender();
       }

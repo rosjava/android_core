@@ -32,7 +32,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import org.ros.message.MessageListener;
-import org.ros.message.nav_msgs.Odometry;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
@@ -50,7 +49,7 @@ import java.util.TimerTask;
  * @author munjaldesai@google.com (Munjal Desai)
  */
 public class VirtualJoystickView extends RelativeLayout implements AnimationListener,
-    MessageListener<org.ros.message.nav_msgs.Odometry>, NodeMain {
+    MessageListener<nav_msgs.Odometry>, NodeMain {
 
   /**
    * BOX_TO_CIRCLE_RATIO The dimensions of the square box that contains the
@@ -93,7 +92,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    */
   private static final float POST_LOCK_MAGNET_THETA = 20.0f;
   private static final int INVALID_POINTER_ID = -1;
-  private Publisher<org.ros.message.geometry_msgs.Twist> publisher;
+  private Publisher<geometry_msgs.Twist> publisher;
   /**
    * mainLayout The parent layout that contains all the elements of the virtual
    * joystick.
@@ -224,7 +223,8 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   private boolean magnetizedXAxis;
   /**
    * {@code true} if the joystick should publish linear velocities along the Y
-   * axis instead of angular velocities along the Z axis, {@code false} otherwise.
+   * axis instead of angular velocities along the Z axis, {@code false}
+   * otherwise.
    */
   private boolean holonomic;
   /**
@@ -236,8 +236,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    * Used to publish velocity commands at a specific rate.
    */
   private Timer publisherTimer;
-  private org.ros.message.geometry_msgs.Twist currentVelocityCommand =
-      new org.ros.message.geometry_msgs.Twist();
+  private geometry_msgs.Twist currentVelocityCommand;
 
   public VirtualJoystickView(Context context) {
     super(context);
@@ -279,14 +278,14 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   }
 
   @Override
-  public void onNewMessage(final Odometry message) {
+  public void onNewMessage(final nav_msgs.Odometry message) {
     double heading;
     // For some reason the values of z and y seem to be interchanged. If they
     // are not swapped then heading is always incorrect.
-    double w = message.pose.pose.orientation.w;
-    double x = message.pose.pose.orientation.x;
-    double y = message.pose.pose.orientation.z;
-    double z = message.pose.pose.orientation.y;
+    double w = message.pose().pose().orientation().w();
+    double x = message.pose().pose().orientation().x();
+    double y = message.pose().pose().orientation().z();
+    double z = message.pose().pose().orientation().y();
     heading = Math.atan2(2 * y * w - 2 * x * z, x * x - y * y - z * z + w * w) * 180 / Math.PI;
     // Negating the orientation to make the math for rotation in
     // turn-in-place mode easy. Since the actual heading is irrelevant it does
@@ -308,64 +307,63 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   public boolean onTouchEvent(MotionEvent event) {
     final int action = event.getAction();
     switch (action & MotionEvent.ACTION_MASK) {
-      case MotionEvent.ACTION_MOVE: {
-        // If the primary contact point is no longer on the screen then ignore
-        // the event.
-        if (pointerId != INVALID_POINTER_ID) {
-          // If the virtual joystick is in resume-previous-velocity mode.
-          if (previousVelocityMode) {
-            // And the current contact is close to the contact location prior to
-            // ContactUp.
-            if (inLastContactRange(event.getX(event.getActionIndex()),
-                event.getY(event.getActionIndex()))) {
-              // Then use the previous velocity.
-              onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y
-                  + joystickRadius);
-            }
-            // Since the current contact is not close to the prior location.
-            else {
-              // Exit the resume-previous-velocity mode.
-              previousVelocityMode = false;
-            }
+    case MotionEvent.ACTION_MOVE: {
+      // If the primary contact point is no longer on the screen then ignore
+      // the event.
+      if (pointerId != INVALID_POINTER_ID) {
+        // If the virtual joystick is in resume-previous-velocity mode.
+        if (previousVelocityMode) {
+          // And the current contact is close to the contact location prior to
+          // ContactUp.
+          if (inLastContactRange(event.getX(event.getActionIndex()),
+              event.getY(event.getActionIndex()))) {
+            // Then use the previous velocity.
+            onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y
+                + joystickRadius);
           }
-          // Since the resume-previous-velocity mode is not active generate
-          // velocities based on current contact position.
+          // Since the current contact is not close to the prior location.
           else {
-            onContactMove(event.getX(event.findPointerIndex(pointerId)),
-                event.getY(event.findPointerIndex(pointerId)));
+            // Exit the resume-previous-velocity mode.
+            previousVelocityMode = false;
           }
         }
-        break;
-      }
-      case MotionEvent.ACTION_DOWN: {
-        // Get the coordinates of the pointer that is initiating the
-        // interaction.
-        pointerId = event.getPointerId(event.getActionIndex());
-        onContactDown();
-        // If the current contact is close to the location of the contact prior
-        // to contactUp.
-        if (inLastContactRange(event.getX(event.getActionIndex()),
-            event.getY(event.getActionIndex()))) {
-          // Trigger resume-previous-velocity mode.
-          previousVelocityMode = true;
-          // The animation calculations/operations are performed in
-          // onContactMove(). If this is not called and the user's finger stays
-          // perfectly still after the down event, no operation is performed.
-          // Calling onContactMove avoids this.
-          onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y + joystickRadius);
-        } else {
-          onContactMove(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()));
+        // Since the resume-previous-velocity mode is not active generate
+        // velocities based on current contact position.
+        else {
+          onContactMove(event.getX(event.findPointerIndex(pointerId)),
+              event.getY(event.findPointerIndex(pointerId)));
         }
-        break;
       }
-      case MotionEvent.ACTION_POINTER_UP:
-      case MotionEvent.ACTION_UP: {
-        // Check if the contact that initiated the interaction is up.
-        if ((action & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent.ACTION_POINTER_ID_SHIFT == pointerId) {
-          onContactUp();
-        }
-        break;
+      break;
+    }
+    case MotionEvent.ACTION_DOWN: {
+      // Get the coordinates of the pointer that is initiating the
+      // interaction.
+      pointerId = event.getPointerId(event.getActionIndex());
+      onContactDown();
+      // If the current contact is close to the location of the contact prior
+      // to contactUp.
+      if (inLastContactRange(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()))) {
+        // Trigger resume-previous-velocity mode.
+        previousVelocityMode = true;
+        // The animation calculations/operations are performed in
+        // onContactMove(). If this is not called and the user's finger stays
+        // perfectly still after the down event, no operation is performed.
+        // Calling onContactMove avoids this.
+        onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y + joystickRadius);
+      } else {
+        onContactMove(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()));
       }
+      break;
+    }
+    case MotionEvent.ACTION_POINTER_UP:
+    case MotionEvent.ACTION_UP: {
+      // Check if the contact that initiated the interaction is up.
+      if ((action & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent.ACTION_POINTER_ID_SHIFT == pointerId) {
+        onContactUp();
+      }
+      break;
+    }
     }
     return true;
   }
@@ -538,36 +536,62 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     // All the virtual joystick elements must be centered on the parent.
     setGravity(Gravity.CENTER);
     // Instantiate the elements from the layout XML file.
-    LayoutInflater.from(context).inflate(org.ros.android_honeycomb_mr2.R.layout.virtual_joystick, this, true);
-    mainLayout = (RelativeLayout) findViewById(org.ros.android_honeycomb_mr2.R.id.virtual_joystick_layout);
+    LayoutInflater.from(context).inflate(org.ros.android_honeycomb_mr2.R.layout.virtual_joystick,
+        this, true);
+    mainLayout =
+        (RelativeLayout) findViewById(org.ros.android_honeycomb_mr2.R.id.virtual_joystick_layout);
     magnitudeText = (TextView) findViewById(org.ros.android_honeycomb_mr2.R.id.magnitude);
     intensity = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.intensity);
     thumbDivet = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.thumb_divet);
     orientationWidget = new ImageView[24];
-    orientationWidget[0] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_0_degrees);
-    orientationWidget[1] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_15_degrees);
-    orientationWidget[2] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_30_degrees);
-    orientationWidget[3] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_45_degrees);
-    orientationWidget[4] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_60_degrees);
-    orientationWidget[5] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_75_degrees);
-    orientationWidget[6] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_90_degrees);
-    orientationWidget[7] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_105_degrees);
-    orientationWidget[8] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_120_degrees);
-    orientationWidget[9] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_135_degrees);
-    orientationWidget[10] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_150_degrees);
-    orientationWidget[11] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_165_degrees);
-    orientationWidget[12] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_180_degrees);
-    orientationWidget[13] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_195_degrees);
-    orientationWidget[14] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_210_degrees);
-    orientationWidget[15] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_225_degrees);
-    orientationWidget[16] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_240_degrees);
-    orientationWidget[17] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_255_degrees);
-    orientationWidget[18] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_270_degrees);
-    orientationWidget[19] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_285_degrees);
-    orientationWidget[20] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_300_degrees);
-    orientationWidget[21] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_315_degrees);
-    orientationWidget[22] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_330_degrees);
-    orientationWidget[23] = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_345_degrees);
+    orientationWidget[0] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_0_degrees);
+    orientationWidget[1] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_15_degrees);
+    orientationWidget[2] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_30_degrees);
+    orientationWidget[3] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_45_degrees);
+    orientationWidget[4] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_60_degrees);
+    orientationWidget[5] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_75_degrees);
+    orientationWidget[6] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_90_degrees);
+    orientationWidget[7] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_105_degrees);
+    orientationWidget[8] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_120_degrees);
+    orientationWidget[9] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_135_degrees);
+    orientationWidget[10] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_150_degrees);
+    orientationWidget[11] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_165_degrees);
+    orientationWidget[12] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_180_degrees);
+    orientationWidget[13] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_195_degrees);
+    orientationWidget[14] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_210_degrees);
+    orientationWidget[15] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_225_degrees);
+    orientationWidget[16] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_240_degrees);
+    orientationWidget[17] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_255_degrees);
+    orientationWidget[18] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_270_degrees);
+    orientationWidget[19] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_285_degrees);
+    orientationWidget[20] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_300_degrees);
+    orientationWidget[21] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_315_degrees);
+    orientationWidget[22] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_330_degrees);
+    orientationWidget[23] =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.widget_345_degrees);
     // Initially hide all the widgets.
     for (ImageView tack : orientationWidget) {
       tack.setAlpha(0.0f);
@@ -583,12 +607,15 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     // Initially the orientationWidgets should point to 0 degrees.
     contactTheta = 0;
     animateOrientationWidgets();
-    currentRotationRange = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.top_angle_slice);
-    previousRotationRange = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.mid_angle_slice);
+    currentRotationRange =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.top_angle_slice);
+    previousRotationRange =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.mid_angle_slice);
     // Hide the slices/arcs used during the turn-in-place mode.
     currentRotationRange.setAlpha(0.0f);
     previousRotationRange.setAlpha(0.0f);
-    lastVelocityDivet = (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.previous_velocity_divet);
+    lastVelocityDivet =
+        (ImageView) findViewById(org.ros.android_honeycomb_mr2.R.id.previous_velocity_divet);
     contactUpLocation = new Point(0, 0);
     holonomic = false;
     for (ImageView tack : orientationWidget) {
@@ -797,12 +824,12 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    */
   private void publishVelocity(double linearVelocityX, double linearVelocityY,
       double angularVelocityZ) {
-    currentVelocityCommand.linear.x = linearVelocityX;
-    currentVelocityCommand.linear.y = -linearVelocityY;
-    currentVelocityCommand.linear.z = 0;
-    currentVelocityCommand.angular.x = 0;
-    currentVelocityCommand.angular.y = 0;
-    currentVelocityCommand.angular.z = -angularVelocityZ;
+    currentVelocityCommand.linear().x(linearVelocityX);
+    currentVelocityCommand.linear().y(-linearVelocityY);
+    currentVelocityCommand.linear().z(0);
+    currentVelocityCommand.angular().x(0);
+    currentVelocityCommand.angular().y(0);
+    currentVelocityCommand.angular().z(-angularVelocityZ);
   }
 
   /**
@@ -925,8 +952,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   public void onStart(Node node) {
     publisher = node.newPublisher("~cmd_vel", "geometry_msgs/Twist");
     publisher.setQueueLimit(1);
-    Subscriber<org.ros.message.nav_msgs.Odometry> subscriber =
-        node.newSubscriber("odom", "nav_msgs/Odometry");
+    Subscriber<nav_msgs.Odometry> subscriber = node.newSubscriber("odom", nav_msgs.Odometry._TYPE);
     subscriber.addMessageListener(this);
     publisherTimer = new Timer();
     publisherTimer.schedule(new TimerTask() {

@@ -31,8 +31,7 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public class OccupancyGridLayer extends SubscriberLayer<org.ros.message.nav_msgs.OccupancyGrid>
-    implements TfLayer {
+public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> implements TfLayer {
 
   /**
    * Color of occupied cells in the map.
@@ -71,13 +70,12 @@ public class OccupancyGridLayer extends SubscriberLayer<org.ros.message.nav_msgs
     }
   }
 
-  private static int[] occupancyGridToPixelArray(
-      org.ros.message.nav_msgs.OccupancyGrid occupancyGrid) {
-    int pixels[] = new int[occupancyGrid.data.length];
-    for (int i = 0; i < occupancyGrid.data.length; i++) {
-      if (occupancyGrid.data[i] == -1) {
+  private static int[] occupancyGridToPixelArray(nav_msgs.OccupancyGrid occupancyGrid) {
+    int pixels[] = new int[occupancyGrid.data().size()];
+    for (int i = 0; i < occupancyGrid.data().size(); i++) {
+      if (occupancyGrid.data().get(i) == -1) {
         pixels[i] = COLOR_UNKNOWN;
-      } else if (occupancyGrid.data[i] == 0) {
+      } else if (occupancyGrid.data().get(i) == 0) {
         pixels[i] = COLOR_FREE;
       } else {
         pixels[i] = COLOR_OCCUPIED;
@@ -90,22 +88,20 @@ public class OccupancyGridLayer extends SubscriberLayer<org.ros.message.nav_msgs
   public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree,
       Camera camera) {
     super.onStart(node, handler, frameTransformTree, camera);
-    getSubscriber().addMessageListener(
-        new MessageListener<org.ros.message.nav_msgs.OccupancyGrid>() {
-          @Override
-          public void onNewMessage(org.ros.message.nav_msgs.OccupancyGrid occupancyGridMessage) {
-            Bitmap occupancyGridBitmap =
-                TextureBitmapUtilities.createSquareBitmap(
-                    occupancyGridToPixelArray(occupancyGridMessage),
-                    (int) occupancyGridMessage.info.width, (int) occupancyGridMessage.info.height,
-                    COLOR_UNKNOWN);
-            occupancyGrid.update(occupancyGridMessage.info.origin,
-                occupancyGridMessage.info.resolution, occupancyGridBitmap);
-            frame = new GraphName(occupancyGridMessage.header.frame_id);
-            ready = true;
-            requestRender();
-          }
-        });
+    getSubscriber().addMessageListener(new MessageListener<nav_msgs.OccupancyGrid>() {
+      @Override
+      public void onNewMessage(nav_msgs.OccupancyGrid occupancyGridMessage) {
+        Bitmap occupancyGridBitmap =
+            TextureBitmapUtilities.createSquareBitmap(
+                occupancyGridToPixelArray(occupancyGridMessage), (int) occupancyGridMessage.info()
+                    .width(), (int) occupancyGridMessage.info().height(), COLOR_UNKNOWN);
+        occupancyGrid.update(occupancyGridMessage.info().origin(), occupancyGridMessage.info()
+            .resolution(), occupancyGridBitmap);
+        frame = new GraphName(occupancyGridMessage.header().frame_id());
+        ready = true;
+        requestRender();
+      }
+    });
   }
 
   @Override

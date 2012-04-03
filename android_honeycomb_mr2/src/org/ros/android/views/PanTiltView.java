@@ -30,7 +30,7 @@ import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * PanTiltZoomView creates a rosjava view that can be used to control a pan tilt
@@ -89,7 +89,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
   private static final String HOME_PAN_KEY_NAME = "HOME_PAN";
   private static final String HOME_TILT_KEY_NAME = "HOME_TILT";
 
-  private Publisher<org.ros.message.sensor_msgs.JointState> publisher;
+  private Publisher<sensor_msgs.JointState> publisher;
   
   /**
    * mainLayout The parent layout that contains all other elements.
@@ -473,7 +473,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
    * Publish the pan position.
    * 
    * @param x
-   *          The x coordinate corrected for the tack size, but not normalized.
+   *          the x coordinate corrected for the tack size, but not normalized
    */
   private void publishPan(float x) {
     // Normalize the pan value from the current range to (-1:+1).
@@ -481,13 +481,9 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
     // Transform the normalized pan value to the pan range for the device.
     pan = (maxPan - minPan) * pan + minPan;
     // Initialize the message with the pan position value and publish it.
-    org.ros.message.sensor_msgs.JointState jointState =
-        new org.ros.message.sensor_msgs.JointState();
-    jointState.name = new ArrayList<String>();
-    jointState.name.add("pan");
-    jointState.position = new double[] { pan };
-    jointState.effort = new double[] {};
-    jointState.velocity = new double[] {};
+    sensor_msgs.JointState jointState = publisher.newMessage();
+    jointState.name().add("pan");
+    jointState.position(Arrays.asList((double) pan));
     publisher.publish(jointState);
   }
 
@@ -495,7 +491,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
    * Publish the tilt position.
    * 
    * @param y
-   *          The y coordinate corrected for the tack size, but not normalized.
+   *          the y coordinate corrected for the tack size, but not normalized
    */
   private void publishTilt(float y) {
     // Normalize the tilt value from the current range to (-1:+1).
@@ -503,13 +499,9 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
     // Transform the normalized tilt value to the pan range for the device.
     tilt = (maxTilt - minTilt) * tilt + minTilt;
     // Initialize the message with the tilt position value and publish it.
-    org.ros.message.sensor_msgs.JointState jointState =
-        new org.ros.message.sensor_msgs.JointState();
-    jointState.name = new ArrayList<String>();
-    jointState.name.add("tilt");
-    jointState.position = new double[] { tilt };
-    jointState.effort = new double[] {};
-    jointState.velocity = new double[] {};
+    sensor_msgs.JointState jointState = publisher.newMessage();
+    jointState.name().add("tilt");
+    jointState.position(Arrays.asList((double) tilt));
     publisher.publish(jointState);
   }
 
@@ -523,28 +515,11 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
 
   @Override
   public void onStart(Node node) {
-    publisher = node.newPublisher("/ptu_cmd", "sensor_msgs/JointState");
+    publisher = node.newPublisher("/ptu_cmd", sensor_msgs.JointState._TYPE);
   }
 
   @Override
   public GraphName getDefaultNodeName() {
     return new GraphName("android_honeycomb_mr2/pan_tilt_view");
   }
-
-  // Future work.
-  // private void setDefaultValues() {
-  // SharedPreferences settings =
-  // this.getContext().getSharedPreferences(SHARED_PREFERENCE_NAME,
-  // Context.MODE_PRIVATE);
-  // SharedPreferences.Editor editor = settings.edit();
-  //
-  // // Perform a synchronous atomic commit.
-  // if (!editor.commit()) {
-  // Toast toast =
-  // Toast.makeText(this.getContext(),
-  // "Could not save the settings for the pan tilt widget",
-  // Toast.LENGTH_LONG);
-  // toast.show();
-  // }
-  // }
 }

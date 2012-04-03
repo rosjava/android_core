@@ -33,7 +33,7 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class GridCellsLayer extends SubscriberLayer<org.ros.message.nav_msgs.GridCells> implements
+public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implements
     TfLayer {
 
   private final Color color;
@@ -42,7 +42,7 @@ public class GridCellsLayer extends SubscriberLayer<org.ros.message.nav_msgs.Gri
   private GraphName frame;
   private Camera camera;
   private boolean ready;
-  private org.ros.message.nav_msgs.GridCells message;
+  private nav_msgs.GridCells message;
 
   public GridCellsLayer(String topicName, Color color) {
     this(new GraphName(topicName), color);
@@ -63,12 +63,12 @@ public class GridCellsLayer extends SubscriberLayer<org.ros.message.nav_msgs.Gri
     }
     super.draw(gl);
     lock.lock();
-    float pointSize = Math.max(message.cell_width, message.cell_height) * camera.getZoom();
-    float[] vertices = new float[3 * message.cells.size()];
+    float pointSize = Math.max(message.cell_width(), message.cell_height()) * camera.getZoom();
+    float[] vertices = new float[3 * message.cells().size()];
     int i = 0;
-    for (org.ros.message.geometry_msgs.Point cell : message.cells) {
-      vertices[i] = (float) cell.x;
-      vertices[i + 1] = (float) cell.y;
+    for (geometry_msgs.Point cell : message.cells()) {
+      vertices[i] = (float) cell.x();
+      vertices[i + 1] = (float) cell.y();
       vertices[i + 2] = 0.0f;
       i += 3;
     }
@@ -76,7 +76,7 @@ public class GridCellsLayer extends SubscriberLayer<org.ros.message.nav_msgs.Gri
     gl.glVertexPointer(3, GL10.GL_FLOAT, 0, Vertices.toFloatBuffer(vertices));
     gl.glColor4f(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
     gl.glPointSize(pointSize);
-    gl.glDrawArrays(GL10.GL_POINTS, 0, message.cells.size());
+    gl.glDrawArrays(GL10.GL_POINTS, 0, message.cells().size());
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
     lock.unlock();
   }
@@ -86,10 +86,10 @@ public class GridCellsLayer extends SubscriberLayer<org.ros.message.nav_msgs.Gri
       Camera camera) {
     super.onStart(node, handler, frameTransformTree, camera);
     this.camera = camera;
-    getSubscriber().addMessageListener(new MessageListener<org.ros.message.nav_msgs.GridCells>() {
+    getSubscriber().addMessageListener(new MessageListener<nav_msgs.GridCells>() {
       @Override
-      public void onNewMessage(org.ros.message.nav_msgs.GridCells data) {
-        frame = new GraphName(data.header.frame_id);
+      public void onNewMessage(nav_msgs.GridCells data) {
+        frame = new GraphName(data.header().frame_id());
         if (frameTransformTree.canTransform(frame, frame)) {
           if (lock.tryLock()) {
             message = data;

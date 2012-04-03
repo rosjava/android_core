@@ -46,7 +46,7 @@ public class PosePublisherLayer extends DefaultLayer {
   private final Context context;
 
   private Shape shape;
-  private Publisher<org.ros.message.geometry_msgs.PoseStamped> posePublisher;
+  private Publisher<geometry_msgs.PoseStamped> posePublisher;
   private boolean visible;
   private GraphName topic;
   private GestureDetector gestureDetector;
@@ -91,7 +91,7 @@ public class PosePublisherLayer extends DefaultLayer {
         return true;
       } else if (event.getAction() == MotionEvent.ACTION_UP) {
         posePublisher.publish(pose.toPoseStampedMessage(camera.getFixedFrame(),
-            node.getCurrentTime()));
+            node.getCurrentTime(), posePublisher.newMessage()));
         visible = false;
         requestRender();
         return true;

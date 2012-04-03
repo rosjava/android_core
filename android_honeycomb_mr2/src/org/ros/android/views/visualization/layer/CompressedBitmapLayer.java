@@ -23,8 +23,8 @@ import android.util.Log;
 import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.TextureBitmapUtilities;
 import org.ros.android.views.visualization.TextureDrawable;
+import org.ros.collections.PrimitiveArrays;
 import org.ros.message.MessageListener;
-import org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.topic.Subscriber;
@@ -38,8 +38,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
 public class CompressedBitmapLayer extends
-    SubscriberLayer<org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap>
-    implements TfLayer {
+    SubscriberLayer<compressed_visualization_transport_msgs.CompressedBitmap> implements TfLayer {
 
   private static final String TAG = "CompressedBitmapLayer";
 
@@ -69,26 +68,27 @@ public class CompressedBitmapLayer extends
   public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree,
       Camera camera) {
     super.onStart(node, handler, frameTransformTree, camera);
-    Subscriber<CompressedBitmap> subscriber = getSubscriber();
+    Subscriber<compressed_visualization_transport_msgs.CompressedBitmap> subscriber =
+        getSubscriber();
     subscriber.setQueueLimit(1);
     subscriber
-        .addMessageListener(new MessageListener<org.ros.message.compressed_visualization_transport_msgs.CompressedBitmap>() {
+        .addMessageListener(new MessageListener<compressed_visualization_transport_msgs.CompressedBitmap>() {
           @Override
-          public void onNewMessage(CompressedBitmap compressedBitmap) {
+          public void onNewMessage(
+              compressed_visualization_transport_msgs.CompressedBitmap compressedBitmap) {
             update(compressedBitmap);
           }
         });
   }
 
-  void update(CompressedBitmap compressedBitmap) {
+  void update(compressed_visualization_transport_msgs.CompressedBitmap compressedBitmap) {
     Bitmap bitmap;
     IntBuffer pixels;
     try {
       BitmapFactory.Options options = new BitmapFactory.Options();
       options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-      bitmap =
-          BitmapFactory.decodeByteArray(compressedBitmap.data, 0, compressedBitmap.data.length,
-              options);
+      byte[] data = PrimitiveArrays.toByteArray(compressedBitmap.data());
+      bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
       pixels = IntBuffer.allocate(bitmap.getWidth() * bitmap.getHeight());
       bitmap.copyPixelsToBuffer(pixels);
       bitmap.recycle();
@@ -106,8 +106,8 @@ public class CompressedBitmapLayer extends
           bitmap.getWidth(), bitmap.getHeight()), e);
       return;
     }
-    textureDrawable.update(compressedBitmap.origin, compressedBitmap.resolution_x, squareBitmap);
-    frame = new GraphName(compressedBitmap.header.frame_id);
+    textureDrawable.update(compressedBitmap.origin(), compressedBitmap.resolution_x(), squareBitmap);
+    frame = new GraphName(compressedBitmap.header().frame_id());
     ready = true;
     requestRender();
   }

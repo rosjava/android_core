@@ -19,7 +19,6 @@ package org.ros.android.views.visualization;
 import com.google.common.base.Preconditions;
 
 import android.graphics.Bitmap;
-import org.ros.message.geometry_msgs.Pose;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
 
@@ -77,13 +76,7 @@ public class TextureDrawable implements OpenGlDrawable {
     texture = new Texture();
   }
   
-  /**
-   * Creates a new set of points to render based on the incoming occupancy grid.
-   * 
-   * @param newOccupancyGrid
-   *          OccupancyGrid representing the map data.
-   */
-  public void update(Pose newOrigin, double newResolution, Bitmap newBitmap) {
+  public void update(geometry_msgs.Pose newOrigin, double newResolution, Bitmap newBitmap) {
     origin = Transform.newFromPoseMessage(newOrigin);
     resolution = newResolution;
     width = newBitmap.getWidth() * resolution;

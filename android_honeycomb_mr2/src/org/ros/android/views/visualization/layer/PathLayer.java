@@ -17,11 +17,10 @@
 package org.ros.android.views.visualization.layer;
 
 import android.os.Handler;
+import geometry_msgs.PoseStamped;
 import org.ros.android.views.visualization.Camera;
 import org.ros.android.views.visualization.shape.Color;
 import org.ros.message.MessageListener;
-import org.ros.message.geometry_msgs.PoseStamped;
-import org.ros.message.nav_msgs.Path;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.rosjava_geometry.FrameTransformTree;
@@ -38,7 +37,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class PathLayer extends SubscriberLayer<org.ros.message.nav_msgs.Path> implements TfLayer {
+public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer {
 
   private static final Color COLOR = Color.fromHexAndAlpha("03dfc9", 0.3f);
   private static final float POINT_SIZE = 5.0f;
@@ -72,9 +71,9 @@ public class PathLayer extends SubscriberLayer<org.ros.message.nav_msgs.Path> im
   public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree,
       Camera camera) {
     super.onStart(node, handler, frameTransformTree, camera);
-    getSubscriber().addMessageListener(new MessageListener<Path>() {
+    getSubscriber().addMessageListener(new MessageListener<nav_msgs.Path>() {
       @Override
-      public void onNewMessage(Path path) {
+      public void onNewMessage(nav_msgs.Path path) {
         updateVertexBuffer(path);
         ready = true;
         requestRender();
@@ -82,24 +81,24 @@ public class PathLayer extends SubscriberLayer<org.ros.message.nav_msgs.Path> im
     });
   }
 
-  private void updateVertexBuffer(Path path) {
+  private void updateVertexBuffer(nav_msgs.Path path) {
     ByteBuffer goalVertexByteBuffer =
-        ByteBuffer.allocateDirect(path.poses.size() * 3 * Float.SIZE / 8);
+        ByteBuffer.allocateDirect(path.poses().size() * 3 * Float.SIZE / 8);
     goalVertexByteBuffer.order(ByteOrder.nativeOrder());
     vertexBuffer = goalVertexByteBuffer.asFloatBuffer();
-    if (path.poses.size() > 0) {
-      frame = new GraphName(path.poses.get(0).header.frame_id);
+    if (path.poses().size() > 0) {
+      frame = new GraphName(path.poses().get(0).header().frame_id());
       // Path poses are densely packed and will make the path look like a solid
       // line even if it is drawn as points. Skipping poses provides the visual
       // point separation were looking for.
       int i = 0;
-      for (PoseStamped pose : path.poses) {
+      for (PoseStamped pose : path.poses()) {
         // TODO(damonkohler): Choose the separation between points as a pixel
         // value. This will require inspecting the zoom level from the camera.
         if (i % 15 == 0) {
-          vertexBuffer.put((float) pose.pose.position.x);
-          vertexBuffer.put((float) pose.pose.position.y);
-          vertexBuffer.put((float) pose.pose.position.z);
+          vertexBuffer.put((float) pose.pose().position().x());
+          vertexBuffer.put((float) pose.pose().position().y());
+          vertexBuffer.put((float) pose.pose().position().z());
         }
         i++;
       }

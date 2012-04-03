@@ -17,8 +17,6 @@
 package org.ros.android.views.visualization;
 
 import org.ros.message.MessageListener;
-import org.ros.message.geometry_msgs.TransformStamped;
-import org.ros.message.tf.tfMessage;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
@@ -32,7 +30,7 @@ public class TransformListener implements NodeMain {
 
   private final FrameTransformTree frameTransformTree;
 
-  private Subscriber<tfMessage> tfSubscriber;
+  private Subscriber<tf.tfMessage> tfSubscriber;
 
   public TransformListener(FrameTransformTree frameTransformTree) {
     this.frameTransformTree = frameTransformTree;
@@ -50,10 +48,10 @@ public class TransformListener implements NodeMain {
       frameTransformTree.setPrefix(new GraphName(tfPrefix));
     }
     tfSubscriber = node.newSubscriber("tf", "tf/tfMessage");
-    tfSubscriber.addMessageListener(new MessageListener<tfMessage>() {
+    tfSubscriber.addMessageListener(new MessageListener<tf.tfMessage>() {
       @Override
-      public void onNewMessage(tfMessage message) {
-        for (TransformStamped transform : message.transforms) {
+      public void onNewMessage(tf.tfMessage message) {
+        for (geometry_msgs.TransformStamped transform : message.transforms()) {
           frameTransformTree.updateTransform(transform);
         }
       }
