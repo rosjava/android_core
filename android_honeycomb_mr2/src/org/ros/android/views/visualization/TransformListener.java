@@ -51,7 +51,7 @@ public class TransformListener implements NodeMain {
     tfSubscriber.addMessageListener(new MessageListener<tf.tfMessage>() {
       @Override
       public void onNewMessage(tf.tfMessage message) {
-        for (geometry_msgs.TransformStamped transform : message.transforms()) {
+        for (geometry_msgs.TransformStamped transform : message.getTransforms()) {
           frameTransformTree.updateTransform(transform);
         }
       }

@@ -63,12 +63,12 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
     }
     super.draw(gl);
     lock.lock();
-    float pointSize = Math.max(message.cell_width(), message.cell_height()) * camera.getZoom();
-    float[] vertices = new float[3 * message.cells().size()];
+    float pointSize = Math.max(message.getCellWidth(), message.getCellHeight()) * camera.getZoom();
+    float[] vertices = new float[3 * message.getCells().size()];
     int i = 0;
-    for (geometry_msgs.Point cell : message.cells()) {
-      vertices[i] = (float) cell.x();
-      vertices[i + 1] = (float) cell.y();
+    for (geometry_msgs.Point cell : message.getCells()) {
+      vertices[i] = (float) cell.getX();
+      vertices[i + 1] = (float) cell.getY();
       vertices[i + 2] = 0.0f;
       i += 3;
     }
@@ -76,7 +76,7 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
     gl.glVertexPointer(3, GL10.GL_FLOAT, 0, Vertices.toFloatBuffer(vertices));
     gl.glColor4f(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
     gl.glPointSize(pointSize);
-    gl.glDrawArrays(GL10.GL_POINTS, 0, message.cells().size());
+    gl.glDrawArrays(GL10.GL_POINTS, 0, message.getCells().size());
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
     lock.unlock();
   }
@@ -89,7 +89,7 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.GridCells>() {
       @Override
       public void onNewMessage(nav_msgs.GridCells data) {
-        frame = new GraphName(data.header().frame_id());
+        frame = new GraphName(data.getHeader().getFrameId());
         if (frameTransformTree.canTransform(frame, frame)) {
           if (lock.tryLock()) {
             message = data;

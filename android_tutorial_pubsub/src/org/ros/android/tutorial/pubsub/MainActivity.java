@@ -50,7 +50,7 @@ public class MainActivity extends RosActivity {
     rosTextView.setMessageToStringCallable(new MessageCallable<String, std_msgs.String>() {
       @Override
       public String call(std_msgs.String message) {
-        return message.data();
+        return message.getData();
       }
     });
   }

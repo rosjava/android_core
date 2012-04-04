@@ -83,22 +83,22 @@ public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer
 
   private void updateVertexBuffer(nav_msgs.Path path) {
     ByteBuffer goalVertexByteBuffer =
-        ByteBuffer.allocateDirect(path.poses().size() * 3 * Float.SIZE / 8);
+        ByteBuffer.allocateDirect(path.getPoses().size() * 3 * Float.SIZE / 8);
     goalVertexByteBuffer.order(ByteOrder.nativeOrder());
     vertexBuffer = goalVertexByteBuffer.asFloatBuffer();
-    if (path.poses().size() > 0) {
-      frame = new GraphName(path.poses().get(0).header().frame_id());
+    if (path.getPoses().size() > 0) {
+      frame = new GraphName(path.getPoses().get(0).getHeader().getFrameId());
       // Path poses are densely packed and will make the path look like a solid
       // line even if it is drawn as points. Skipping poses provides the visual
       // point separation were looking for.
       int i = 0;
-      for (PoseStamped pose : path.poses()) {
+      for (PoseStamped pose : path.getPoses()) {
         // TODO(damonkohler): Choose the separation between points as a pixel
         // value. This will require inspecting the zoom level from the camera.
         if (i % 15 == 0) {
-          vertexBuffer.put((float) pose.pose().position().x());
-          vertexBuffer.put((float) pose.pose().position().y());
-          vertexBuffer.put((float) pose.pose().position().z());
+          vertexBuffer.put((float) pose.getPose().getPosition().getX());
+          vertexBuffer.put((float) pose.getPose().getPosition().getY());
+          vertexBuffer.put((float) pose.getPose().getPosition().getZ());
         }
         i++;
       }

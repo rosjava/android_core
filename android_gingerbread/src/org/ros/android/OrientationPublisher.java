@@ -54,13 +54,13 @@ public class OrientationPublisher implements NodeMain {
         float[] quaternion = new float[4];
         SensorManager.getQuaternionFromVector(quaternion, event.values);
         PoseStamped pose = publisher.newMessage();
-        pose.header().frame_id("/map");
+        pose.getHeader().setFrameId("/map");
         // TODO(damonkohler): Should get time from the Node.
-        pose.header().stamp(Time.fromMillis(System.currentTimeMillis()));
-        pose.pose().orientation().w(quaternion[0]);
-        pose.pose().orientation().x(quaternion[1]);
-        pose.pose().orientation().y(quaternion[2]);
-        pose.pose().orientation().z(quaternion[3]);
+        pose.getHeader().setStamp(Time.fromMillis(System.currentTimeMillis()));
+        pose.getPose().getOrientation().setW(quaternion[0]);
+        pose.getPose().getOrientation().setX(quaternion[1]);
+        pose.getPose().getOrientation().setY(quaternion[2]);
+        pose.getPose().getOrientation().setZ(quaternion[3]);
         publisher.publish(pose);
       }
     }

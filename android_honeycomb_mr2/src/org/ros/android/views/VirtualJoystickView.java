@@ -282,10 +282,10 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     double heading;
     // For some reason the values of z and y seem to be interchanged. If they
     // are not swapped then heading is always incorrect.
-    double w = message.pose().pose().orientation().w();
-    double x = message.pose().pose().orientation().x();
-    double y = message.pose().pose().orientation().z();
-    double z = message.pose().pose().orientation().y();
+    double w = message.getPose().getPose().getOrientation().getW();
+    double x = message.getPose().getPose().getOrientation().getX();
+    double y = message.getPose().getPose().getOrientation().getZ();
+    double z = message.getPose().getPose().getOrientation().getY();
     heading = Math.atan2(2 * y * w - 2 * x * z, x * x - y * y - z * z + w * w) * 180 / Math.PI;
     // Negating the orientation to make the math for rotation in
     // turn-in-place mode easy. Since the actual heading is irrelevant it does
@@ -824,12 +824,12 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    */
   private void publishVelocity(double linearVelocityX, double linearVelocityY,
       double angularVelocityZ) {
-    currentVelocityCommand.linear().x(linearVelocityX);
-    currentVelocityCommand.linear().y(-linearVelocityY);
-    currentVelocityCommand.linear().z(0);
-    currentVelocityCommand.angular().x(0);
-    currentVelocityCommand.angular().y(0);
-    currentVelocityCommand.angular().z(-angularVelocityZ);
+    currentVelocityCommand.getLinear().setX(linearVelocityX);
+    currentVelocityCommand.getLinear().setY(-linearVelocityY);
+    currentVelocityCommand.getLinear().setZ(0);
+    currentVelocityCommand.getAngular().setX(0);
+    currentVelocityCommand.getAngular().setY(0);
+    currentVelocityCommand.getAngular().setZ(-angularVelocityZ);
   }
 
   /**

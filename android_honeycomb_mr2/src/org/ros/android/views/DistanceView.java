@@ -117,7 +117,7 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
         post(new Runnable() {
           @Override
           public void run() {
-            distanceRenderer.currentSpeed(robotVelocity.linear().x());
+            distanceRenderer.currentSpeed(robotVelocity.getLinear().getX());
           }
         });
       }
@@ -143,16 +143,16 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
       @Override
       public void run() {
         List<Float> outRanges = new ArrayList<Float>();
-        float minDistToObject = message.range_max();
+        float minDistToObject = message.getRangeMax();
         // Find the distance to the closest object and also create an List
         // for the ranges.
-        for (float range : message.ranges()) {
+        for (float range : message.getRanges()) {
           outRanges.add(range);
           minDistToObject = (minDistToObject > range) ? range : minDistToObject;
         }
         // Update the renderer with the latest range values.
-        distanceRenderer.updateRange(outRanges, message.range_max(), message.range_min(),
-            message.angle_min(), message.angle_increment(), minDistToObject);
+        distanceRenderer.updateRange(outRanges, message.getRangeMax(), message.getRangeMin(),
+            message.getAngleMin(), message.getAngleIncrement(), minDistToObject);
         // Request to render the surface.
         requestRender();
       }

@@ -66,18 +66,18 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
     subscriber.addMessageListener(new MessageListener<LaserScan>() {
       @Override
       public void onNewMessage(LaserScan laserScan) {
-        frame = new GraphName(laserScan.header().frame_id());
-        float[] ranges = ArrayUtils.toPrimitive(laserScan.ranges().toArray(new Float[0]));
+        frame = new GraphName(laserScan.getHeader().getFrameId());
+        float[] ranges = ArrayUtils.toPrimitive(laserScan.getRanges().toArray(new Float[0]));
         // vertices is an array of x, y, z values starting with the origin of
         // the triangle fan.
         float[] vertices = new float[(ranges.length + 1) * 3];
         vertices[0] = 0;
         vertices[1] = 0;
         vertices[2] = 0;
-        float minimumRange = laserScan.range_min();
-        float maximumRange = laserScan.range_max();
-        float angle = laserScan.angle_min();
-        float angleIncrement = laserScan.angle_increment();
+        float minimumRange = laserScan.getRangeMin();
+        float maximumRange = laserScan.getRangeMax();
+        float angle = laserScan.getAngleMin();
+        float angleIncrement = laserScan.getAngleIncrement();
         // Calculate the coordinates of the laser range values.
         for (int i = 0; i < ranges.length; i++) {
           float range = ranges[i];

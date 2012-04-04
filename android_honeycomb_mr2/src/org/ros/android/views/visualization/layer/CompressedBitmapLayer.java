@@ -87,7 +87,7 @@ public class CompressedBitmapLayer extends
     try {
       BitmapFactory.Options options = new BitmapFactory.Options();
       options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-      byte[] data = PrimitiveArrays.toByteArray(compressedBitmap.data());
+      byte[] data = PrimitiveArrays.toByteArray(compressedBitmap.getData());
       bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
       pixels = IntBuffer.allocate(bitmap.getWidth() * bitmap.getHeight());
       bitmap.copyPixelsToBuffer(pixels);
@@ -106,8 +106,9 @@ public class CompressedBitmapLayer extends
           bitmap.getWidth(), bitmap.getHeight()), e);
       return;
     }
-    textureDrawable.update(compressedBitmap.origin(), compressedBitmap.resolution_x(), squareBitmap);
-    frame = new GraphName(compressedBitmap.header().frame_id());
+    textureDrawable.update(compressedBitmap.getOrigin(), compressedBitmap.getResolutionX(),
+        squareBitmap);
+    frame = new GraphName(compressedBitmap.getHeader().getFrameId());
     ready = true;
     requestRender();
   }

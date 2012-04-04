@@ -28,7 +28,7 @@ public class BitmapFromCompressedImage implements
 
   @Override
   public Bitmap call(sensor_msgs.CompressedImage message) {
-    byte[] data = PrimitiveArrays.toByteArray(message.data());
+    byte[] data = PrimitiveArrays.toByteArray(message.getData());
     return BitmapFactory.decodeByteArray(data, 0, data.length);
   }
 }

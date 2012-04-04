@@ -482,8 +482,8 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
     pan = (maxPan - minPan) * pan + minPan;
     // Initialize the message with the pan position value and publish it.
     sensor_msgs.JointState jointState = publisher.newMessage();
-    jointState.name().add("pan");
-    jointState.position(Arrays.asList((double) pan));
+    jointState.getName().add("pan");
+    jointState.setPosition(Arrays.asList((double) pan));
     publisher.publish(jointState);
   }
 
@@ -500,8 +500,8 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
     tilt = (maxTilt - minTilt) * tilt + minTilt;
     // Initialize the message with the tilt position value and publish it.
     sensor_msgs.JointState jointState = publisher.newMessage();
-    jointState.name().add("tilt");
-    jointState.position(Arrays.asList((double) tilt));
+    jointState.getName().add("tilt");
+    jointState.setPosition(Arrays.asList((double) tilt));
     publisher.publish(jointState);
   }
 

@@ -28,14 +28,15 @@ public class BitmapFromImage implements MessageCallable<Bitmap, sensor_msgs.Imag
 
   @Override
   public Bitmap call(sensor_msgs.Image message) {
-    Preconditions.checkArgument(message.encoding().equals("rgb8"));
+    Preconditions.checkArgument(message.getEncoding().equals("rgb8"));
     Bitmap bitmap =
-        Bitmap.createBitmap((int) message.width(), (int) message.height(), Bitmap.Config.ARGB_8888);
-    for (int x = 0; x < message.width(); x++) {
-      for (int y = 0; y < message.height(); y++) {
-        byte red = message.data().get((int) (y * message.step() + 3 * x)).byteValue();
-        byte green = message.data().get((int) (y * message.step() + 3 * x + 1)).byteValue();
-        byte blue = message.data().get((int) (y * message.step() + 3 * x + 2)).byteValue();
+        Bitmap.createBitmap((int) message.getWidth(), (int) message.getHeight(),
+            Bitmap.Config.ARGB_8888);
+    for (int x = 0; x < message.getWidth(); x++) {
+      for (int y = 0; y < message.getHeight(); y++) {
+        byte red = message.getData().get((int) (y * message.getStep() + 3 * x)).byteValue();
+        byte green = message.getData().get((int) (y * message.getStep() + 3 * x + 1)).byteValue();
+        byte blue = message.getData().get((int) (y * message.getStep() + 3 * x + 2)).byteValue();
         bitmap.setPixel(x, y, Color.argb(255, red & 0xFF, green & 0xFF, blue & 0xFF));
       }
     }

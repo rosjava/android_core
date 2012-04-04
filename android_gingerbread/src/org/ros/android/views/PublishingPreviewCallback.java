@@ -25,8 +25,6 @@ import org.ros.message.Time;
 import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
 
-import java.util.ArrayList;
-
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -53,22 +51,21 @@ class PublishingPreviewCallback implements PreviewCallback {
     String frameId = "camera";
 
     sensor_msgs.CompressedImage image = imagePublisher.newMessage();
-    image.data(new ArrayList<Short>());
     for (byte b : data) {
-      image.data().add((short) b);
+      image.getData().add((short) b);
     }
-    image.format("jpeg");
-    image.header().stamp(currentTime);
-    image.header().frame_id(frameId);
+    image.setFormat("jpeg");
+    image.getHeader().setStamp(currentTime);
+    image.getHeader().setFrameId(frameId);
     imagePublisher.publish(image);
 
     sensor_msgs.CameraInfo cameraInfo = cameraInfoPublisher.newMessage();
-    cameraInfo.header().stamp(currentTime);
-    cameraInfo.header().frame_id(frameId);
+    cameraInfo.getHeader().setStamp(currentTime);
+    cameraInfo.getHeader().setFrameId(frameId);
 
     Size previewSize = camera.getParameters().getPreviewSize();
-    cameraInfo.width(previewSize.width);
-    cameraInfo.height(previewSize.height);
+    cameraInfo.setWidth(previewSize.width);
+    cameraInfo.setHeight(previewSize.height);
     cameraInfoPublisher.publish(cameraInfo);
   }
 }

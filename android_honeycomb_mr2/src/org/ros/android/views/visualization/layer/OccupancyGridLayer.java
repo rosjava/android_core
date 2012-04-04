@@ -71,11 +71,11 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   }
 
   private static int[] occupancyGridToPixelArray(nav_msgs.OccupancyGrid occupancyGrid) {
-    int pixels[] = new int[occupancyGrid.data().size()];
-    for (int i = 0; i < occupancyGrid.data().size(); i++) {
-      if (occupancyGrid.data().get(i) == -1) {
+    int pixels[] = new int[occupancyGrid.getData().size()];
+    for (int i = 0; i < occupancyGrid.getData().size(); i++) {
+      if (occupancyGrid.getData().get(i) == -1) {
         pixels[i] = COLOR_UNKNOWN;
-      } else if (occupancyGrid.data().get(i) == 0) {
+      } else if (occupancyGrid.getData().get(i) == 0) {
         pixels[i] = COLOR_FREE;
       } else {
         pixels[i] = COLOR_OCCUPIED;
@@ -93,11 +93,12 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
       public void onNewMessage(nav_msgs.OccupancyGrid occupancyGridMessage) {
         Bitmap occupancyGridBitmap =
             TextureBitmapUtilities.createSquareBitmap(
-                occupancyGridToPixelArray(occupancyGridMessage), (int) occupancyGridMessage.info()
-                    .width(), (int) occupancyGridMessage.info().height(), COLOR_UNKNOWN);
-        occupancyGrid.update(occupancyGridMessage.info().origin(), occupancyGridMessage.info()
-            .resolution(), occupancyGridBitmap);
-        frame = new GraphName(occupancyGridMessage.header().frame_id());
+                occupancyGridToPixelArray(occupancyGridMessage), (int) occupancyGridMessage
+                    .getInfo().getWidth(), (int) occupancyGridMessage.getInfo().getHeight(),
+                COLOR_UNKNOWN);
+        occupancyGrid.update(occupancyGridMessage.getInfo().getOrigin(), occupancyGridMessage
+            .getInfo().getResolution(), occupancyGridBitmap);
+        frame = new GraphName(occupancyGridMessage.getHeader().getFrameId());
         ready = true;
         requestRender();
       }
