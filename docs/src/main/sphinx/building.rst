@@ -24,13 +24,7 @@ The prerequisites for building android_core are the Android SDK and `Apache Ant`
 
 .. _Android SDK: http://developer.android.com/sdk/installing.html
 
-Then, for each project in android_core you have to create a local.properties
-file. This will be automated in the future.
-
-#. roscd android_xxx
-#. $ANDROID_SDK/tools/android update project -p \`pwd\`
-
-Finally, you can build debug APKs for all android_core packages using `Gradle`_.
+You can build debug APKs for all android_core packages using `Gradle`_.
 
 #. roscd android_core
 #. ./gradlew debug
