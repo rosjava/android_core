@@ -43,12 +43,20 @@ subprojects {
     }
 
     task clean << {
+      ant.delete file: "${projectDir}/local.properties"
+      ant.delete file: "${projectDir}/proguard-project.txt"
+      ant.delete file: "${projectDir}/build.xml"
       ant.delete dir: "${projectDir}/bin"
       ant.delete dir: "${projectDir}/gen"
       ant.delete dir: "${projectDir}/libs"
     }
 
-    task debug(type: Exec, dependsOn: deployLibs) {
+    task updateProject(type: Exec) {
+      commandLine 'android', 'update', 'project', '-p', projectDir
+    }
+
+    task debug(type: Exec) {
+      dependsOn updateProject, deployLibs
       commandLine 'ant', 'debug'
     }
   }
