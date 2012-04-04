@@ -14,11 +14,9 @@
  * the License.
  */
 
-dependsOn ':android_acm_serial'
-
 dependencies {
   compile 'ros.google:hokuyo:0.0.0-SNAPSHOT'
 }
 
-debug.dependsOn deployLibs
+debug.dependsOn project(':android_acm_serial').tasks.debug
 

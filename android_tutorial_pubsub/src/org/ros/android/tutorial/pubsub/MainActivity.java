@@ -32,7 +32,7 @@ import org.ros.tutorials.pubsub.Talker;
 public class MainActivity extends RosActivity {
 
   private RosCore rosCore;
-  private RosTextView<org.ros.message.std_msgs.String> rosTextView;
+  private RosTextView<std_msgs.String> rosTextView;
   private Talker talker;
 
   public MainActivity() {
@@ -44,16 +44,15 @@ public class MainActivity extends RosActivity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    rosTextView = (RosTextView<org.ros.message.std_msgs.String>) findViewById(R.id.text);
+    rosTextView = (RosTextView<std_msgs.String>) findViewById(R.id.text);
     rosTextView.setTopicName("/chatter");
     rosTextView.setMessageType("std_msgs/String");
-    rosTextView
-        .setMessageToStringCallable(new MessageCallable<String, org.ros.message.std_msgs.String>() {
-          @Override
-          public String call(org.ros.message.std_msgs.String message) {
-            return message.data;
-          }
-        });
+    rosTextView.setMessageToStringCallable(new MessageCallable<String, std_msgs.String>() {
+      @Override
+      public String call(std_msgs.String message) {
+        return message.data();
+      }
+    });
   }
 
   @Override

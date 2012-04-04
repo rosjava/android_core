@@ -37,13 +37,8 @@ subprojects {
       exclude group: 'xml-apis'
     }
 
-    task deployTransitiveLibs(type: Copy) {
-      from { configurations.compile }
-      into "${projectDir}/libs"
-    }
-
     task deployLibs(type: Copy) {
-      from { configurations.compile.copy().setTransitive(false) }
+      from { configurations.compile }
       into "${projectDir}/libs"
     }
 
@@ -53,7 +48,7 @@ subprojects {
       ant.delete dir: "${projectDir}/libs"
     }
 
-    task debug(type: Exec) {
+    task debug(type: Exec, dependsOn: deployLibs) {
       commandLine 'ant', 'debug'
     }
   }

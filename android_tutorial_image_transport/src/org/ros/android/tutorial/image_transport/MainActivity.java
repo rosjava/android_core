@@ -21,7 +21,6 @@ import org.ros.address.InetAddressFactory;
 import org.ros.android.BitmapFromCompressedImage;
 import org.ros.android.RosActivity;
 import org.ros.android.views.RosImageView;
-import org.ros.message.sensor_msgs.CompressedImage;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
@@ -31,7 +30,7 @@ import org.ros.node.NodeMainExecutor;
  */
 public class MainActivity extends RosActivity {
 
-  private RosImageView<CompressedImage> image;
+  private RosImageView<sensor_msgs.CompressedImage> image;
 
   public MainActivity() {
     super("ImageTransportTutorial", "ImageTransportTutorial");
@@ -42,9 +41,9 @@ public class MainActivity extends RosActivity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    image = (RosImageView<CompressedImage>) findViewById(R.id.image);
+    image = (RosImageView<sensor_msgs.CompressedImage>) findViewById(R.id.image);
     image.setTopicName("/usb_cam/image_raw/compressed");
-    image.setMessageType("sensor_msgs/CompressedImage");
+    image.setMessageType(sensor_msgs.CompressedImage._TYPE);
     image.setMessageToBitmapCallable(new BitmapFromCompressedImage());
   }
 

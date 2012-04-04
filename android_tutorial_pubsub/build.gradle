@@ -14,11 +14,9 @@
  * the License.
  */
 
-dependsOn ':android_gingerbread'
-
 dependencies {
   compile 'ros.rosjava_core:rosjava_tutorial_pubsub:0.0.0-SNAPSHOT'
 }
 
-debug.dependsOn deployLibs
+debug.dependsOn project(':android_gingerbread').tasks.debug
 

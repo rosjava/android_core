@@ -14,7 +14,5 @@
  * the License.
  */
 
-dependsOn ':android_honeycomb_mr2'
-
-debug.dependsOn deployLibs
+debug.dependsOn project(':android_honeycomb_mr2').tasks.debug
 
