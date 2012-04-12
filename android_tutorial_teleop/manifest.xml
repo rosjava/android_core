@@ -2,8 +2,8 @@
   <description brief="android_tutorial_teleop">
      android_tutorial_teleop
   </description>
-  <author>Damon Kohler</author>
-  <license>Apache License 2.0</license>
+  <author>Damon Kohler (damonkohler@google.com)</author>
+  <license>Apache 2.0</license>
   <review status="unreviewed" notes="" />
   <url>http://ros.org/wiki/android_tutorial_teleop</url>
 </package>

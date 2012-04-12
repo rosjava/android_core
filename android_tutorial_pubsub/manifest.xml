@@ -1,25 +1,10 @@
 <package>
   <description brief="android_tutorial_pubsub">
-
      android_tutorial_pubsub
-
   </description>
   <author>Damon Kohler</author>
-  <license>BSD</license>
+  <license>Apache 2.0</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/android_tutorial_pubsub</url>
-
-  <depend package="rosjava" />
-  <depend package="rosjava_tutorial_pubsub" />
-  <depend package="android_gingerbread" />
-
-  <export>
-    <rosjava-android-app target="android-10" />
-    <rosjava-src location="src" />
-    <rosjava-src location="gen" />
-    <rosjava-src location="res" />
-  </export>
-
 </package>
-
 

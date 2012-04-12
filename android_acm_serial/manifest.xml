@@ -1,7 +1,9 @@
 <package>
-  <description brief="android_acm_serial">android_acm_serial</description>
-  <author>Damon Kohler</author>
-  <license>Apache License 2.0</license>
+  <description brief="android_acm_serial">
+    android_acm_serial
+  </description>
+  <author>Damon Kohler (damonkohler@google.com)</author>
+  <license>Apache 2.0</license>
   <review status="unreviewed" notes="" />
   <url>http://ros.org/wiki/android_acm_serial</url>
 </package>

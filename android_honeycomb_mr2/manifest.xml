@@ -1,27 +1,10 @@
 <package>
   <description brief="android_honeycomb_mr2">
-
     android_honeycomb_mr2
-
   </description>
-  <author>Damon Kohler</author>
-  <license>Apache 2</license>
+  <author>Damon Kohler (damonkohler@google.com)</author>
+  <license>Apache 2.0</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/android</url>
-
-  <depend package="rosjava" />
-  <depend package="android_gingerbread" />
-  <depend package="sensor_msgs" />
-  <depend package="nav_msgs" />
-  <depend package="rosjava_geometry" />
-  <depend package="compressed_visualization_transport_msgs" />
-  <depend package="tf" />
-
-  <export>
-    <rosjava-android-lib target="android-13" />
-    <rosjava-src location="src" />
-    <rosjava-src location="gen" />
-    <rosjava-src location="res" />
-  </export>
-
 </package>
+
