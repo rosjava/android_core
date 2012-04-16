@@ -42,23 +42,23 @@ public abstract class RosActivity extends Activity {
   private final String notificationTitle;
 
   private URI masterUri;
-  private NodeRunnerService nodeRunnerService;
+  private NodeMainExecutorService nodeMainExecutorService;
 
   private class NodeRunnerServiceConnection implements ServiceConnection {
     @Override
     public void onServiceConnected(ComponentName name, IBinder binder) {
-      nodeRunnerService = ((NodeRunnerService.LocalBinder) binder).getService();
-      nodeRunnerService.addListener(new NodeRunnerServiceListener() {
+      nodeMainExecutorService = ((NodeMainExecutorService.LocalBinder) binder).getService();
+      nodeMainExecutorService.addListener(new NodeMainExecutorServiceListener() {
         @Override
-        public void onShutdown(NodeRunnerService nodeRunnerService) {
+        public void onShutdown(NodeMainExecutorService nodeMainExecutorService) {
           RosActivity.this.finish();
         }
       });
       // Run init() in a new thread as a convenience since it often requires
       // network access. Also, this allows us to keep a reference to the
       // NodeMainExecutor separate from this class.
-      nodeRunnerService.getScheduledExecutorService().execute(
-          new InitRunnable(RosActivity.this, nodeRunnerService));
+      nodeMainExecutorService.getScheduledExecutorService().execute(
+          new InitRunnable(RosActivity.this, nodeMainExecutorService));
     }
 
     @Override
@@ -79,7 +79,7 @@ public abstract class RosActivity extends Activity {
       // Call this method on super to avoid triggering our precondition in the
       // overridden startActivityForResult().
       super.startActivityForResult(new Intent(this, MasterChooser.class), 0);
-    } else if (nodeRunnerService == null) {
+    } else if (nodeMainExecutorService == null) {
       // TODO(damonkohler): The NodeRunnerService should maintain its own copy
       // of master URI that we can query if we're restarting this activity.
       startNodeRunnerService();
@@ -88,10 +88,10 @@ public abstract class RosActivity extends Activity {
   }
 
   private void startNodeRunnerService() {
-    Intent intent = new Intent(this, NodeRunnerService.class);
-    intent.setAction(NodeRunnerService.ACTION_START);
-    intent.putExtra(NodeRunnerService.EXTRA_NOTIFICATION_TICKER, notificationTicker);
-    intent.putExtra(NodeRunnerService.EXTRA_NOTIFICATION_TITLE, notificationTitle);
+    Intent intent = new Intent(this, NodeMainExecutorService.class);
+    intent.setAction(NodeMainExecutorService.ACTION_START);
+    intent.putExtra(NodeMainExecutorService.EXTRA_NOTIFICATION_TICKER, notificationTicker);
+    intent.putExtra(NodeMainExecutorService.EXTRA_NOTIFICATION_TITLE, notificationTitle);
     startService(intent);
     Preconditions.checkState(bindService(intent, nodeRunnerServiceConnection, BIND_AUTO_CREATE),
         "Failed to bind NodeRunnerService.");
@@ -99,12 +99,12 @@ public abstract class RosActivity extends Activity {
 
   @Override
   protected void onDestroy() {
-    if (nodeRunnerService != null) {
-      nodeRunnerService.shutdown();
+    if (nodeMainExecutorService != null) {
+      nodeMainExecutorService.shutdown();
       unbindService(nodeRunnerServiceConnection);
       // NOTE(damonkohler): The activity could still be restarted. In that case,
       // nodeRunner needs to be null for everything to be started up again.
-      nodeRunnerService = null;
+      nodeMainExecutorService = null;
     }
     Toast.makeText(this, notificationTitle + " shut down.", Toast.LENGTH_SHORT).show();
     super.onDestroy();
@@ -113,7 +113,7 @@ public abstract class RosActivity extends Activity {
   /**
    * This method is called in a background thread once this {@link Activity} has
    * been initialized with a master {@link URI} via the {@link MasterChooser}
-   * and a {@link NodeRunnerService} has started. Your {@link NodeMain}s should
+   * and a {@link NodeMainExecutorService} has started. Your {@link NodeMain}s should
    * be started here using the provided {@link NodeMainExecutor}.
    * 
    * @param nodeMainExecutor
