@@ -2,3 +2,7 @@
     local-name: android_core
     uri: https://code.google.com/p/rosjava.android/
     version: default
+- hg:
+    local-name: google
+    uri: https://code.google.com/p/rosjava.google/
+    version: default
