@@ -19,7 +19,11 @@ Support is best found on http://answers.ros.org/.
 Please file bugs and feature requests on the rosjava `issues`_ page. Starring
 issues that are important to you will help developers prioritize their work.
 
+In addition to the following documentation, rosjava_core makes liberal use of
+`Javadoc`_.
+
 .. _issues: http://code.google.com/p/rosjava/issues/list
+.. _Javadoc: javadoc/index.html
 .. _Activity: http://developer.android.com/reference/android/app/Activity.html
 .. _Service: http://developer.android.com/reference/android/app/Service.html
 .. _View: http://developer.android.com/reference/android/view/View.html

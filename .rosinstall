@@ -1,0 +1,4 @@
+- hg:
+    local-name: android_core
+    uri: https://code.google.com/p/rosjava.android/
+    version: default
