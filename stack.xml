@@ -1,6 +1,6 @@
 <stack>
   <description brief="android_core">
-    android_core is a collection of components and examples that are useful for
+    The android_core stack is a collection of components and examples for
     developing ROS applications on Android.
   </description>
   <author>Maintained by Damon Kohler (damonkohler@google.com)</author>
