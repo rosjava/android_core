@@ -14,18 +14,18 @@
  * the License.
  */
 
-package org.ros.android.acm_serial;
+package org.ros.android.android_acm_serial;
 
-public enum DataBits {
-  DATA_BITS_5(5), DATA_BITS_6(6), DATA_BITS_7(7), DATA_BITS_8(8), DATA_BITS_16(16);
+public enum BitRate {
+  BPS_300(300), BPS_1200(1200), BPS_2400(2400), BPS_4800(4800), BPS_9600(9600), BPS_14400(14400), BPS_19200(19200), BPS_28800(28800), BPS_38400(38400), BPS_57600(57600), BPS_115200(115200);
   
-  private byte dataBits;
+  private int bitRate;
   
-  private DataBits(int dataBits) {
-    this.dataBits = (byte) dataBits;
+  private BitRate(int bitRate) {
+    this.bitRate = bitRate;
   }
 
-  byte getDataBits() {
-    return dataBits;
+  int getBitRate() {
+    return bitRate;
   }
 }

@@ -14,15 +14,18 @@
  * the License.
  */
 
-package org.ros.android.acm_serial;
+package org.ros.android.android_acm_serial;
 
-import android.hardware.usb.UsbRequest;
+public enum Parity {
+  NONE(0), ODD(1), EVEN(2), MARK(3), SPACE(4);
+  
+  private byte parity;
+  
+  private Parity(int parity) {
+    this.parity = (byte) parity;
+  }
 
-/**
- * @author damonkohler@google.com (Damon Kohler)
- */
-public interface UsbRequestCallback {
-
-  void onRequestComplete(UsbRequest request);
-
+  byte getParity() {
+    return parity;
+  }
 }

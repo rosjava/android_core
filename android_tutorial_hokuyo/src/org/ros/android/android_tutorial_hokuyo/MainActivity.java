@@ -14,15 +14,15 @@
  * the License.
  */
 
-package org.ros.android.tutorial.hokuyo;
+package org.ros.android.android_tutorial_hokuyo;
 
 import android.os.Bundle;
 import org.ros.address.InetAddressFactory;
-import org.ros.android.acm_serial.AcmDevice;
-import org.ros.android.acm_serial.AcmDeviceActivity;
+import org.ros.android.android_acm_serial.AcmDevice;
+import org.ros.android.android_acm_serial.AcmDeviceActivity;
+import org.ros.exception.RosRuntimeException;
 import org.ros.hokuyo.LaserScanPublisher;
 import org.ros.hokuyo.scip20.Device;
-import org.ros.exception.RosRuntimeException;
 import org.ros.namespace.GraphName;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;

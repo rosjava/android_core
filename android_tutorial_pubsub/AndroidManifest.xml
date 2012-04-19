@@ -23,7 +23,7 @@
         </activity>
         <activity android:name="org.ros.android.MasterChooser" />
 
-        <service android:name="org.ros.android.NodeRunnerService" />
+        <service android:name="org.ros.android.NodeMainExecutorService" />
     </application>
 
 </manifest>

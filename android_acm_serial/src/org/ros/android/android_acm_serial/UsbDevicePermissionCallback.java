@@ -14,18 +14,17 @@
  * the License.
  */
 
-package org.ros.android.acm_serial;
+package org.ros.android.android_acm_serial;
 
-public enum BitRate {
-  BPS_300(300), BPS_1200(1200), BPS_2400(2400), BPS_4800(4800), BPS_9600(9600), BPS_14400(14400), BPS_19200(19200), BPS_28800(28800), BPS_38400(38400), BPS_57600(57600), BPS_115200(115200);
-  
-  private int bitRate;
-  
-  private BitRate(int bitRate) {
-    this.bitRate = bitRate;
-  }
+import android.hardware.usb.UsbDevice;
 
-  int getBitRate() {
-    return bitRate;
-  }
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
+public interface UsbDevicePermissionCallback {
+
+  void onPermissionGranted(UsbDevice device);
+
+  void onPermissionDenied();
+
 }

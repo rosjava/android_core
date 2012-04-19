@@ -14,15 +14,18 @@
  * the License.
  */
 
-package org.ros.android.acm_serial;
+package org.ros.android.android_acm_serial;
 
-/**
- * @author damonkohler@google.com (Damon Kohler)
- */
-public interface AcmDevicePermissionCallback {
+public enum DataBits {
+  DATA_BITS_5(5), DATA_BITS_6(6), DATA_BITS_7(7), DATA_BITS_8(8), DATA_BITS_16(16);
+  
+  private byte dataBits;
+  
+  private DataBits(int dataBits) {
+    this.dataBits = (byte) dataBits;
+  }
 
-  void onPermissionGranted(AcmDevice acmDevice);
-
-  void onPermissionDenied();
-
+  byte getDataBits() {
+    return dataBits;
+  }
 }

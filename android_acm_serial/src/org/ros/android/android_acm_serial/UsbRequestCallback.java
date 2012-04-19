@@ -14,17 +14,15 @@
  * the License.
  */
 
-package org.ros.android.acm_serial;
+package org.ros.android.android_acm_serial;
 
-import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbRequest;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface UsbDevicePermissionCallback {
+public interface UsbRequestCallback {
 
-  void onPermissionGranted(UsbDevice device);
-
-  void onPermissionDenied();
+  void onRequestComplete(UsbRequest request);
 
 }

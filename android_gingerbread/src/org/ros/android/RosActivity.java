@@ -37,14 +37,14 @@ public abstract class RosActivity extends Activity {
 
   private static final int MASTER_CHOOSER_REQUEST_CODE = 0;
 
-  private final ServiceConnection nodeRunnerServiceConnection;
+  private final ServiceConnection nodeMainExecutorServiceConnection;
   private final String notificationTicker;
   private final String notificationTitle;
 
   private URI masterUri;
   private NodeMainExecutorService nodeMainExecutorService;
 
-  private class NodeRunnerServiceConnection implements ServiceConnection {
+  private class NodeMainExecutorServiceConnection implements ServiceConnection {
     @Override
     public void onServiceConnected(ComponentName name, IBinder binder) {
       nodeMainExecutorService = ((NodeMainExecutorService.LocalBinder) binder).getService();
@@ -70,7 +70,7 @@ public abstract class RosActivity extends Activity {
     super();
     this.notificationTicker = notificationTicker;
     this.notificationTitle = notificationTitle;
-    nodeRunnerServiceConnection = new NodeRunnerServiceConnection();
+    nodeMainExecutorServiceConnection = new NodeMainExecutorServiceConnection();
   }
 
   @Override
@@ -80,28 +80,29 @@ public abstract class RosActivity extends Activity {
       // overridden startActivityForResult().
       super.startActivityForResult(new Intent(this, MasterChooser.class), 0);
     } else if (nodeMainExecutorService == null) {
-      // TODO(damonkohler): The NodeRunnerService should maintain its own copy
-      // of master URI that we can query if we're restarting this activity.
-      startNodeRunnerService();
+      // TODO(damonkohler): The NodeMainExecutorService should maintain its own
+      // copy of master URI that we can query if we're restarting this activity.
+      startNodeMainExecutorService();
     }
     super.onResume();
   }
 
-  private void startNodeRunnerService() {
+  private void startNodeMainExecutorService() {
     Intent intent = new Intent(this, NodeMainExecutorService.class);
     intent.setAction(NodeMainExecutorService.ACTION_START);
     intent.putExtra(NodeMainExecutorService.EXTRA_NOTIFICATION_TICKER, notificationTicker);
     intent.putExtra(NodeMainExecutorService.EXTRA_NOTIFICATION_TITLE, notificationTitle);
     startService(intent);
-    Preconditions.checkState(bindService(intent, nodeRunnerServiceConnection, BIND_AUTO_CREATE),
-        "Failed to bind NodeRunnerService.");
+    Preconditions.checkState(
+        bindService(intent, nodeMainExecutorServiceConnection, BIND_AUTO_CREATE),
+        "Failed to bind NodeMainExecutorService.");
   }
 
   @Override
   protected void onDestroy() {
     if (nodeMainExecutorService != null) {
       nodeMainExecutorService.shutdown();
-      unbindService(nodeRunnerServiceConnection);
+      unbindService(nodeMainExecutorServiceConnection);
       // NOTE(damonkohler): The activity could still be restarted. In that case,
       // nodeRunner needs to be null for everything to be started up again.
       nodeMainExecutorService = null;
@@ -113,8 +114,8 @@ public abstract class RosActivity extends Activity {
   /**
    * This method is called in a background thread once this {@link Activity} has
    * been initialized with a master {@link URI} via the {@link MasterChooser}
-   * and a {@link NodeMainExecutorService} has started. Your {@link NodeMain}s should
-   * be started here using the provided {@link NodeMainExecutor}.
+   * and a {@link NodeMainExecutorService} has started. Your {@link NodeMain}s
+   * should be started here using the provided {@link NodeMainExecutor}.
    * 
    * @param nodeMainExecutor
    *          the {@link NodeMainExecutor} created for this {@link Activity}

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.android.acm_serial;
+package org.ros.android.android_acm_serial;
 
 public enum StopBits {
   STOP_BITS_1(0), STOP_BITS_1_5(1), STOP_BITS_2(2);

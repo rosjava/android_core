@@ -14,38 +14,36 @@
  * the License.
  */
 
-package org.ros.android.acm_serial;
+package org.ros.android.android_acm_serial;
 
 import com.google.common.base.Preconditions;
 
 import android.hardware.usb.UsbConstants;
-import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
+import android.hardware.usb.UsbRequest;
 import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
-public class AcmInputStream extends InputStream {
+public class AcmAsyncInputStream extends InputStream {
 
   private static final boolean DEBUG = false;
-  private static final String TAG = "AcmInputStream";
+  private static final String TAG = "AcmAsyncInputStream";
 
-  // Disable USB read timeouts. Reads are expected to block until data becomes
-  // available.
-  private static final int TIMEOUT = 0;
-
-  private final UsbDeviceConnection connection;
+  private final UsbRequestPool usbRequestPool;
   private final UsbEndpoint endpoint;
 
-  public AcmInputStream(UsbDeviceConnection connection, UsbEndpoint endpoint) {
+  public AcmAsyncInputStream(UsbRequestPool usbRequestPool, UsbEndpoint endpoint) {
     Preconditions.checkArgument(endpoint.getDirection() == UsbConstants.USB_DIR_IN);
-    this.connection = connection;
     this.endpoint = endpoint;
+    this.usbRequestPool = usbRequestPool;
   }
 
   @Override
   public void close() throws IOException {
+    usbRequestPool.shutdown();
   }
 
   @Override
@@ -58,26 +56,23 @@ public class AcmInputStream extends InputStream {
     // be able to return 0 when we didn't read anything. However, it also says
     // we should block until input is available. Blocking seems to be the
     // preferred behavior.
-    byte[] slice = new byte[count];
     if (DEBUG) {
       Log.i(TAG, "Reading " + count + " bytes.");
     }
     int byteCount = 0;
     while (byteCount == 0) {
-      byteCount = connection.bulkTransfer(endpoint, slice, slice.length, TIMEOUT);
-      if (DEBUG) {
-        if (byteCount == 0) {
-          Log.i(TAG, "bulkTransfer() returned 0, retrying.");
-        }
+      UsbRequest request = usbRequestPool.poll(endpoint);
+      if (!request.queue(ByteBuffer.wrap(buffer, offset, count), count)) {
+        Log.e(TAG, "IO error while queuing " + count + " bytes to be read.");
       }
     }
     if (byteCount < 0) {
       throw new IOException("USB read failed.");
     }
-    System.arraycopy(slice, 0, buffer, offset, byteCount);
+    // System.arraycopy(slice, 0, buffer, offset, byteCount);
     if (DEBUG) {
       Log.i(TAG, "Actually read " + byteCount + " bytes.");
-      Log.i(TAG, "Slice: " + byteArrayToHexString(slice));
+      // Log.i(TAG, "Slice: " + byteArrayToHexString(slice));
     }
     return byteCount;
   }

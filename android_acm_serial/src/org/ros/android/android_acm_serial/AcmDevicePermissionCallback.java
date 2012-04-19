@@ -14,18 +14,15 @@
  * the License.
  */
 
-package org.ros.android.acm_serial;
+package org.ros.android.android_acm_serial;
 
-public enum Parity {
-  NONE(0), ODD(1), EVEN(2), MARK(3), SPACE(4);
-  
-  private byte parity;
-  
-  private Parity(int parity) {
-    this.parity = (byte) parity;
-  }
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
+public interface AcmDevicePermissionCallback {
 
-  byte getParity() {
-    return parity;
-  }
+  void onPermissionGranted(AcmDevice acmDevice);
+
+  void onPermissionDenied();
+
 }

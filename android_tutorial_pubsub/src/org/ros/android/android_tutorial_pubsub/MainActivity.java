@@ -23,7 +23,7 @@ import org.ros.android.RosActivity;
 import org.ros.android.view.RosTextView;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
-import org.ros.tutorials.pubsub.Talker;
+import org.ros.rosjava_tutorial_pubsub.Talker;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

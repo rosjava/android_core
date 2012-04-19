@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.android.acm_serial;
+package org.ros.android.android_acm_serial;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;

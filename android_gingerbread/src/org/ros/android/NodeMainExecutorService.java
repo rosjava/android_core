@@ -46,7 +46,7 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class NodeMainExecutorService extends Service implements NodeMainExecutor {
 
-  private static final String TAG = "NodeRunnerService";
+  private static final String TAG = "NodeMainExecutorService";
 
   // NOTE(damonkohler): If this is 0, the notification does not show up.
   private static final int ONGOING_NOTIFICATION = 1;

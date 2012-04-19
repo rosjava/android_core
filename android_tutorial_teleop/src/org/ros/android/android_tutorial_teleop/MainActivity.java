@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.android.tutorial.teleop;
+package org.ros.android.android_tutorial_teleop;
 
 import android.os.Bundle;
 import android.view.Menu;
