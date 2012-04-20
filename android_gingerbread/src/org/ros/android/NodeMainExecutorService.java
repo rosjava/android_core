@@ -29,15 +29,18 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
+import org.ros.RosCore;
 import org.ros.android.android_gingerbread.R;
 import org.ros.concurrent.ListenerCollection;
 import org.ros.concurrent.ListenerCollection.SignalRunnable;
+import org.ros.exception.RosRuntimeException;
 import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeListener;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -62,6 +65,8 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
 
   private WakeLock wakeLock;
   private WifiLock wifiLock;
+  private RosCore rosCore;
+  private URI masterUri;
 
   /**
    * Class for clients to access. Because we know this service always runs in
@@ -127,6 +132,9 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
     // NodeMainExecutor multiple times is safe. It simply calls shutdown on all
     // NodeMains.
     nodeMainExecutor.shutdown();
+    if (rosCore != null) {
+      rosCore.shutdown();
+    }
     if (wakeLock.isHeld()) {
       wakeLock.release();
     }
@@ -167,7 +175,6 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
       Notification notification =
           new Notification(R.drawable.icon, intent.getStringExtra(EXTRA_NOTIFICATION_TICKER),
               System.currentTimeMillis());
-      // Should this be the RosActivity context instead?
       Intent notificationIntent = new Intent(this, NodeMainExecutorService.class);
       notificationIntent.setAction(NodeMainExecutorService.ACTION_SHUTDOWN);
       PendingIntent pendingIntent = PendingIntent.getService(this, 0, notificationIntent, 0);
@@ -184,5 +191,24 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
   @Override
   public IBinder onBind(Intent intent) {
     return binder;
+  }
+
+  public URI getMasterUri() {
+    return masterUri;
+  }
+
+  public void setMasterUri(URI uri) {
+    masterUri = uri;
+  }
+
+  public void startMaster() {
+    rosCore = RosCore.newPrivate();
+    rosCore.start();
+    try {
+      rosCore.awaitStart();
+    } catch (Exception e) {
+      throw new RosRuntimeException(e);
+    }
+    masterUri = rosCore.getUri();
   }
 }

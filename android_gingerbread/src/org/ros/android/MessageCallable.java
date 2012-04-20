@@ -18,9 +18,13 @@ package org.ros.android;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
+ * 
+ * @param <T>
+ *          the return type
+ * @param <S>
+ *          the message type
  */
-public interface MessageCallable<ReturnType, MessageType> {
+public interface MessageCallable<T, S> {
 
-  ReturnType call(MessageType message);
-
+  T call(S message);
 }

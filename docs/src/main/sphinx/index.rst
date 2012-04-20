@@ -35,4 +35,5 @@ Contents:
 
    installing
    building
+   getting_started
 

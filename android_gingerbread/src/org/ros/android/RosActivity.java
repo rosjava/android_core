@@ -22,8 +22,10 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.widget.Toast;
+import org.ros.exception.RosRuntimeException;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 
@@ -41,10 +43,9 @@ public abstract class RosActivity extends Activity {
   private final String notificationTicker;
   private final String notificationTitle;
 
-  private URI masterUri;
   private NodeMainExecutorService nodeMainExecutorService;
 
-  private class NodeMainExecutorServiceConnection implements ServiceConnection {
+  private final class NodeMainExecutorServiceConnection implements ServiceConnection {
     @Override
     public void onServiceConnected(ComponentName name, IBinder binder) {
       nodeMainExecutorService = ((NodeMainExecutorService.LocalBinder) binder).getService();
@@ -54,11 +55,7 @@ public abstract class RosActivity extends Activity {
           RosActivity.this.finish();
         }
       });
-      // Run init() in a new thread as a convenience since it often requires
-      // network access. Also, this allows us to keep a reference to the
-      // NodeMainExecutor separate from this class.
-      nodeMainExecutorService.getScheduledExecutorService().execute(
-          new InitRunnable(RosActivity.this, nodeMainExecutorService));
+      startMasterChooser();
     }
 
     @Override
@@ -74,17 +71,9 @@ public abstract class RosActivity extends Activity {
   }
 
   @Override
-  protected void onResume() {
-    if (getMasterUri() == null) {
-      // Call this method on super to avoid triggering our precondition in the
-      // overridden startActivityForResult().
-      super.startActivityForResult(new Intent(this, MasterChooser.class), 0);
-    } else if (nodeMainExecutorService == null) {
-      // TODO(damonkohler): The NodeMainExecutorService should maintain its own
-      // copy of master URI that we can query if we're restarting this activity.
-      startNodeMainExecutorService();
-    }
-    super.onResume();
+  protected void onStart() {
+    super.onStart();
+    startNodeMainExecutorService();
   }
 
   private void startNodeMainExecutorService() {
@@ -122,29 +111,54 @@ public abstract class RosActivity extends Activity {
    */
   protected abstract void init(NodeMainExecutor nodeMainExecutor);
 
+  private void startMasterChooser() {
+    Preconditions.checkState(getMasterUri() == null);
+    // Call this method on super to avoid triggering our precondition in the
+    // overridden startActivityForResult().
+    super.startActivityForResult(new Intent(this, MasterChooser.class), 0);
+  }
+
+  public URI getMasterUri() {
+    Preconditions.checkNotNull(nodeMainExecutorService);
+    return nodeMainExecutorService.getMasterUri();
+  }
+
   @Override
   public void startActivityForResult(Intent intent, int requestCode) {
-    super.startActivityForResult(intent, requestCode);
     Preconditions.checkArgument(requestCode != MASTER_CHOOSER_REQUEST_CODE);
+    super.startActivityForResult(intent, requestCode);
   }
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
-    if (requestCode == MASTER_CHOOSER_REQUEST_CODE && resultCode == RESULT_OK) {
-      try {
-        masterUri = new URI(data.getStringExtra("ROS_MASTER_URI"));
-      } catch (URISyntaxException e) {
-        throw new RuntimeException(e);
+    if (requestCode == MASTER_CHOOSER_REQUEST_CODE) {
+      if (resultCode == RESULT_OK) {
+        if (data == null) {
+          nodeMainExecutorService.startMaster();
+        } else {
+          URI uri;
+          try {
+            uri = new URI(data.getStringExtra("ROS_MASTER_URI"));
+          } catch (URISyntaxException e) {
+            throw new RosRuntimeException(e);
+          }
+          nodeMainExecutorService.setMasterUri(uri);
+        }
+        // Run init() in a new thread as a convenience since it often requires
+        // network access.
+        new AsyncTask<Void, Void, Void>() {
+          @Override
+          protected Void doInBackground(Void... params) {
+            RosActivity.this.init(nodeMainExecutorService);
+            return null;
+          }
+        }.execute();
+      } else {
+        // Without a master URI configured, we are in an unusable state.
+        nodeMainExecutorService.shutdown();
+        finish();
       }
     }
-  }
-
-  /**
-   * @return the configured master {@link URI} or <code>null</code> if it is not
-   *         yet available
-   */
-  public URI getMasterUri() {
-    return masterUri;
   }
 }

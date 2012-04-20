@@ -17,7 +17,6 @@
 package org.ros.android.android_tutorial_pubsub;
 
 import android.os.Bundle;
-import org.ros.RosCore;
 import org.ros.android.MessageCallable;
 import org.ros.android.RosActivity;
 import org.ros.android.view.RosTextView;
@@ -30,11 +29,12 @@ import org.ros.rosjava_tutorial_pubsub.Talker;
  */
 public class MainActivity extends RosActivity {
 
-  private RosCore rosCore;
   private RosTextView<std_msgs.String> rosTextView;
   private Talker talker;
 
   public MainActivity() {
+    // The RosActivity constructor configures the notification title and ticker
+    // messages.
     super("Pubsub Tutorial", "Pubsub Tutorial");
   }
 
@@ -44,8 +44,8 @@ public class MainActivity extends RosActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
     rosTextView = (RosTextView<std_msgs.String>) findViewById(R.id.text);
-    rosTextView.setTopicName("/chatter");
-    rosTextView.setMessageType("std_msgs/String");
+    rosTextView.setTopicName("chatter");
+    rosTextView.setMessageType(std_msgs.String._TYPE);
     rosTextView.setMessageToStringCallable(new MessageCallable<String, std_msgs.String>() {
       @Override
       public String call(std_msgs.String message) {
@@ -56,25 +56,14 @@ public class MainActivity extends RosActivity {
 
   @Override
   protected void init(NodeMainExecutor nodeMainExecutor) {
-    rosCore = RosCore.newPrivate();
-    rosCore.start();
-    try {
-      rosCore.awaitStart();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
     talker = new Talker();
     NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate();
-    nodeConfiguration.setMasterUri(rosCore.getUri());
+    // At this point, the user has already been prompted to either enter the URI
+    // of a master to use or to start a master locally.
+    nodeConfiguration.setMasterUri(getMasterUri());
     nodeMainExecutor.execute(talker, nodeConfiguration);
+    // The RosTextView is also a NodeMain that must be executed in order to
+    // start displaying incoming messages.
     nodeMainExecutor.execute(rosTextView, nodeConfiguration);
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    // RosCore should be shut down last since running Nodes will attempt to
-    // unregister at shutdown.
-    rosCore.shutdown();
   }
 }

@@ -36,10 +36,12 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 /**
- * Displays a text box to allow the user to enter a URI or scan a QR code. Then
- * it returns that uri to the calling activity. When this activity is started
- * the last used (or the default) uri is displayed to the user.
- *
+ * Allows the user to configue a master {@link URI} then it returns that
+ * {@link URI} to the calling {@link Activity}.
+ * <p>
+ * When this {@link Activity} is started, the last used (or the default)
+ * {@link URI} is displayed to the user.
+ * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  * @author munjaldesai@google.com (Munjal Desai)
@@ -47,15 +49,18 @@ import java.util.List;
 public class MasterChooser extends Activity {
 
   /**
-   * The key with which the last used uri will be stored as a preference.
+   * The key with which the last used {@link URI} will be stored as a
+   * preference.
    */
   private static final String PREFS_KEY_NAME = "URI_KEY";
+
   /**
    * Package name of the QR code reader used to scan QR codes.
    */
   private static final String BAR_CODE_SCANNER_PACKAGE_NAME =
       "com.google.zxing.client.android.SCAN";
-  private String masterUri = "";
+
+  private String masterUri;
   private EditText uriText;
 
   @Override
@@ -83,21 +88,6 @@ public class MasterChooser extends Activity {
     }
   }
 
-  public void qrCodeButtonClicked(View unused) {
-    Intent intent = new Intent(BAR_CODE_SCANNER_PACKAGE_NAME);
-    intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-    // Check if the Barcode Scanner is installed.
-    if (!isQRCodeReaderInstalled(intent)) {
-      // Open the Market and take them to the page from which they can download
-      // the Barcode Scanner app.
-      startActivity(new Intent(Intent.ACTION_VIEW,
-          Uri.parse("market://details?id=com.google.zxing.client.android")));
-    } else {
-      // Call the Barcode Scanner to let the user scan a QR code.
-      startActivityForResult(intent, 0);
-    }
-  }
-
   public void okButtonClicked(View unused) {
     // Get the current text entered for URI.
     String userUri = uriText.getText().toString();
@@ -110,7 +100,7 @@ public class MasterChooser extends Activity {
     }
     // Make sure the URI can be parsed correctly.
     try {
-      new URI(userUri); // Test the supplied URI.
+      new URI(userUri);
     } catch (URISyntaxException e) {
       Toast.makeText(MasterChooser.this, "Invalid URI.", Toast.LENGTH_SHORT).show();
       return;
@@ -128,6 +118,26 @@ public class MasterChooser extends Activity {
     finish();
   }
 
+  public void qrCodeButtonClicked(View unused) {
+    Intent intent = new Intent(BAR_CODE_SCANNER_PACKAGE_NAME);
+    intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+    // Check if the Barcode Scanner is installed.
+    if (!isQRCodeReaderInstalled(intent)) {
+      // Open the Market and take them to the page from which they can download
+      // the Barcode Scanner app.
+      startActivity(new Intent(Intent.ACTION_VIEW,
+          Uri.parse("market://details?id=com.google.zxing.client.android")));
+    } else {
+      // Call the Barcode Scanner to let the user scan a QR code.
+      startActivityForResult(intent, 0);
+    }
+  }
+
+  public void newMasterButtonClicked(View unused) {
+    setResult(RESULT_OK, null);
+    finish();
+  }
+
   public void cancelButtonClicked(View unused) {
     setResult(RESULT_CANCELED);
     finish();
@@ -135,7 +145,7 @@ public class MasterChooser extends Activity {
 
   /**
    * Check if the specified app is installed.
-   *
+   * 
    * @param intent
    *          The activity that you wish to look for.
    * @return true if the desired activity is install on the device, false

@@ -16,7 +16,6 @@
 
 package org.ros.android;
 
-
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
