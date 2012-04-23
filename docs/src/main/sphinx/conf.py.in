@@ -28,7 +28,7 @@ needs_sphinx = '1.0'
 extensions = ['sphinx.ext.intersphinx', 'javadoc', 'ros']
 
 intersphinx_mapping = {
-    'rosjava_core': ('http://docs.rosjava.googlecode.com/hg/rosjava_core/html/', None),
+    'rosjava-core': ('http://docs.rosjava.googlecode.com/hg/rosjava_core/html/', None),
     }
 
 javadoc_root = 'javadoc'

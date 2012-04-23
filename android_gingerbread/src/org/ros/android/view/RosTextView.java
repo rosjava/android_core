@@ -16,11 +16,10 @@
 
 package org.ros.android.view;
 
-import org.ros.android.MessageCallable;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
+import org.ros.android.MessageCallable;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;

@@ -1,16 +1,38 @@
+.. _getting-started:
+
 Getting started
 ===============
 
 Before diving into ROS enabled Android application development, you should be
-familiar with :ref:`rosjava <rosjava_core:getting_started>` and `Android
+familiar with :ref:`rosjava <rosjava-core:getting-started>` and `Android
 application development`_ in general.
 
-.. _Android application development: http://developer.android.com/resources/tutorials/hello-world.html
+.. _Android application development: http://developer.android.com/training/index.html
 
 Creating a new Android application
 ----------------------------------
 
-TODO
+.. note:: This is still a work in progress. There are many obvious limitations
+  and the process will be improved in the near future.
+
+Currently, the easiest way to create a new application is to create your own
+package in the android_core stack by copying one of the tutorial packages (e.g.
+android_tutorial_pubsub).
+
+.. code-block:: bash
+
+  roscd android_core
+  cp -a android_tutorial_pubsub my_package
+
+After that, modify android_core/settings.gradle to include your new package.
+
+.. code-block:: bash
+
+  rosed android_core/settings.gradle
+  ./gradlew my_package:clean my_package:debug
+
+
+.. _life-of-a-rosactivity:
 
 Life of a RosActivity
 ---------------------
@@ -25,8 +47,10 @@ messages.
 .. literalinclude:: ../../../../android_tutorial_pubsub/src/org/ros/android/android_tutorial_pubsub/MainActivity.java
   :language: java
   :linenos:
+  :lines: 17-
+  :emphasize-lines: 14,22,28-30,42
 
-On line 30, we extend :javadoc:`org.ros.android.RosActivity`.  When our
+On line 14, we extend :javadoc:`org.ros.android.RosActivity`.  When our
 `activity`_ starts, the :javadoc:`org.ros.android.RosActivity` super class will:
 
 * start the :javadoc:`org.ros.android.NodeMainExecutorService` as a `service`_
@@ -41,15 +65,15 @@ On line 30, we extend :javadoc:`org.ros.android.RosActivity`.  When our
 .. _foreground: http://developer.android.com/reference/android/app/Service.html#startForeground(int, android.app.Notification)
 .. _notification: http://developer.android.com/reference/android/app/Notification.html
 
-On line 38 we call the super constructor with two strings that become the title
+On line 22 we call the super constructor with two strings that become the title
 and ticker message of an Android `notification`_. The user may tap on the
 notification to shut down all ROS nodes associated with the application.
 
-Lines 42-46 should look familiar to Android developers. We load the `activity`_
+Lines 28-30 should look familiar to Android developers. We load the `activity`_
 layout and get a reference to our
-:javadoc:`org.ros.android.view.RosTextView<T>`. More on that later.
+:javadoc:`org.ros.android.view.RosTextView`. More on that later.
 
-On line 58 we define the abstract method
+On line 42 we define the abstract method
 :javadoc:`org.ros.android.RosActivity#init(org.ros.node.NodeMainExecutor)`.
 This is where we kick off our :javadoc:`org.ros.node.NodeMain`\s and other
 business logic.
@@ -57,15 +81,45 @@ business logic.
 And that's it. :javadoc:`org.ros.android.RosActivity` handles the rest of the
 application's lifecycle management including:
 
-* acquiring and releasing `wake and WiFi locks`_,
-* binding and unbinding the `service`_,
+* acquiring and releasing `WakeLocks`_ and `WifiLocks`_,
+* binding and unbinding the :javadoc:`org.ros.android.NodeMainExecutorService`,
 * and shutting down :javadoc:`org.ros.node.NodeMain`\s when the application exits.
 
-.. _wake and WiFi locks: http://developer.android.com/reference/android/os/PowerManager.html
+.. _WakeLocks: http://developer.android.com/reference/android/os/PowerManager.WakeLock.html
+.. _WifiLocks: http://developer.android.com/reference/android/net/wifi/WifiManager.WifiLock.html
 
 Nodes and Views
 ---------------
 
-TODO
+The android_core stack provides a number of Android `Views`_ which implement
+:javadoc:`org.ros.node.NodeMain`. For example, let's look at the implementation
+of :javadoc:`org.ros.android.view.RosTextView`. The intent of this view is
+to display the textual representation of published messages.
 
+.. literalinclude:: ../../../../android_gingerbread/src/org/ros/android/view/RosTextView.java
+  :language: java
+  :linenos:
+  :lines: 17-36,50-
+  :emphasize-lines: 40,48,55
 
+The view is configured with a topic name, message type, and a
+:javadoc:`org.ros.android.MessageCallable`. On line 40, in the
+:javadoc:`org.ros.node.NodeMain#onStart(Node)` method, we create a new
+:javadoc:`org.ros.node.topic.Subscriber` for the configured topic and message
+type.
+
+When a new message arrives, we either use the configured callable to transform
+the incoming message to a string (line 48), or we use the default
+``toString()`` method if no callable was configured (line 55). We then set the
+text of the view to the string representation of the incoming message.
+
+As with any other :javadoc:`org.ros.node.NodeMain`, the
+:javadoc:`org.ros.android.view.RosTextView` must be executed by the
+:javadoc:`org.ros.node.NodeMainExecutor`. In the :ref:`life-of-a-rosactivity`
+example, we execute it in
+:javadoc:`org.ros.android.RosActivity#init(NodeMainExecutor)` and use the it to
+display incoming messages from the
+:javadoc:`org.ros.rosjava_tutorial_pubsub.Talker` node.
+
+.. _Views: http://developer.android.com/reference/android/view/View.html
+.. _TextView: http://developer.android.com/reference/android/widget/TextView.html
