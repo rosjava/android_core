@@ -19,7 +19,7 @@ following quick start instructions to be insufficient.
 
 .. code-block:: bash
 
-  cd ~/my_ros_workspace
+  cd ~/my_workspace
   rosws merge http://android.rosjava.googlecode.com/hg/.rosinstall
   rosws update
 

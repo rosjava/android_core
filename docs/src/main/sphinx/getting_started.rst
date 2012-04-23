@@ -71,7 +71,7 @@ notification to shut down all ROS nodes associated with the application.
 
 Lines 28-30 should look familiar to Android developers. We load the `activity`_
 layout and get a reference to our
-:javadoc:`org.ros.android.view.RosTextView`. More on that later.
+:javadoc:`org.ros.android.view.RosTextView` (more on that later).
 
 On line 42 we define the abstract method
 :javadoc:`org.ros.android.RosActivity#init(org.ros.node.NodeMainExecutor)`.
