@@ -31,11 +31,34 @@ After that, modify android_core/settings.gradle to include your new package.
   rosed android_core/settings.gradle
   ./gradlew my_package:clean my_package:debug
 
+At this point, you may interact with your Android projects as described in the
+`Android documentation`_. Please start there if the following quick start
+instructions are insufficient for you.
+
+Use `Apache Ant`_ to install your new Android application:
+
+.. code-block:: bash
+
+  roscd my_package
+  ant installd
+
+You can also use ant to build the application. However, if you add, remove, or
+modify a dependency in the build.gradle file, you will need to execute the
+`gradle wrapper`_ as described above in order to update the Android
+application's external dependencies (located in the ``my_package/libs``
+directory).
+
+.. note:: You may also build and run your application from Eclipse. For more
+  information, see :doc:`building`.
+
+.. _Android documentation: http://developer.android.com/guide/developing/building/building-cmdline.html
+.. _Apache Ant: http://ant.apache.org/
+.. _gradle wrapper: http://gradle.org/docs/current/userguide/gradle_wrapper.html
 
 .. _life-of-a-rosactivity:
 
-Life of a RosActivity
----------------------
+Using RosActivity
+-----------------
 
 The :javadoc:`org.ros.android.RosActivity` class is the base class for all of
 your ROS enabled Android applications. Let's consider the following example
@@ -100,7 +123,7 @@ to display the textual representation of published messages.
   :language: java
   :linenos:
   :lines: 17-36,50-
-  :emphasize-lines: 40,48,55
+  :emphasize-lines: 40,49,56
 
 The view is configured with a topic name, message type, and a
 :javadoc:`org.ros.android.MessageCallable`. On line 40, in the
@@ -109,8 +132,8 @@ The view is configured with a topic name, message type, and a
 type.
 
 When a new message arrives, we either use the configured callable to transform
-the incoming message to a string (line 48), or we use the default
-``toString()`` method if no callable was configured (line 55). We then set the
+the incoming message to a string (line 49), or we use the default
+``toString()`` method if no callable was configured (line 56). We then set the
 text of the view to the string representation of the incoming message.
 
 As with any other :javadoc:`org.ros.node.NodeMain`, the
@@ -123,3 +146,4 @@ display incoming messages from the
 
 .. _Views: http://developer.android.com/reference/android/view/View.html
 .. _TextView: http://developer.android.com/reference/android/widget/TextView.html
+

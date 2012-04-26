@@ -16,7 +16,7 @@ android_core provides a base `Activity`_
 and managing the lifecycle of your :javadoc:`org.ros.node.NodeMain`\s.
 
 In addition, android_core defines the pattern of combining the Android
-`View`_ and :javadoc:`org.ros.node.NodeMain` concepts that enables the
+`View`_ and :javadoc:`org.ros.node.NodeMain` concepts to enable the
 development of data driven Android UIs. Several such RosViews (e.g.
 :javadoc:`org.ros.android.view.RosTextView`,
 :javadoc:`org.ros.android.view.RosImageView`, and
