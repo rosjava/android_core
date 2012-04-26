@@ -22,7 +22,7 @@ import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
 import org.ros.message.Time;
-import org.ros.node.Node;
+import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 
 /**
@@ -30,14 +30,14 @@ import org.ros.node.topic.Publisher;
  */
 class PublishingPreviewCallback implements PreviewCallback {
 
-  private final Node node;
+  private final ConnectedNode connectedNode;
   private final Publisher<sensor_msgs.CompressedImage> imagePublisher;
   private final Publisher<sensor_msgs.CameraInfo> cameraInfoPublisher;
 
-  public PublishingPreviewCallback(Node node,
+  public PublishingPreviewCallback(ConnectedNode connectedNode,
       Publisher<sensor_msgs.CompressedImage> imagePublisher,
       Publisher<sensor_msgs.CameraInfo> cameraInfoPublisher) {
-    this.node = node;
+    this.connectedNode = connectedNode;
     this.imagePublisher = imagePublisher;
     this.cameraInfoPublisher = cameraInfoPublisher;
   }
@@ -47,7 +47,7 @@ class PublishingPreviewCallback implements PreviewCallback {
     Preconditions.checkNotNull(data);
     Preconditions.checkNotNull(camera);
 
-    Time currentTime = node.getCurrentTime();
+    Time currentTime = connectedNode.getCurrentTime();
     String frameId = "camera";
 
     sensor_msgs.CompressedImage image = imagePublisher.newMessage();

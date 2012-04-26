@@ -16,18 +16,16 @@
 
 package org.ros.android.view.visualization.layer;
 
-import org.ros.android.view.visualization.Camera;
-import org.ros.android.view.visualization.VisualizationView;
-import org.ros.android.view.visualization.shape.RobotShape;
-import org.ros.android.view.visualization.shape.Shape;
-
-
 import android.content.Context;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import org.ros.android.view.visualization.Camera;
+import org.ros.android.view.visualization.VisualizationView;
+import org.ros.android.view.visualization.shape.RobotShape;
+import org.ros.android.view.visualization.shape.Shape;
 import org.ros.namespace.GraphName;
-import org.ros.node.Node;
+import org.ros.node.ConnectedNode;
 import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.util.Timer;
@@ -64,7 +62,7 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
   }
 
   @Override
-  public void onStart(Node node, Handler handler, final FrameTransformTree frameTransformTree,
+  public void onStart(ConnectedNode connectedNode, Handler handler, final FrameTransformTree frameTransformTree,
       final Camera camera) {
     redrawTimer = new Timer();
     redrawTimer.scheduleAtFixedRate(new TimerTask() {

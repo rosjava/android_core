@@ -16,15 +16,13 @@
 
 package org.ros.android.view.visualization.layer;
 
+import android.os.Handler;
 import org.ros.android.view.visualization.Camera;
 import org.ros.android.view.visualization.Vertices;
 import org.ros.android.view.visualization.shape.Color;
-
-
-import android.os.Handler;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
-import org.ros.node.Node;
+import org.ros.node.ConnectedNode;
 import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.util.concurrent.locks.Lock;
@@ -84,9 +82,9 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
   }
 
   @Override
-  public void onStart(Node node, Handler handler, final FrameTransformTree frameTransformTree,
+  public void onStart(ConnectedNode connectedNode, Handler handler, final FrameTransformTree frameTransformTree,
       Camera camera) {
-    super.onStart(node, handler, frameTransformTree, camera);
+    super.onStart(connectedNode, handler, frameTransformTree, camera);
     this.camera = camera;
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.GridCells>() {
       @Override

@@ -16,15 +16,14 @@
 
 package org.ros.android.view.visualization.layer;
 
-import org.ros.android.view.visualization.Camera;
-import org.ros.android.view.visualization.VisualizationView;
-
 import android.content.Context;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import org.ros.node.Node;
+import org.ros.android.view.visualization.Camera;
+import org.ros.android.view.visualization.VisualizationView;
+import org.ros.node.ConnectedNode;
 import org.ros.rosjava_geometry.FrameTransformTree;
 
 /**
@@ -50,7 +49,7 @@ public class CameraControlLayer extends DefaultLayer {
   }
 
   @Override
-  public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree,
+  public void onStart(ConnectedNode connectedNode, Handler handler, FrameTransformTree frameTransformTree,
       final Camera camera) {
     handler.post(new Runnable() {
       @Override

@@ -23,14 +23,14 @@ import android.hardware.SensorManager;
 import geometry_msgs.PoseStamped;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
-import org.ros.node.Node;
-import org.ros.node.NodeMain;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class OrientationPublisher implements NodeMain {
+public class OrientationPublisher extends AbstractNodeMain {
 
   private final SensorManager sensorManager;
 
@@ -76,24 +76,16 @@ public class OrientationPublisher implements NodeMain {
   }
 
   @Override
-  public void onStart(Node node) {
+  public void onStart(ConnectedNode connectedNode) {
     try {
       Publisher<geometry_msgs.PoseStamped> publisher =
-          node.newPublisher("android/orientation", "geometry_msgs/PoseStamped");
+          connectedNode.newPublisher("android/orientation", "geometry_msgs/PoseStamped");
       orientationListener = new OrientationListener(publisher);
       Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
       // 10 Hz
       sensorManager.registerListener(orientationListener, sensor, 500000);
     } catch (Exception e) {
-      node.getLog().fatal(e);
+      connectedNode.getLog().fatal(e);
     }
-  }
-
-  @Override
-  public void onShutdown(Node node) {
-  }
-
-  @Override
-  public void onShutdownComplete(Node node) {
   }
 }

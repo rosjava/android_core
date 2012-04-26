@@ -22,6 +22,7 @@ import android.widget.TextView;
 import org.ros.android.MessageCallable;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
+import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
@@ -65,8 +66,8 @@ public class RosTextView<T> extends TextView implements NodeMain {
   }
 
   @Override
-  public void onStart(Node node) {
-    Subscriber<T> subscriber = node.newSubscriber(topicName, messageType);
+  public void onStart(ConnectedNode connectedNode) {
+    Subscriber<T> subscriber = connectedNode.newSubscriber(topicName, messageType);
     subscriber.addMessageListener(new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {
@@ -96,5 +97,9 @@ public class RosTextView<T> extends TextView implements NodeMain {
 
   @Override
   public void onShutdownComplete(Node node) {
+  }
+
+  @Override
+  public void onError(Node node, Throwable throwable) {
   }
 }

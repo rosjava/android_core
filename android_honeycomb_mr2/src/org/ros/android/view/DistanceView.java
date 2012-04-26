@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
+import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
@@ -102,15 +103,15 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
   }
 
   @Override
-  public void onStart(Node node) {
+  public void onStart(ConnectedNode connectedNode) {
     // Subscribe to the laser scans.
     Subscriber<sensor_msgs.LaserScan> laserScanSubscriber =
-        node.newSubscriber(laserTopic, sensor_msgs.LaserScan._TYPE);
+        connectedNode.newSubscriber(laserTopic, sensor_msgs.LaserScan._TYPE);
     laserScanSubscriber.addMessageListener(this);
     // Subscribe to the command velocity. This is needed for auto adjusting the
     // zoom in ZoomMode.VELOCITY_ZOOM_MODE mode.
     Subscriber<geometry_msgs.Twist> twistSubscriber =
-        node.newSubscriber("cmd_vel", geometry_msgs.Twist._TYPE);
+        connectedNode.newSubscriber("cmd_vel", geometry_msgs.Twist._TYPE);
     twistSubscriber.addMessageListener(new MessageListener<geometry_msgs.Twist>() {
       @Override
       public void onNewMessage(final geometry_msgs.Twist robotVelocity) {
@@ -135,6 +136,10 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
   public void onShutdownComplete(Node node) {
     // Save the existing settings before exiting.
     distanceRenderer.savePreferences(this.getContext());
+  }
+
+  @Override
+  public void onError(Node node, Throwable throwable) {
   }
 
   @Override

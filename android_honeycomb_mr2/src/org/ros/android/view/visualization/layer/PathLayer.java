@@ -16,15 +16,13 @@
 
 package org.ros.android.view.visualization.layer;
 
-import org.ros.android.view.visualization.Camera;
-import org.ros.android.view.visualization.shape.Color;
-
-
 import android.os.Handler;
 import geometry_msgs.PoseStamped;
+import org.ros.android.view.visualization.Camera;
+import org.ros.android.view.visualization.shape.Color;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
-import org.ros.node.Node;
+import org.ros.node.ConnectedNode;
 import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.nio.ByteBuffer;
@@ -70,9 +68,9 @@ public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer
   }
 
   @Override
-  public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree,
+  public void onStart(ConnectedNode connectedNode, Handler handler, FrameTransformTree frameTransformTree,
       Camera camera) {
-    super.onStart(node, handler, frameTransformTree, camera);
+    super.onStart(connectedNode, handler, frameTransformTree, camera);
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.Path>() {
       @Override
       public void onNewMessage(nav_msgs.Path path) {

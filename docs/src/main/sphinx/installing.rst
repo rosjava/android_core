@@ -22,16 +22,17 @@ following quick start instructions to be insufficient.
   cd ~/my_workspace
   rosws merge http://android.rosjava.googlecode.com/hg/.rosinstall
   rosws update
+  source setup.bash
 
-.. note:: The rosws tool will remind you as well, but don't forget to source
-  the appropriate, newly generated setup script.
+.. note:: You should source the correct setup script for your shell (e.g.
+  setup.bash for Bash or setup.zsh for Z shell).
 
 If you would like to build the android_core documentation, you will also need
-Pygments 1.5+.
+Pygments 1.5+ and Sphinx 1.1.3+.
 
 .. code-block:: bash
 
-  easy_install --prefix ~/.local -U pygments
+  sudo pip install --upgrade sphinx Pygments
 
 .. _rosws tutorial: http://www.ros.org/doc/api/rosinstall/html/rosws_tutorial.html
 .. _Apache Ant: http://ant.apache.org/

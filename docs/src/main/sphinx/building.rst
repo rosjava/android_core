@@ -13,6 +13,19 @@ You can build debug APKs for all android_core packages using `Gradle`_.
   roscd android_core
   ./gradlew debug
 
+To build debug APKs for all android_core packages, execute the `gradle wrapper`_.
+
+.. code-block:: bash
+
+  roscd android_core
+  ./gradlew debug
+
+To build the documentation, you may execute the docs task:
+
+.. code-block:: bash
+
+  ./gradlew docs
+
 At this point, you may interact with your Android projects as described in the
 `Android documentation`_.
 

@@ -16,16 +16,15 @@
 
 package org.ros.android.view.visualization.layer;
 
+import android.os.Handler;
+import android.view.MotionEvent;
 import org.ros.android.view.visualization.Camera;
 import org.ros.android.view.visualization.OpenGlDrawable;
 import org.ros.android.view.visualization.RenderRequestListener;
 import org.ros.android.view.visualization.VisualizationView;
-
-import org.ros.rosjava_geometry.FrameTransformTree;
-
-import android.os.Handler;
-import android.view.MotionEvent;
+import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
+import org.ros.rosjava_geometry.FrameTransformTree;
 
 /**
  * Interface for a drawable layer on a VisualizationView.
@@ -47,9 +46,9 @@ public interface Layer extends OpenGlDrawable {
 
   /**
    * Called when the layer is registered at the navigation view.
-   * @param handler TODO
    */
-  void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree, Camera camera);
+  void onStart(ConnectedNode connectedNode, Handler handler, FrameTransformTree frameTransformTree,
+      Camera camera);
 
   /**
    * Called when the view is removed from the view.

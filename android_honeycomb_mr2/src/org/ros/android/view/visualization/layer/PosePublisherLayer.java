@@ -18,20 +18,17 @@ package org.ros.android.view.visualization.layer;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.android.view.visualization.Camera;
-import org.ros.android.view.visualization.VisualizationView;
-import org.ros.android.view.visualization.shape.PoseShape;
-import org.ros.android.view.visualization.shape.Shape;
-
-
-
-
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import org.ros.android.view.visualization.Camera;
+import org.ros.android.view.visualization.VisualizationView;
+import org.ros.android.view.visualization.shape.PoseShape;
+import org.ros.android.view.visualization.shape.Shape;
 import org.ros.namespace.GraphName;
+import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
 import org.ros.rosjava_geometry.FrameTransformTree;
@@ -56,7 +53,7 @@ public class PosePublisherLayer extends DefaultLayer {
   private GestureDetector gestureDetector;
   private Transform pose;
   private Camera camera;
-  private Node node;
+  private ConnectedNode connectedNode;
 
   public PosePublisherLayer(String topic, Context context) {
     this(new GraphName(topic), context);
@@ -95,7 +92,7 @@ public class PosePublisherLayer extends DefaultLayer {
         return true;
       } else if (event.getAction() == MotionEvent.ACTION_UP) {
         posePublisher.publish(pose.toPoseStampedMessage(camera.getFixedFrame(),
-            node.getCurrentTime(), posePublisher.newMessage()));
+            connectedNode.getCurrentTime(), posePublisher.newMessage()));
         visible = false;
         requestRender();
         return true;
@@ -106,12 +103,12 @@ public class PosePublisherLayer extends DefaultLayer {
   }
 
   @Override
-  public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree,
-      final Camera camera) {
-    this.node = node;
+  public void onStart(ConnectedNode connectedNode, Handler handler,
+      FrameTransformTree frameTransformTree, final Camera camera) {
+    this.connectedNode = connectedNode;
     this.camera = camera;
     shape = new PoseShape(camera);
-    posePublisher = node.newPublisher(topic, "geometry_msgs/PoseStamped");
+    posePublisher = connectedNode.newPublisher(topic, "geometry_msgs/PoseStamped");
     handler.post(new Runnable() {
       @Override
       public void run() {

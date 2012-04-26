@@ -16,16 +16,14 @@
 
 package org.ros.android.view.visualization.layer;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.ros.android.view.visualization.Camera;
 import org.ros.android.view.visualization.shape.Color;
 import org.ros.android.view.visualization.shape.Shape;
 import org.ros.android.view.visualization.shape.TriangleFanShape;
-
-
-import org.apache.commons.lang.ArrayUtils;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
-import org.ros.node.Node;
+import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
 import org.ros.rosjava_geometry.FrameTransformTree;
 import sensor_msgs.LaserScan;
@@ -61,9 +59,9 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
   }
 
   @Override
-  public void onStart(Node node, android.os.Handler handler, FrameTransformTree frameTransformTree,
+  public void onStart(ConnectedNode connectedNode, android.os.Handler handler, FrameTransformTree frameTransformTree,
       Camera camera) {
-    super.onStart(node, handler, frameTransformTree, camera);
+    super.onStart(connectedNode, handler, frameTransformTree, camera);
     Subscriber<LaserScan> subscriber = getSubscriber();
     subscriber.addMessageListener(new MessageListener<LaserScan>() {
       @Override

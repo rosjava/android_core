@@ -16,10 +16,9 @@
 
 package org.ros.android.view.visualization;
 
+import android.opengl.GLSurfaceView;
 import org.ros.android.view.visualization.layer.Layer;
 import org.ros.android.view.visualization.layer.TfLayer;
-
-import android.opengl.GLSurfaceView;
 import org.ros.namespace.GraphName;
 import org.ros.rosjava_geometry.FrameTransformTree;
 import org.ros.rosjava_geometry.Transform;

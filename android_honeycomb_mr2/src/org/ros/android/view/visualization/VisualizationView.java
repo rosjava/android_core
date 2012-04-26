@@ -19,18 +19,18 @@ package org.ros.android.view.visualization;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-import org.ros.android.view.visualization.layer.Layer;
-
-
-
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import org.ros.android.view.visualization.layer.Layer;
+import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
+import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
+import org.ros.node.topic.Subscriber;
 import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.util.List;
@@ -42,12 +42,10 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
 
   private RenderRequestListener renderRequestListener;
   private FrameTransformTree frameTransformTree;
-  private TransformListener transformListener;
   private Camera camera;
   private XYOrthographicRenderer renderer;
   private List<Layer> layers;
-
-  private Node node;
+  private ConnectedNode connectedNode;
 
   public VisualizationView(Context context) {
     super(context);
@@ -67,13 +65,17 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
       }
     };
     frameTransformTree = new FrameTransformTree();
-    transformListener = new TransformListener(frameTransformTree);
     camera = new Camera(frameTransformTree);
     renderer = new XYOrthographicRenderer(frameTransformTree, camera);
     layers = Lists.newArrayList();
     setEGLConfigChooser(8, 8, 8, 8, 0, 0);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
     setRenderer(renderer);
+  }
+
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("android_honeycomb_mr2/visualization_view");
   }
 
   @Override
@@ -100,28 +102,43 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   public void addLayer(Layer layer) {
     layers.add(layer);
     layer.addRenderListener(renderRequestListener);
-    if (node != null) {
-      layer.onStart(node, getHandler(), frameTransformTree, camera);
+    if (connectedNode != null) {
+      layer.onStart(connectedNode, getHandler(), frameTransformTree, camera);
     }
     requestRender();
   }
 
   public void removeLayer(Layer layer) {
-    layer.onShutdown(this, node);
+    layer.onShutdown(this, connectedNode);
     layers.remove(layer);
   }
 
   @Override
-  public GraphName getDefaultNodeName() {
-    return new GraphName("android_honeycomb_mr2/visualization_view");
+  public void onStart(ConnectedNode connectedNode) {
+    this.connectedNode = connectedNode;
+    startTransformListener();
+    startLayers();
   }
 
-  @Override
-  public void onStart(Node node) {
-    this.node = node;
-    transformListener.onStart(node);
+  private void startTransformListener() {
+    String tfPrefix = connectedNode.getParameterTree().getString("~tf_prefix", "");
+    if (!tfPrefix.isEmpty()) {
+      frameTransformTree.setPrefix(tfPrefix);
+    }
+    Subscriber<tf.tfMessage> tfSubscriber = connectedNode.newSubscriber("tf", tf.tfMessage._TYPE);
+    tfSubscriber.addMessageListener(new MessageListener<tf.tfMessage>() {
+      @Override
+      public void onNewMessage(tf.tfMessage message) {
+        for (geometry_msgs.TransformStamped transform : message.getTransforms()) {
+          frameTransformTree.updateTransform(transform);
+        }
+      }
+    });
+  }
+
+  private void startLayers() {
     for (Layer layer : layers) {
-      layer.onStart(node, getHandler(), frameTransformTree, camera);
+      layer.onStart(connectedNode, getHandler(), frameTransformTree, camera);
     }
     renderer.setLayers(layers);
   }
@@ -132,11 +149,14 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     for (Layer layer : layers) {
       layer.onShutdown(this, node);
     }
-    transformListener.onShutdown(node);
-    this.node = null;
+    this.connectedNode = null;
   }
 
   @Override
   public void onShutdownComplete(Node node) {
+  }
+
+  @Override
+  public void onError(Node node, Throwable throwable) {
   }
 }

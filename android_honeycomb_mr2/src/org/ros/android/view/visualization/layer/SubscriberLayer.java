@@ -18,13 +18,11 @@ package org.ros.android.view.visualization.layer;
 
 import com.google.common.base.Preconditions;
 
+import android.os.Handler;
 import org.ros.android.view.visualization.Camera;
 import org.ros.android.view.visualization.VisualizationView;
-
-
-
-import android.os.Handler;
 import org.ros.namespace.GraphName;
+import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.topic.Subscriber;
 import org.ros.rosjava_geometry.FrameTransformTree;
@@ -45,9 +43,9 @@ public class SubscriberLayer<T> extends DefaultLayer {
   }
  
   @Override
-  public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree, Camera camera) {
-    super.onStart(node, handler, frameTransformTree, camera);
-    subscriber = node.newSubscriber(topicName, messageType);
+  public void onStart(ConnectedNode connectedNode, Handler handler, FrameTransformTree frameTransformTree, Camera camera) {
+    super.onStart(connectedNode, handler, frameTransformTree, camera);
+    subscriber = connectedNode.newSubscriber(topicName, messageType);
     subscriber.setQueueLimit(1);
   }
   

@@ -3,9 +3,6 @@ package org.ros.android.view.visualization.shape;
 import com.google.common.base.Preconditions;
 
 import org.ros.android.view.visualization.OpenGlTransform;
-
-
-
 import org.ros.rosjava_geometry.Transform;
 
 import javax.microedition.khronos.opengles.GL10;

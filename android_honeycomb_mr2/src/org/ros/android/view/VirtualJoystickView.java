@@ -34,6 +34,7 @@ import android.widget.TextView;
 import org.ros.android.android_honeycomb_mr2.R;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
+import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
@@ -921,10 +922,11 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   }
 
   @Override
-  public void onStart(Node node) {
-    publisher = node.newPublisher("~cmd_vel", "geometry_msgs/Twist");
+  public void onStart(ConnectedNode connectedNode) {
+    publisher = connectedNode.newPublisher("~cmd_vel", geometry_msgs.Twist._TYPE);
     publisher.setQueueLimit(1);
-    Subscriber<nav_msgs.Odometry> subscriber = node.newSubscriber("odom", nav_msgs.Odometry._TYPE);
+    Subscriber<nav_msgs.Odometry> subscriber =
+        connectedNode.newSubscriber("odom", nav_msgs.Odometry._TYPE);
     subscriber.addMessageListener(this);
     publisherTimer = new Timer();
     publisherTimer.schedule(new TimerTask() {
@@ -945,5 +947,9 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   public void onShutdownComplete(Node node) {
     publisherTimer.cancel();
     publisherTimer.purge();
+  }
+
+  @Override
+  public void onError(Node node, Throwable throwable) {
   }
 }

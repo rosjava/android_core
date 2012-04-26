@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
+import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
@@ -47,14 +48,15 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
   }
 
   @Override
-  public void onStart(Node node) {
-    NameResolver resolver = node.getResolver().newChild("camera");
+  public void onStart(ConnectedNode connectedNode) {
+    NameResolver resolver = connectedNode.getResolver().newChild("camera");
     Publisher<sensor_msgs.CompressedImage> imagePublisher =
-        node.newPublisher(resolver.resolve("image_raw/compressed"),
+        connectedNode.newPublisher(resolver.resolve("image_raw/compressed"),
             sensor_msgs.CompressedImage._TYPE);
     Publisher<sensor_msgs.CameraInfo> cameraInfoPublisher =
-        node.newPublisher(resolver.resolve("camera_info"), sensor_msgs.CameraInfo._TYPE);
-    setPreviewCallback(new PublishingPreviewCallback(node, imagePublisher, cameraInfoPublisher));
+        connectedNode.newPublisher(resolver.resolve("camera_info"), sensor_msgs.CameraInfo._TYPE);
+    setPreviewCallback(new PublishingPreviewCallback(connectedNode, imagePublisher,
+        cameraInfoPublisher));
   }
 
   @Override
@@ -62,7 +64,11 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
   }
 
   @Override
-  public void onShutdownComplete(Node arg0) {
+  public void onShutdownComplete(Node node) {
     releaseCamera();
+  }
+
+  @Override
+  public void onError(Node node, Throwable throwable) {
   }
 }

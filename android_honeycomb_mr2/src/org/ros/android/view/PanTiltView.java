@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import org.ros.android.android_honeycomb_mr2.R;
 import org.ros.namespace.GraphName;
+import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
@@ -91,7 +92,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
   private static final String HOME_TILT_KEY_NAME = "HOME_TILT";
 
   private Publisher<sensor_msgs.JointState> publisher;
-  
+
   /**
    * mainLayout The parent layout that contains all other elements.
    */
@@ -167,31 +168,31 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
     final int action = event.getAction();
 
     switch (action & MotionEvent.ACTION_MASK) {
-      case MotionEvent.ACTION_MOVE: {
-        // Only proceed if the pointer that initiated the interaction is still
-        // in contact with the screen.
-        if (pointerId == INVALID_POINTER_ID) {
-          break;
-        }
-        onContactMove(event.getX(event.findPointerIndex(pointerId)),
-            event.getY(event.findPointerIndex(pointerId)));
+    case MotionEvent.ACTION_MOVE: {
+      // Only proceed if the pointer that initiated the interaction is still
+      // in contact with the screen.
+      if (pointerId == INVALID_POINTER_ID) {
         break;
       }
-      case MotionEvent.ACTION_DOWN: {
-        // Get the coordinates of the pointer that is initiating the
-        // interaction.
-        pointerId = event.getPointerId(event.getActionIndex());
-        onContactDown(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()));
-        break;
-      }
-      case MotionEvent.ACTION_POINTER_UP:
-      case MotionEvent.ACTION_UP: {
-        // When any pointer (primary or otherwise) fires an UP, prevent further
-        // the interaction.
-        pointerId = INVALID_POINTER_ID;
-        initialPointerLocation = INVALID_POINTER_LOCATION;
-        break;
-      }
+      onContactMove(event.getX(event.findPointerIndex(pointerId)),
+          event.getY(event.findPointerIndex(pointerId)));
+      break;
+    }
+    case MotionEvent.ACTION_DOWN: {
+      // Get the coordinates of the pointer that is initiating the
+      // interaction.
+      pointerId = event.getPointerId(event.getActionIndex());
+      onContactDown(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()));
+      break;
+    }
+    case MotionEvent.ACTION_POINTER_UP:
+    case MotionEvent.ACTION_UP: {
+      // When any pointer (primary or otherwise) fires an UP, prevent further
+      // the interaction.
+      pointerId = INVALID_POINTER_ID;
+      initialPointerLocation = INVALID_POINTER_LOCATION;
+      break;
+    }
     }
     return true;
   }
@@ -507,6 +508,16 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
   }
 
   @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("android_honeycomb_mr2/pan_tilt_view");
+  }
+
+  @Override
+  public void onStart(ConnectedNode connectedNode) {
+    publisher = connectedNode.newPublisher("ptu_cmd", sensor_msgs.JointState._TYPE);
+  }
+
+  @Override
   public void onShutdown(Node node) {
   }
 
@@ -515,12 +526,6 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
   }
 
   @Override
-  public void onStart(Node node) {
-    publisher = node.newPublisher("/ptu_cmd", sensor_msgs.JointState._TYPE);
-  }
-
-  @Override
-  public GraphName getDefaultNodeName() {
-    return new GraphName("android_honeycomb_mr2/pan_tilt_view");
+  public void onError(Node node, Throwable throwable) {
   }
 }

@@ -16,15 +16,14 @@
 
 package org.ros.android.view.visualization.layer;
 
+import android.graphics.Bitmap;
+import android.os.Handler;
 import org.ros.android.view.visualization.Camera;
 import org.ros.android.view.visualization.TextureBitmapUtilities;
 import org.ros.android.view.visualization.TextureDrawable;
-
-import android.graphics.Bitmap;
-import android.os.Handler;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
-import org.ros.node.Node;
+import org.ros.node.ConnectedNode;
 import org.ros.rosjava_geometry.FrameTransformTree;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -86,9 +85,9 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   }
 
   @Override
-  public void onStart(Node node, Handler handler, FrameTransformTree frameTransformTree,
+  public void onStart(ConnectedNode connectedNode, Handler handler, FrameTransformTree frameTransformTree,
       Camera camera) {
-    super.onStart(node, handler, frameTransformTree, camera);
+    super.onStart(connectedNode, handler, frameTransformTree, camera);
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.OccupancyGrid>() {
       @Override
       public void onNewMessage(nav_msgs.OccupancyGrid occupancyGridMessage) {

@@ -17,7 +17,6 @@
 package org.ros.android.view.visualization.shape;
 
 import org.ros.android.view.visualization.Vertices;
-
 import org.ros.rosjava_geometry.Quaternion;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
