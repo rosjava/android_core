@@ -119,7 +119,7 @@ The android_core stack provides a number of Android `Views`_ which implement
 of :javadoc:`org.ros.android.view.RosTextView`. The intent of this view is
 to display the textual representation of published messages.
 
-.. literalinclude:: ../../../../android_gingerbread/src/org/ros/android/view/RosTextView.java
+.. literalinclude:: ../../../../android_gingerbread_mr1/src/org/ros/android/view/RosTextView.java
   :language: java
   :linenos:
   :lines: 17-36,50-

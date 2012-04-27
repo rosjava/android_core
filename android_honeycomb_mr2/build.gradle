@@ -18,5 +18,5 @@ dependencies {
   compile 'ros.rosjava_core:rosjava_geometry:0.0.0-SNAPSHOT'
 }
 
-debug.dependsOn project(':android_gingerbread').tasks.debug
+debug.dependsOn project(':android_gingerbread_mr1').tasks.debug
 
