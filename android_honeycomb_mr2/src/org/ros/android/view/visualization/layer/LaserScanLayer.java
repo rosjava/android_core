@@ -16,7 +16,6 @@
 
 package org.ros.android.view.visualization.layer;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.ros.android.view.visualization.Camera;
 import org.ros.android.view.visualization.shape.Color;
 import org.ros.android.view.visualization.shape.Shape;
@@ -67,7 +66,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
       @Override
       public void onNewMessage(LaserScan laserScan) {
         frame = new GraphName(laserScan.getHeader().getFrameId());
-        float[] ranges = ArrayUtils.toPrimitive(laserScan.getRanges().toArray(new Float[0]));
+        float[] ranges = laserScan.getRanges();
         // vertices is an array of x, y, z values starting with the origin of
         // the triangle fan.
         float[] vertices = new float[(ranges.length + 1) * 3];

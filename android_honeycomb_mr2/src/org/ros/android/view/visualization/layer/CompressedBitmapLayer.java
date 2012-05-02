@@ -23,7 +23,6 @@ import android.util.Log;
 import org.ros.android.view.visualization.Camera;
 import org.ros.android.view.visualization.TextureBitmapUtilities;
 import org.ros.android.view.visualization.TextureDrawable;
-import org.ros.collections.PrimitiveArrays;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
@@ -87,7 +86,7 @@ public class CompressedBitmapLayer extends
     try {
       BitmapFactory.Options options = new BitmapFactory.Options();
       options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-      byte[] data = PrimitiveArrays.toByteArray(compressedBitmap.getData());
+      byte[] data = compressedBitmap.getData();
       bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
       pixels = IntBuffer.allocate(bitmap.getWidth() * bitmap.getHeight());
       bitmap.copyPixelsToBuffer(pixels);

@@ -34,13 +34,13 @@ public class BitmapFromImage implements MessageCallable<Bitmap, sensor_msgs.Imag
             Bitmap.Config.ARGB_8888);
     for (int x = 0; x < message.getWidth(); x++) {
       for (int y = 0; y < message.getHeight(); y++) {
-        byte red = message.getData().get((int) (y * message.getStep() + 3 * x)).byteValue();
-        byte green = message.getData().get((int) (y * message.getStep() + 3 * x + 1)).byteValue();
-        byte blue = message.getData().get((int) (y * message.getStep() + 3 * x + 2)).byteValue();
+        byte[] data = message.getData();
+        byte red = data[(int) (y * message.getStep() + 3 * x)];
+        byte green = data[(int) (y * message.getStep() + 3 * x + 1)];
+        byte blue = data[(int) (y * message.getStep() + 3 * x + 2)];
         bitmap.setPixel(x, y, Color.argb(255, red & 0xFF, green & 0xFF, blue & 0xFF));
       }
     }
     return bitmap;
   }
-
 }

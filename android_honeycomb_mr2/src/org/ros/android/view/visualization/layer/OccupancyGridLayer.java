@@ -71,11 +71,11 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   }
 
   private static int[] occupancyGridToPixelArray(nav_msgs.OccupancyGrid occupancyGrid) {
-    int pixels[] = new int[occupancyGrid.getData().size()];
-    for (int i = 0; i < occupancyGrid.getData().size(); i++) {
-      if (occupancyGrid.getData().get(i) == -1) {
+    int pixels[] = new int[occupancyGrid.getData().length];
+    for (int i = 0; i < pixels.length; i++) {
+      if (occupancyGrid.getData()[i] == -1) {
         pixels[i] = COLOR_UNKNOWN;
-      } else if (occupancyGrid.getData().get(i) == 0) {
+      } else if (occupancyGrid.getData()[i] == 0) {
         pixels[i] = COLOR_FREE;
       } else {
         pixels[i] = COLOR_OCCUPIED;

@@ -16,7 +16,6 @@
 
 package org.ros.android.android_tutorial_camera;
 
-import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -24,9 +23,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 import org.ros.address.InetAddressFactory;
-import org.ros.android.MasterChooser;
 import org.ros.android.RosActivity;
-import org.ros.android.view.RosCameraPreviewView;
+import org.ros.android.view.camera.RosCameraPreviewView;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
@@ -37,7 +35,7 @@ import org.ros.node.NodeMainExecutor;
 public class MainActivity extends RosActivity {
 
   private int cameraId;
-  private RosCameraPreviewView preview;
+  private RosCameraPreviewView rosCameraPreviewView;
 
   public MainActivity() {
     super("CameraTutorial", "CameraTutorial");
@@ -49,8 +47,7 @@ public class MainActivity extends RosActivity {
     requestWindowFeature(Window.FEATURE_NO_TITLE);
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     setContentView(R.layout.main);
-    preview = (RosCameraPreviewView) findViewById(R.id.camera_preview);
-    startActivityForResult(new Intent(this, MasterChooser.class), 0);
+    rosCameraPreviewView = (RosCameraPreviewView) findViewById(R.id.ros_camera_preview_view);
   }
 
   @Override
@@ -60,8 +57,8 @@ public class MainActivity extends RosActivity {
       final Toast toast;
       if (numberOfCameras > 1) {
         cameraId = (cameraId + 1) % numberOfCameras;
-        preview.releaseCamera();
-        preview.setCamera(Camera.open(cameraId));
+        rosCameraPreviewView.releaseCamera();
+        rosCameraPreviewView.setCamera(Camera.open(cameraId));
         toast = Toast.makeText(this, "Switching cameras.", Toast.LENGTH_SHORT);
       } else {
         toast = Toast.makeText(this, "No alternative cameras to switch to.", Toast.LENGTH_SHORT);
@@ -79,10 +76,10 @@ public class MainActivity extends RosActivity {
   @Override
   protected void init(NodeMainExecutor nodeMainExecutor) {
     cameraId = 0;
-    preview.setCamera(Camera.open(cameraId));
+    rosCameraPreviewView.setCamera(Camera.open(cameraId));
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
     nodeConfiguration.setMasterUri(getMasterUri());
-    nodeMainExecutor.execute(preview, nodeConfiguration);
+    nodeMainExecutor.execute(rosCameraPreviewView, nodeConfiguration);
   }
 }

@@ -32,8 +32,6 @@ import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
-import java.util.Arrays;
-
 /**
  * PanTiltZoomView creates a rosjava view that can be used to control a pan tilt
  * device.
@@ -485,7 +483,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
     // Initialize the message with the pan position value and publish it.
     sensor_msgs.JointState jointState = publisher.newMessage();
     jointState.getName().add("pan");
-    jointState.setPosition(Arrays.asList((double) pan));
+    jointState.setPosition(new double[] { pan });
     publisher.publish(jointState);
   }
 
@@ -503,7 +501,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
     // Initialize the message with the tilt position value and publish it.
     sensor_msgs.JointState jointState = publisher.newMessage();
     jointState.getName().add("tilt");
-    jointState.setPosition(Arrays.asList((double) tilt));
+    jointState.setPosition(new double[] { tilt });
     publisher.publish(jointState);
   }
 

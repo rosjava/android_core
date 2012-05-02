@@ -29,7 +29,7 @@ import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
 
 /**
- * A camera node that publishes images and camera_info
+ * Displays incoming sensor_msgs/CompressedImage messages.
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
@@ -66,7 +66,7 @@ public class RosImageView<T> extends ImageView implements NodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return new GraphName("android_gingerbread/ros_image_view");
+    return new GraphName("ros_image_view");
   }
 
   @Override
