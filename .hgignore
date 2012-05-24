@@ -25,3 +25,4 @@ bin
 docs/src/main/sphinx/conf.py
 local.properties
 proguard-project.txt
+build.xml

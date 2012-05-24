@@ -30,7 +30,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import org.ros.RosCore;
-import org.ros.android.android_gingerbread.R;
+import org.ros.android.android_gingerbread_mr1.R;
 import org.ros.concurrent.ListenerCollection;
 import org.ros.concurrent.ListenerCollection.SignalRunnable;
 import org.ros.exception.RosRuntimeException;
