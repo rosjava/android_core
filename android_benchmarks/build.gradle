@@ -14,7 +14,9 @@
  * the License.
  */
 
-include 'android_gingerbread_mr1', 'android_tutorial_pubsub', 'android_honeycomb_mr2',
-        'android_tutorial_teleop', 'android_tutorial_hokuyo', 'android_acm_serial',
-	'android_tutorial_camera', 'android_tutorial_image_transport',
-	'android_benchmarks', 'docs'
+dependencies {
+  compile 'ros.rosjava_core:rosjava_benchmarks:0.0.0-SNAPSHOT'
+}
+
+debug.dependsOn project(':android_gingerbread_mr1').tasks.debug
+

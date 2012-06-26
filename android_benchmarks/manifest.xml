@@ -1,0 +1,10 @@
+<package>
+  <description brief="android_tutorial_pubsub">
+     android_tutorial_pubsub
+  </description>
+  <author>Damon Kohler</author>
+  <license>Apache 2.0</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/android_tutorial_pubsub</url>
+</package>
+
