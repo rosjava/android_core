@@ -94,7 +94,6 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
           if (lock.tryLock()) {
             message = data;
             ready = true;
-            requestRender();
             lock.unlock();
           }
         }

@@ -72,7 +72,6 @@ public class PoseSubscriberLayer extends SubscriberLayer<geometry_msgs.PoseStamp
               frameTransformTree.newFrameTransform(frame, targetFrame);
           shape.setTransform(targetFrameTransform.getTransform().multiply(poseTransform));
           ready = true;
-          requestRender();
         }
       }
     });

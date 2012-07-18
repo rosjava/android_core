@@ -94,7 +94,6 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
           angle += angleIncrement;
         }
         shape = new TriangleFanShape(vertices, FREE_SPACE_COLOR);
-        requestRender();
       }
     });
   }

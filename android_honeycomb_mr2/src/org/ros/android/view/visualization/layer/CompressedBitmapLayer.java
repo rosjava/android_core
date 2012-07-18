@@ -92,7 +92,6 @@ public class CompressedBitmapLayer extends
     textureDrawable.update(message.getOrigin(), message.getResolutionX(), bitmap);
     frame = new GraphName(message.getHeader().getFrameId());
     ready = true;
-    requestRender();
   }
 
   private Texture comprssedBitmapMessageToTexture(

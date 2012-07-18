@@ -42,7 +42,6 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
 
   private static final boolean DEBUG = false;
 
-  private RenderRequestListener renderRequestListener;
   private FrameTransformTree frameTransformTree;
   private Camera camera;
   private XYOrthographicRenderer renderer;
@@ -60,12 +59,6 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   }
 
   private void init() {
-    renderRequestListener = new RenderRequestListener() {
-      @Override
-      public void onRenderRequest() {
-        requestRender();
-      }
-    };
     // TODO(damonkohler): Support ~tf_prefix parameter.
     frameTransformTree = new FrameTransformTree(NameResolver.newRoot());
     camera = new Camera(frameTransformTree);
@@ -108,8 +101,6 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
    */
   public void addLayer(Layer layer) {
     layers.add(layer);
-    layer.addRenderListener(renderRequestListener);
-    requestRender();
   }
 
   public void removeLayer(Layer layer) {

@@ -76,7 +76,6 @@ public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer
       public void onNewMessage(nav_msgs.Path path) {
         updateVertexBuffer(path);
         ready = true;
-        requestRender();
       }
     });
   }

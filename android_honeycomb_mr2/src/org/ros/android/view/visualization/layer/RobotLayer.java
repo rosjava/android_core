@@ -28,9 +28,6 @@ import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.rosjava_geometry.FrameTransformTree;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import javax.microedition.khronos.opengles.GL10;
 
 /**
@@ -43,7 +40,6 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
   private final Shape shape;
 
   private GestureDetector gestureDetector;
-  private Timer redrawTimer;
 
   public RobotLayer(String frame, Context context) {
     this.frame = new GraphName(frame);
@@ -58,22 +54,15 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
 
   @Override
   public boolean onTouchEvent(VisualizationView view, MotionEvent event) {
-    return gestureDetector.onTouchEvent(event);
+    if (gestureDetector != null) {
+      return gestureDetector.onTouchEvent(event);
+    }
+    return false;
   }
 
   @Override
   public void onStart(ConnectedNode connectedNode, Handler handler, final FrameTransformTree frameTransformTree,
       final Camera camera) {
-    redrawTimer = new Timer();
-    redrawTimer.scheduleAtFixedRate(new TimerTask() {
-      @Override
-      public void run() {
-        if (frameTransformTree.canTransform(camera.getFixedFrame(), frame)) {
-          requestRender();
-        }
-      }
-    }, 0, 100);
-
     handler.post(new Runnable() {
       @Override
       public void run() {
@@ -82,7 +71,6 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
               @Override
               public boolean onDoubleTap(MotionEvent event) {
                 camera.setFixedFrame(frame);
-                requestRender();
                 return true;
               }
 

@@ -123,6 +123,5 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
     }
     frame = new GraphName(message.getHeader().getFrameId());
     ready = true;
-    requestRender();
   }
 }

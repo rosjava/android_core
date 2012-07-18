@@ -60,7 +60,6 @@ public class CameraControlLayer extends DefaultLayer {
               public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
                   float distanceY) {
                 camera.moveCameraScreenCoordinates(distanceX, distanceY);
-                requestRender();
                 return true;
               }
             });
@@ -70,7 +69,6 @@ public class CameraControlLayer extends DefaultLayer {
                   @Override
                   public boolean onScale(ScaleGestureDetector detector) {
                     camera.zoomCamera(detector.getScaleFactor());
-                    requestRender();
                     return true;
                   }
                 });

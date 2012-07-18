@@ -88,13 +88,11 @@ public class PosePublisherLayer extends DefaultLayer {
           pose.setRotation(Quaternion.newIdentityQuaternion());
         }
         shape.setTransform(pose);
-        requestRender();
         return true;
       } else if (event.getAction() == MotionEvent.ACTION_UP) {
         posePublisher.publish(pose.toPoseStampedMessage(camera.getFixedFrame(),
             connectedNode.getCurrentTime(), posePublisher.newMessage()));
         visible = false;
-        requestRender();
         return true;
       }
     }
@@ -121,7 +119,6 @@ public class PosePublisherLayer extends DefaultLayer {
                         .getY())), Quaternion.newIdentityQuaternion());
                 shape.setTransform(pose);
                 visible = true;
-                requestRender();
               }
             });
       }

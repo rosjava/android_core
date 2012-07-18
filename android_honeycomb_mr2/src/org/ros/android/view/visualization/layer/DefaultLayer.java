@@ -16,18 +16,13 @@
 
 package org.ros.android.view.visualization.layer;
 
-import com.google.common.collect.Lists;
-
 import android.os.Handler;
 import android.view.MotionEvent;
 import org.ros.android.view.visualization.Camera;
-import org.ros.android.view.visualization.RenderRequestListener;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.rosjava_geometry.FrameTransformTree;
-
-import java.util.Collection;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -37,12 +32,6 @@ import javax.microedition.khronos.opengles.GL10;
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
 public abstract class DefaultLayer implements Layer {
-
-  private final Collection<RenderRequestListener> renderListeners;
-
-  public DefaultLayer() {
-    renderListeners = Lists.newArrayList();
-  }
 
   @Override
   public void draw(GL10 gl) {
@@ -60,20 +49,5 @@ public abstract class DefaultLayer implements Layer {
 
   @Override
   public void onShutdown(VisualizationView view, Node node) {
-  }
-
-  @Override
-  public void addRenderListener(RenderRequestListener listener) {
-    renderListeners.add(listener);
-  }
-
-  @Override
-  public void removeRenderListener(RenderRequestListener listener) {
-  }
-
-  protected void requestRender() {
-    for (RenderRequestListener listener : renderListeners) {
-      listener.onRenderRequest();
-    }
   }
 }

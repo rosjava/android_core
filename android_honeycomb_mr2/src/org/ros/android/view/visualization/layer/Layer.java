@@ -20,7 +20,6 @@ import android.os.Handler;
 import android.view.MotionEvent;
 import org.ros.android.view.visualization.Camera;
 import org.ros.android.view.visualization.OpenGlDrawable;
-import org.ros.android.view.visualization.RenderRequestListener;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
@@ -54,16 +53,4 @@ public interface Layer extends OpenGlDrawable {
    * Called when the view is removed from the view.
    */
   void onShutdown(VisualizationView view, Node node);
-
-  /**
-   * @param listener
-   *          the {@link RenderRequestListener} to add
-   */
-  void addRenderListener(RenderRequestListener listener);
-
-  /**
-   * @param listener
-   *          the {@link RenderRequestListener} to remove
-   */
-  void removeRenderListener(RenderRequestListener listener);
 }
