@@ -56,7 +56,7 @@ public class PosePublisherLayer extends DefaultLayer {
   private ConnectedNode connectedNode;
 
   public PosePublisherLayer(String topic, Context context) {
-    this(new GraphName(topic), context);
+    this(GraphName.of(topic), context);
   }
 
   public PosePublisherLayer(GraphName topic, Context context) {

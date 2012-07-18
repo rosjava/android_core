@@ -58,7 +58,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   private GraphName frame;
 
   public OccupancyGridLayer(String topic) {
-    this(new GraphName(topic));
+    this(GraphName.of(topic));
   }
 
   public OccupancyGridLayer(GraphName topic) {
@@ -121,7 +121,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
       textureDrawable
           .update(message.getInfo().getOrigin(), message.getInfo().getResolution(), bitmap);
     }
-    frame = new GraphName(message.getHeader().getFrameId());
+    frame = GraphName.of(message.getHeader().getFrameId());
     ready = true;
   }
 }

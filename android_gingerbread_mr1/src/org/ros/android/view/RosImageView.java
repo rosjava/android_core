@@ -66,7 +66,7 @@ public class RosImageView<T> extends ImageView implements NodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return new GraphName("ros_image_view");
+    return GraphName.of("ros_image_view");
   }
 
   @Override

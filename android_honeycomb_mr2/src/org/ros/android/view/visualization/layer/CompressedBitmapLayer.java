@@ -49,7 +49,7 @@ public class CompressedBitmapLayer extends
   private GraphName frame;
 
   public CompressedBitmapLayer(String topic) {
-    this(new GraphName(topic));
+    this(GraphName.of(topic));
   }
 
   public CompressedBitmapLayer(GraphName topic) {
@@ -90,7 +90,7 @@ public class CompressedBitmapLayer extends
         Bitmap.createBitmap(texture.getPixels(), texture.getStride(), texture.getHeight(),
             Bitmap.Config.ARGB_8888);
     textureDrawable.update(message.getOrigin(), message.getResolutionX(), bitmap);
-    frame = new GraphName(message.getHeader().getFrameId());
+    frame = GraphName.of(message.getHeader().getFrameId());
     ready = true;
   }
 

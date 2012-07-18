@@ -918,7 +918,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
 
   @Override
   public GraphName getDefaultNodeName() {
-    return new GraphName("android_honeycomb_mr2/virtual_joystick_view");
+    return GraphName.of("android_honeycomb_mr2/virtual_joystick_view");
   }
 
   @Override

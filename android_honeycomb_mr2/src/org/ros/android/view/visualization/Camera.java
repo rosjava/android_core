@@ -36,7 +36,7 @@ public class Camera {
    * 
    * TODO(moesenle): make this the root of the TF tree.
    */
-  private static final GraphName DEFAULT_FIXED_FRAME = new GraphName("/map");
+  private static final GraphName DEFAULT_FIXED_FRAME = GraphName.of("/map");
 
   /**
    * Most the user can zoom in.

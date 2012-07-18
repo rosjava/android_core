@@ -44,7 +44,7 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
 
   @Override
   public GraphName getDefaultNodeName() {
-    return new GraphName("ros_camera_preview_view");
+    return GraphName.of("ros_camera_preview_view");
   }
 
   @Override

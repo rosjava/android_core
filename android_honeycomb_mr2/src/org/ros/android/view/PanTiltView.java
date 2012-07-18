@@ -507,7 +507,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
 
   @Override
   public GraphName getDefaultNodeName() {
-    return new GraphName("android_honeycomb_mr2/pan_tilt_view");
+    return GraphName.of("android_honeycomb_mr2/pan_tilt_view");
   }
 
   @Override

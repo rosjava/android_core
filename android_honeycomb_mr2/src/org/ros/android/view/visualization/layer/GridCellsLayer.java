@@ -45,7 +45,7 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
   private nav_msgs.GridCells message;
 
   public GridCellsLayer(String topicName, Color color) {
-    this(new GraphName(topicName), color);
+    this(GraphName.of(topicName), color);
   }
 
   public GridCellsLayer(GraphName topicName, Color color) {
@@ -89,7 +89,7 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.GridCells>() {
       @Override
       public void onNewMessage(nav_msgs.GridCells data) {
-        frame = new GraphName(data.getHeader().getFrameId());
+        frame = GraphName.of(data.getHeader().getFrameId());
         if (frameTransformTree.canTransform(frame, frame)) {
           if (lock.tryLock()) {
             message = data;

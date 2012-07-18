@@ -62,7 +62,7 @@ public class RosTextView<T> extends TextView implements NodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return new GraphName("android_gingerbread/ros_text_view");
+    return GraphName.of("android_gingerbread/ros_text_view");
   }
 
   @Override

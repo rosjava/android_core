@@ -43,7 +43,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
   private Shape shape;
 
   public LaserScanLayer(String topicName) {
-    this(new GraphName(topicName));
+    this(GraphName.of(topicName));
   }
 
   public LaserScanLayer(GraphName topicName) {
@@ -65,7 +65,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
     subscriber.addMessageListener(new MessageListener<LaserScan>() {
       @Override
       public void onNewMessage(LaserScan laserScan) {
-        frame = new GraphName(laserScan.getHeader().getFrameId());
+        frame = GraphName.of(laserScan.getHeader().getFrameId());
         float[] ranges = laserScan.getRanges();
         // vertices is an array of x, y, z values starting with the origin of
         // the triangle fan.

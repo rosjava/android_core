@@ -41,12 +41,12 @@ public class PoseSubscriberLayer extends SubscriberLayer<geometry_msgs.PoseStamp
   private boolean ready;
 
   public PoseSubscriberLayer(String topic) {
-    this(new GraphName(topic));
+    this(GraphName.of(topic));
   }
 
   public PoseSubscriberLayer(GraphName topic) {
     super(topic, "geometry_msgs/PoseStamped");
-    targetFrame = new GraphName("/map");
+    targetFrame = GraphName.of("/map");
     ready = false;
   }
 
@@ -65,7 +65,7 @@ public class PoseSubscriberLayer extends SubscriberLayer<geometry_msgs.PoseStamp
     getSubscriber().addMessageListener(new MessageListener<geometry_msgs.PoseStamped>() {
       @Override
       public void onNewMessage(geometry_msgs.PoseStamped pose) {
-        GraphName frame = new GraphName(pose.getHeader().getFrameId());
+        GraphName frame = GraphName.of(pose.getHeader().getFrameId());
         if (frameTransformTree.canTransform(frame, targetFrame)) {
           Transform poseTransform = Transform.newFromPoseMessage(pose.getPose());
           FrameTransform targetFrameTransform =

@@ -72,7 +72,7 @@ public class OrientationPublisher extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return new GraphName("android/orientiation_sensor");
+    return GraphName.of("android/orientiation_sensor");
   }
 
   @Override

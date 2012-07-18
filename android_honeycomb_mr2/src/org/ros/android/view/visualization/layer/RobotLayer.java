@@ -42,7 +42,7 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
   private GestureDetector gestureDetector;
 
   public RobotLayer(String frame, Context context) {
-    this.frame = new GraphName(frame);
+    this.frame = GraphName.of(frame);
     this.context = context;
     shape = new RobotShape();
   }
