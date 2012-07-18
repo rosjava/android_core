@@ -46,7 +46,7 @@ public class MainActivity extends RosActivity {
     visualizationView = (VisualizationView) findViewById(R.id.visualization);
     visualizationView.addLayer(new CameraControlLayer(this));
     visualizationView.addLayer(new OccupancyGridLayer("map"));
-    visualizationView.addLayer(new RobotLayer("laser_link", this));
+    visualizationView.addLayer(new RobotLayer("imu_stabilized", this));
   }
 
   @Override

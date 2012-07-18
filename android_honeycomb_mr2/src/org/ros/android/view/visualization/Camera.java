@@ -39,12 +39,6 @@ public class Camera {
   private static final GraphName DEFAULT_FIXED_FRAME = new GraphName("/map");
 
   /**
-   * The default target frame is null which means that the renderer uses the
-   * user set camera.
-   */
-  private static final GraphName DEFAULT_TARGET_FRAME = null;
-
-  /**
    * Most the user can zoom in.
    */
   private static final float MINIMUM_ZOOM = 10.0f;
@@ -65,13 +59,6 @@ public class Camera {
   private Vector3 location;
 
   /**
-   * The TF frame the camera is locked on. If set, the camera point is set to
-   * the location of this frame in fixedFrame. If the camera is set or moved,
-   * the lock is removed.
-   */
-  private GraphName targetFrame;
-
-  /**
    * The frame in which to render everything. The default value is /map which
    * indicates that everything is rendered in map. If this is changed to, for
    * instance, base_link, the view follows the robot and the robot itself is in
@@ -79,10 +66,7 @@ public class Camera {
    */
   private GraphName fixedFrame;
 
-  private FrameTransformTree frameTransformTree;
-
   public Camera(FrameTransformTree frameTransformTree) {
-    this.frameTransformTree = frameTransformTree;
     location = new Vector3(0, 0, 0);
     fixedFrame = DEFAULT_FIXED_FRAME;
   }
@@ -91,11 +75,6 @@ public class Camera {
     viewport.zoom(gl);
     // Rotate coordinate system to match ROS standard (x is forward, y is left).
     gl.glRotatef(90, 0, 0, 1);
-    // Apply target frame transformation.
-    if (targetFrame != null && frameTransformTree.canTransform(fixedFrame, targetFrame)) {
-      location =
-          frameTransformTree.newFrameTransform(fixedFrame, targetFrame).getTransform().getTranslation();
-    }
     // Translate view to line up with camera.
     gl.glTranslatef((float) -location.getX(), (float) -location.getY(), (float) -location.getZ());
   }
@@ -109,7 +88,6 @@ public class Camera {
    *          distance to move in y in world coordinates
    */
   private void moveCamera(float xDistance, float yDistance) {
-    resetTargetFrame();
     location.setX(location.getX() + xDistance);
     location.setY(location.getY() + yDistance);
   }
@@ -135,7 +113,6 @@ public class Camera {
   }
 
   public void setCamera(Vector3 newCameraPoint) {
-    resetTargetFrame();
     location = newCameraPoint;
   }
 
@@ -197,18 +174,6 @@ public class Camera {
 
   public void resetFixedFrame() {
     fixedFrame = DEFAULT_FIXED_FRAME;
-  }
-
-  public void setTargetFrame(GraphName frame) {
-    targetFrame = frame;
-  }
-
-  public void resetTargetFrame() {
-    targetFrame = DEFAULT_TARGET_FRAME;
-  }
-
-  public GraphName getTargetFrame() {
-    return targetFrame;
   }
 
   public Viewport getViewport() {

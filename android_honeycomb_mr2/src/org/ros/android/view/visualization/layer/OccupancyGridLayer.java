@@ -52,6 +52,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   private static final int COLOR_UNKNOWN = 0xff000000;
 
   private final TextureDrawable textureDrawable;
+  private final Object mutex;
 
   private boolean ready;
   private GraphName frame;
@@ -63,13 +64,16 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   public OccupancyGridLayer(GraphName topic) {
     super(topic, nav_msgs.OccupancyGrid._TYPE);
     textureDrawable = new TextureDrawable();
+    mutex = new Object();
     ready = false;
   }
 
   @Override
   public void draw(GL10 gl) {
     if (ready) {
-      textureDrawable.draw(gl);
+      synchronized (mutex) {
+        textureDrawable.draw(gl);
+      }
     }
   }
 
@@ -113,7 +117,10 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
     Bitmap bitmap =
         Bitmap.createBitmap(texture.getPixels(), texture.getStride(), texture.getHeight(),
             Bitmap.Config.ARGB_8888);
-    textureDrawable.update(message.getInfo().getOrigin(), message.getInfo().getResolution(), bitmap);
+    synchronized (mutex) {
+      textureDrawable
+          .update(message.getInfo().getOrigin(), message.getInfo().getResolution(), bitmap);
+    }
     frame = new GraphName(message.getHeader().getFrameId());
     ready = true;
     requestRender();

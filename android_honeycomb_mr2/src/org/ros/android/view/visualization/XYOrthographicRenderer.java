@@ -51,14 +51,11 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
 
   @Override
   public void onSurfaceChanged(GL10 gl, int width, int height) {
-    // Set the viewport.
     Viewport viewport = new Viewport(width, height);
     viewport.apply(gl);
     camera.setViewport(viewport);
-    // Set camera location transformation.
     gl.glMatrixMode(GL10.GL_MODELVIEW);
     gl.glLoadIdentity();
-    // Set texture rendering hints.
     gl.glEnable(GL10.GL_BLEND);
     gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
     gl.glEnable(GL10.GL_POINT_SMOOTH);
@@ -96,9 +93,11 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
               frameTransformTree.newFrameTransform(layerFrame, camera.getFixedFrame())
                   .getTransform();
           OpenGlTransform.apply(gl, transform);
+          layer.draw(gl);
         }
+      } else {
+        layer.draw(gl);
       }
-      layer.draw(gl);
       gl.glPopMatrix();
     }
   }

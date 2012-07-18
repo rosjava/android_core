@@ -26,7 +26,6 @@ import org.ros.android.view.visualization.TextureDrawable;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
-import org.ros.node.topic.Subscriber;
 import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.nio.IntBuffer;
@@ -75,9 +74,7 @@ public class CompressedBitmapLayer extends
   public void onStart(ConnectedNode connectedNode, Handler handler,
       FrameTransformTree frameTransformTree, Camera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
-    Subscriber<compressed_visualization_transport_msgs.CompressedBitmap> subscriber =
-        getSubscriber();
-    subscriber
+    getSubscriber()
         .addMessageListener(new MessageListener<compressed_visualization_transport_msgs.CompressedBitmap>() {
           @Override
           public void onNewMessage(
