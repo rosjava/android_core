@@ -24,7 +24,7 @@ allprojects {
 }
 
 subprojects {
-  if (name != 'docs') {
+  if (name != 'docs' && name != 'android_graphics') {
     repositories {
       mavenLocal()
       maven {

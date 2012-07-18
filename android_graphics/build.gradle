@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Google Inc.
+ * Copyright (C) 2012 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,8 +14,28 @@
  * the License.
  */
 
-include 'android_gingerbread_mr1', 'android_tutorial_pubsub', 'android_honeycomb_mr2',
-        'android_tutorial_teleop', 'android_tutorial_hokuyo', 'android_acm_serial',
-	'android_tutorial_camera', 'android_tutorial_image_transport',
-	'android_tutorial_map_viewer', 'android_benchmarks', 'android_graphics',
-        'docs'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+group 'ros.android_core'
+version = '0.0.0-SNAPSHOT'
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+repositories {
+  mavenLocal()
+  maven {
+    url 'http://robotbrains.hideho.org/nexus/content/groups/ros-public'
+  }
+}
+
+dependencies {
+  compile 'ros.rosjava_core:rosjava:0.0.0-SNAPSHOT'
+  compile 'com.google.guava:guava:12.0'
+  testCompile 'junit:junit:4.8.2'
+}
+
+defaultTasks 'install'
+
