@@ -16,8 +16,6 @@
 
 package org.ros.android.view.visualization;
 
-import com.google.common.base.Preconditions;
-
 import android.graphics.Bitmap;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
@@ -36,12 +34,11 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class TextureDrawable implements OpenGlDrawable {
 
-  private final Texture texture;
+  private final TextureBitmap textureBitmap;
   private final FloatBuffer vertexBuffer;
   private final FloatBuffer textureBuffer;
-  
+
   private Transform origin;
-  private double resolution;
   private double width;
   private double height;
 
@@ -62,43 +59,31 @@ public class TextureDrawable implements OpenGlDrawable {
     vertexBuffer.put(vertexCoordinates);
     vertexBuffer.position(0);
 
-    float textureCoordinates[] = { 
-        // Triangle 1 
+    float textureCoordinates[] = {
+        // Triangle 1
         0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
         // Triangle 2
-        1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f
-        };
+        1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f };
     ByteBuffer textureByteBuffer = ByteBuffer.allocateDirect(textureCoordinates.length * 4);
     textureByteBuffer.order(ByteOrder.nativeOrder());
     textureBuffer = textureByteBuffer.asFloatBuffer();
     textureBuffer.put(textureCoordinates);
     textureBuffer.position(0);
-    texture = new Texture();
+
+    textureBitmap = new TextureBitmap();
   }
-  
-  public void update(geometry_msgs.Pose newOrigin, double newResolution, Bitmap newBitmap) {
-    origin = Transform.newFromPoseMessage(newOrigin);
-    resolution = newResolution;
-    width = newBitmap.getWidth() * resolution;
-    height = newBitmap.getHeight() * resolution;
-    Preconditions.checkArgument(width == height);
-    texture.updateTexture(newBitmap);
+
+  public void update(geometry_msgs.Pose origin, double resolution, Bitmap bitmap) {
+    this.origin = Transform.newFromPoseMessage(origin);
+    width = bitmap.getWidth() * resolution;
+    height = bitmap.getHeight() * resolution;
+    textureBitmap.setBitmap(bitmap);
   }
 
   @Override
   public void draw(GL10 gl) {
-    if (vertexBuffer == null) {
-      return;
-    }
-    texture.maybeInitTexture(gl);
-    try {
-      gl.glBindTexture(GL10.GL_TEXTURE_2D, texture.getTextureHandle());
-    } catch (TextureNotInitialized e) {
-      // This should actually never happen since we call init on the texture
-      // first.
-      e.printStackTrace();
-      return;
-    }
+    gl.glEnable(GL10.GL_TEXTURE_2D);
+    textureBitmap.bind(gl);
     gl.glPushMatrix();
     gl.glTranslatef((float) origin.getTranslation().getX(), (float) origin.getTranslation().getY(),
         (float) origin.getTranslation().getZ());
@@ -106,7 +91,6 @@ public class TextureDrawable implements OpenGlDrawable {
     gl.glRotatef((float) Math.toDegrees(origin.getRotation().getAngle()), (float) axis.getX(),
         (float) axis.getY(), (float) axis.getZ());
     gl.glScalef((float) width, (float) height, 1.0f);
-    gl.glEnable(GL10.GL_TEXTURE_2D);
     gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);

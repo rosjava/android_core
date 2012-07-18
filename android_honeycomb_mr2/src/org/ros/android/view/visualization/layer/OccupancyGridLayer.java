@@ -16,10 +16,13 @@
 
 package org.ros.android.view.visualization.layer;
 
+import com.google.common.base.Preconditions;
+
 import android.graphics.Bitmap;
 import android.os.Handler;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.ros.android.graphics.Texture;
 import org.ros.android.view.visualization.Camera;
-import org.ros.android.view.visualization.TextureBitmapUtilities;
 import org.ros.android.view.visualization.TextureDrawable;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
@@ -36,19 +39,19 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   /**
    * Color of occupied cells in the map.
    */
-  private static final int COLOR_OCCUPIED = 0xffcc1919;
+  private static final int COLOR_OCCUPIED = 0xff000000;
 
   /**
    * Color of free cells in the map.
    */
-  private static final int COLOR_FREE = 0xff7d7d7d;
+  private static final int COLOR_FREE = 0xff8d8d8d;
 
   /**
    * Color of unknown cells in the map.
    */
   private static final int COLOR_UNKNOWN = 0xff000000;
 
-  private final TextureDrawable occupancyGrid;
+  private final TextureDrawable textureDrawable;
 
   private boolean ready;
   private GraphName frame;
@@ -58,55 +61,61 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   }
 
   public OccupancyGridLayer(GraphName topic) {
-    super(topic, "nav_msgs/OccupancyGrid");
-    occupancyGrid = new TextureDrawable();
+    super(topic, nav_msgs.OccupancyGrid._TYPE);
+    textureDrawable = new TextureDrawable();
     ready = false;
   }
 
   @Override
   public void draw(GL10 gl) {
     if (ready) {
-      occupancyGrid.draw(gl);
+      textureDrawable.draw(gl);
     }
-  }
-
-  private static int[] occupancyGridToPixelArray(nav_msgs.OccupancyGrid occupancyGrid) {
-    int pixels[] = new int[occupancyGrid.getData().length];
-    for (int i = 0; i < pixels.length; i++) {
-      if (occupancyGrid.getData()[i] == -1) {
-        pixels[i] = COLOR_UNKNOWN;
-      } else if (occupancyGrid.getData()[i] == 0) {
-        pixels[i] = COLOR_FREE;
-      } else {
-        pixels[i] = COLOR_OCCUPIED;
-      }
-    }
-    return pixels;
-  }
-
-  @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler, FrameTransformTree frameTransformTree,
-      Camera camera) {
-    super.onStart(connectedNode, handler, frameTransformTree, camera);
-    getSubscriber().addMessageListener(new MessageListener<nav_msgs.OccupancyGrid>() {
-      @Override
-      public void onNewMessage(nav_msgs.OccupancyGrid occupancyGridMessage) {
-        Bitmap occupancyGridBitmap =
-            TextureBitmapUtilities.createSquareBitmap(
-                occupancyGridToPixelArray(occupancyGridMessage), (int) occupancyGridMessage
-                    .getInfo().getWidth(), (int) occupancyGridMessage.getInfo().getHeight(),
-                COLOR_UNKNOWN);
-        occupancyGrid.update(occupancyGridMessage.getInfo().getOrigin(), occupancyGridMessage
-            .getInfo().getResolution(), occupancyGridBitmap);
-        frame = new GraphName(occupancyGridMessage.getHeader().getFrameId());
-        ready = true;
-        requestRender();
-      }
-    });
   }
 
   @Override
   public GraphName getFrame() {
     return frame;
+  }
+
+  private static Texture occupancyGridToTexture(nav_msgs.OccupancyGrid occupancyGrid) {
+    Preconditions.checkArgument(occupancyGrid.getInfo().getWidth() <= 1024);
+    Preconditions.checkArgument(occupancyGrid.getInfo().getHeight() <= 1024);
+    ChannelBuffer buffer = occupancyGrid.getData();
+    int pixels[] = new int[buffer.readableBytes()];
+    for (int i = 0; i < pixels.length; i++) {
+      byte pixel = buffer.readByte();
+      if (pixel == -1) {
+        pixels[i] = COLOR_UNKNOWN;
+      } else if (pixel == 0) {
+        pixels[i] = COLOR_FREE;
+      } else {
+        pixels[i] = COLOR_OCCUPIED;
+      }
+    }
+    return new Texture(pixels, occupancyGrid.getInfo().getWidth(), COLOR_UNKNOWN);
+  }
+
+  @Override
+  public void onStart(ConnectedNode connectedNode, Handler handler,
+      FrameTransformTree frameTransformTree, Camera camera) {
+    super.onStart(connectedNode, handler, frameTransformTree, camera);
+    getSubscriber().addMessageListener(new MessageListener<nav_msgs.OccupancyGrid>() {
+      @Override
+      public void onNewMessage(nav_msgs.OccupancyGrid message) {
+        update(message);
+      }
+    });
+  }
+
+  private void update(nav_msgs.OccupancyGrid message) {
+    Texture texture = occupancyGridToTexture(message);
+    Bitmap bitmap =
+        Bitmap.createBitmap(texture.getPixels(), texture.getStride(), texture.getHeight(),
+            Bitmap.Config.ARGB_8888);
+    textureDrawable.update(message.getInfo().getOrigin(), message.getInfo().getResolution(), bitmap);
+    frame = new GraphName(message.getHeader().getFrameId());
+    ready = true;
+    requestRender();
   }
 }

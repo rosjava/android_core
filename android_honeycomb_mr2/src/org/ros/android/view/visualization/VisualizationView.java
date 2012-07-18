@@ -16,7 +16,6 @@
 
 package org.ros.android.view.visualization;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import android.content.Context;
@@ -27,6 +26,7 @@ import android.view.MotionEvent;
 import org.ros.android.view.visualization.layer.Layer;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
+import org.ros.namespace.NameResolver;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
@@ -39,6 +39,8 @@ import java.util.List;
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
 public class VisualizationView extends GLSurfaceView implements NodeMain {
+
+  private static final boolean DEBUG = false;
 
   private RenderRequestListener renderRequestListener;
   private FrameTransformTree frameTransformTree;
@@ -64,10 +66,15 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
         requestRender();
       }
     };
-    frameTransformTree = new FrameTransformTree();
+    // TODO(damonkohler): Support ~tf_prefix parameter.
+    frameTransformTree = new FrameTransformTree(NameResolver.newRoot());
     camera = new Camera(frameTransformTree);
     renderer = new XYOrthographicRenderer(frameTransformTree, camera);
     layers = Lists.newArrayList();
+    if (DEBUG) {
+      // Turn on OpenGL error-checking and logging.
+      setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
+    }
     setEGLConfigChooser(8, 8, 8, 8, 0, 0);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
     setRenderer(renderer);
@@ -80,7 +87,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
 
   @Override
   public boolean onTouchEvent(MotionEvent event) {
-    for (Layer layer : Iterables.reverse(layers)) {
+    for (Layer layer : Lists.reverse(layers)) {
       if (layer.onTouchEvent(this, event)) {
         return true;
       }
@@ -102,9 +109,6 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   public void addLayer(Layer layer) {
     layers.add(layer);
     layer.addRenderListener(renderRequestListener);
-    if (connectedNode != null) {
-      layer.onStart(connectedNode, getHandler(), frameTransformTree, camera);
-    }
     requestRender();
   }
 
@@ -121,10 +125,6 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   }
 
   private void startTransformListener() {
-    String tfPrefix = connectedNode.getParameterTree().getString("~tf_prefix", "");
-    if (!tfPrefix.isEmpty()) {
-      frameTransformTree.setPrefix(tfPrefix);
-    }
     Subscriber<tf.tfMessage> tfSubscriber = connectedNode.newSubscriber("tf", tf.tfMessage._TYPE);
     tfSubscriber.addMessageListener(new MessageListener<tf.tfMessage>() {
       @Override

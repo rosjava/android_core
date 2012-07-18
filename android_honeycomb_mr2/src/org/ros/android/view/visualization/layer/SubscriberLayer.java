@@ -41,14 +41,14 @@ public class SubscriberLayer<T> extends DefaultLayer {
     this.topicName = topicName;
     this.messageType = messageType;
   }
- 
+
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler, FrameTransformTree frameTransformTree, Camera camera) {
+  public void onStart(ConnectedNode connectedNode, Handler handler,
+      FrameTransformTree frameTransformTree, Camera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
     subscriber = connectedNode.newSubscriber(topicName, messageType);
-    subscriber.setQueueLimit(1);
   }
-  
+
   @Override
   public void onShutdown(VisualizationView view, Node node) {
     subscriber.shutdown();

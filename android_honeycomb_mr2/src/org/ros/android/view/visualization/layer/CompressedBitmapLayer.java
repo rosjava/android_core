@@ -19,9 +19,9 @@ package org.ros.android.view.visualization.layer;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
-import android.util.Log;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.ros.android.graphics.Texture;
 import org.ros.android.view.visualization.Camera;
-import org.ros.android.view.visualization.TextureBitmapUtilities;
 import org.ros.android.view.visualization.TextureDrawable;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
@@ -39,7 +39,10 @@ import javax.microedition.khronos.opengles.GL10;
 public class CompressedBitmapLayer extends
     SubscriberLayer<compressed_visualization_transport_msgs.CompressedBitmap> implements TfLayer {
 
-  private static final String TAG = "CompressedBitmapLayer";
+  /**
+   * Color of unknown cells in the map.
+   */
+  private static final int COLOR_UNKNOWN = 0xff000000;
 
   private final TextureDrawable textureDrawable;
 
@@ -64,12 +67,16 @@ public class CompressedBitmapLayer extends
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler, FrameTransformTree frameTransformTree,
-      Camera camera) {
+  public GraphName getFrame() {
+    return frame;
+  }
+
+  @Override
+  public void onStart(ConnectedNode connectedNode, Handler handler,
+      FrameTransformTree frameTransformTree, Camera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
     Subscriber<compressed_visualization_transport_msgs.CompressedBitmap> subscriber =
         getSubscriber();
-    subscriber.setQueueLimit(1);
     subscriber
         .addMessageListener(new MessageListener<compressed_visualization_transport_msgs.CompressedBitmap>() {
           @Override
@@ -80,40 +87,29 @@ public class CompressedBitmapLayer extends
         });
   }
 
-  void update(compressed_visualization_transport_msgs.CompressedBitmap compressedBitmap) {
-    Bitmap bitmap;
-    IntBuffer pixels;
-    try {
-      BitmapFactory.Options options = new BitmapFactory.Options();
-      options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-      byte[] data = compressedBitmap.getData();
-      bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
-      pixels = IntBuffer.allocate(bitmap.getWidth() * bitmap.getHeight());
-      bitmap.copyPixelsToBuffer(pixels);
-      bitmap.recycle();
-    } catch (OutOfMemoryError e) {
-      Log.e(TAG, "Not enough memory to decode incoming compressed bitmap.", e);
-      return;
-    }
-    Bitmap squareBitmap;
-    try {
-      squareBitmap =
-          TextureBitmapUtilities.createSquareBitmap(pixels.array(), bitmap.getWidth(),
-              bitmap.getHeight(), 0xff000000);
-    } catch (OutOfMemoryError e) {
-      Log.e(TAG, String.format("Not enough memory to render %d x %d pixel bitmap.",
-          bitmap.getWidth(), bitmap.getHeight()), e);
-      return;
-    }
-    textureDrawable.update(compressedBitmap.getOrigin(), compressedBitmap.getResolutionX(),
-        squareBitmap);
-    frame = new GraphName(compressedBitmap.getHeader().getFrameId());
+  void update(compressed_visualization_transport_msgs.CompressedBitmap message) {
+    Texture texture = comprssedBitmapMessageToTexture(message);
+    Bitmap bitmap =
+        Bitmap.createBitmap(texture.getPixels(), texture.getStride(), texture.getHeight(),
+            Bitmap.Config.ARGB_8888);
+    textureDrawable.update(message.getOrigin(), message.getResolutionX(), bitmap);
+    frame = new GraphName(message.getHeader().getFrameId());
     ready = true;
     requestRender();
   }
 
-  @Override
-  public GraphName getFrame() {
-    return frame;
+  private Texture comprssedBitmapMessageToTexture(
+      compressed_visualization_transport_msgs.CompressedBitmap message) {
+    BitmapFactory.Options options = new BitmapFactory.Options();
+    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+    ChannelBuffer buffer = message.getData();
+    Bitmap bitmap =
+        BitmapFactory.decodeByteArray(buffer.array(), buffer.arrayOffset(), buffer.readableBytes(),
+            options);
+    IntBuffer pixels = IntBuffer.allocate(bitmap.getWidth() * bitmap.getHeight());
+    bitmap.copyPixelsToBuffer(pixels);
+    Texture texture = new Texture(pixels.array(), bitmap.getWidth(), COLOR_UNKNOWN);
+    bitmap.recycle();
+    return texture;
   }
 }
