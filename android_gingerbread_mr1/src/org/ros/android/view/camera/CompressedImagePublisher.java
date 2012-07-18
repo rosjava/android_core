@@ -22,6 +22,8 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera.Size;
+import org.jboss.netty.buffer.ChannelBufferOutputStream;
+import org.ros.internal.message.MessageBuffers;
 import org.ros.message.Time;
 import org.ros.namespace.NameResolver;
 import org.ros.node.ConnectedNode;
@@ -42,7 +44,7 @@ class CompressedImagePublisher implements RawImageListener {
   private Size rawImageSize;
   private YuvImage yuvImage;
   private Rect rect;
-  private FixedByteArrayOutputStream stream;
+  private ChannelBufferOutputStream stream;
 
   public CompressedImagePublisher(ConnectedNode connectedNode) {
     this.connectedNode = connectedNode;
@@ -52,7 +54,7 @@ class CompressedImagePublisher implements RawImageListener {
             sensor_msgs.CompressedImage._TYPE);
     cameraInfoPublisher =
         connectedNode.newPublisher(resolver.resolve("camera_info"), sensor_msgs.CameraInfo._TYPE);
-    stream = new FixedByteArrayOutputStream(1024 * 1024 * 8);
+    stream = new ChannelBufferOutputStream(MessageBuffers.dynamicBuffer());
   }
 
   @Override
@@ -75,10 +77,8 @@ class CompressedImagePublisher implements RawImageListener {
     image.getHeader().setFrameId(frameId);
 
     Preconditions.checkState(yuvImage.compressToJpeg(rect, 20, stream));
-    byte[] compressedData = new byte[stream.getPosition()];
-    System.arraycopy(stream.getBuffer(), 0, compressedData, 0, stream.getPosition());
-    image.setData(compressedData);
-    stream.reset();
+    image.setData(stream.buffer().copy());
+    stream.buffer().clear();
 
     imagePublisher.publish(image);
 

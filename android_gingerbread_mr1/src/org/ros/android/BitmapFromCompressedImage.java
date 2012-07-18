@@ -18,6 +18,7 @@ package org.ros.android;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import org.jboss.netty.buffer.ChannelBuffer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -27,7 +28,8 @@ public class BitmapFromCompressedImage implements
 
   @Override
   public Bitmap call(sensor_msgs.CompressedImage message) {
-    byte[] data = message.getData();
-    return BitmapFactory.decodeByteArray(data, 0, data.length);
+    ChannelBuffer buffer = message.getData();
+    byte[] data = buffer.array();
+    return BitmapFactory.decodeByteArray(data, buffer.arrayOffset(), buffer.readableBytes());
   }
 }

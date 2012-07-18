@@ -31,8 +31,8 @@ import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import org.ros.RosCore;
 import org.ros.android.android_gingerbread_mr1.R;
-import org.ros.concurrent.ListenerCollection;
-import org.ros.concurrent.ListenerCollection.SignalRunnable;
+import org.ros.concurrent.ListenerGroup;
+import org.ros.concurrent.SignalRunnable;
 import org.ros.exception.RosRuntimeException;
 import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
@@ -61,7 +61,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
 
   private final NodeMainExecutor nodeMainExecutor;
   private final IBinder binder;
-  private final ListenerCollection<NodeMainExecutorServiceListener> listeners;
+  private final ListenerGroup<NodeMainExecutorServiceListener> listeners;
 
   private WakeLock wakeLock;
   private WifiLock wifiLock;
@@ -83,7 +83,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
     nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
     binder = new LocalBinder();
     listeners =
-        new ListenerCollection<NodeMainExecutorServiceListener>(
+        new ListenerGroup<NodeMainExecutorServiceListener>(
             nodeMainExecutor.getScheduledExecutorService());
   }
 
