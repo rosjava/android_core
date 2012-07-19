@@ -20,8 +20,8 @@ import android.opengl.GLSurfaceView;
 import org.ros.android.view.visualization.layer.Layer;
 import org.ros.android.view.visualization.layer.TfLayer;
 import org.ros.namespace.GraphName;
+import org.ros.rosjava_geometry.FrameTransform;
 import org.ros.rosjava_geometry.FrameTransformTree;
-import org.ros.rosjava_geometry.Transform;
 
 import java.util.List;
 
@@ -82,23 +82,21 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
       return;
     }
     for (Layer layer : getLayers()) {
-      gl.glPushMatrix();
       if (layer instanceof TfLayer) {
         GraphName layerFrame = ((TfLayer) layer).getFrame();
-        // TODO(moesenle): throw a warning that no transform could be found and
-        // the layer has been ignored.
-        if (layerFrame != null
-            && frameTransformTree.canTransform(layerFrame, camera.getFixedFrame())) {
-          Transform transform =
-              frameTransformTree.newFrameTransform(layerFrame, camera.getFixedFrame())
-                  .getTransform();
-          OpenGlTransform.apply(gl, transform);
-          layer.draw(gl);
+        if (layerFrame != null) {
+          FrameTransform frameTransform =
+              frameTransformTree.newFrameTransform(layerFrame, camera.getFixedFrame());
+          if (frameTransform != null) {
+            gl.glPushMatrix();
+            OpenGlTransform.apply(gl, frameTransform.getTransform());
+            layer.draw(gl);
+            gl.glPopMatrix();
+          }
         }
       } else {
         layer.draw(gl);
       }
-      gl.glPopMatrix();
     }
   }
 
