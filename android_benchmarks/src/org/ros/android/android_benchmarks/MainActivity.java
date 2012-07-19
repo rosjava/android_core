@@ -22,7 +22,7 @@ import org.ros.android.RosActivity;
 import org.ros.android.view.RosTextView;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
-import org.ros.rosjava_benchmarks.TransformBenchmark;
+import org.ros.rosjava_benchmarks.MessagesBenchmark;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -58,6 +58,7 @@ public class MainActivity extends RosActivity {
     nodeMainExecutor.execute(rosTextView, nodeConfiguration);
     // TODO(damonkohler): Support launching different benchmarks via the UI.
     // nodeMainExecutor.execute(new PubsubBenchmark(), nodeConfiguration);
-    nodeMainExecutor.execute(new TransformBenchmark(), nodeConfiguration);
+    // nodeMainExecutor.execute(new TransformBenchmark(), nodeConfiguration);
+    nodeMainExecutor.execute(new MessagesBenchmark(), nodeConfiguration);
   }
 }
