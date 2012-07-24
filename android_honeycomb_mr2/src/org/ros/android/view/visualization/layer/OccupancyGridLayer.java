@@ -18,16 +18,16 @@ package org.ros.android.view.visualization.layer;
 
 import com.google.common.base.Preconditions;
 
-import android.graphics.Bitmap;
 import android.os.Handler;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.ros.android.graphics.Texture;
 import org.ros.android.view.visualization.Camera;
-import org.ros.android.view.visualization.TextureDrawable;
+import org.ros.android.view.visualization.TextureBitmap;
+import org.ros.internal.message.MessageBuffers;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.rosjava_geometry.FrameTransformTree;
+import org.ros.rosjava_geometry.Transform;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -51,7 +51,8 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
    */
   private static final int COLOR_UNKNOWN = 0xff000000;
 
-  private final TextureDrawable textureDrawable;
+  private final ChannelBuffer pixels;
+  private final TextureBitmap textureBitmap;
   private final Object mutex;
 
   private boolean ready;
@@ -63,7 +64,8 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
 
   public OccupancyGridLayer(GraphName topic) {
     super(topic, nav_msgs.OccupancyGrid._TYPE);
-    textureDrawable = new TextureDrawable();
+    pixels = MessageBuffers.dynamicBuffer();
+    textureBitmap = new TextureBitmap();
     mutex = new Object();
     ready = false;
   }
@@ -72,7 +74,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   public void draw(GL10 gl) {
     if (ready) {
       synchronized (mutex) {
-        textureDrawable.draw(gl);
+        textureBitmap.draw(gl);
       }
     }
   }
@@ -80,24 +82,6 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   @Override
   public GraphName getFrame() {
     return frame;
-  }
-
-  private static Texture occupancyGridToTexture(nav_msgs.OccupancyGrid occupancyGrid) {
-    Preconditions.checkArgument(occupancyGrid.getInfo().getWidth() <= 1024);
-    Preconditions.checkArgument(occupancyGrid.getInfo().getHeight() <= 1024);
-    ChannelBuffer buffer = occupancyGrid.getData();
-    int pixels[] = new int[buffer.readableBytes()];
-    for (int i = 0; i < pixels.length; i++) {
-      byte pixel = buffer.readByte();
-      if (pixel == -1) {
-        pixels[i] = COLOR_UNKNOWN;
-      } else if (pixel == 0) {
-        pixels[i] = COLOR_FREE;
-      } else {
-        pixels[i] = COLOR_OCCUPIED;
-      }
-    }
-    return new Texture(pixels, occupancyGrid.getInfo().getWidth(), COLOR_UNKNOWN);
   }
 
   @Override
@@ -113,13 +97,25 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   }
 
   private void update(nav_msgs.OccupancyGrid message) {
-    Texture texture = occupancyGridToTexture(message);
-    Bitmap bitmap =
-        Bitmap.createBitmap(texture.getPixels(), texture.getStride(), texture.getHeight(),
-            Bitmap.Config.ARGB_8888);
+    Preconditions.checkArgument(message.getInfo().getHeight() <= 1024);
+    int stride = message.getInfo().getWidth();
+    Preconditions.checkArgument(stride <= 1024);
+    Transform origin = Transform.newFromPoseMessage(message.getInfo().getOrigin());
+    float resolution = message.getInfo().getResolution();
+    ChannelBuffer buffer = message.getData();
     synchronized (mutex) {
-      textureDrawable
-          .update(message.getInfo().getOrigin(), message.getInfo().getResolution(), bitmap);
+      while (buffer.readable()) {
+        byte pixel = buffer.readByte();
+        if (pixel == -1) {
+          pixels.writeInt(COLOR_UNKNOWN);
+        } else if (pixel == 0) {
+          pixels.writeInt(COLOR_FREE);
+        } else {
+          pixels.writeInt(COLOR_OCCUPIED);
+        }
+      }
+      textureBitmap.updateFromPixelBuffer(pixels, stride, resolution, origin, COLOR_UNKNOWN);
+      pixels.clear();
     }
     frame = GraphName.of(message.getHeader().getFrameId());
     ready = true;

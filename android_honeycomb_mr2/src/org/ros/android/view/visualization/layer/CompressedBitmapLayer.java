@@ -16,34 +16,32 @@
 
 package org.ros.android.view.visualization.layer;
 
+import com.google.common.base.Preconditions;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.ros.android.graphics.Texture;
 import org.ros.android.view.visualization.Camera;
-import org.ros.android.view.visualization.TextureDrawable;
+import org.ros.android.view.visualization.TextureBitmap;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.rosjava_geometry.FrameTransformTree;
-
-import java.nio.IntBuffer;
+import org.ros.rosjava_geometry.Transform;
 
 import javax.microedition.khronos.opengles.GL10;
 
 /**
+ * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
 public class CompressedBitmapLayer extends
     SubscriberLayer<compressed_visualization_transport_msgs.CompressedBitmap> implements TfLayer {
 
-  /**
-   * Color of unknown cells in the map.
-   */
-  private static final int COLOR_UNKNOWN = 0xff000000;
+  private static final int FILL_COLOR = 0xff000000;
 
-  private final TextureDrawable textureDrawable;
+  private final TextureBitmap textureBitmap;
 
   private boolean ready;
   private GraphName frame;
@@ -54,14 +52,14 @@ public class CompressedBitmapLayer extends
 
   public CompressedBitmapLayer(GraphName topic) {
     super(topic, "compressed_visualization_transport_msgs/CompressedBitmap");
-    textureDrawable = new TextureDrawable();
+    textureBitmap = new TextureBitmap();
     ready = false;
   }
 
   @Override
   public void draw(GL10 gl) {
     if (ready) {
-      textureDrawable.draw(gl);
+      textureBitmap.draw(gl);
     }
   }
 
@@ -74,8 +72,8 @@ public class CompressedBitmapLayer extends
   public void onStart(ConnectedNode connectedNode, Handler handler,
       FrameTransformTree frameTransformTree, Camera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
-    getSubscriber()
-        .addMessageListener(new MessageListener<compressed_visualization_transport_msgs.CompressedBitmap>() {
+    getSubscriber().addMessageListener(
+        new MessageListener<compressed_visualization_transport_msgs.CompressedBitmap>() {
           @Override
           public void onNewMessage(
               compressed_visualization_transport_msgs.CompressedBitmap compressedBitmap) {
@@ -85,27 +83,17 @@ public class CompressedBitmapLayer extends
   }
 
   void update(compressed_visualization_transport_msgs.CompressedBitmap message) {
-    Texture texture = comprssedBitmapMessageToTexture(message);
-    Bitmap bitmap =
-        Bitmap.createBitmap(texture.getPixels(), texture.getStride(), texture.getHeight(),
-            Bitmap.Config.ARGB_8888);
-    textureDrawable.update(message.getOrigin(), message.getResolutionX(), bitmap);
-    frame = GraphName.of(message.getHeader().getFrameId());
-    ready = true;
-  }
-
-  private Texture comprssedBitmapMessageToTexture(
-      compressed_visualization_transport_msgs.CompressedBitmap message) {
-    BitmapFactory.Options options = new BitmapFactory.Options();
-    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+    Preconditions.checkArgument(message.getResolutionX() == message.getResolutionY());
     ChannelBuffer buffer = message.getData();
     Bitmap bitmap =
-        BitmapFactory.decodeByteArray(buffer.array(), buffer.arrayOffset(), buffer.readableBytes(),
-            options);
-    IntBuffer pixels = IntBuffer.allocate(bitmap.getWidth() * bitmap.getHeight());
-    bitmap.copyPixelsToBuffer(pixels);
-    Texture texture = new Texture(pixels.array(), bitmap.getWidth(), COLOR_UNKNOWN);
-    bitmap.recycle();
-    return texture;
+        BitmapFactory.decodeByteArray(buffer.array(), buffer.arrayOffset(), buffer.readableBytes());
+    int width = bitmap.getWidth();
+    int height = bitmap.getHeight();
+    int[] pixels = new int[width * height];
+    bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+    textureBitmap.updateFromPixelArray(pixels, width, (float) message.getResolutionX(),
+        Transform.newFromPoseMessage(message.getOrigin()), FILL_COLOR);
+    frame = GraphName.of(message.getHeader().getFrameId());
+    ready = true;
   }
 }
