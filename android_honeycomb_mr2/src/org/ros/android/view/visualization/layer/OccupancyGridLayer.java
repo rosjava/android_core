@@ -53,7 +53,6 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
 
   private final ChannelBuffer pixels;
   private final TextureBitmap textureBitmap;
-  private final Object mutex;
 
   private boolean ready;
   private GraphName frame;
@@ -66,16 +65,13 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
     super(topic, nav_msgs.OccupancyGrid._TYPE);
     pixels = MessageBuffers.dynamicBuffer();
     textureBitmap = new TextureBitmap();
-    mutex = new Object();
     ready = false;
   }
 
   @Override
   public void draw(GL10 gl) {
     if (ready) {
-      synchronized (mutex) {
-        textureBitmap.draw(gl);
-      }
+      textureBitmap.draw(gl);
     }
   }
 
@@ -103,20 +99,18 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
     Transform origin = Transform.newFromPoseMessage(message.getInfo().getOrigin());
     float resolution = message.getInfo().getResolution();
     ChannelBuffer buffer = message.getData();
-    synchronized (mutex) {
-      while (buffer.readable()) {
-        byte pixel = buffer.readByte();
-        if (pixel == -1) {
-          pixels.writeInt(COLOR_UNKNOWN);
-        } else if (pixel == 0) {
-          pixels.writeInt(COLOR_FREE);
-        } else {
-          pixels.writeInt(COLOR_OCCUPIED);
-        }
+    while (buffer.readable()) {
+      byte pixel = buffer.readByte();
+      if (pixel == -1) {
+        pixels.writeInt(COLOR_UNKNOWN);
+      } else if (pixel == 0) {
+        pixels.writeInt(COLOR_FREE);
+      } else {
+        pixels.writeInt(COLOR_OCCUPIED);
       }
-      textureBitmap.updateFromPixelBuffer(pixels, stride, resolution, origin, COLOR_UNKNOWN);
-      pixels.clear();
     }
+    textureBitmap.updateFromPixelBuffer(pixels, stride, resolution, origin, COLOR_UNKNOWN);
+    pixels.clear();
     frame = GraphName.of(message.getHeader().getFrameId());
     ready = true;
   }

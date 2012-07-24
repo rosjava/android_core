@@ -17,13 +17,15 @@
 package org.ros.android.view.visualization;
 
 import org.ros.rosjava_geometry.Transform;
-import org.ros.rosjava_geometry.Vector3;
+
+import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * An adapter for using {@link Transform}s with OpenGL.
+ * An adapter for applying {@link Transform}s in an OpenGL context.
  * 
+ * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
 public class OpenGlTransform {
@@ -41,11 +43,11 @@ public class OpenGlTransform {
    *          the {@link Transform} to apply
    */
   public static void apply(GL10 gl, Transform transform) {
-    gl.glTranslatef((float) transform.getTranslation().getX(), (float) transform.getTranslation()
-        .getY(), (float) transform.getTranslation().getZ());
-    double angleDegrees = Math.toDegrees(transform.getRotation().getAngle());
-    Vector3 axis = transform.getRotation().getAxis();
-    gl.glRotatef((float) angleDegrees, (float) axis.getX(), (float) axis.getY(),
-        (float) axis.getZ());
+    double[] matrix = transform.toMatrix();
+    FloatBuffer buffer = FloatBuffer.allocate(16);
+    for (double value : matrix) {
+      buffer.put((float) value);
+    }
+    gl.glMultMatrixf(buffer);
   }
 }

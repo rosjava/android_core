@@ -51,8 +51,10 @@ public class TextureBitmap implements OpenGlDrawable {
   private final int[] pixels;
   private final FloatBuffer vertexBuffer;
   private final FloatBuffer textureBuffer;
-  private final Bitmap bitmap;
+  private final Object mutex;
 
+  private Bitmap bitmapFront;
+  private Bitmap bitmapBack;
   private int[] handle;
   private Transform origin;
   private double scaledWidth;
@@ -95,7 +97,9 @@ public class TextureBitmap implements OpenGlDrawable {
       textureBuffer.put(textureCoordinates);
       textureBuffer.position(0);
     }
-    bitmap = Bitmap.createBitmap(TEXTURE_STRIDE, TEXTURE_HEIGHT, Bitmap.Config.ARGB_8888);
+    bitmapFront = Bitmap.createBitmap(TEXTURE_STRIDE, TEXTURE_HEIGHT, Bitmap.Config.ARGB_8888);
+    bitmapBack = Bitmap.createBitmap(TEXTURE_STRIDE, TEXTURE_HEIGHT, Bitmap.Config.ARGB_8888);
+    mutex = new Object();
     reload = true;
   }
 
@@ -142,8 +146,13 @@ public class TextureBitmap implements OpenGlDrawable {
     this.origin = origin;
     scaledWidth = TEXTURE_STRIDE * resolution;
     scaledHeight = TEXTURE_HEIGHT * resolution;
-    bitmap.setPixels(pixels, 0, TEXTURE_STRIDE, 0, 0, TEXTURE_STRIDE, TEXTURE_HEIGHT);
-    reload = true;
+    bitmapBack.setPixels(pixels, 0, TEXTURE_STRIDE, 0, 0, TEXTURE_STRIDE, TEXTURE_HEIGHT);
+    synchronized (mutex) {
+      Bitmap tmp = bitmapFront;
+      bitmapFront = bitmapBack;
+      bitmapBack = tmp;
+      reload = true;
+    }
   }
 
   private void bind(GL10 gl) {
@@ -151,14 +160,16 @@ public class TextureBitmap implements OpenGlDrawable {
       handle = new int[1];
       gl.glGenTextures(1, handle, 0);
     }
-    if (reload) {
-      gl.glBindTexture(GL10.GL_TEXTURE_2D, handle[0]);
-      gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
-      gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_NEAREST);
-      gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_REPEAT);
-      gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_REPEAT);
-      GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap, 0);
-      reload = false;
+    synchronized (mutex) {
+      if (reload) {
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, handle[0]);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_NEAREST);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_REPEAT);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_REPEAT);
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmapFront, 0);
+        reload = false;
+      }
     }
     gl.glBindTexture(GL10.GL_TEXTURE_2D, handle[0]);
   }

@@ -27,7 +27,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 /**
  * A {@link Shape} defined by vertices using OpenGl's GL_TRIANGLE_FAN method.
- * 
  * <p>
  * Note that this class is intended to be wrapped. No transformations are
  * performed in the {@link #draw(GL10)} method.

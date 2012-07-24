@@ -169,7 +169,7 @@ public class Camera {
     this.fixedFrame = fixedFrame;
     // To prevent camera jumps, we always center on the fixedFrame when
     // it is reset.
-    location = Vector3.newIdentityVector3();
+    location = Vector3.newZeroVector();
   }
 
   public void resetFixedFrame() {
