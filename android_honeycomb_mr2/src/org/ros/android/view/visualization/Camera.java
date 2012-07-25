@@ -156,7 +156,7 @@ public class Camera {
    *          the orientation of the pose on the screen
    */
   public Transform toOpenGLPose(Point goalScreenPoint, float orientation) {
-    return new Transform(toWorldCoordinates(goalScreenPoint), Quaternion.newFromAxisAngle(
+    return new Transform(toWorldCoordinates(goalScreenPoint), Quaternion.fromAxisAngle(
         new Vector3(0, 0, -1), orientation + Math.PI / 2));
   }
 
@@ -169,7 +169,7 @@ public class Camera {
     this.fixedFrame = fixedFrame;
     // To prevent camera jumps, we always center on the fixedFrame when
     // it is reset.
-    location = Vector3.newZeroVector();
+    location = Vector3.zero();
   }
 
   public void resetFixedFrame() {

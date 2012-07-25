@@ -67,7 +67,7 @@ public class PoseSubscriberLayer extends SubscriberLayer<geometry_msgs.PoseStamp
       public void onNewMessage(geometry_msgs.PoseStamped pose) {
         GraphName frame = GraphName.of(pose.getHeader().getFrameId());
         if (frameTransformTree.canTransform(frame, targetFrame)) {
-          Transform poseTransform = Transform.newFromPoseMessage(pose.getPose());
+          Transform poseTransform = Transform.fromPoseMessage(pose.getPose());
           FrameTransform targetFrameTransform =
               frameTransformTree.newFrameTransform(frame, targetFrame);
           shape.setTransform(targetFrameTransform.getTransform().multiply(poseTransform));

@@ -96,7 +96,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
     Preconditions.checkArgument(message.getInfo().getHeight() <= 1024);
     int stride = message.getInfo().getWidth();
     Preconditions.checkArgument(stride <= 1024);
-    Transform origin = Transform.newFromPoseMessage(message.getInfo().getOrigin());
+    Transform origin = Transform.fromPoseMessage(message.getInfo().getOrigin());
     float resolution = message.getInfo().getResolution();
     ChannelBuffer buffer = message.getData();
     while (buffer.readable()) {

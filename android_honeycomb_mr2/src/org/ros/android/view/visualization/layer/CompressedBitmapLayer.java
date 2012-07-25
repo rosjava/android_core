@@ -92,7 +92,7 @@ public class CompressedBitmapLayer extends
     int[] pixels = new int[width * height];
     bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
     textureBitmap.updateFromPixelArray(pixels, width, (float) message.getResolutionX(),
-        Transform.newFromPoseMessage(message.getOrigin()), FILL_COLOR);
+        Transform.fromPoseMessage(message.getOrigin()), FILL_COLOR);
     frame = GraphName.of(message.getHeader().getFrameId());
     ready = true;
   }

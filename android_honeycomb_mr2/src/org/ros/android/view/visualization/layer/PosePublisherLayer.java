@@ -85,7 +85,7 @@ public class PosePublisherLayer extends DefaultLayer {
           pose.setRotation(Quaternion.rotationBetweenVectors(new Vector3(1, 0, 0),
               orientationVector));
         } else {
-          pose.setRotation(Quaternion.newIdentityQuaternion());
+          pose.setRotation(Quaternion.identity());
         }
         shape.setTransform(pose);
         return true;
@@ -116,7 +116,7 @@ public class PosePublisherLayer extends DefaultLayer {
               public void onLongPress(MotionEvent e) {
                 pose =
                     new Transform(camera.toWorldCoordinates(new Point((int) e.getX(), (int) e
-                        .getY())), Quaternion.newIdentityQuaternion());
+                        .getY())), Quaternion.identity());
                 shape.setTransform(pose);
                 visible = true;
               }
