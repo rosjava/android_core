@@ -24,7 +24,7 @@ import java.nio.FloatBuffer;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class Vertices {
-  
+
   private Vertices() {
     // Utility class.
   }

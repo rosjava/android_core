@@ -23,6 +23,7 @@ import org.ros.address.InetAddressFactory;
 import org.ros.android.RosActivity;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.android.view.visualization.layer.CameraControlLayer;
+import org.ros.android.view.visualization.layer.LaserScanLayer;
 import org.ros.android.view.visualization.layer.OccupancyGridLayer;
 import org.ros.android.view.visualization.layer.RobotLayer;
 import org.ros.node.NodeConfiguration;
@@ -46,6 +47,7 @@ public class MainActivity extends RosActivity {
     visualizationView = (VisualizationView) findViewById(R.id.visualization);
     visualizationView.addLayer(new CameraControlLayer(this));
     visualizationView.addLayer(new OccupancyGridLayer("map"));
+    visualizationView.addLayer(new LaserScanLayer("scan"));
     visualizationView.addLayer(new RobotLayer("imu_stabilized", this));
   }
 

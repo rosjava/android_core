@@ -39,6 +39,8 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
 
   private static final Color FREE_SPACE_COLOR = Color.fromHexAndAlpha("00adff", 0.3f);
 
+  private final Object mutex;
+
   private GraphName frame;
   private Shape shape;
 
@@ -48,18 +50,21 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
 
   public LaserScanLayer(GraphName topicName) {
     super(topicName, "sensor_msgs/LaserScan");
+    mutex = new Object();
   }
 
   @Override
   public void draw(GL10 gl) {
     if (shape != null) {
-      shape.draw(gl);
+      synchronized (mutex) {
+        shape.draw(gl);
+      }
     }
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, android.os.Handler handler, FrameTransformTree frameTransformTree,
-      Camera camera) {
+  public void onStart(ConnectedNode connectedNode, android.os.Handler handler,
+      FrameTransformTree frameTransformTree, Camera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
     Subscriber<LaserScan> subscriber = getSubscriber();
     subscriber.addMessageListener(new MessageListener<LaserScan>() {
@@ -93,7 +98,9 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
           vertices[3 * i + 5] = 0;
           angle += angleIncrement;
         }
-        shape = new TriangleFanShape(vertices, FREE_SPACE_COLOR);
+        synchronized (mutex) {
+          shape = new TriangleFanShape(vertices, FREE_SPACE_COLOR);
+        }
       }
     });
   }

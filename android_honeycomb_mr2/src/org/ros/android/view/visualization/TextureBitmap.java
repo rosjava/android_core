@@ -23,8 +23,6 @@ import android.opengl.GLUtils;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.rosjava_geometry.Transform;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -49,8 +47,8 @@ public class TextureBitmap implements OpenGlDrawable {
   private final static int VERTEX_BUFFER_STRIDE = 3;
 
   private final int[] pixels;
-  private final FloatBuffer vertexBuffer;
-  private final FloatBuffer textureBuffer;
+  private final FloatBuffer surfaceVertices;
+  private final FloatBuffer textureVertices;
   private final Object mutex;
 
   private Bitmap bitmapFront;
@@ -63,7 +61,7 @@ public class TextureBitmap implements OpenGlDrawable {
 
   public TextureBitmap() {
     pixels = new int[TEXTURE_HEIGHT * TEXTURE_STRIDE];
-    float vertexCoordinates[] = {
+    surfaceVertices = Vertices.toFloatBuffer(new float[] {
         // Triangle 1
         0.0f, 0.0f, 0.0f, // Bottom left
         1.0f, 0.0f, 0.0f, // Bottom right
@@ -72,15 +70,8 @@ public class TextureBitmap implements OpenGlDrawable {
         1.0f, 0.0f, 0.0f, // Bottom right
         0.0f, 1.0f, 0.0f, // Top left
         1.0f, 1.0f, 0.0f, // Top right
-    };
-    {
-      ByteBuffer buffer = ByteBuffer.allocateDirect(vertexCoordinates.length * 4);
-      buffer.order(ByteOrder.nativeOrder());
-      vertexBuffer = buffer.asFloatBuffer();
-      vertexBuffer.put(vertexCoordinates);
-      vertexBuffer.position(0);
-    }
-    float textureCoordinates[] = {
+    });
+    textureVertices = Vertices.toFloatBuffer(new float[] {
         // Triangle 1
         0.0f, 0.0f, // Bottom left
         1.0f, 0.0f, // Bottom right
@@ -89,14 +80,7 @@ public class TextureBitmap implements OpenGlDrawable {
         1.0f, 0.0f, // Bottom right
         0.0f, 1.0f, // Top left
         1.0f, 1.0f, // Top right
-    };
-    {
-      ByteBuffer buffer = ByteBuffer.allocateDirect(textureCoordinates.length * 4);
-      buffer.order(ByteOrder.nativeOrder());
-      textureBuffer = buffer.asFloatBuffer();
-      textureBuffer.put(textureCoordinates);
-      textureBuffer.position(0);
-    }
+    });
     bitmapFront = Bitmap.createBitmap(TEXTURE_STRIDE, TEXTURE_HEIGHT, Bitmap.Config.ARGB_8888);
     bitmapBack = Bitmap.createBitmap(TEXTURE_STRIDE, TEXTURE_HEIGHT, Bitmap.Config.ARGB_8888);
     mutex = new Object();
@@ -184,8 +168,8 @@ public class TextureBitmap implements OpenGlDrawable {
     gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-    gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
-    gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, textureBuffer);
+    gl.glVertexPointer(3, GL10.GL_FLOAT, 0, surfaceVertices);
+    gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, textureVertices);
     gl.glDrawArrays(GL10.GL_TRIANGLES, 0, VERTEX_BUFFER_STRIDE);
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
