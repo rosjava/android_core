@@ -17,15 +17,16 @@
 package org.ros.android.view.visualization.layer;
 
 import org.ros.android.view.visualization.Camera;
-import org.ros.android.view.visualization.shape.Color;
-import org.ros.android.view.visualization.shape.Shape;
-import org.ros.android.view.visualization.shape.TriangleFanShape;
+import org.ros.android.view.visualization.Color;
+import org.ros.android.view.visualization.Vertices;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
 import org.ros.rosjava_geometry.FrameTransformTree;
 import sensor_msgs.LaserScan;
+
+import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -38,26 +39,32 @@ import javax.microedition.khronos.opengles.GL10;
 public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> implements TfLayer {
 
   private static final Color FREE_SPACE_COLOR = Color.fromHexAndAlpha("00adff", 0.3f);
+  private static final Color OCCUPIED_SPACE_COLOR = Color.fromHexAndAlpha("ffffff", 0.6f);
+  private static final float LASER_SCAN_POINT_SIZE = 0.1f; // M
+  private static final int LASER_SCAN_STRIDE = 5;
 
   private final Object mutex;
 
   private GraphName frame;
-  private Shape shape;
+  private FloatBuffer vertices;
+  private Camera camera;
 
   public LaserScanLayer(String topicName) {
     this(GraphName.of(topicName));
   }
 
   public LaserScanLayer(GraphName topicName) {
-    super(topicName, "sensor_msgs/LaserScan");
+    super(topicName, sensor_msgs.LaserScan._TYPE);
     mutex = new Object();
   }
 
   @Override
   public void draw(GL10 gl) {
-    if (shape != null) {
+    if (vertices != null) {
       synchronized (mutex) {
-        shape.draw(gl);
+        Vertices.drawTriangleFan(gl, vertices, FREE_SPACE_COLOR);
+        Vertices.drawPoints(gl, vertices, OCCUPIED_SPACE_COLOR,
+            LASER_SCAN_POINT_SIZE * camera.getZoom());
       }
     }
   }
@@ -66,43 +73,50 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
   public void onStart(ConnectedNode connectedNode, android.os.Handler handler,
       FrameTransformTree frameTransformTree, Camera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
+    this.camera = camera;
     Subscriber<LaserScan> subscriber = getSubscriber();
     subscriber.addMessageListener(new MessageListener<LaserScan>() {
       @Override
       public void onNewMessage(LaserScan laserScan) {
         frame = GraphName.of(laserScan.getHeader().getFrameId());
-        float[] ranges = laserScan.getRanges();
-        // vertices is an array of x, y, z values starting with the origin of
-        // the triangle fan.
-        float[] vertices = new float[(ranges.length + 1) * 3];
-        vertices[0] = 0;
-        vertices[1] = 0;
-        vertices[2] = 0;
-        float minimumRange = laserScan.getRangeMin();
-        float maximumRange = laserScan.getRangeMax();
-        float angle = laserScan.getAngleMin();
-        float angleIncrement = laserScan.getAngleIncrement();
-        // Calculate the coordinates of the laser range values.
-        for (int i = 0; i < ranges.length; i++) {
-          float range = ranges[i];
-          // Clamp the range to the specified min and max.
-          if (range < minimumRange) {
-            range = minimumRange;
-          }
-          if (range > maximumRange) {
-            range = maximumRange;
-          }
-          // x, y, z
-          vertices[3 * i + 3] = (float) (range * Math.cos(angle));
-          vertices[3 * i + 4] = (float) (range * Math.sin(angle));
-          vertices[3 * i + 5] = 0;
-          angle += angleIncrement;
-        }
+        FloatBuffer vertices = newVertexBuffer(laserScan, LASER_SCAN_STRIDE);
         synchronized (mutex) {
-          shape = new TriangleFanShape(vertices, FREE_SPACE_COLOR);
+          LaserScanLayer.this.vertices = vertices;
         }
       }
     });
+  }
+
+  private FloatBuffer newVertexBuffer(LaserScan laserScan, int stride) {
+    float[] ranges = laserScan.getRanges();
+    int vertexCount = (ranges.length / stride) + 2;
+    FloatBuffer vertices = Vertices.allocateBuffer(vertexCount);
+    // We start with the origin of the triangle fan.
+    vertices.put(0);
+    vertices.put(0);
+    vertices.put(0);
+    float minimumRange = laserScan.getRangeMin();
+    float maximumRange = laserScan.getRangeMax();
+    float angle = laserScan.getAngleMin();
+    float angleIncrement = laserScan.getAngleIncrement();
+    // Calculate the coordinates of the laser range values.
+    for (int i = 0; i < ranges.length; i += stride) {
+      float range = ranges[i];
+      // Clamp the range to the specified min and max.
+      if (range < minimumRange) {
+        range = minimumRange;
+      }
+      if (range > maximumRange) {
+        range = maximumRange;
+      }
+      // x, y, z
+      vertices.put((float) (range * Math.cos(angle)));
+      vertices.put((float) (range * Math.sin(angle)));
+      vertices.put(0);
+      angle += angleIncrement * stride;
+    }
+    vertices.position(0);
+    return vertices;
   }
 
   @Override

@@ -14,9 +14,11 @@
  * the License.
  */
 
-package org.ros.android.view.visualization.shape;
+package org.ros.android.view.visualization;
 
 import com.google.common.base.Preconditions;
+
+import javax.microedition.khronos.opengles.GL10;
 
 /**
  * Defines a color based on RGBA values in the range [0, 1].
@@ -29,11 +31,11 @@ public class Color {
   private float green;
   private float blue;
   private float alpha;
-  
+
   public static Color copyOf(Color color) {
     return new Color(color.red, color.green, color.blue, color.alpha);
   }
-  
+
   public static Color fromHexAndAlpha(String hex, float alpha) {
     Preconditions.checkArgument(hex.length() == 6);
     float red = Integer.parseInt(hex.substring(0, 2), 16) / 255.0f;
@@ -41,7 +43,7 @@ public class Color {
     float blue = Integer.parseInt(hex.substring(4), 16) / 255.0f;
     return new Color(red, green, blue, alpha);
   }
-  
+
   public Color(float red, float green, float blue, float alpha) {
     Preconditions.checkArgument(0.0f <= red && red <= 1.0f);
     Preconditions.checkArgument(0.0f <= green && green <= 1.0f);
@@ -51,6 +53,10 @@ public class Color {
     this.green = green;
     this.blue = blue;
     this.alpha = alpha;
+  }
+
+  public void apply(GL10 gl) {
+    gl.glColor4f(red, green, blue, alpha);
   }
 
   public float getRed() {

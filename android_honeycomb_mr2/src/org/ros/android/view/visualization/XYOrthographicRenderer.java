@@ -58,15 +58,12 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
     gl.glLoadIdentity();
     gl.glEnable(GL10.GL_BLEND);
     gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
-    gl.glEnable(GL10.GL_POINT_SMOOTH);
     gl.glDisable(GL10.GL_LIGHTING);
     gl.glDisable(GL10.GL_DEPTH_TEST);
-    gl.glEnable(GL10.GL_COLOR_MATERIAL);
   }
 
   @Override
   public void onDrawFrame(GL10 gl) {
-    gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
     gl.glLoadIdentity();
     camera.apply(gl);

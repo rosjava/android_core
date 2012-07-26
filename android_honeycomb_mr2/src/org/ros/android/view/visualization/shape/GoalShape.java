@@ -16,6 +16,8 @@
 
 package org.ros.android.view.visualization.shape;
 
+import org.ros.android.view.visualization.Color;
+
 /**
  * Represents the robot's current goal pose.
  * 

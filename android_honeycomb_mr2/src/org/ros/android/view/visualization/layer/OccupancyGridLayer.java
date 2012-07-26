@@ -39,7 +39,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   /**
    * Color of occupied cells in the map.
    */
-  private static final int COLOR_OCCUPIED = 0xff000000;
+  private static final int COLOR_OCCUPIED = 0xdfffffff;
 
   /**
    * Color of free cells in the map.

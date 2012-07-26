@@ -16,10 +16,11 @@
 
 package org.ros.android.view.visualization.layer;
 
+import org.ros.android.view.visualization.Color;
+
 import android.os.Handler;
 import geometry_msgs.PoseStamped;
 import org.ros.android.view.visualization.Camera;
-import org.ros.android.view.visualization.shape.Color;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
@@ -60,7 +61,7 @@ public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer
     if (ready) {
       gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
       gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
-      gl.glColor4f(COLOR.getRed(), COLOR.getGreen(), COLOR.getBlue(), COLOR.getAlpha());
+      COLOR.apply(gl);
       gl.glPointSize(POINT_SIZE);
       gl.glDrawArrays(GL10.GL_POINTS, 0, vertexBuffer.limit() / 3);
       gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);

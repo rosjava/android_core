@@ -118,7 +118,7 @@ class DistancePoints {
       gl.glVertexPointer(3, GL10.GL_FLOAT, 0, rangeVertexBuffer);
       gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
       gl.glColor4f(0.35f, 0.35f, 0.35f, 0.7f);
-      // Draw the vertices as triangle strip
+      // Draw the vertices as triangle strip.
       gl.glDrawArrays(GL10.GL_TRIANGLE_FAN, 0, rangeVertexCount);
       gl.glPointSize(3);
       gl.glColor4f(0.8f, 0.1f, 0.1f, 1f);

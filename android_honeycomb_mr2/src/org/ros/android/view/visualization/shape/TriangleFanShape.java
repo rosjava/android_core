@@ -16,10 +16,9 @@
 
 package org.ros.android.view.visualization.shape;
 
+import org.ros.android.view.visualization.Color;
 import org.ros.android.view.visualization.Vertices;
-import org.ros.rosjava_geometry.Quaternion;
 import org.ros.rosjava_geometry.Transform;
-import org.ros.rosjava_geometry.Vector3;
 
 import java.nio.FloatBuffer;
 
@@ -47,18 +46,12 @@ public class TriangleFanShape extends BaseShape {
   public TriangleFanShape(float[] vertices, Color color) {
     this.vertices = Vertices.toFloatBuffer(vertices);
     setColor(color);
-    setTransform(new Transform(new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 1)));
+    setTransform(Transform.identity());
   }
 
   @Override
   public void draw(GL10 gl) {
     super.draw(gl);
-    gl.glDisable(GL10.GL_CULL_FACE);
-    gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-    gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
-    gl.glColor4f(getColor().getRed(), getColor().getGreen(), getColor().getBlue(), getColor()
-        .getAlpha());
-    gl.glDrawArrays(GL10.GL_TRIANGLE_FAN, 0, vertices.limit() / 3);
-    gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
+    Vertices.drawTriangleFan(gl, vertices, getColor());
   }
 }

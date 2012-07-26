@@ -18,8 +18,8 @@ package org.ros.android.view.visualization.layer;
 
 import android.os.Handler;
 import org.ros.android.view.visualization.Camera;
+import org.ros.android.view.visualization.Color;
 import org.ros.android.view.visualization.Vertices;
-import org.ros.android.view.visualization.shape.Color;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
@@ -33,8 +33,7 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implements
-    TfLayer {
+public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implements TfLayer {
 
   private final Color color;
   private final Lock lock;
@@ -74,7 +73,7 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
     }
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glVertexPointer(3, GL10.GL_FLOAT, 0, Vertices.toFloatBuffer(vertices));
-    gl.glColor4f(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+    color.apply(gl);
     gl.glPointSize(pointSize);
     gl.glDrawArrays(GL10.GL_POINTS, 0, message.getCells().size());
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
@@ -82,8 +81,8 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler, final FrameTransformTree frameTransformTree,
-      Camera camera) {
+  public void onStart(ConnectedNode connectedNode, Handler handler,
+      final FrameTransformTree frameTransformTree, Camera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
     this.camera = camera;
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.GridCells>() {
