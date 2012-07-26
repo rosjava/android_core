@@ -42,6 +42,9 @@ public class CameraControlLayer extends DefaultLayer {
 
   @Override
   public boolean onTouchEvent(VisualizationView view, MotionEvent event) {
+    if (gestureDetector == null || scaleGestureDetector == null) {
+      return false;
+    }
     if (gestureDetector.onTouchEvent(event)) {
       return true;
     }
