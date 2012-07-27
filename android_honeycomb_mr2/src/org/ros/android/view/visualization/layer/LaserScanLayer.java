@@ -102,17 +102,15 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
     // Calculate the coordinates of the laser range values.
     for (int i = 0; i < ranges.length; i += stride) {
       float range = ranges[i];
-      // Clamp the range to the specified min and max.
-      if (range < minimumRange) {
-        range = minimumRange;
+      // Ignore ranges that are outside the defined range. We are not overly
+      // concerned about the accuracy of the visualization and this is makes it
+      // look a lot nicer.
+      if (minimumRange < range && range < maximumRange) {
+        // x, y, z
+        vertices.put((float) (range * Math.cos(angle)));
+        vertices.put((float) (range * Math.sin(angle)));
+        vertices.put(0);
       }
-      if (range > maximumRange) {
-        range = maximumRange;
-      }
-      // x, y, z
-      vertices.put((float) (range * Math.cos(angle)));
-      vertices.put((float) (range * Math.sin(angle)));
-      vertices.put(0);
       angle += angleIncrement * stride;
     }
     vertices.position(0);
