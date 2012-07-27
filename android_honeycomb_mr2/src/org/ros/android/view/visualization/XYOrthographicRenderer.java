@@ -31,9 +31,11 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * Renders all layers of a navigation view.
  * 
+ * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
 public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
+
   /**
    * List of layers to draw. Layers are drawn in-order, i.e. the layer with
    * index 0 is the bottom layer and is drawn first.
@@ -83,7 +85,7 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
         GraphName layerFrame = ((TfLayer) layer).getFrame();
         if (layerFrame != null) {
           FrameTransform frameTransform =
-              frameTransformTree.newFrameTransform(layerFrame, camera.getFixedFrame());
+              frameTransformTree.transform(layerFrame, camera.getFixedFrame());
           if (frameTransform != null) {
             gl.glPushMatrix();
             OpenGlTransform.apply(gl, frameTransform.getTransform());

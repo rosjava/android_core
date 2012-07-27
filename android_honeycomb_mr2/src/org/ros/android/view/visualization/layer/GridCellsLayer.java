@@ -89,7 +89,7 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
       @Override
       public void onNewMessage(nav_msgs.GridCells data) {
         frame = GraphName.of(data.getHeader().getFrameId());
-        if (frameTransformTree.canTransform(frame, frame)) {
+        if (frameTransformTree.lookUp(frame) != null) {
           if (lock.tryLock()) {
             message = data;
             ready = true;

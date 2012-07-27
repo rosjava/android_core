@@ -58,19 +58,18 @@ public class PoseSubscriberLayer extends SubscriberLayer<geometry_msgs.PoseStamp
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler, final FrameTransformTree frameTransformTree,
-      Camera camera) {
+  public void onStart(ConnectedNode connectedNode, Handler handler,
+      final FrameTransformTree frameTransformTree, Camera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
     shape = new GoalShape();
     getSubscriber().addMessageListener(new MessageListener<geometry_msgs.PoseStamped>() {
       @Override
       public void onNewMessage(geometry_msgs.PoseStamped pose) {
-        GraphName frame = GraphName.of(pose.getHeader().getFrameId());
-        if (frameTransformTree.canTransform(frame, targetFrame)) {
+        GraphName source = GraphName.of(pose.getHeader().getFrameId());
+        FrameTransform frameTransform = frameTransformTree.transform(source, targetFrame);
+        if (frameTransform != null) {
           Transform poseTransform = Transform.fromPoseMessage(pose.getPose());
-          FrameTransform targetFrameTransform =
-              frameTransformTree.newFrameTransform(frame, targetFrame);
-          shape.setTransform(targetFrameTransform.getTransform().multiply(poseTransform));
+          shape.setTransform(frameTransform.getTransform().multiply(poseTransform));
           ready = true;
         }
       }

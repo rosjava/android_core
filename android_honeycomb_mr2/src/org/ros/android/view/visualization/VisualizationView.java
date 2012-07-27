@@ -121,7 +121,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
       @Override
       public void onNewMessage(tf.tfMessage message) {
         for (geometry_msgs.TransformStamped transform : message.getTransforms()) {
-          frameTransformTree.updateTransform(transform);
+          frameTransformTree.update(transform);
         }
       }
     });
