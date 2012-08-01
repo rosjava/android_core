@@ -89,8 +89,8 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
 
   private FloatBuffer newVertexBuffer(LaserScan laserScan, int stride) {
     float[] ranges = laserScan.getRanges();
-    int vertexCount = (ranges.length / stride) + 2;
-    FloatBuffer vertices = Vertices.allocateBuffer(vertexCount);
+    int size = ((ranges.length / stride) + 2) * 3;
+    FloatBuffer vertices = Vertices.allocateBuffer(size);
     // We start with the origin of the triangle fan.
     vertices.put(0);
     vertices.put(0);

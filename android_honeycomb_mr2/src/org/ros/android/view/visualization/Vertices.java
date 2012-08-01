@@ -30,22 +30,20 @@ import javax.microedition.khronos.opengles.GL10;
 public class Vertices {
 
   public static final int FLOAT_BYTE_SIZE = Float.SIZE / 8;
-  public static final int VERTEX_BYTE_SIZE = FLOAT_BYTE_SIZE * 3;
 
   private Vertices() {
     // Utility class.
   }
 
-  public static FloatBuffer allocateBuffer(int vertexCount) {
-    ByteBuffer byteBuffer = ByteBuffer.allocateDirect(vertexCount * VERTEX_BYTE_SIZE);
+  public static FloatBuffer allocateBuffer(int size) {
+    ByteBuffer byteBuffer = ByteBuffer.allocateDirect(size * FLOAT_BYTE_SIZE);
     byteBuffer.order(ByteOrder.nativeOrder());
     return byteBuffer.asFloatBuffer();
   }
 
-  public static FloatBuffer toFloatBuffer(float[] vertices) {
-    Preconditions.checkArgument(vertices.length % 3 == 0);
-    FloatBuffer floatBuffer = allocateBuffer(vertices.length / 3);
-    floatBuffer.put(vertices);
+  public static FloatBuffer toFloatBuffer(float[] floats) {
+    FloatBuffer floatBuffer = allocateBuffer(floats.length);
+    floatBuffer.put(floats);
     floatBuffer.position(0);
     return floatBuffer;
   }
@@ -55,7 +53,7 @@ public class Vertices {
     gl.glPointSize(size);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
-    gl.glDrawArrays(GL10.GL_POINTS, 0, countVertices(vertices));
+    gl.glDrawArrays(GL10.GL_POINTS, 0, countVertices(vertices, 3));
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
   }
 
@@ -63,13 +61,13 @@ public class Vertices {
     color.apply(gl);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
-    gl.glDrawArrays(GL10.GL_TRIANGLE_FAN, 0, countVertices(vertices));
+    gl.glDrawArrays(GL10.GL_TRIANGLE_FAN, 0, countVertices(vertices, 3));
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
   }
 
-  private static int countVertices(FloatBuffer vertices) {
+  private static int countVertices(FloatBuffer vertices, int size) {
     // FloatBuffer accounts for the size of each float when calling remaining().
-    Preconditions.checkArgument(vertices.remaining() % 3 == 0);
-    return vertices.remaining() / 3;
+    Preconditions.checkArgument(vertices.remaining() % size == 0);
+    return vertices.remaining() / size;
   }
 }

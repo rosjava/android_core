@@ -44,7 +44,6 @@ public class TextureBitmap implements OpenGlDrawable {
    * The maximum width of a texture.
    */
   private final static int TEXTURE_STRIDE = 1024;
-  private final static int VERTEX_BUFFER_STRIDE = 3;
 
   private final int[] pixels;
   private final FloatBuffer surfaceVertices;
@@ -62,21 +61,15 @@ public class TextureBitmap implements OpenGlDrawable {
   public TextureBitmap() {
     pixels = new int[TEXTURE_HEIGHT * TEXTURE_STRIDE];
     surfaceVertices = Vertices.toFloatBuffer(new float[] {
-        // Triangle 1
+        // Triangle strip
         0.0f, 0.0f, 0.0f, // Bottom left
-        1.0f, 0.0f, 0.0f, // Bottom right
-        0.0f, 1.0f, 0.0f, // Top left
-        // Triangle 2
         1.0f, 0.0f, 0.0f, // Bottom right
         0.0f, 1.0f, 0.0f, // Top left
         1.0f, 1.0f, 0.0f, // Top right
     });
     textureVertices = Vertices.toFloatBuffer(new float[] {
-        // Triangle 1
+        // Triangle strip
         0.0f, 0.0f, // Bottom left
-        1.0f, 0.0f, // Bottom right
-        0.0f, 1.0f, // Top left
-        // Triangle 2
         1.0f, 0.0f, // Bottom right
         0.0f, 1.0f, // Top left
         1.0f, 1.0f, // Top right
@@ -111,6 +104,7 @@ public class TextureBitmap implements OpenGlDrawable {
   public void updateFromPixelBuffer(ChannelBuffer pixels, int stride, float resolution,
       Transform origin, int fillColor) {
     Preconditions.checkNotNull(pixels);
+    Preconditions.checkNotNull(origin);
     for (int y = 0, i = 0; y < TEXTURE_HEIGHT; y++) {
       for (int x = 0; x < TEXTURE_STRIDE; x++, i++) {
         // If the pixel is within the bounds of the specified pixel array then
@@ -144,18 +138,17 @@ public class TextureBitmap implements OpenGlDrawable {
       handle = new int[1];
       gl.glGenTextures(1, handle, 0);
     }
+    gl.glBindTexture(GL10.GL_TEXTURE_2D, handle[0]);
     synchronized (mutex) {
       if (reload) {
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, handle[0]);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_NEAREST);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_REPEAT);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_REPEAT);
         GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmapFront, 0);
         reload = false;
       }
     }
-    gl.glBindTexture(GL10.GL_TEXTURE_2D, handle[0]);
   }
 
   @Override
@@ -170,10 +163,10 @@ public class TextureBitmap implements OpenGlDrawable {
     gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
     gl.glVertexPointer(3, GL10.GL_FLOAT, 0, surfaceVertices);
     gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, textureVertices);
-    gl.glDrawArrays(GL10.GL_TRIANGLES, 0, VERTEX_BUFFER_STRIDE);
+    gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-    gl.glDisable(GL10.GL_TEXTURE_2D);
     gl.glPopMatrix();
+    gl.glDisable(GL10.GL_TEXTURE_2D);
   }
 }
