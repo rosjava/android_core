@@ -22,7 +22,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 /**
  * Represents the pose that will be published.
- * 
  * <p>
  * This shape is defined in pixel space and will not be affected by the zoom
  * level of the camera.

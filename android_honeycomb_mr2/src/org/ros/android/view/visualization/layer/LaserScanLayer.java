@@ -63,7 +63,11 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
     if (vertices != null) {
       synchronized (mutex) {
         Vertices.drawTriangleFan(gl, vertices, FREE_SPACE_COLOR);
-        Vertices.drawPoints(gl, vertices, OCCUPIED_SPACE_COLOR,
+        // Drop the first point which is required for the triangle fan but is
+        // not a range reading.
+        FloatBuffer pointVertices = vertices.duplicate();
+        pointVertices.position(3);
+        Vertices.drawPoints(gl, pointVertices, OCCUPIED_SPACE_COLOR,
             (float) (LASER_SCAN_POINT_SIZE * camera.getZoom()));
       }
     }
