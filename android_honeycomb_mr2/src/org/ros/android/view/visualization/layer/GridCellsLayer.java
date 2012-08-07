@@ -62,7 +62,8 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
     }
     super.draw(gl);
     lock.lock();
-    float pointSize = Math.max(message.getCellWidth(), message.getCellHeight()) * camera.getZoom();
+    float pointSize =
+        (float) (Math.max(message.getCellWidth(), message.getCellHeight()) * camera.getZoom());
     float[] vertices = new float[3 * message.getCells().size()];
     int i = 0;
     for (geometry_msgs.Point cell : message.getCells()) {

@@ -62,7 +62,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     // TODO(damonkohler): Support ~tf_prefix parameter.
     frameTransformTree = new FrameTransformTree(NameResolver.newRoot());
     camera = new Camera(frameTransformTree);
-    renderer = new XYOrthographicRenderer(frameTransformTree, camera);
+    renderer = new XYOrthographicRenderer(camera);
     layers = Lists.newArrayList();
     if (DEBUG) {
       // Turn on OpenGL error-checking and logging.

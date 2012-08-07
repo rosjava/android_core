@@ -16,8 +16,6 @@
 
 package org.ros.android.view.visualization;
 
-import com.google.common.base.Preconditions;
-
 import javax.microedition.khronos.opengles.GL10;
 
 /**
@@ -25,22 +23,12 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class Viewport {
 
-  /**
-   * Pixels per meter in the world. If zoom is set to the number of pixels per
-   * meter (the display density) then 1 cm in the world will be displayed as 1
-   * cm on the display.
-   */
-  private static final float DEFAULT_ZOOM = 100.0f;
-
   private final int width;
   private final int height;
-
-  private float zoom;
 
   public Viewport(int width, int height) {
     this.width = width;
     this.height = height;
-    zoom = DEFAULT_ZOOM;
   }
 
   public void apply(GL10 gl) {
@@ -49,13 +37,9 @@ public class Viewport {
     gl.glMatrixMode(GL10.GL_PROJECTION);
     gl.glLoadIdentity();
     // This corrects for the aspect ratio of the viewport. The viewport can now
-    // be reasoned about in pixels.
-    gl.glOrthof(-width / 2.0f, width / 2.0f, -height / 2.0f, height / 2.0f, -1.0f, 1.0f);
-  }
-
-  public void zoom(GL10 gl) {
-    Preconditions.checkNotNull(gl);
-    gl.glScalef(zoom, zoom, 1.0f);
+    // be reasoned about in pixels. The zNear and zFar only need to be
+    // sufficiently large to avoid clipping. The z-buffer is not otherwise used.
+    gl.glOrthof(-width / 2.0f, width / 2.0f, -height / 2.0f, height / 2.0f, -1e4f, 1e4f);
   }
 
   public int getWidth() {
@@ -64,13 +48,5 @@ public class Viewport {
 
   public int getHeight() {
     return height;
-  }
-
-  public float getZoom() {
-    return zoom;
-  }
-
-  public void setZoom(float zoom) {
-    this.zoom = zoom;
   }
 }

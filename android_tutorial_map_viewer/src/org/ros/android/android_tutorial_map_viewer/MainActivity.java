@@ -25,6 +25,7 @@ import org.ros.android.view.visualization.VisualizationView;
 import org.ros.android.view.visualization.layer.CameraControlLayer;
 import org.ros.android.view.visualization.layer.LaserScanLayer;
 import org.ros.android.view.visualization.layer.OccupancyGridLayer;
+import org.ros.android.view.visualization.layer.PosePublisherLayer;
 import org.ros.android.view.visualization.layer.RobotLayer;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
@@ -45,10 +46,11 @@ public class MainActivity extends RosActivity {
         WindowManager.LayoutParams.FLAG_FULLSCREEN);
     setContentView(R.layout.main);
     visualizationView = (VisualizationView) findViewById(R.id.visualization);
-    visualizationView.addLayer(new CameraControlLayer(this));
+    visualizationView.addLayer(new CameraControlLayer("map", this));
     visualizationView.addLayer(new OccupancyGridLayer("map"));
     visualizationView.addLayer(new LaserScanLayer("scan"));
     visualizationView.addLayer(new RobotLayer("imu_stabilized", this));
+    visualizationView.addLayer(new PosePublisherLayer("foo", this));
   }
 
   @Override

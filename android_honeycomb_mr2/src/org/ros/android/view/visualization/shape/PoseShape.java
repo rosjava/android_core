@@ -42,6 +42,6 @@ public class PoseShape extends GoalShape {
     // Adjust for metric scale definition of GoalShape.
     gl.glScalef(250.0f, 250.0f, 1.0f);
     // Counter adjust for the camera zoom.
-    gl.glScalef(1.0f / camera.getZoom(), 1.0f / camera.getZoom(), 1.0f);
+    gl.glScalef(1 / (float) camera.getZoom(), 1 / (float) camera.getZoom(), 1.0f);
   }
 }

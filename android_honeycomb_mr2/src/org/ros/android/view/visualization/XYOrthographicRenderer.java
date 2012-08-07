@@ -20,8 +20,6 @@ import android.opengl.GLSurfaceView;
 import org.ros.android.view.visualization.layer.Layer;
 import org.ros.android.view.visualization.layer.TfLayer;
 import org.ros.namespace.GraphName;
-import org.ros.rosjava_geometry.FrameTransform;
-import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.util.List;
 
@@ -42,12 +40,9 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
    */
   private List<Layer> layers;
 
-  private FrameTransformTree frameTransformTree;
-
   private Camera camera;
 
-  public XYOrthographicRenderer(FrameTransformTree frameTransformTree, Camera camera) {
-    this.frameTransformTree = frameTransformTree;
+  public XYOrthographicRenderer(Camera camera) {
     this.camera = camera;
   }
 
@@ -57,10 +52,8 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
     viewport.apply(gl);
     camera.setViewport(viewport);
     gl.glMatrixMode(GL10.GL_MODELVIEW);
-    gl.glLoadIdentity();
     gl.glEnable(GL10.GL_BLEND);
     gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
-    gl.glDisable(GL10.GL_LIGHTING);
     gl.glDisable(GL10.GL_DEPTH_TEST);
   }
 
@@ -81,21 +74,16 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
       return;
     }
     for (Layer layer : getLayers()) {
+      gl.glPushMatrix();
       if (layer instanceof TfLayer) {
         GraphName layerFrame = ((TfLayer) layer).getFrame();
-        if (layerFrame != null) {
-          FrameTransform frameTransform =
-              frameTransformTree.transform(layerFrame, camera.getFixedFrame());
-          if (frameTransform != null) {
-            gl.glPushMatrix();
-            OpenGlTransform.apply(gl, frameTransform.getTransform());
-            layer.draw(gl);
-            gl.glPopMatrix();
-          }
+        if (layerFrame != null && camera.applyFrameTransform(gl, layerFrame)) {
+          layer.draw(gl);
         }
       } else {
         layer.draw(gl);
       }
+      gl.glPopMatrix();
     }
   }
 

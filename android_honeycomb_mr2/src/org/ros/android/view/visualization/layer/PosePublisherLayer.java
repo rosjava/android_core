@@ -19,7 +19,6 @@ package org.ros.android.view.visualization.layer;
 import com.google.common.base.Preconditions;
 
 import android.content.Context;
-import android.graphics.Point;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -32,7 +31,6 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
 import org.ros.rosjava_geometry.FrameTransformTree;
-import org.ros.rosjava_geometry.Quaternion;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
 
@@ -40,7 +38,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 /**
  * @author moesenle@google.com (Lorenz Moesenlechner)
- * 
  */
 public class PosePublisherLayer extends DefaultLayer {
 
@@ -73,24 +70,27 @@ public class PosePublisherLayer extends DefaultLayer {
     }
   }
 
+  private double angle(double x1, double y1, double x2, double y2) {
+    double deltaX = x1 - x2;
+    double deltaY = y1 - y2;
+    return Math.atan2(deltaY, deltaX);
+  }
+
   @Override
   public boolean onTouchEvent(VisualizationView view, MotionEvent event) {
     if (visible) {
       Preconditions.checkNotNull(pose);
       if (event.getAction() == MotionEvent.ACTION_MOVE) {
-        Vector3 orientationVector =
-            camera.toWorldCoordinates(new Point((int) event.getX(), (int) event.getY())).subtract(
-                pose.getTranslation());
-        if (orientationVector.length() > 0) {
-          pose.setRotation(Quaternion.rotationBetweenVectors(new Vector3(1, 0, 0),
-              orientationVector));
-        } else {
-          pose.setRotation(Quaternion.identity());
-        }
+        Vector3 poseVector = pose.apply(Vector3.zero());
+        Vector3 pointerVector = camera.toMetricCoordinates((int) event.getX(), (int) event.getY());
+        double angle =
+            angle(pointerVector.getX(), pointerVector.getY(), poseVector.getX(), poseVector.getY());
+        pose = Transform.translation(poseVector).multiply(Transform.zRotation(angle));
         shape.setTransform(pose);
         return true;
-      } else if (event.getAction() == MotionEvent.ACTION_UP) {
-        posePublisher.publish(pose.toPoseStampedMessage(camera.getFixedFrame(),
+      }
+      if (event.getAction() == MotionEvent.ACTION_UP) {
+        posePublisher.publish(pose.toPoseStampedMessage(camera.getFrame(),
             connectedNode.getCurrentTime(), posePublisher.newMessage()));
         visible = false;
         return true;
@@ -115,8 +115,7 @@ public class PosePublisherLayer extends DefaultLayer {
               @Override
               public void onLongPress(MotionEvent e) {
                 pose =
-                    new Transform(camera.toWorldCoordinates(new Point((int) e.getX(), (int) e
-                        .getY())), Quaternion.identity());
+                    Transform.translation(camera.toMetricCoordinates((int) e.getX(), (int) e.getY()));
                 shape.setTransform(pose);
                 visible = true;
               }

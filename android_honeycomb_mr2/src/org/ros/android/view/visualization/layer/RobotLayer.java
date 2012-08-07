@@ -41,10 +41,14 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
 
   private GestureDetector gestureDetector;
 
-  public RobotLayer(String frame, Context context) {
-    this.frame = GraphName.of(frame);
+  public RobotLayer(GraphName frame, Context context) {
+    this.frame = frame;
     this.context = context;
     shape = new RobotShape();
+  }
+
+  public RobotLayer(String frame, Context context) {
+    this(GraphName.of(frame), context);
   }
 
   @Override
@@ -61,8 +65,8 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler, final FrameTransformTree frameTransformTree,
-      final Camera camera) {
+  public void onStart(ConnectedNode connectedNode, Handler handler,
+      final FrameTransformTree frameTransformTree, final Camera camera) {
     handler.post(new Runnable() {
       @Override
       public void run() {
@@ -70,18 +74,8 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
             new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
               @Override
               public boolean onDoubleTap(MotionEvent event) {
-                camera.setFixedFrame(frame);
+                camera.jumpToFrame(frame);
                 return true;
-              }
-
-              @Override
-              public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
-                  float distanceY) {
-                return false;
-              }
-
-              @Override
-              public void onShowPress(MotionEvent event) {
               }
             });
       }

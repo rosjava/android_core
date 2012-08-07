@@ -18,45 +18,43 @@ package org.ros.android.view.visualization;
 
 import com.google.common.base.Preconditions;
 
-import android.graphics.Point;
+import org.ros.math.RosMath;
 import org.ros.namespace.GraphName;
+import org.ros.rosjava_geometry.FrameTransform;
 import org.ros.rosjava_geometry.FrameTransformTree;
-import org.ros.rosjava_geometry.Quaternion;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
 
 import javax.microedition.khronos.opengles.GL10;
 
 /**
+ * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
 public class Camera {
+
   /**
-   * The default reference frame.
-   * 
-   * TODO(moesenle): make this the root of the TF tree.
+   * Pixels per meter in the world. If zoom is set to the number of pixels per
+   * meter (the display density) then 1 cm in the world will be displayed as 1
+   * cm on the display.
    */
-  private static final GraphName DEFAULT_FIXED_FRAME = GraphName.of("/map");
+  private static final double DEFAULT_ZOOM = 100.0;
 
   /**
    * Most the user can zoom in.
    */
-  private static final float MINIMUM_ZOOM = 10.0f;
+  private static final float MINIMUM_ZOOM = 10;
 
   /**
    * Most the user can zoom out.
    */
-  private static final float MAXIMUM_ZOOM = 500.0f;
+  private static final float MAXIMUM_ZOOM = 500;
 
-  /**
-   * Size of the viewport.
-   */
+  private final FrameTransformTree frameTransformTree;
+  private final Object mutex;
+
   private Viewport viewport;
-
-  /**
-   * Real world (x,y) coordinates of the camera.
-   */
-  private Vector3 location;
+  private Transform transform;
 
   /**
    * The frame in which to render everything. The default value is /map which
@@ -64,131 +62,150 @@ public class Camera {
    * instance, base_link, the view follows the robot and the robot itself is in
    * the origin.
    */
-  private GraphName fixedFrame;
+  private GraphName frame;
 
   public Camera(FrameTransformTree frameTransformTree) {
-    location = new Vector3(0, 0, 0);
-    fixedFrame = DEFAULT_FIXED_FRAME;
+    this.frameTransformTree = frameTransformTree;
+    mutex = new Object();
+    resetTransform();
+  }
+
+  private void resetTransform() {
+    // Rotate coordinate system to match ROS standard (x is forward, y is left).
+    transform = Transform.zRotation(Math.PI / 2).scale(DEFAULT_ZOOM);
   }
 
   public void apply(GL10 gl) {
-    viewport.zoom(gl);
-    // Rotate coordinate system to match ROS standard (x is forward, y is left).
-    gl.glRotatef(90, 0, 0, 1);
-    // Translate view to line up with camera.
-    gl.glTranslatef((float) -location.getX(), (float) -location.getY(), (float) -location.getZ());
-  }
-
-  /**
-   * Moves the camera.
-   * 
-   * @param xDistance
-   *          distance to move in x in world coordinates
-   * @param yDistance
-   *          distance to move in y in world coordinates
-   */
-  private void moveCamera(float xDistance, float yDistance) {
-    location.setX(location.getX() + xDistance);
-    location.setY(location.getY() + yDistance);
-  }
-
-  /**
-   * Moves the camera.
-   * 
-   * <p>
-   * The distances are given in viewport coordinates, not in world coordinates.
-   * 
-   * @param xDistance
-   *          distance in x to move
-   * @param yDistance
-   *          distance in y to move
-   */
-  public void moveCameraScreenCoordinates(float xDistance, float yDistance) {
-    Vector3 worldOrigin = toWorldCoordinates(new Point(0, 0));
-    Vector3 worldPoint = toWorldCoordinates(new Point((int) xDistance, (int) yDistance));
-    Vector3 worldDistance = worldPoint.subtract(worldOrigin);
-    // Point is the relative movement in pixels on the viewport. We need to
-    // scale this by width end height of the viewport.
-    moveCamera((float) worldDistance.getX(), (float) worldDistance.getY());
-  }
-
-  public void setCamera(Vector3 newCameraPoint) {
-    location = newCameraPoint;
-  }
-
-  public Vector3 getCamera() {
-    return location;
-  }
-
-  public void zoomCamera(float factor) {
-    float zoom = viewport.getZoom() * factor;
-    if (zoom < MINIMUM_ZOOM) {
-      zoom = MINIMUM_ZOOM;
-    } else if (zoom > MAXIMUM_ZOOM) {
-      zoom = MAXIMUM_ZOOM;
+    synchronized (mutex) {
+      OpenGlTransform.apply(gl, transform);
     }
-    viewport.setZoom(zoom);
+  }
+
+  public boolean applyFrameTransform(GL10 gl, GraphName frame) {
+    Preconditions.checkNotNull(frame);
+    if (this.frame != null) {
+      FrameTransform frameTransform = frameTransformTree.transform(frame, this.frame);
+      if (frameTransform != null) {
+        OpenGlTransform.apply(gl, frameTransform.getTransform());
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
-   * Returns the real world equivalent of the viewport coordinates specified.
+   * Translates the camera.
    * 
-   * @return the world coordinates of the provided screen coordinates
+   * @param deltaX
+   *          distance to move in x in pixels
+   * @param deltaY
+   *          distance to move in y in pixels
    */
-  public Vector3 toWorldCoordinates(Point screenPoint) {
-    // Top left corner of the view is the origin.
-    double x = 2.0d * screenPoint.x / viewport.getWidth() - 1.0d;
-    double y = 1.0d - 2.0d * screenPoint.y / viewport.getHeight();
-    // Apply the viewport transformation.
-    x *= viewport.getWidth() / 2.0d / viewport.getZoom();
-    y *= viewport.getHeight() / 2.0d / viewport.getZoom();
-    // Exchange x and y for the rotation and add the translation.
-    return new Vector3(y + location.getX(), -x + location.getY(), 0);
+  public void translate(double deltaX, double deltaY) {
+    synchronized (mutex) {
+      transform = Transform.translation(deltaX, deltaY, 0).multiply(transform);
+    }
   }
 
   /**
-   * Returns the pose in the OpenGL world that corresponds to a screen
-   * coordinate and an orientation.
+   * Rotates the camera round the specified coordinates.
    * 
-   * @param goalScreenPoint
-   *          the point on the screen
-   * @param orientation
-   *          the orientation of the pose on the screen
+   * @param focusX
+   *          the x coordinate to focus on
+   * @param focusY
+   *          the y coordinate to focus on
+   * @param deltaAngle
+   *          the camera will be rotated by {@code deltaAngle} radians
    */
-  public Transform toOpenGLPose(Point goalScreenPoint, float orientation) {
-    return new Transform(toWorldCoordinates(goalScreenPoint), Quaternion.fromAxisAngle(
-        new Vector3(0, 0, -1), orientation + Math.PI / 2));
+  public void rotate(double focusX, double focusY, double deltaAngle) {
+    synchronized (mutex) {
+      Transform focus = Transform.translation(toMetricCoordinates((int) focusX, (int) focusY));
+      transform =
+          transform.multiply(focus).multiply(Transform.zRotation(deltaAngle))
+              .multiply(focus.invert());
+    }
   }
 
-  public GraphName getFixedFrame() {
-    return fixedFrame;
+  /**
+   * Zooms the camera around the specified focus coordinates.
+   * 
+   * @param focusX
+   *          the x coordinate to focus on
+   * @param focusY
+   *          the y coordinate to focus on
+   * @param factor
+   *          the zoom will be scaled by this factor
+   */
+  public void zoom(double focusX, double focusY, double factor) {
+    synchronized (mutex) {
+      Transform focus = Transform.translation(toMetricCoordinates((int) focusX, (int) focusY));
+      double zoom = RosMath.clamp(getZoom() * factor, MINIMUM_ZOOM, MAXIMUM_ZOOM) / getZoom();
+      transform = transform.multiply(focus).scale(zoom).multiply(focus.invert());
+    }
   }
 
-  public void setFixedFrame(GraphName fixedFrame) {
-    Preconditions.checkNotNull(fixedFrame, "Fixed frame must be specified.");
-    this.fixedFrame = fixedFrame;
-    // To prevent camera jumps, we always center on the fixedFrame when
-    // it is reset.
-    location = Vector3.zero();
+  /**
+   * @return the current zoom factor
+   */
+  public double getZoom() {
+    return transform.getScale();
   }
 
-  public void resetFixedFrame() {
-    fixedFrame = DEFAULT_FIXED_FRAME;
+  /**
+   * @return the metric coordinates of the provided pixel coordinates where the
+   *         origin is the top left corner of the view
+   */
+  public Vector3 toMetricCoordinates(int x, int y) {
+    double centeredX = x - viewport.getWidth() / 2.0d;
+    double centeredY = viewport.getHeight() / 2.0d - y;
+    return transform.invert().apply(new Vector3(centeredX, centeredY, 0));
   }
 
-  public Viewport getViewport() {
-    return viewport;
+  public GraphName getFrame() {
+    return frame;
+  }
+
+  /**
+   * Changes the camera frame to the specified frame.
+   * <p>
+   * If possible, the camera will avoid jumping on the next frame.
+   * 
+   * @param frame
+   *          the new camera frame
+   */
+  public void setFrame(GraphName frame) {
+    Preconditions.checkNotNull(frame);
+    synchronized (mutex) {
+      if (this.frame != null && this.frame != frame) {
+        FrameTransform frameTransform = frameTransformTree.transform(frame, this.frame);
+        if (frameTransform != null) {
+          // Best effort to prevent the camera from jumping. If we don't have
+          // the transform yet, we can't help matters.
+          transform = transform.multiply(frameTransform.getTransform());
+        }
+      }
+      this.frame = frame;
+    }
+  }
+
+  /**
+   * Changes the camera frame to the specified frame and aligns the camera with
+   * the new frame.
+   * 
+   * @param frame
+   *          the new camera frame
+   */
+  public void jumpToFrame(GraphName frame) {
+    synchronized (mutex) {
+      this.frame = frame;
+      double zoom = getZoom();
+      resetTransform();
+      transform = transform.scale(zoom / getZoom());
+    }
   }
 
   public void setViewport(Viewport viewport) {
+    Preconditions.checkNotNull(viewport);
     this.viewport = viewport;
-  }
-
-  public float getZoom() {
-    return viewport.getZoom();
-  }
-
-  public void setZoom(float zoom) {
-    viewport.setZoom(zoom);
   }
 }

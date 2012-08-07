@@ -22,7 +22,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import org.ros.address.InetAddressFactory;
 import org.ros.android.RosActivity;
-import org.ros.android.android_tutorial_teleop.R;
 import org.ros.android.view.VirtualJoystickView;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.android.view.visualization.layer.CameraControlLayer;
@@ -81,7 +80,7 @@ public class MainActivity extends RosActivity {
     setContentView(R.layout.main);
     virtualJoystickView = (VirtualJoystickView) findViewById(R.id.virtual_joystick);
     visualizationView = (VisualizationView) findViewById(R.id.visualization);
-    visualizationView.addLayer(new CameraControlLayer(this));
+    visualizationView.addLayer(new CameraControlLayer("map", this));
     visualizationView.addLayer(new CompressedBitmapLayer("~compressed_map"));
     visualizationView.addLayer(new PathLayer("move_base/NavfnROS/plan"));
     visualizationView.addLayer(new PathLayer("move_base_dynamic/NavfnROS/plan"));

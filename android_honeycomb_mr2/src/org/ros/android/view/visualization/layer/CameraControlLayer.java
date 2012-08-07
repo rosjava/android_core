@@ -22,56 +22,96 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import org.ros.android.view.visualization.Camera;
+import org.ros.android.view.visualization.RotateGestureDetector;
 import org.ros.android.view.visualization.VisualizationView;
+import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.rosjava_geometry.FrameTransformTree;
 
 /**
+ * Provides gesture control of the camera for translate, rotate, and zoom.
+ * 
+ * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
 public class CameraControlLayer extends DefaultLayer {
 
+  private final GraphName frame;
   private final Context context;
 
-  private GestureDetector gestureDetector;
-  private ScaleGestureDetector scaleGestureDetector;
+  private GestureDetector translateGestureDetector;
+  private RotateGestureDetector rotateGestureDetector;
+  private ScaleGestureDetector zoomGestureDetector;
 
-  public CameraControlLayer(Context context) {
+  /**
+   * Creates a new {@link CameraControlLayer}.
+   * <p>
+   * The camera's frame will be set to {@code frame} once when this layer is
+   * started and always when the camera is translated.
+   * 
+   * @param frame
+   *          the default camera frame
+   * @param context
+   *          the application's {@link Context}
+   */
+  public CameraControlLayer(GraphName frame, Context context) {
+    this.frame = frame;
     this.context = context;
+  }
+
+  public CameraControlLayer(String frame, Context context) {
+    this(GraphName.of(frame), context);
   }
 
   @Override
   public boolean onTouchEvent(VisualizationView view, MotionEvent event) {
-    if (gestureDetector == null || scaleGestureDetector == null) {
+    if (translateGestureDetector == null || rotateGestureDetector == null
+        || zoomGestureDetector == null) {
       return false;
     }
-    if (gestureDetector.onTouchEvent(event)) {
-      return true;
-    }
-    return scaleGestureDetector.onTouchEvent(event);
+    return translateGestureDetector.onTouchEvent(event)
+        || rotateGestureDetector.onTouchEvent(event) || zoomGestureDetector.onTouchEvent(event);
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler, FrameTransformTree frameTransformTree,
-      final Camera camera) {
+  public void onStart(ConnectedNode connectedNode, Handler handler,
+      FrameTransformTree frameTransformTree, final Camera camera) {
+    camera.setFrame(frame);
     handler.post(new Runnable() {
       @Override
       public void run() {
-        gestureDetector =
+        translateGestureDetector =
             new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
               @Override
               public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
                   float distanceY) {
-                camera.moveCameraScreenCoordinates(distanceX, distanceY);
+                camera.setFrame(frame);
+                camera.translate(-distanceX, distanceY);
                 return true;
               }
             });
-        scaleGestureDetector =
+        rotateGestureDetector =
+            new RotateGestureDetector(new RotateGestureDetector.OnRotateGestureListener() {
+              @Override
+              public boolean onRotate(MotionEvent event1, MotionEvent event2, double deltaAngle) {
+                double focusX = (event1.getX(0) + event1.getX(1)) / 2;
+                double focusY = (event1.getY(0) + event1.getY(1)) / 2;
+                camera.rotate(focusX, focusY, deltaAngle);
+                // Don't consume this event in order to allow the zoom gesture
+                // to also be detected.
+                return false;
+              }
+            });
+        zoomGestureDetector =
             new ScaleGestureDetector(context,
                 new ScaleGestureDetector.SimpleOnScaleGestureListener() {
                   @Override
                   public boolean onScale(ScaleGestureDetector detector) {
-                    camera.zoomCamera(detector.getScaleFactor());
+                    if (!detector.isInProgress()) {
+                      return false;
+                    }
+                    camera.zoom(detector.getFocusX(), detector.getFocusY(),
+                        detector.getScaleFactor());
                     return true;
                   }
                 });

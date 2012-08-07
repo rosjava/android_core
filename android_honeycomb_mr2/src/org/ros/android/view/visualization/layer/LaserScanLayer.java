@@ -64,7 +64,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
       synchronized (mutex) {
         Vertices.drawTriangleFan(gl, vertices, FREE_SPACE_COLOR);
         Vertices.drawPoints(gl, vertices, OCCUPIED_SPACE_COLOR,
-            LASER_SCAN_POINT_SIZE * camera.getZoom());
+            (float) (LASER_SCAN_POINT_SIZE * camera.getZoom()));
       }
     }
   }
