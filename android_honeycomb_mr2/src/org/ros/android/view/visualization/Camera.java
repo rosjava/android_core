@@ -189,6 +189,13 @@ public class Camera {
   }
 
   /**
+   * @see #setFrame(GraphName)
+   */
+  public void setFrame(String frame) {
+    setFrame(GraphName.of(frame));
+  }
+
+  /**
    * Changes the camera frame to the specified frame and aligns the camera with
    * the new frame.
    * 
@@ -202,6 +209,13 @@ public class Camera {
       resetTransform();
       transform = transform.scale(zoom / getZoom());
     }
+  }
+
+  /**
+   * @see #jumpToFrame(GraphName)
+   */
+  public void jumpToFrame(String frame) {
+    jumpToFrame(GraphName.of(frame));
   }
 
   public void setViewport(Viewport viewport) {

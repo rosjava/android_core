@@ -41,13 +41,14 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
   private static final Color FREE_SPACE_COLOR = Color.fromHexAndAlpha("00adff", 0.3f);
   private static final Color OCCUPIED_SPACE_COLOR = Color.fromHexAndAlpha("ffffff", 0.6f);
   private static final float LASER_SCAN_POINT_SIZE = 0.1f; // M
-  private static final int LASER_SCAN_STRIDE = 5;
+  private static final int LASER_SCAN_STRIDE = 15;
 
   private final Object mutex;
 
   private GraphName frame;
-  private FloatBuffer vertices;
   private Camera camera;
+  private FloatBuffer vertexFrontBuffer;
+  private FloatBuffer vertexBackBuffer;
 
   public LaserScanLayer(String topicName) {
     this(GraphName.of(topicName));
@@ -60,12 +61,12 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
 
   @Override
   public void draw(GL10 gl) {
-    if (vertices != null) {
+    if (vertexFrontBuffer != null) {
       synchronized (mutex) {
-        Vertices.drawTriangleFan(gl, vertices, FREE_SPACE_COLOR);
+        Vertices.drawTriangleFan(gl, vertexFrontBuffer, FREE_SPACE_COLOR);
         // Drop the first point which is required for the triangle fan but is
         // not a range reading.
-        FloatBuffer pointVertices = vertices.duplicate();
+        FloatBuffer pointVertices = vertexFrontBuffer.duplicate();
         pointVertices.position(3);
         Vertices.drawPoints(gl, pointVertices, OCCUPIED_SPACE_COLOR,
             (float) (LASER_SCAN_POINT_SIZE * camera.getZoom()));
@@ -83,22 +84,22 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
       @Override
       public void onNewMessage(LaserScan laserScan) {
         frame = GraphName.of(laserScan.getHeader().getFrameId());
-        FloatBuffer vertices = newVertexBuffer(laserScan, LASER_SCAN_STRIDE);
-        synchronized (mutex) {
-          LaserScanLayer.this.vertices = vertices;
-        }
+        updateVertexBuffer(laserScan, LASER_SCAN_STRIDE);
       }
     });
   }
 
-  private FloatBuffer newVertexBuffer(LaserScan laserScan, int stride) {
+  private void updateVertexBuffer(LaserScan laserScan, int stride) {
     float[] ranges = laserScan.getRanges();
     int size = ((ranges.length / stride) + 2) * 3;
-    FloatBuffer vertices = Vertices.allocateBuffer(size);
+    if (vertexBackBuffer == null || vertexBackBuffer.capacity() < size) {
+      vertexBackBuffer = Vertices.allocateBuffer(size);
+    }
+    vertexBackBuffer.clear();
     // We start with the origin of the triangle fan.
-    vertices.put(0);
-    vertices.put(0);
-    vertices.put(0);
+    vertexBackBuffer.put(0);
+    vertexBackBuffer.put(0);
+    vertexBackBuffer.put(0);
     float minimumRange = laserScan.getRangeMin();
     float maximumRange = laserScan.getRangeMax();
     float angle = laserScan.getAngleMin();
@@ -111,14 +112,18 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
       // look a lot nicer.
       if (minimumRange < range && range < maximumRange) {
         // x, y, z
-        vertices.put((float) (range * Math.cos(angle)));
-        vertices.put((float) (range * Math.sin(angle)));
-        vertices.put(0);
+        vertexBackBuffer.put((float) (range * Math.cos(angle)));
+        vertexBackBuffer.put((float) (range * Math.sin(angle)));
+        vertexBackBuffer.put(0);
       }
       angle += angleIncrement * stride;
     }
-    vertices.position(0);
-    return vertices;
+    vertexBackBuffer.position(0);
+    synchronized (mutex) {
+      FloatBuffer tmp = vertexFrontBuffer;
+      LaserScanLayer.this.vertexFrontBuffer = vertexBackBuffer;
+      vertexBackBuffer = tmp;
+    }
   }
 
   @Override

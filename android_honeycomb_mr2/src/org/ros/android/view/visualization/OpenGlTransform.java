@@ -30,6 +30,20 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class OpenGlTransform {
 
+  private static final ThreadLocal<FloatBuffer> buffer = new ThreadLocal<FloatBuffer>() {
+    @Override
+    protected FloatBuffer initialValue() {
+      return FloatBuffer.allocate(16);
+    };
+
+    @Override
+    public FloatBuffer get() {
+      FloatBuffer buffer = super.get();
+      buffer.clear();
+      return buffer;
+    };
+  };
+
   private OpenGlTransform() {
     // Utility class.
   }
@@ -43,11 +57,10 @@ public class OpenGlTransform {
    *          the {@link Transform} to apply
    */
   public static void apply(GL10 gl, Transform transform) {
-    double[] matrix = transform.toMatrix();
-    FloatBuffer buffer = FloatBuffer.allocate(16);
-    for (double value : matrix) {
-      buffer.put((float) value);
+    FloatBuffer matrix = buffer.get();
+    for (double value : transform.toMatrix()) {
+      matrix.put((float) value);
     }
-    gl.glMultMatrixf(buffer);
+    gl.glMultMatrixf(matrix);
   }
 }

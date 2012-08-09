@@ -29,7 +29,7 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class Vertices {
 
-  public static final int FLOAT_BYTE_SIZE = Float.SIZE / 8;
+  private static final int FLOAT_BYTE_SIZE = Float.SIZE / 8;
 
   private Vertices() {
     // Utility class.

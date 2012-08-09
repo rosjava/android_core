@@ -1,12 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical" >
 
     <org.ros.android.view.visualization.VisualizationView
         android:id="@+id/visualization"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="3dip" >
+
+        <ToggleButton
+            android:id="@+id/follow_me_toggle_button"
+            style="@style/ButtonFont"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onFollowMeToggleButtonClicked"
+            android:textOff="Follow Me"
+            android:textOn="Follow Me" />
+
+        <Button
+            android:id="@+id/clear_map_button"
+            style="@style/ButtonFont"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClearMapButtonClicked"
+            android:text="Clear Map" />
+    </LinearLayout>
 
 </LinearLayout>

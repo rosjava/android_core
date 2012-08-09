@@ -80,18 +80,20 @@ public class MainActivity extends RosActivity {
     setContentView(R.layout.main);
     virtualJoystickView = (VirtualJoystickView) findViewById(R.id.virtual_joystick);
     visualizationView = (VisualizationView) findViewById(R.id.visualization);
-    visualizationView.addLayer(new CameraControlLayer("map", this));
+    visualizationView.getCamera().setFrame("map");
+  }
+
+  @Override
+  protected void init(NodeMainExecutor nodeMainExecutor) {
+    visualizationView.addLayer(new CameraControlLayer(this, nodeMainExecutor
+        .getScheduledExecutorService()));
     visualizationView.addLayer(new CompressedBitmapLayer("~compressed_map"));
     visualizationView.addLayer(new PathLayer("move_base/NavfnROS/plan"));
     visualizationView.addLayer(new PathLayer("move_base_dynamic/NavfnROS/plan"));
     visualizationView.addLayer(new LaserScanLayer("base_scan"));
     visualizationView.addLayer(new PoseSubscriberLayer("simple_waypoints_server/goal_pose"));
     visualizationView.addLayer(new PosePublisherLayer("simple_waypoints_server/goal_pose", this));
-    visualizationView.addLayer(new RobotLayer("base_footprint", this));
-  }
-
-  @Override
-  protected void init(NodeMainExecutor nodeMainExecutor) {
+    visualizationView.addLayer(new RobotLayer("base_footprint"));
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress(),
             getMasterUri());

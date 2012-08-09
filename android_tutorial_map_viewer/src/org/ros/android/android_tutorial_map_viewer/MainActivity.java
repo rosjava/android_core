@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Google Inc.
+ * Copyright (C) 2012 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,25 +17,31 @@
 package org.ros.android.android_tutorial_map_viewer;
 
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ToggleButton;
 import org.ros.address.InetAddressFactory;
 import org.ros.android.RosActivity;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.android.view.visualization.layer.CameraControlLayer;
+import org.ros.android.view.visualization.layer.CameraControlListener;
 import org.ros.android.view.visualization.layer.LaserScanLayer;
 import org.ros.android.view.visualization.layer.OccupancyGridLayer;
-import org.ros.android.view.visualization.layer.PosePublisherLayer;
 import org.ros.android.view.visualization.layer.RobotLayer;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
 public class MainActivity extends RosActivity {
 
+  private final SystemCommands systemCommands;
+
   private VisualizationView visualizationView;
+  private ToggleButton followMeToggleButton;
 
   public MainActivity() {
     super("Map Viewer", "Map Viewer");
+    systemCommands = new SystemCommands();
   }
 
   @Override
@@ -46,18 +52,55 @@ public class MainActivity extends RosActivity {
         WindowManager.LayoutParams.FLAG_FULLSCREEN);
     setContentView(R.layout.main);
     visualizationView = (VisualizationView) findViewById(R.id.visualization);
-    visualizationView.addLayer(new CameraControlLayer("map", this));
-    visualizationView.addLayer(new OccupancyGridLayer("map"));
-    visualizationView.addLayer(new LaserScanLayer("scan"));
-    visualizationView.addLayer(new RobotLayer("imu_stabilized", this));
-    visualizationView.addLayer(new PosePublisherLayer("foo", this));
+    visualizationView.getCamera().setFrame("map");
+    followMeToggleButton = (ToggleButton) findViewById(R.id.follow_me_toggle_button);
   }
 
   @Override
   protected void init(NodeMainExecutor nodeMainExecutor) {
+    CameraControlLayer cameraControlLayer =
+        new CameraControlLayer(this, nodeMainExecutor.getScheduledExecutorService());
+    cameraControlLayer.addListener(new CameraControlListener() {
+      @Override
+      public void onZoom(double focusX, double focusY, double factor) {
+      }
+
+      @Override
+      public void onTranslate(float distanceX, float distanceY) {
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            visualizationView.getCamera().setFrame("map");
+            followMeToggleButton.setChecked(false);
+          }
+        });
+      }
+
+      @Override
+      public void onRotate(double focusX, double focusY, double deltaAngle) {
+      }
+    });
+    visualizationView.addLayer(cameraControlLayer);
+    visualizationView.addLayer(new OccupancyGridLayer("map"));
+    visualizationView.addLayer(new LaserScanLayer("scan"));
+    visualizationView.addLayer(new RobotLayer("imu_stabilized"));
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress(),
             getMasterUri());
-    nodeMainExecutor.execute(visualizationView, nodeConfiguration.setNodeName("map_viewer"));
+    nodeMainExecutor.execute(visualizationView, nodeConfiguration);
+    nodeMainExecutor.execute(systemCommands, nodeConfiguration);
+  }
+
+  public void onClearMapButtonClicked(View view) {
+    systemCommands.reset();
+  }
+
+  public void onFollowMeToggleButtonClicked(View view) {
+    boolean on = ((ToggleButton) view).isChecked();
+    if (on) {
+      visualizationView.getCamera().jumpToFrame("imu_stabilized");
+    } else {
+      visualizationView.getCamera().setFrame("map");
+    }
   }
 }

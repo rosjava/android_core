@@ -16,12 +16,8 @@
 
 package org.ros.android.view.visualization.layer;
 
-import android.content.Context;
 import android.os.Handler;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import org.ros.android.view.visualization.Camera;
-import org.ros.android.view.visualization.VisualizationView;
 import org.ros.android.view.visualization.shape.RobotShape;
 import org.ros.android.view.visualization.shape.Shape;
 import org.ros.namespace.GraphName;
@@ -36,19 +32,15 @@ import javax.microedition.khronos.opengles.GL10;
 public class RobotLayer extends DefaultLayer implements TfLayer {
 
   private final GraphName frame;
-  private final Context context;
   private final Shape shape;
 
-  private GestureDetector gestureDetector;
-
-  public RobotLayer(GraphName frame, Context context) {
+  public RobotLayer(GraphName frame) {
     this.frame = frame;
-    this.context = context;
     shape = new RobotShape();
   }
 
-  public RobotLayer(String frame, Context context) {
-    this(GraphName.of(frame), context);
+  public RobotLayer(String frame) {
+    this(GraphName.of(frame));
   }
 
   @Override
@@ -57,29 +49,8 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
   }
 
   @Override
-  public boolean onTouchEvent(VisualizationView view, MotionEvent event) {
-    if (gestureDetector != null) {
-      return gestureDetector.onTouchEvent(event);
-    }
-    return false;
-  }
-
-  @Override
   public void onStart(ConnectedNode connectedNode, Handler handler,
       final FrameTransformTree frameTransformTree, final Camera camera) {
-    handler.post(new Runnable() {
-      @Override
-      public void run() {
-        gestureDetector =
-            new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
-              @Override
-              public boolean onDoubleTap(MotionEvent event) {
-                camera.jumpToFrame(frame);
-                return true;
-              }
-            });
-      }
-    });
   }
 
   @Override

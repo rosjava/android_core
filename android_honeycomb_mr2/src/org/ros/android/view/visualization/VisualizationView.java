@@ -42,10 +42,13 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
 
   private static final boolean DEBUG = false;
 
-  private FrameTransformTree frameTransformTree;
-  private Camera camera;
-  private XYOrthographicRenderer renderer;
-  private List<Layer> layers;
+  // Initialized here to avoid constructor code duplication.
+  private final NameResolver nameResolver = NameResolver.newRoot();
+  private final FrameTransformTree frameTransformTree = new FrameTransformTree(nameResolver);
+  private final Camera camera = new Camera(frameTransformTree);
+  private final XYOrthographicRenderer renderer = new XYOrthographicRenderer(camera);
+  private final List<Layer> layers = Lists.newArrayList();
+
   private ConnectedNode connectedNode;
 
   public VisualizationView(Context context) {
@@ -59,11 +62,6 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   }
 
   private void init() {
-    // TODO(damonkohler): Support ~tf_prefix parameter.
-    frameTransformTree = new FrameTransformTree(NameResolver.newRoot());
-    camera = new Camera(frameTransformTree);
-    renderer = new XYOrthographicRenderer(camera);
-    layers = Lists.newArrayList();
     if (DEBUG) {
       // Turn on OpenGL error-checking and logging.
       setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
@@ -90,6 +88,10 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
 
   public XYOrthographicRenderer getRenderer() {
     return renderer;
+  }
+
+  public Camera getCamera() {
+    return camera;
   }
 
   /**
