@@ -25,8 +25,8 @@ import org.ros.android.RosActivity;
 import org.ros.android.view.VirtualJoystickView;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.android.view.visualization.layer.CameraControlLayer;
-import org.ros.android.view.visualization.layer.CompressedBitmapLayer;
 import org.ros.android.view.visualization.layer.LaserScanLayer;
+import org.ros.android.view.visualization.layer.OccupancyGridLayer;
 import org.ros.android.view.visualization.layer.PathLayer;
 import org.ros.android.view.visualization.layer.PosePublisherLayer;
 import org.ros.android.view.visualization.layer.PoseSubscriberLayer;
@@ -87,7 +87,7 @@ public class MainActivity extends RosActivity {
   protected void init(NodeMainExecutor nodeMainExecutor) {
     visualizationView.addLayer(new CameraControlLayer(this, nodeMainExecutor
         .getScheduledExecutorService()));
-    visualizationView.addLayer(new CompressedBitmapLayer("~compressed_map"));
+    visualizationView.addLayer(new OccupancyGridLayer("map"));
     visualizationView.addLayer(new PathLayer("move_base/NavfnROS/plan"));
     visualizationView.addLayer(new PathLayer("move_base_dynamic/NavfnROS/plan"));
     visualizationView.addLayer(new LaserScanLayer("base_scan"));

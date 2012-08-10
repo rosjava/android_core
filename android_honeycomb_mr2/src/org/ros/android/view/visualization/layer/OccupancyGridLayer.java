@@ -96,8 +96,6 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
     int stride = message.getInfo().getWidth();
     Preconditions.checkArgument(stride <= 1024);
     Preconditions.checkArgument(message.getInfo().getHeight() <= 1024);
-    Transform origin = Transform.fromPoseMessage(message.getInfo().getOrigin());
-    float resolution = message.getInfo().getResolution();
     ChannelBuffer buffer = message.getData();
     while (buffer.readable()) {
       byte pixel = buffer.readByte();
@@ -109,6 +107,8 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
         pixels.writeInt(COLOR_OCCUPIED);
       }
     }
+    float resolution = message.getInfo().getResolution();
+    Transform origin = Transform.fromPoseMessage(message.getInfo().getOrigin());
     textureBitmap.updateFromPixelBuffer(pixels, stride, resolution, origin, COLOR_UNKNOWN);
     pixels.clear();
     frame = GraphName.of(message.getHeader().getFrameId());

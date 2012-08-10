@@ -36,22 +36,35 @@ import javax.microedition.khronos.opengles.GL10;
  * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public class CompressedBitmapLayer extends
-    SubscriberLayer<compressed_visualization_transport_msgs.CompressedBitmap> implements TfLayer {
+public class CompressedOccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> implements
+    TfLayer {
 
-  private static final int FILL_COLOR = 0xff000000;
+  /**
+   * Color of occupied cells in the map.
+   */
+  private static final int COLOR_OCCUPIED = 0xdfffffff;
+
+  /**
+   * Color of free cells in the map.
+   */
+  private static final int COLOR_FREE = 0xff8d8d8d;
+
+  /**
+   * Color of unknown cells in the map.
+   */
+  private static final int COLOR_UNKNOWN = 0xff000000;
 
   private final TextureBitmap textureBitmap;
 
   private boolean ready;
   private GraphName frame;
 
-  public CompressedBitmapLayer(String topic) {
+  public CompressedOccupancyGridLayer(String topic) {
     this(GraphName.of(topic));
   }
 
-  public CompressedBitmapLayer(GraphName topic) {
-    super(topic, "compressed_visualization_transport_msgs/CompressedBitmap");
+  public CompressedOccupancyGridLayer(GraphName topic) {
+    super(topic, nav_msgs.OccupancyGrid._TYPE);
     textureBitmap = new TextureBitmap();
     ready = false;
   }
@@ -72,27 +85,37 @@ public class CompressedBitmapLayer extends
   public void onStart(ConnectedNode connectedNode, Handler handler,
       FrameTransformTree frameTransformTree, Camera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
-    getSubscriber().addMessageListener(
-        new MessageListener<compressed_visualization_transport_msgs.CompressedBitmap>() {
-          @Override
-          public void onNewMessage(
-              compressed_visualization_transport_msgs.CompressedBitmap compressedBitmap) {
-            update(compressedBitmap);
-          }
-        });
+    getSubscriber().addMessageListener(new MessageListener<nav_msgs.OccupancyGrid>() {
+      @Override
+      public void onNewMessage(nav_msgs.OccupancyGrid message) {
+        update(message);
+      }
+    });
   }
 
-  void update(compressed_visualization_transport_msgs.CompressedBitmap message) {
-    Preconditions.checkArgument(message.getResolutionX() == message.getResolutionY());
+  void update(nav_msgs.OccupancyGrid message) {
     ChannelBuffer buffer = message.getData();
     Bitmap bitmap =
         BitmapFactory.decodeByteArray(buffer.array(), buffer.arrayOffset(), buffer.readableBytes());
-    int width = bitmap.getWidth();
+    int stride = bitmap.getWidth();
     int height = bitmap.getHeight();
-    int[] pixels = new int[width * height];
-    bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
-    textureBitmap.updateFromPixelArray(pixels, width, (float) message.getResolutionX(),
-        Transform.fromPoseMessage(message.getOrigin()), FILL_COLOR);
+    Preconditions.checkArgument(stride <= 1024);
+    Preconditions.checkArgument(height <= 1024);
+    int[] pixels = new int[stride * height];
+    bitmap.getPixels(pixels, 0, stride, 0, 0, stride, height);
+    for (int i = 0; i < pixels.length; i++) {
+      // Pixels are ARGB packed ints.
+      if (pixels[i] == 0xffffffff) {
+        pixels[i] = COLOR_UNKNOWN;
+      } else if (pixels[i] == 0xff000000) {
+        pixels[i] = COLOR_FREE;
+      } else {
+        pixels[i] = COLOR_OCCUPIED;
+      }
+    }
+    float resolution = message.getInfo().getResolution();
+    Transform origin = Transform.fromPoseMessage(message.getInfo().getOrigin());
+    textureBitmap.updateFromPixelArray(pixels, stride, resolution, origin, COLOR_UNKNOWN);
     frame = GraphName.of(message.getHeader().getFrameId());
     ready = true;
   }
