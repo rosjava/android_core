@@ -40,9 +40,17 @@ public class SystemCommands extends AbstractNodeMain {
   }
 
   public void reset() {
+    publish("reset");
+  }
+
+  public void saveGeotiff() {
+    publish("savegeotiff");
+  }
+
+  private void publish(String command) {
     if (publisher != null) {
       std_msgs.String message = publisher.newMessage();
-      message.setData("reset");
+      message.setData(command);
       publisher.publish(message);
     }
   }

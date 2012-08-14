@@ -31,6 +31,14 @@
             android:layout_height="wrap_content"
             android:onClick="onClearMapButtonClicked"
             android:text="Clear Map" />
+
+        <Button
+            android:id="@+id/save_map_button"
+            style="@style/ButtonFont"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onSaveMapButtonClicked"
+            android:text="Save Map" />
     </LinearLayout>
 
 </LinearLayout>

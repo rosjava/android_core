@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 import org.ros.address.InetAddressFactory;
 import org.ros.android.RosActivity;
@@ -33,6 +34,9 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
 public class MainActivity extends RosActivity {
+
+  private static final String MAP_FRAME = "map";
+  private static final String ROBOT_FRAME = "base_link";
 
   private final SystemCommands systemCommands;
 
@@ -52,8 +56,9 @@ public class MainActivity extends RosActivity {
         WindowManager.LayoutParams.FLAG_FULLSCREEN);
     setContentView(R.layout.main);
     visualizationView = (VisualizationView) findViewById(R.id.visualization);
-    visualizationView.getCamera().setFrame("map");
     followMeToggleButton = (ToggleButton) findViewById(R.id.follow_me_toggle_button);
+    visualizationView.getCamera().jumpToFrame(ROBOT_FRAME);
+    followMeToggleButton.setChecked(true);
   }
 
   @Override
@@ -63,27 +68,33 @@ public class MainActivity extends RosActivity {
     cameraControlLayer.addListener(new CameraControlListener() {
       @Override
       public void onZoom(double focusX, double focusY, double factor) {
+        disableFollowMe();
       }
 
       @Override
       public void onTranslate(float distanceX, float distanceY) {
-        runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            visualizationView.getCamera().setFrame("map");
-            followMeToggleButton.setChecked(false);
-          }
-        });
+        disableFollowMe();
       }
 
       @Override
       public void onRotate(double focusX, double focusY, double deltaAngle) {
+        disableFollowMe();
+      }
+
+      private void disableFollowMe() {
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            visualizationView.getCamera().setFrame(MAP_FRAME);
+            followMeToggleButton.setChecked(false);
+          }
+        });
       }
     });
     visualizationView.addLayer(cameraControlLayer);
     visualizationView.addLayer(new CompressedOccupancyGridLayer("map/png"));
     visualizationView.addLayer(new LaserScanLayer("scan"));
-    visualizationView.addLayer(new RobotLayer("imu_stabilized"));
+    visualizationView.addLayer(new RobotLayer(ROBOT_FRAME));
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress(),
             getMasterUri());
@@ -92,15 +103,33 @@ public class MainActivity extends RosActivity {
   }
 
   public void onClearMapButtonClicked(View view) {
+    toast("Clearing map...");
     systemCommands.reset();
+    visualizationView.getCamera().jumpToFrame(ROBOT_FRAME);
+    followMeToggleButton.setChecked(true);
+  }
+
+  public void onSaveMapButtonClicked(View view) {
+    toast("Saving map...");
+    systemCommands.saveGeotiff();
+  }
+
+  private void toast(final String text) {
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        Toast toast = Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT);
+        toast.show();
+      }
+    });
   }
 
   public void onFollowMeToggleButtonClicked(View view) {
     boolean on = ((ToggleButton) view).isChecked();
     if (on) {
-      visualizationView.getCamera().jumpToFrame("imu_stabilized");
+      visualizationView.getCamera().jumpToFrame(ROBOT_FRAME);
     } else {
-      visualizationView.getCamera().setFrame("map");
+      visualizationView.getCamera().setFrame(MAP_FRAME);
     }
   }
 }
