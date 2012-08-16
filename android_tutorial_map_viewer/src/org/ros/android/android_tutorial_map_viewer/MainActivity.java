@@ -81,15 +81,6 @@ public class MainActivity extends RosActivity {
         disableFollowMe();
       }
 
-      private void disableFollowMe() {
-        runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            visualizationView.getCamera().setFrame(MAP_FRAME);
-            followMeToggleButton.setChecked(false);
-          }
-        });
-      }
     });
     visualizationView.addLayer(cameraControlLayer);
     visualizationView.addLayer(new CompressedOccupancyGridLayer("map/png"));
@@ -127,9 +118,29 @@ public class MainActivity extends RosActivity {
   public void onFollowMeToggleButtonClicked(View view) {
     boolean on = ((ToggleButton) view).isChecked();
     if (on) {
-      visualizationView.getCamera().jumpToFrame(ROBOT_FRAME);
+      enableFollowMe();
     } else {
-      visualizationView.getCamera().setFrame(MAP_FRAME);
+      disableFollowMe();
     }
+  }
+
+  private void enableFollowMe() {
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        visualizationView.getCamera().jumpToFrame(ROBOT_FRAME);
+        followMeToggleButton.setChecked(true);
+      }
+    });
+  }
+
+  private void disableFollowMe() {
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        visualizationView.getCamera().setFrame(MAP_FRAME);
+        followMeToggleButton.setChecked(false);
+      }
+    });
   }
 }

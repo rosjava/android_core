@@ -24,6 +24,7 @@ import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import org.ros.android.view.visualization.layer.Layer;
+import org.ros.exception.RosRuntimeException;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
@@ -34,20 +35,22 @@ import org.ros.node.topic.Subscriber;
 import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
+ * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
 public class VisualizationView extends GLSurfaceView implements NodeMain {
 
   private static final boolean DEBUG = false;
 
-  // Initialized here to avoid constructor code duplication.
   private final NameResolver nameResolver = NameResolver.newRoot();
   private final FrameTransformTree frameTransformTree = new FrameTransformTree(nameResolver);
   private final Camera camera = new Camera(frameTransformTree);
   private final XYOrthographicRenderer renderer = new XYOrthographicRenderer(camera);
   private final List<Layer> layers = Lists.newArrayList();
+  private final CountDownLatch attachedToWindow = new CountDownLatch(1);
 
   private ConnectedNode connectedNode;
 
@@ -114,7 +117,20 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   public void onStart(ConnectedNode connectedNode) {
     this.connectedNode = connectedNode;
     startTransformListener();
+    try {
+      attachedToWindow.await();
+    } catch (InterruptedException e) {
+      throw new RosRuntimeException(e);
+    }
+    // startLayers() must be called after we've attached to the window in order
+    // to ensure that getHandler() will not return null.
     startLayers();
+  }
+
+  @Override
+  protected void onAttachedToWindow() {
+    super.onAttachedToWindow();
+    attachedToWindow.countDown();
   }
 
   private void startTransformListener() {

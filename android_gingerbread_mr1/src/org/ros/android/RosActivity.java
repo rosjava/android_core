@@ -93,7 +93,8 @@ public abstract class RosActivity extends Activity {
       nodeMainExecutorService.shutdown();
       unbindService(nodeMainExecutorServiceConnection);
       // NOTE(damonkohler): The activity could still be restarted. In that case,
-      // nodeRunner needs to be null for everything to be started up again.
+      // nodeMainExectuorService needs to be null for everything to be started
+      // up again.
       nodeMainExecutorService = null;
     }
     Toast.makeText(this, notificationTitle + " shut down.", Toast.LENGTH_SHORT).show();

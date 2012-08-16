@@ -16,8 +16,8 @@
         android:label="@string/app_name" >
         <activity
             android:name="org.ros.android.android_tutorial_map_viewer.MainActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="landscape" >
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
