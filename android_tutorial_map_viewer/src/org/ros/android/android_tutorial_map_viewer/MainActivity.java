@@ -16,6 +16,8 @@
 
 package org.ros.android.android_tutorial_map_viewer;
 
+import com.google.common.base.Preconditions;
+
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -32,6 +34,9 @@ import org.ros.android.view.visualization.layer.LaserScanLayer;
 import org.ros.android.view.visualization.layer.RobotLayer;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
+import org.ros.time.NtpTimeProvider;
+
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends RosActivity {
 
@@ -57,8 +62,7 @@ public class MainActivity extends RosActivity {
     setContentView(R.layout.main);
     visualizationView = (VisualizationView) findViewById(R.id.visualization);
     followMeToggleButton = (ToggleButton) findViewById(R.id.follow_me_toggle_button);
-    visualizationView.getCamera().jumpToFrame(ROBOT_FRAME);
-    followMeToggleButton.setChecked(true);
+    enableFollowMe();
   }
 
   @Override
@@ -89,6 +93,11 @@ public class MainActivity extends RosActivity {
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress(),
             getMasterUri());
+    NtpTimeProvider ntpTimeProvider =
+        new NtpTimeProvider(InetAddressFactory.newFromHostString("192.168.0.1"),
+            nodeMainExecutor.getScheduledExecutorService());
+    ntpTimeProvider.startPeriodicUpdates(1, TimeUnit.MINUTES);
+    nodeConfiguration.setTimeProvider(ntpTimeProvider);
     nodeMainExecutor.execute(visualizationView, nodeConfiguration);
     nodeMainExecutor.execute(systemCommands, nodeConfiguration);
   }
@@ -96,8 +105,7 @@ public class MainActivity extends RosActivity {
   public void onClearMapButtonClicked(View view) {
     toast("Clearing map...");
     systemCommands.reset();
-    visualizationView.getCamera().jumpToFrame(ROBOT_FRAME);
-    followMeToggleButton.setChecked(true);
+    enableFollowMe();
   }
 
   public void onSaveMapButtonClicked(View view) {
@@ -125,6 +133,8 @@ public class MainActivity extends RosActivity {
   }
 
   private void enableFollowMe() {
+    Preconditions.checkNotNull(visualizationView);
+    Preconditions.checkNotNull(followMeToggleButton);
     runOnUiThread(new Runnable() {
       @Override
       public void run() {
@@ -135,6 +145,8 @@ public class MainActivity extends RosActivity {
   }
 
   private void disableFollowMe() {
+    Preconditions.checkNotNull(visualizationView);
+    Preconditions.checkNotNull(followMeToggleButton);
     runOnUiThread(new Runnable() {
       @Override
       public void run() {
