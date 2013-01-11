@@ -12,7 +12,7 @@ issues that are important to you will help developers prioritize their work.
 In addition to the following documentation, android_core makes liberal use of
 `Javadoc`_.
 
-.. _issues: http://code.google.com/p/rosjava/issues/list
+.. _issues: https://github.com/rosjava/android_core/issues
 .. _Javadoc: javadoc/index.html
 
 Contents:

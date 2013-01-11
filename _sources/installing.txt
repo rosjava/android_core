@@ -20,7 +20,7 @@ following quick start instructions to be insufficient.
 .. code-block:: bash
 
   cd ~/my_workspace
-  rosws merge http://android.rosjava.googlecode.com/hg/.rosinstall
+  rosws merge https://raw.github.com/rosjava/android_core/master/.rosinstall
   rosws update
   source setup.bash
 
