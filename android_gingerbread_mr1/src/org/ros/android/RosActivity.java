@@ -38,11 +38,11 @@ import java.net.URISyntaxException;
  */
 public abstract class RosActivity extends Activity {
 
-  RosActivityLifecycle lifecycle;
+  private final RosActivityLifecycle lifecycle;
 
   protected RosActivity(String notificationTicker, String notificationTitle) {
     super();
-    lifecycle = new RosActivityLifecycle(notificationTicket, notificationTitle);
+    lifecycle = new RosActivityLifecycle(this, notificationTicker, notificationTitle);
   }
 
   @Override
@@ -68,13 +68,8 @@ public abstract class RosActivity extends Activity {
    */
   protected abstract void init(NodeMainExecutor nodeMainExecutor);
 
-  private void startMasterChooser() {
-    lifecycle.startMasterChooser();
-    super.startActivityForResult(new Intent(this, MasterChooser.class), 0);
-  }
-
   public URI getMasterUri() {
-    return lifecycle.nodeMainExecutorService.getMasterUri();
+    return lifecycle.getMasterUri();
   }
 
   @Override

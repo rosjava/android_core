@@ -35,15 +35,16 @@ import java.net.URISyntaxException;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RosActivity {
+public class RosActivityLifecycle {
 
   private static final int MASTER_CHOOSER_REQUEST_CODE = 0;
 
   private final ServiceConnection nodeMainExecutorServiceConnection;
   private final String notificationTicker;
   private final String notificationTitle;
+  private final Activity activity;
 
-  private NodeMainExecutorService nodeMainExecutorService;
+  NodeMainExecutorService nodeMainExecutorService;
 
   private final class NodeMainExecutorServiceConnection implements ServiceConnection {
     @Override
@@ -52,7 +53,8 @@ public class RosActivity {
       nodeMainExecutorService.addListener(new NodeMainExecutorServiceListener() {
         @Override
         public void onShutdown(NodeMainExecutorService nodeMainExecutorService) {
-          RosActivity.this.finish();
+        	// TODO Is this correct?
+        	RosActivityLifecycle.this.activity.finish();
         }
       });
       startMasterChooser();
@@ -63,37 +65,38 @@ public class RosActivity {
     }
   };
 
-  protected RosActivityLifeCycle(String notificationTicker, String notificationTitle) {
+  protected RosActivityLifecycle(Activity activity, String notificationTicker, String notificationTitle) {
+	this.activity = activity;
     this.notificationTicker = notificationTicker;
     this.notificationTitle = notificationTitle;
     nodeMainExecutorServiceConnection = new NodeMainExecutorServiceConnection();
   }
 
-  protected void onStart() {
+  public void onStart() {
     startNodeMainExecutorService();
   }
 
-  private void startNodeMainExecutorService() {
-    Intent intent = new Intent(this, NodeMainExecutorService.class);
+  public void startNodeMainExecutorService() {
+    Intent intent = new Intent(this.activity, NodeMainExecutorService.class);
     intent.setAction(NodeMainExecutorService.ACTION_START);
     intent.putExtra(NodeMainExecutorService.EXTRA_NOTIFICATION_TICKER, notificationTicker);
     intent.putExtra(NodeMainExecutorService.EXTRA_NOTIFICATION_TITLE, notificationTitle);
-    startService(intent);
+    this.activity.startService(intent);
     Preconditions.checkState(
-        bindService(intent, nodeMainExecutorServiceConnection, BIND_AUTO_CREATE),
+        this.activity.bindService(intent, nodeMainExecutorServiceConnection, this.activity.BIND_AUTO_CREATE),
         "Failed to bind NodeMainExecutorService.");
   }
 
   protected void onDestroy() {
     if (nodeMainExecutorService != null) {
       nodeMainExecutorService.shutdown();
-      unbindService(nodeMainExecutorServiceConnection);
+      this.activity.unbindService(nodeMainExecutorServiceConnection);
       // NOTE(damonkohler): The activity could still be restarted. In that case,
       // nodeMainExectuorService needs to be null for everything to be started
       // up again.
       nodeMainExecutorService = null;
     }
-    Toast.makeText(this, notificationTitle + " shut down.", Toast.LENGTH_SHORT).show();
+    Toast.makeText(this.activity, notificationTitle + " shut down.", Toast.LENGTH_SHORT).show();
   }
 
   /**
@@ -105,7 +108,8 @@ public class RosActivity {
    * @param nodeMainExecutor
    *          the {@link NodeMainExecutor} created for this {@link Activity}
    */
-  protected abstract void init(NodeMainExecutor nodeMainExecutor);
+  //protected abstract void init(NodeMainExecutor nodeMainExecutor);
+  // TODO Not sure what to do here
 
   private void startMasterChooser() {
     Preconditions.checkState(getMasterUri() == null);
@@ -118,7 +122,7 @@ public class RosActivity {
 
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == MASTER_CHOOSER_REQUEST_CODE) {
-      if (resultCode == RESULT_OK) {
+      if (resultCode == this.activity.RESULT_OK) {
         if (data == null) {
           nodeMainExecutorService.startMaster();
         } else {
@@ -135,14 +139,15 @@ public class RosActivity {
         new AsyncTask<Void, Void, Void>() {
           @Override
           protected Void doInBackground(Void... params) {
-            RosActivity.this.init(nodeMainExecutorService);
+        	// TODO How to implement without RosActivity?
+            RosActivityLifecycle.this.activity.init(nodeMainExecutorService);
             return null;
           }
         }.execute();
       } else {
         // Without a master URI configured, we are in an unusable state.
         nodeMainExecutorService.shutdown();
-        finish();
+        this.activity.finish();
       }
     }
   }
