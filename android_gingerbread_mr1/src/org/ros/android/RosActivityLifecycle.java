@@ -26,11 +26,10 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.widget.Toast;
 import org.ros.exception.RosRuntimeException;
-import org.ros.node.NodeMain;
-import org.ros.node.NodeMainExecutor;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.Callable;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -43,6 +42,7 @@ public class RosActivityLifecycle {
   private final String notificationTicker;
   private final String notificationTitle;
   private final Activity activity;
+  private Callable<Void> initCallable;
 
   NodeMainExecutorService nodeMainExecutorService;
 
@@ -53,7 +53,6 @@ public class RosActivityLifecycle {
       nodeMainExecutorService.addListener(new NodeMainExecutorServiceListener() {
         @Override
         public void onShutdown(NodeMainExecutorService nodeMainExecutorService) {
-        	// TODO Is this correct?
         	RosActivityLifecycle.this.activity.finish();
         }
       });
@@ -98,18 +97,10 @@ public class RosActivityLifecycle {
     }
     Toast.makeText(this.activity, notificationTitle + " shut down.", Toast.LENGTH_SHORT).show();
   }
-
-  /**
-   * This method is called in a background thread once this {@link Activity} has
-   * been initialized with a master {@link URI} via the {@link MasterChooser}
-   * and a {@link NodeMainExecutorService} has started. Your {@link NodeMain}s
-   * should be started here using the provided {@link NodeMainExecutor}.
-   * 
-   * @param nodeMainExecutor
-   *          the {@link NodeMainExecutor} created for this {@link Activity}
-   */
-  //protected abstract void init(NodeMainExecutor nodeMainExecutor);
-  // TODO Not sure what to do here
+  
+  public void setInitCallable(Callable<Void> callable){
+	  initCallable = callable;
+  }
 
   private void startMasterChooser() {
     Preconditions.checkState(getMasterUri() == null);
@@ -118,6 +109,10 @@ public class RosActivityLifecycle {
   public URI getMasterUri() {
     Preconditions.checkNotNull(nodeMainExecutorService);
     return nodeMainExecutorService.getMasterUri();
+  }
+  
+  public NodeMainExecutorService getNodeMainExecutorService(){
+	  return nodeMainExecutorService;
   }
 
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -139,8 +134,10 @@ public class RosActivityLifecycle {
         new AsyncTask<Void, Void, Void>() {
           @Override
           protected Void doInBackground(Void... params) {
-        	// TODO How to implement without RosActivity?
-            RosActivityLifecycle.this.activity.init(nodeMainExecutorService);
+        	try {
+				RosActivityLifecycle.this.initCallable.call();
+			} catch (Exception e) {
+			}
             return null;
           }
         }.execute();

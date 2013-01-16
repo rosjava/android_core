@@ -16,22 +16,14 @@
 
 package org.ros.android;
 
-import com.google.common.base.Preconditions;
-
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.AsyncTask;
-import android.os.IBinder;
-import android.widget.Toast;
-import org.ros.exception.RosRuntimeException;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 import org.ros.android.RosActivityLifecycle;
 
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.concurrent.Callable;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -43,6 +35,14 @@ public abstract class RosActivity extends Activity {
   protected RosActivity(String notificationTicker, String notificationTitle) {
     super();
     lifecycle = new RosActivityLifecycle(this, notificationTicker, notificationTitle);
+    final NodeMainExecutorService nmes = lifecycle.getNodeMainExecutorService();
+    lifecycle.setInitCallable(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+			RosActivity.this.init(nmes);
+			return null;
+		}
+    });
   }
 
   @Override
