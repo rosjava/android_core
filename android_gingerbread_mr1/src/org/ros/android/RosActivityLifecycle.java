@@ -25,26 +25,33 @@ import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.widget.Toast;
-import org.ros.exception.RosRuntimeException;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+
+import org.ros.exception.RosRuntimeException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class RosActivityLifecycle {
 
-  private static final int MASTER_CHOOSER_REQUEST_CODE = 0;
+  public static final int MASTER_CHOOSER_REQUEST_CODE = 0;
 
   private final ServiceConnection nodeMainExecutorServiceConnection;
   private final String notificationTicker;
   private final String notificationTitle;
   private final Activity activity;
-  private Callable<Void> initCallable;
+  private InitListener initCallable;
+  private Callable<Void> masterChooserCallable;
+  private final CountDownLatch nodeMainExecutorServiceLatch;
 
   NodeMainExecutorService nodeMainExecutorService;
+  
+  public interface InitListener {
+    void onInit(NodeMainExecutorService service);
+  };
 
   private final class NodeMainExecutorServiceConnection implements ServiceConnection {
     @Override
@@ -56,7 +63,15 @@ public class RosActivityLifecycle {
         	RosActivityLifecycle.this.activity.finish();
         }
       });
-      startMasterChooser();
+      
+      nodeMainExecutorServiceLatch.countDown();
+      
+      try {
+	    masterChooserCallable.call(); // Must be called here, or service may not be connected before it is called.
+      } catch (Exception e) {
+	    // TODO Auto-generated catch block
+		e.printStackTrace();
+	  }
     }
 
     @Override
@@ -69,21 +84,18 @@ public class RosActivityLifecycle {
     this.notificationTicker = notificationTicker;
     this.notificationTitle = notificationTitle;
     nodeMainExecutorServiceConnection = new NodeMainExecutorServiceConnection();
+    
+    nodeMainExecutorServiceLatch = new CountDownLatch(1);
   }
 
-  public void onStart() {
-    startNodeMainExecutorService();
-  }
-
-  public void startNodeMainExecutorService() {
-    Intent intent = new Intent(this.activity, NodeMainExecutorService.class);
-    intent.setAction(NodeMainExecutorService.ACTION_START);
-    intent.putExtra(NodeMainExecutorService.EXTRA_NOTIFICATION_TICKER, notificationTicker);
-    intent.putExtra(NodeMainExecutorService.EXTRA_NOTIFICATION_TITLE, notificationTitle);
-    this.activity.startService(intent);
-    Preconditions.checkState(
-        this.activity.bindService(intent, nodeMainExecutorServiceConnection, this.activity.BIND_AUTO_CREATE),
-        "Failed to bind NodeMainExecutorService.");
+  public void onStart(Activity activity) {
+    Intent intent = new Intent(activity, NodeMainExecutorService.class);
+	intent.setAction(NodeMainExecutorService.ACTION_START);
+	intent.putExtra(NodeMainExecutorService.EXTRA_NOTIFICATION_TICKER, notificationTicker);
+	intent.putExtra(NodeMainExecutorService.EXTRA_NOTIFICATION_TITLE, notificationTitle);
+	activity.startService(intent);
+	Preconditions.checkState(
+	    activity.bindService(intent, nodeMainExecutorServiceConnection, Activity.BIND_AUTO_CREATE), "Failed to bind NodeMainExecutorService.");
   }
 
   protected void onDestroy() {
@@ -98,12 +110,17 @@ public class RosActivityLifecycle {
     Toast.makeText(this.activity, notificationTitle + " shut down.", Toast.LENGTH_SHORT).show();
   }
   
-  public void setInitCallable(Callable<Void> callable){
+  public void setInitCallable(InitListener callable){
 	  initCallable = callable;
   }
-
-  private void startMasterChooser() {
-    Preconditions.checkState(getMasterUri() == null);
+  
+  public void setMasterChooserCallable(Callable<Void> callable){
+	  masterChooserCallable = callable;
+  }
+  
+  public Intent getMasterChooserIntent(Activity activity) {
+	Preconditions.checkState(getMasterUri() == null);
+    return new Intent(activity, MasterChooser.class);
   }
 
   public URI getMasterUri() {
@@ -111,41 +128,45 @@ public class RosActivityLifecycle {
     return nodeMainExecutorService.getMasterUri();
   }
   
-  public NodeMainExecutorService getNodeMainExecutorService(){
+  private NodeMainExecutorService getNodeMainExecutorService(){
+	  try {
+		nodeMainExecutorServiceLatch.await();
+	} catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		throw new RosRuntimeException(e);
+	}
 	  return nodeMainExecutorService;
   }
+  
+  public void shutdown(){
+      nodeMainExecutorService.shutdown();
+      this.activity.finish(); 
+  }
+  
+  public void startWithNewMaster(){
+	  nodeMainExecutorService.startMaster();
+	  start();
+  }
 
-  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (requestCode == MASTER_CHOOSER_REQUEST_CODE) {
-      if (resultCode == this.activity.RESULT_OK) {
-        if (data == null) {
-          nodeMainExecutorService.startMaster();
-        } else {
-          URI uri;
-          try {
-            uri = new URI(data.getStringExtra("ROS_MASTER_URI"));
-          } catch (URISyntaxException e) {
-            throw new RosRuntimeException(e);
-          }
-          nodeMainExecutorService.setMasterUri(uri);
-        }
-        // Run init() in a new thread as a convenience since it often requires
-        // network access.
-        new AsyncTask<Void, Void, Void>() {
-          @Override
-          protected Void doInBackground(Void... params) {
-        	try {
-				RosActivityLifecycle.this.initCallable.call();
-			} catch (Exception e) {
-			}
-            return null;
-          }
-        }.execute();
-      } else {
-        // Without a master URI configured, we are in an unusable state.
-        nodeMainExecutorService.shutdown();
-        this.activity.finish();
+  public void startWithMaster(URI uri) {
+	Preconditions.checkNotNull(uri);
+    nodeMainExecutorService.setMasterUri(uri);
+    start();
+  }
+  
+  private void start(){
+    // Run init() in a new thread as a convenience since it often requires
+    // network access.
+    new AsyncTask<Void, Void, Void>() {
+      @Override
+      protected Void doInBackground(Void... params) {
+    	try {
+    		
+			RosActivityLifecycle.this.initCallable.onInit(RosActivityLifecycle.this.getNodeMainExecutorService());
+		} catch (Exception e) {
+		}
+        return null;
       }
-    }
+    }.execute();
   }
 }

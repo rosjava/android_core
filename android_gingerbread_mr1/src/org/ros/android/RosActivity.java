@@ -21,8 +21,12 @@ import android.content.Intent;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 import org.ros.android.RosActivityLifecycle;
+import org.ros.exception.RosRuntimeException;
+
+import com.google.common.base.Preconditions;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.Callable;
 
 /**
@@ -35,11 +39,20 @@ public abstract class RosActivity extends Activity {
   protected RosActivity(String notificationTicker, String notificationTitle) {
     super();
     lifecycle = new RosActivityLifecycle(this, notificationTicker, notificationTitle);
-    final NodeMainExecutorService nmes = lifecycle.getNodeMainExecutorService();
-    lifecycle.setInitCallable(new Callable<Void>(){
+    
+    
+    
+    lifecycle.setInitCallable(new RosActivityLifecycle.InitListener(){
+		@Override
+		public void onInit(NodeMainExecutorService service) {
+			RosActivity.this.init(service);
+		}
+    });
+    
+    lifecycle.setMasterChooserCallable(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
-			RosActivity.this.init(nmes);
+			startMasterChooser();
 			return null;
 		}
     });
@@ -48,7 +61,13 @@ public abstract class RosActivity extends Activity {
   @Override
   protected void onStart() {
     super.onStart();
-    lifecycle.startNodeMainExecutorService();
+    lifecycle.onStart(this);
+  }
+  
+  public void startMasterChooser(){
+    // Call this method on super to avoid triggering our precondition in the
+    // overridden startActivityForResult().
+    super.startActivityForResult(lifecycle.getMasterChooserIntent(this), RosActivityLifecycle.MASTER_CHOOSER_REQUEST_CODE);
   }
 
   @Override
@@ -74,12 +93,28 @@ public abstract class RosActivity extends Activity {
 
   @Override
   public void startActivityForResult(Intent intent, int requestCode) {
+	Preconditions.checkArgument(requestCode != RosActivityLifecycle.MASTER_CHOOSER_REQUEST_CODE);
     super.startActivityForResult(intent, requestCode);
   }
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
-    lifecycle.onActivityResult(requestCode, resultCode, data);
-  }
+    if (requestCode == RosActivityLifecycle.MASTER_CHOOSER_REQUEST_CODE) {
+    	if (data == null) {
+    		lifecycle.startWithMaster(null);
+    	} else if (resultCode == Activity.RESULT_OK) {
+            URI uri;
+            try {
+              uri = new URI(data.getStringExtra("ROS_MASTER_URI"));
+            } catch (URISyntaxException e) {
+              throw new RosRuntimeException(e);
+            }
+            lifecycle.startWithMaster(uri);
+        }
+	    } else {
+	        // Without a master URI configured, we are in an unusable state.
+		    lifecycle.shutdown();
+	    }
+	  }
 }
