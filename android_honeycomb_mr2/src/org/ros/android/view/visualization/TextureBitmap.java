@@ -119,6 +119,10 @@ public class TextureBitmap implements OpenGlDrawable {
     }
     update(origin, stride, resolution, fillColor);
   }
+  
+  public void clearHandle() {
+	  handle = null;
+  }
 
   private void update(Transform origin, int stride, float resolution, int fillColor) {
     this.origin = origin;
