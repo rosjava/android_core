@@ -144,6 +144,7 @@ public class TextureBitmap implements OpenGlDrawable {
       gl.glBindTexture(GL10.GL_TEXTURE_2D, handle[0]);
       gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
       gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_NEAREST);
+      reload = true;
     }
     synchronized (mutex) {
       if (reload) {
