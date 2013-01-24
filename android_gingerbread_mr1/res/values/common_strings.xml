@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ROS for Android</string>
+    <string name="cancel">Cancel</string>
+    <string name="qr_code">Scan</string>
+    <string name="master_uri_hint">http://localhost:11311/</string>
+    <string name="new_master">New Master</string>
+
+</resources>

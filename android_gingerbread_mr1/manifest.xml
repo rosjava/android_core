@@ -1,0 +1,10 @@
+<package>
+  <description brief="android_gingerbread">
+    android_gingerbread
+  </description>
+  <author>Damon Kohler (damonkohler@google.com)</author>
+  <license>Apache 2.0</license>
+  <review status="unreviewed" notes="" />
+  <url>http://ros.org/wiki/android_gingerbread</url>
+</package>
+
