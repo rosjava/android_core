@@ -81,7 +81,9 @@ public abstract class RosAppActivity extends RosActivity
 				InetAddressFactory.newNonLoopback().getHostAddress(),
 				getMasterUri());
 		nodeMainExecutor.execute(dashboard, nodeConfiguration.setNodeName("dashboard"));
-		startApp();
+		if(startApplication){
+			startApp();
+		}
 	}
 	
     private void startApp() {
@@ -127,7 +129,9 @@ public abstract class RosAppActivity extends RosActivity
 
 	@Override
 	protected void onDestroy() {
-		stopApp();
+		if(startApplication){
+			stopApp();
+		}
 		super.onDestroy();
 	}
     

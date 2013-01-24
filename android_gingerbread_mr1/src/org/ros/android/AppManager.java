@@ -10,6 +10,9 @@ import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseListener;
 
 import android.util.Log;
+import app_manager.ListApps;
+import app_manager.ListAppsRequest;
+import app_manager.ListAppsResponse;
 import app_manager.StartApp;
 import app_manager.StartAppRequest;
 import app_manager.StartAppResponse;
@@ -23,6 +26,8 @@ public class AppManager extends AbstractNodeMain{
 	private String appName;
 	private ServiceResponseListener<StartAppResponse> startServiceResponseListener;
 	private ServiceResponseListener<StopAppResponse> stopServiceResponseListener;
+	private ServiceResponseListener<ListAppsResponse> listServiceResponseListener;
+	
 	private ConnectedNode connectedNode;
 	private String function;
 	
@@ -40,6 +45,10 @@ public class AppManager extends AbstractNodeMain{
 	
 	public void setStopService(ServiceResponseListener<StopAppResponse> stopServiceResponseListener){
 		this.stopServiceResponseListener = stopServiceResponseListener;
+	}
+	
+	public void setListService(ServiceResponseListener<ListAppsResponse> listServiceResponseListener){
+		this.listServiceResponseListener = listServiceResponseListener;
 	}
 	
     public void startApp() {
@@ -71,6 +80,20 @@ public class AppManager extends AbstractNodeMain{
 	    stopAppClient.call(request,stopServiceResponseListener);
 	    Log.i("RosAndroid", "Done call");
     }
+   
+   public void listApps() {
+	   
+	   ServiceClient<ListAppsRequest, ListAppsResponse> listAppsClient;
+	   try{
+           Log.i("RosAndroid", "List app service client created");
+           listAppsClient = connectedNode.newServiceClient("/turtlebot/list_apps", ListApps._TYPE);
+	   } catch(ServiceNotFoundException e){
+		   throw new RosRuntimeException(e);
+	   }
+	   final ListAppsRequest request = listAppsClient.newMessage();
+	   listAppsClient.call(request, listServiceResponseListener);
+	   Log.i("RosAndroid","Done call");
+   }
 
 	@Override
 	public GraphName getDefaultNodeName() {
@@ -85,6 +108,9 @@ public class AppManager extends AbstractNodeMain{
 		}
 		else if(function.equals("stop")){
 			stopApp();
+		}
+		else if(function.equals("list")){
+			listApps();
 		}
 	}	
 }
