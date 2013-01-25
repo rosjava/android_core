@@ -26,6 +26,7 @@ public abstract class RosAppActivity extends RosActivity
     private Dashboard dashboard = null;
     private NodeConfiguration nodeConfiguration;
 	private NodeMainExecutor nodeMainExecutor;
+	private boolean fromAppChooser = true;
     
     protected void setDashboardResource(int resource) {
         dashboardResourceId = resource;
@@ -64,6 +65,7 @@ public abstract class RosAppActivity extends RosActivity
     	    setContentView(mainWindowId);
             robotAppName = getIntent().getStringExtra(AppManager.PACKAGE + ".robot_app_name");
             if(robotAppName == null) {
+            	fromAppChooser = false;
                 robotAppName = defaultAppName;
             }
             
@@ -85,6 +87,13 @@ public abstract class RosAppActivity extends RosActivity
 			startApp();
 		}
 	}
+	  
+	@Override
+	  public void startMasterChooser() {
+		if(!fromAppChooser){
+			super.startMasterChooser();
+		}
+	  }
 	
     private void startApp() {
         Log.i("RosAndroid", "Starting application");
