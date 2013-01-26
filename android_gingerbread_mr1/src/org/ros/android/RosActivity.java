@@ -43,7 +43,7 @@ public abstract class RosActivity extends Activity {
   private final String notificationTicker;
   private final String notificationTitle;
 
-  private NodeMainExecutorService nodeMainExecutorService;
+  protected NodeMainExecutorService nodeMainExecutorService;
 
   private final class NodeMainExecutorServiceConnection implements ServiceConnection {
     @Override
