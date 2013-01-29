@@ -97,7 +97,7 @@ public abstract class RosActivity extends Activity {
       // up again.
       nodeMainExecutorService = null;
     }
-    Toast.makeText(this, notificationTitle + " shut down.", Toast.LENGTH_SHORT).show();
+    //Toast.makeText(this, notificationTitle + " shut down.", Toast.LENGTH_SHORT).show();
     super.onDestroy();
   }
 
@@ -126,7 +126,7 @@ public abstract class RosActivity extends Activity {
 
   @Override
   public void startActivityForResult(Intent intent, int requestCode) {
-    Preconditions.checkArgument(requestCode != MASTER_CHOOSER_REQUEST_CODE);
+    // Preconditions.checkArgument(requestCode != MASTER_CHOOSER_REQUEST_CODE);
     super.startActivityForResult(intent, requestCode);
   }
 

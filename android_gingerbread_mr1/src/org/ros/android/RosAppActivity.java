@@ -4,15 +4,11 @@ package org.ros.android;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -37,7 +33,9 @@ public abstract class RosAppActivity extends RosActivity
     private Dashboard dashboard = null;
     private NodeConfiguration nodeConfiguration;
 	private NodeMainExecutor nodeMainExecutor;
-	private boolean fromAppChooser = true;
+	private boolean fromAppChooser = false;
+	private boolean fromApplication = false;
+	private boolean backKeyTouched = false;
 	private URI uri;
 	
 
@@ -78,8 +76,13 @@ public abstract class RosAppActivity extends RosActivity
     	    setContentView(mainWindowId);
             robotAppName = getIntent().getStringExtra(AppManager.PACKAGE + ".robot_app_name");
             if(robotAppName == null) {
-            	fromAppChooser = false;
                 robotAppName = defaultAppName;
+            }
+            else if(robotAppName.equals("AppChooser")){
+            	fromApplication = true;
+            }
+            else {
+            	fromAppChooser = true;
             }
             
     	    if(dashboard == null) {
@@ -102,19 +105,18 @@ public abstract class RosAppActivity extends RosActivity
 	  
 	@Override
 	  public void startMasterChooser() {
-		if(!fromAppChooser){
+		if(!fromAppChooser && !fromApplication){
 			super.startMasterChooser();
 		}
 		else{
 			Intent intent = new Intent();
 		    intent.putExtra(AppManager.PACKAGE + ".robot_app_name", "AppChooser");
-			 if(fromAppChooser){
 		          try {
 		            uri = new URI(getIntent().getStringExtra("ChooserURI"));
 		          } catch (URISyntaxException e) {
 		            throw new RosRuntimeException(e);
 		          }
-			 }
+			 
 	          nodeMainExecutorService.setMasterUri(uri);
 	        new AsyncTask<Void, Void, Void>() {
 	            @Override
@@ -148,10 +150,10 @@ public abstract class RosAppActivity extends RosActivity
        nodeMainExecutor.execute(appManager, nodeConfiguration.setNodeName("start_app"));
     }
     
-    private void stopApp() {
+    protected void stopApp() {
         Log.i("RosAndroid", "Stopping application");
         AppManager appManager = new AppManager(robotAppName);
-        appManager.setFunction("stop");        
+        appManager.setFunction("stop");
         
         appManager.setStopService(new ServiceResponseListener<StopAppResponse>() {
             @Override
@@ -167,10 +169,14 @@ public abstract class RosAppActivity extends RosActivity
         nodeMainExecutor.execute(appManager, nodeConfiguration.setNodeName("start_app"));
     }
     
+    protected void releaseDashboardNode(){
+    	nodeMainExecutor.shutdownNodeMain(dashboard);
+    }
+    
 
 	@Override
 	protected void onDestroy() {
-		if(startApplication){
+		if(startApplication && !backKeyTouched){
 			stopApp();
 		}
 		super.onDestroy();
@@ -179,10 +185,11 @@ public abstract class RosAppActivity extends RosActivity
 
 	
 	public boolean onKeyDown(int keyCode,KeyEvent event){
-	  if(keyCode == KeyEvent.KEYCODE_BACK && fromAppChooser){		  
+	  if(keyCode == KeyEvent.KEYCODE_BACK && fromAppChooser){
+		backKeyTouched = true;
 		Intent intent = new Intent();
-	    intent.putExtra(AppManager.PACKAGE + ".robot_app_name", "AppChooser");
-	    intent.putExtra("ChooserURI", uri.toString());
+		intent.putExtra(AppManager.PACKAGE + ".robot_app_name", "AppChooser");
+		intent.putExtra("ChooserURI", uri.toString());
 		intent.setAction("org.ros.android.android_app_chooser.AppChooser");
 		intent.addCategory("android.intent.category.DEFAULT");
 		startActivity(intent);
