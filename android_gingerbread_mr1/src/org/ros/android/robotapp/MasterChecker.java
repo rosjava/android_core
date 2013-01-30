@@ -1,9 +1,9 @@
 package org.ros.android.robotapp;
 
 import android.util.Log;
-//import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.client.ParameterClient;
-import org.ros.namespace.NameResolver;
+import org.ros.internal.node.server.NodeIdentifier;
+import org.ros.namespace.GraphName;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
@@ -78,14 +78,14 @@ public class MasterChecker {
     @Override
     public void run() {
       try {
-    //    ParameterClient paramClient = new ParameterClient(
-    //              SlaveIdentifier.createFromStrings("/master_checker", masterUri.toString()), masterUri);
-     //   String robotName = (String) paramClient.getParam("robot/name").getResult();
-     //   String robotType = (String) paramClient.getParam("robot/type").getResult();
-        Date timeLastSeen = new Date(); // current time.
-    //    RobotDescription robotDescription = new RobotDescription(robotId, robotName, robotType,
-    //                                                             timeLastSeen);
-    //    foundMasterCallback.receive(robotDescription);
+        ParameterClient paramClient = new ParameterClient(
+                  NodeIdentifier.forNameAndUri("/master_checker", masterUri.toString()), masterUri);
+        String robotName = (String) paramClient.getParam(GraphName.of("robot/name")).getResult();
+        String robotType = (String) paramClient.getParam(GraphName.of("robot/type")).getResult();
+        Date timeLastSeen = new Date();
+        RobotDescription robotDescription = new RobotDescription(robotId, robotName, robotType,
+                                                                 timeLastSeen);
+        foundMasterCallback.receive(robotDescription);
         return;
       } catch (Throwable ex) {
         Log.e("RosAndroid", "Exception while creating node in MasterChecker for master URI "
