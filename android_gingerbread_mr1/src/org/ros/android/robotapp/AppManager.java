@@ -1,4 +1,4 @@
-package org.ros.android;
+package org.ros.android.robotapp;
 
 import org.ros.exception.RemoteException;
 import org.ros.exception.RosRuntimeException;

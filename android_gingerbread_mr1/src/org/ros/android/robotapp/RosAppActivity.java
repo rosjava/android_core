@@ -1,4 +1,4 @@
-package org.ros.android;
+package org.ros.android.robotapp;
 
 
 import java.net.URI;
@@ -16,7 +16,7 @@ import app_manager.StartAppResponse;
 import app_manager.StopAppResponse;
 
 import org.ros.address.InetAddressFactory;
-import org.ros.android.util.Dashboard;
+import org.ros.android.RosActivity;
 import org.ros.exception.RemoteException;
 import org.ros.exception.RosRuntimeException;
 import org.ros.node.NodeConfiguration;
@@ -34,8 +34,8 @@ public abstract class RosAppActivity extends RosActivity
     private NodeConfiguration nodeConfiguration;
 	private NodeMainExecutor nodeMainExecutor;
 	private boolean fromAppChooser = false;
-	private boolean fromApplication = false;
-	private boolean backKeyTouched = false;
+	protected boolean fromApplication = false;
+	private boolean keyBackTouched = false;
 	private URI uri;
 	
 
@@ -176,17 +176,16 @@ public abstract class RosAppActivity extends RosActivity
 
 	@Override
 	protected void onDestroy() {
-		if(startApplication && !backKeyTouched){
+		if(startApplication && !keyBackTouched){
 			stopApp();
 		}
 		super.onDestroy();
-		
 	}
 
 	
 	public boolean onKeyDown(int keyCode,KeyEvent event){
 	  if(keyCode == KeyEvent.KEYCODE_BACK && fromAppChooser){
-		backKeyTouched = true;
+		keyBackTouched = true;
 		Intent intent = new Intent();
 		intent.putExtra(AppManager.PACKAGE + ".robot_app_name", "AppChooser");
 		intent.putExtra("ChooserURI", uri.toString());
@@ -197,7 +196,5 @@ public abstract class RosAppActivity extends RosActivity
 		return false;
 	  }
 	  else return super.onKeyDown(keyCode, event);
-    }
-
-    
+	}
 }

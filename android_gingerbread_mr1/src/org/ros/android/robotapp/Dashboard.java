@@ -1,4 +1,4 @@
-package org.ros.android.util;
+package org.ros.android.robotapp;
 
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
