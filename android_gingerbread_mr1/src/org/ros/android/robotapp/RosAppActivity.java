@@ -4,6 +4,7 @@ package org.ros.android.robotapp;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -37,6 +38,7 @@ public abstract class RosAppActivity extends RosActivity
 	protected boolean fromApplication = false;
 	private boolean keyBackTouched = false;
 	private URI uri;
+	private ProgressDialog startingDialog;
 	
 
     protected void setDashboardResource(int resource) {
@@ -61,6 +63,8 @@ public abstract class RosAppActivity extends RosActivity
 	@Override
     public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            
+
 
     	    if(mainWindowId == 0) {
                 Log.e("RosAndroid", "You must set the dashboard resource ID in your RosAppActivity");
@@ -83,6 +87,9 @@ public abstract class RosAppActivity extends RosActivity
             }
             else {
             	fromAppChooser = true;
+            	 startingDialog =  ProgressDialog.show(this,
+  		               "Starting Robot", "starting robot...", true, false);
+  		    startingDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             }
             
     	    if(dashboard == null) {
@@ -131,6 +138,7 @@ public abstract class RosAppActivity extends RosActivity
 	
     private void startApp() {
         Log.i("RosAndroid", "Starting application");
+        
         AppManager appManager = new AppManager(robotAppName);
         appManager.setFunction("start");
 
@@ -138,6 +146,9 @@ public abstract class RosAppActivity extends RosActivity
         appManager.setStartService(new ServiceResponseListener<StartAppResponse>() {
             @Override
             public void onSuccess(StartAppResponse message) {
+            	if(fromAppChooser == true){
+            		startingDialog.dismiss();
+            	}
                     Log.i("RosAndroid", "App started successfully");
  
             }
@@ -168,6 +179,7 @@ public abstract class RosAppActivity extends RosActivity
         
         nodeMainExecutor.execute(appManager, nodeConfiguration.setNodeName("start_app"));
     }
+    
     
     protected void releaseDashboardNode(){
     	nodeMainExecutor.shutdownNodeMain(dashboard);
