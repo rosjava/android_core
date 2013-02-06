@@ -216,8 +216,9 @@ public abstract class RosAppActivity extends RosActivity {
 		super.onDestroy();
 	}
 
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_BACK && fromAppChooser) {
+	@Override
+	public void onBackPressed() {
+		if (fromAppChooser) {
 			keyBackTouched = true;
 			Intent intent = new Intent();
 			intent.putExtra(AppManager.PACKAGE + ".robot_app_name",
@@ -227,8 +228,7 @@ public abstract class RosAppActivity extends RosActivity {
 			intent.addCategory("android.intent.category.DEFAULT");
 			startActivity(intent);
 			onDestroy();
-			return false;
-		} else
-			return super.onKeyDown(keyCode, event);
+		}
+		super.onBackPressed();
 	}
 }

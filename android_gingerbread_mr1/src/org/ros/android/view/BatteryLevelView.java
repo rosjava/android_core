@@ -42,7 +42,7 @@ public class BatteryLevelView extends View {
 	  }
 	  private void init(Context context) {
 	    silhouette = BitmapFactory.decodeResource(context.getResources(), R.drawable.battery_silhouette);
-	    plug = BitmapFactory.decodeResource(context.getResources(), R.drawable.power_plug);
+	    plug = BitmapFactory.decodeResource(context.getResources(), R.drawable.battery_charging);
 	    green = makePaint( 0x00ff00 );
 	    yellow = makePaint( 0xffff00 );
 	    red = makePaint( 0xff0000 );
@@ -78,9 +78,10 @@ public class BatteryLevelView extends View {
 	    srcRect.set(0, 0, (int)(silhouette.getWidth() * levelPercent / 100f), silhouette.getHeight());
 	    destRect.set(0, 0, (int)(getWidth() * levelPercent / 100f), getHeight());
 	    canvas.drawBitmap(silhouette, srcRect, destRect, fillPaint);
+
 	    if( pluggedIn ) {
 	      srcRect.set(0, 0, plug.getWidth(), plug.getHeight());
-	      destRect.set(getWidth() / 5, getHeight() / 5, (getWidth() * 4) / 5, (getHeight() * 4) / 5);
+	      destRect.set(0,0,getWidth(), getHeight());
 	      canvas.drawBitmap(plug, srcRect, destRect, new Paint());
 	    }
 	  }
