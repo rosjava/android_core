@@ -19,7 +19,9 @@ package org.ros.android.robotapp;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,6 +35,8 @@ import org.ros.address.InetAddressFactory;
 import org.ros.android.RosActivity;
 import org.ros.exception.RemoteException;
 import org.ros.exception.RosRuntimeException;
+import org.ros.namespace.GraphName;
+import org.ros.namespace.NameResolver;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.service.ServiceResponseListener;
@@ -45,7 +49,10 @@ import app_manager.StopAppResponse;
  */
 public abstract class RosAppActivity extends RosActivity {
 
-	private String robotAppName = null, defaultAppName = null;
+	public static final String ROBOT_DESCRIPTION_EXTRA = "org.ros.android.robotapp.RobotDescription";
+	private String robotAppName = null;
+	private String defaultAppName = null;
+	private String defaultRobotName = null;
 	private boolean startApplication = true;
 	private int dashboardResourceId = 0;
 	private int mainWindowId = 0;
@@ -57,6 +64,8 @@ public abstract class RosAppActivity extends RosActivity {
 	private boolean keyBackTouched = false;
 	private URI uri;
 	private ProgressDialog startingDialog;
+	private RobotNameResolver robotNameResolver;
+	private RobotDescription robotDescription;
 
 	protected void setDashboardResource(int resource) {
 		dashboardResourceId = resource;
@@ -64,6 +73,10 @@ public abstract class RosAppActivity extends RosActivity {
 
 	protected void setMainWindowResource(int resource) {
 		mainWindowId = resource;
+	}
+
+	protected void setDefaultRobotName(String name) {
+		defaultRobotName = name;
 	}
 
 	protected void setDefaultAppName(String name) {
@@ -96,6 +109,16 @@ public abstract class RosAppActivity extends RosActivity {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(mainWindowId);
+		
+		robotNameResolver = new RobotNameResolver();
+		if (getIntent().hasExtra(ROBOT_DESCRIPTION_EXTRA)) {
+			robotDescription = (RobotDescription) getIntent()
+					.getSerializableExtra(ROBOT_DESCRIPTION_EXTRA);
+		} 
+		if (defaultRobotName != null) {
+			robotNameResolver.setRobotName(defaultRobotName);
+		}
+		
 		robotAppName = getIntent().getStringExtra(
 				AppManager.PACKAGE + ".robot_app_name");
 		if (robotAppName == null) {
@@ -116,6 +139,8 @@ public abstract class RosAppActivity extends RosActivity {
 							LinearLayout.LayoutParams.WRAP_CONTENT,
 							LinearLayout.LayoutParams.WRAP_CONTENT));
 		}
+
+
 	}
 
 	@Override
@@ -125,9 +150,50 @@ public abstract class RosAppActivity extends RosActivity {
 				.newNonLoopback().getHostAddress(), getMasterUri());
 		nodeMainExecutor.execute(dashboard,
 				nodeConfiguration.setNodeName("dashboard"));
+
+		if (fromAppChooser && robotDescription != null) {
+			robotNameResolver.setRobot(robotDescription);
+		}
+			nodeMainExecutor.execute(robotNameResolver,
+					nodeConfiguration.setNodeName("robotNameResolver"));
+			while (getAppNameSpace() == null) {
+				try {
+					Thread.sleep(100);
+				} catch (Exception e) {
+				}
+			}
+
 		if (startApplication) {
 			startApp();
 		}
+	}
+
+	protected NameResolver getAppNameSpace() {
+		return robotNameResolver.getAppNameSpace();
+	}
+
+	protected NameResolver getRobotNameSpace() {
+		return robotNameResolver.getRobotNameSpace();
+	}
+
+	protected void onAppTerminate() {
+		RosAppActivity.this.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				new AlertDialog.Builder(RosAppActivity.this)
+						.setTitle("App Termination")
+						.setMessage(
+								"The application has terminated on the server, so the client is exiting.")
+						.setCancelable(false)
+						.setNeutralButton("Exit",
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int which) {
+										RosAppActivity.this.finish();
+									}
+								}).create().show();
+			}
+		});
 	}
 
 	@Override
@@ -159,7 +225,8 @@ public abstract class RosAppActivity extends RosActivity {
 	private void startApp() {
 		Log.i("RosAndroid", "Starting application");
 
-		AppManager appManager = new AppManager(robotAppName);
+		AppManager appManager = new AppManager(robotAppName,
+				getRobotNameSpace());
 		appManager.setFunction("start");
 
 		appManager
@@ -185,7 +252,8 @@ public abstract class RosAppActivity extends RosActivity {
 
 	protected void stopApp() {
 		Log.i("RosAndroid", "Stopping application");
-		AppManager appManager = new AppManager(robotAppName);
+		AppManager appManager = new AppManager(robotAppName,
+				getRobotNameSpace());
 		appManager.setFunction("stop");
 
 		appManager
@@ -202,6 +270,10 @@ public abstract class RosAppActivity extends RosActivity {
 				});
 		nodeMainExecutor.execute(appManager,
 				nodeConfiguration.setNodeName("start_app"));
+	}
+	
+	protected void releaseRobotNameResolver() {
+		nodeMainExecutor.shutdownNodeMain(robotNameResolver);
 	}
 
 	protected void releaseDashboardNode() {

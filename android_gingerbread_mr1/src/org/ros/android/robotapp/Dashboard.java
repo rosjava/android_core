@@ -113,7 +113,7 @@ public class Dashboard implements NodeMain {
 	        return createDashboard(dashboardClassName, context);
 	      }
 	    }
-	    return createDashboard("org.ros.android.view.TurtlebotDashboard", context);
+	    return createDashboard("org.ros.android.robotapp.view.TurtlebotDashboard", context);
 	  }
 	@Override
 	public void onError(Node arg0, Throwable arg1) {

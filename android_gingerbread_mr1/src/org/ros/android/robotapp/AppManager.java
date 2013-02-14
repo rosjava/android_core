@@ -22,6 +22,7 @@ import android.util.Log;
 import org.ros.exception.RosRuntimeException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.namespace.GraphName;
+import org.ros.namespace.NameResolver;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.service.ServiceClient;
@@ -43,7 +44,12 @@ import app_manager.StopAppResponse;
 public class AppManager extends AbstractNodeMain {
 
 	static public final String PACKAGE = "org.ros.android";
+	private static final String startTopic = "start_app";
+	private static final String stopTopic = "stop_app";
+	private static final String listTopic = "list_apps";
+
 	private String appName;
+	private NameResolver resolver;
 	private ServiceResponseListener<StartAppResponse> startServiceResponseListener;
 	private ServiceResponseListener<StopAppResponse> stopServiceResponseListener;
 	private ServiceResponseListener<ListAppsResponse> listServiceResponseListener;
@@ -51,8 +57,17 @@ public class AppManager extends AbstractNodeMain {
 	private ConnectedNode connectedNode;
 	private String function;
 
+	public AppManager(final String appName,NameResolver resolver) {
+		this.appName = appName;
+		this.resolver = resolver;
+	}
+	
 	public AppManager(final String appName) {
 		this.appName = appName;
+	}
+	
+	public AppManager(){
+		
 	}
 
 	public void setFunction(String function) {
@@ -75,12 +90,14 @@ public class AppManager extends AbstractNodeMain {
 	}
 
 	public void startApp() {
+		String startTopic = resolver.resolve(this.startTopic).toString();
+
 
 		ServiceClient<StartAppRequest, StartAppResponse> startAppClient;
 		try {
 			Log.i("RosAndroid", "Start app service client created");
 			startAppClient = connectedNode.newServiceClient(
-					"/turtlebot/start_app", StartApp._TYPE);
+					startTopic, StartApp._TYPE);
 		} catch (ServiceNotFoundException e) {
 			throw new RosRuntimeException(e);
 		}
@@ -91,12 +108,14 @@ public class AppManager extends AbstractNodeMain {
 	}
 
 	public void stopApp() {
+		String stopTopic = resolver.resolve(this.stopTopic).toString();
+		
 
 		ServiceClient<StopAppRequest, StopAppResponse> stopAppClient;
 		try {
 			Log.i("RosAndroid", "Stop app service client created");
 			stopAppClient = connectedNode.newServiceClient(
-					"/turtlebot/stop_app", StopApp._TYPE);
+					stopTopic, StopApp._TYPE);
 		} catch (ServiceNotFoundException e) {
 			throw new RosRuntimeException(e);
 		}
@@ -107,12 +126,13 @@ public class AppManager extends AbstractNodeMain {
 	}
 
 	public void listApps() {
-
+		String listTopic = resolver.resolve(this.listTopic).toString();
+	
 		ServiceClient<ListAppsRequest, ListAppsResponse> listAppsClient;
 		try {
 			Log.i("RosAndroid", "List app service client created");
 			listAppsClient = connectedNode.newServiceClient(
-					"/turtlebot/list_apps", ListApps._TYPE);
+					listTopic, ListApps._TYPE);
 		} catch (ServiceNotFoundException e) {
 			throw new RosRuntimeException(e);
 		}

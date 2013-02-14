@@ -32,13 +32,14 @@
  */
 
 
-package org.ros.android.view;
+package org.ros.android.robotapp.view;
 
 import java.util.HashMap;
 import java.util.List;
 
 import org.ros.android.android_gingerbread_mr1.R;
 import org.ros.android.robotapp.Dashboard.DashboardInterface;
+import org.ros.android.view.BatteryLevelView;
 import org.ros.exception.RosException;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
