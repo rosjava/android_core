@@ -42,7 +42,7 @@ public class RobotNameResolver extends AbstractNodeMain {
 
 	@Override
 	public void onStart(final ConnectedNode connectedNode) {
-		if (name == null) {
+		if (currentRobot != null) {
 			name = GraphName.of(currentRobot.getRobotName());
 		}
 			app = name.join(GraphName.of("application"));

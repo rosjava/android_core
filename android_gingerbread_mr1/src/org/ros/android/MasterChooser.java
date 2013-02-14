@@ -81,7 +81,7 @@ public class MasterChooser extends Activity {
     // If the Barcode Scanner returned a string then display that string.
     if (requestCode == 0) {
       if (resultCode == RESULT_OK) {
-        Preconditions.checkState(intent.getStringExtra("SCAN_RESULT_FORMAT").equals("TEXT_TYPE"));
+        Preconditions.checkState(intent.getStringExtra("SCAN_RESULT_FORMAT").equals("QR_CODE"));
         String contents = intent.getStringExtra("SCAN_RESULT");
         uriText.setText(contents);
       }

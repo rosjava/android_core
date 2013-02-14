@@ -54,18 +54,18 @@ public abstract class RosAppActivity extends RosActivity {
 	private String defaultAppName = null;
 	private String defaultRobotName = null;
 	private boolean startApplication = true;
+	private boolean fromAppChooser = false;
+	private boolean keyBackTouched = false;
 	private int dashboardResourceId = 0;
 	private int mainWindowId = 0;
 	private Dashboard dashboard = null;
 	private NodeConfiguration nodeConfiguration;
 	private NodeMainExecutor nodeMainExecutor;
-	private boolean fromAppChooser = false;
-	protected boolean fromApplication = false;
-	private boolean keyBackTouched = false;
 	private URI uri;
 	private ProgressDialog startingDialog;
 	private RobotNameResolver robotNameResolver;
 	private RobotDescription robotDescription;
+	protected boolean fromApplication = false;
 
 	protected void setDashboardResource(int resource) {
 		dashboardResourceId = resource;
@@ -84,6 +84,10 @@ public abstract class RosAppActivity extends RosActivity {
 			startApplication = false;
 		}
 		defaultAppName = name;
+	}
+	
+	protected void setCustomDashboardPath(String path) {
+		dashboard.setCustomDashboardPath(path);
 	}
 
 	protected RosAppActivity(String notificationTicker, String notificationTitle) {
@@ -109,16 +113,16 @@ public abstract class RosAppActivity extends RosActivity {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(mainWindowId);
-		
+
 		robotNameResolver = new RobotNameResolver();
 		if (getIntent().hasExtra(ROBOT_DESCRIPTION_EXTRA)) {
 			robotDescription = (RobotDescription) getIntent()
 					.getSerializableExtra(ROBOT_DESCRIPTION_EXTRA);
-		} 
+		}
 		if (defaultRobotName != null) {
 			robotNameResolver.setRobotName(defaultRobotName);
 		}
-		
+
 		robotAppName = getIntent().getStringExtra(
 				AppManager.PACKAGE + ".robot_app_name");
 		if (robotAppName == null) {
@@ -140,7 +144,6 @@ public abstract class RosAppActivity extends RosActivity {
 							LinearLayout.LayoutParams.WRAP_CONTENT));
 		}
 
-
 	}
 
 	@Override
@@ -148,20 +151,22 @@ public abstract class RosAppActivity extends RosActivity {
 		this.nodeMainExecutor = nodeMainExecutor;
 		nodeConfiguration = NodeConfiguration.newPublic(InetAddressFactory
 				.newNonLoopback().getHostAddress(), getMasterUri());
-		nodeMainExecutor.execute(dashboard,
-				nodeConfiguration.setNodeName("dashboard"));
+
 
 		if (fromAppChooser && robotDescription != null) {
 			robotNameResolver.setRobot(robotDescription);
 		}
-			nodeMainExecutor.execute(robotNameResolver,
-					nodeConfiguration.setNodeName("robotNameResolver"));
-			while (getAppNameSpace() == null) {
-				try {
-					Thread.sleep(100);
-				} catch (Exception e) {
-				}
+		nodeMainExecutor.execute(robotNameResolver,
+				nodeConfiguration.setNodeName("robotNameResolver"));
+		while (getAppNameSpace() == null) {
+			try {
+				Thread.sleep(100);
+			} catch (Exception e) {
 			}
+		}
+		dashboard.setRobotName(getRobotNameSpace().getNamespace().toString());
+		nodeMainExecutor.execute(dashboard,
+				nodeConfiguration.setNodeName("dashboard"));
 
 		if (startApplication) {
 			startApp();
@@ -271,7 +276,7 @@ public abstract class RosAppActivity extends RosActivity {
 		nodeMainExecutor.execute(appManager,
 				nodeConfiguration.setNodeName("start_app"));
 	}
-	
+
 	protected void releaseRobotNameResolver() {
 		nodeMainExecutor.shutdownNodeMain(robotNameResolver);
 	}
