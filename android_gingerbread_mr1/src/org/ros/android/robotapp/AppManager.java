@@ -16,18 +16,23 @@
 
 package org.ros.android.robotapp;
 
+import java.util.ArrayList;
 
 import android.util.Log;
 
+import org.ros.exception.RosException;
 import org.ros.exception.RosRuntimeException;
 import org.ros.exception.ServiceNotFoundException;
+import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseListener;
+import org.ros.node.topic.Subscriber;
 
+import app_manager.AppList;
 import app_manager.ListApps;
 import app_manager.ListAppsRequest;
 import app_manager.ListAppsResponse;
@@ -53,25 +58,37 @@ public class AppManager extends AbstractNodeMain {
 	private ServiceResponseListener<StartAppResponse> startServiceResponseListener;
 	private ServiceResponseListener<StopAppResponse> stopServiceResponseListener;
 	private ServiceResponseListener<ListAppsResponse> listServiceResponseListener;
-
+	private ArrayList<Subscriber<AppList>> subscriptions;
+	private Subscriber<AppList> subscriber;
+	
 	private ConnectedNode connectedNode;
-	private String function;
+	private String function = null;
 
-	public AppManager(final String appName,NameResolver resolver) {
+	public AppManager(final String appName, NameResolver resolver) {
 		this.appName = appName;
 		this.resolver = resolver;
 	}
-	
+
 	public AppManager(final String appName) {
 		this.appName = appName;
 	}
-	
-	public AppManager(){
-		
+
+	public AppManager() {
+
+	}
+
+	public void addAppListCallback(MessageListener<AppList> callback)
+			throws RosException {
+		subscriber = connectedNode.newSubscriber(resolver.resolve("app_list"),"app_manager/AppList");
+		subscriber.addMessageListener(callback);
 	}
 
 	public void setFunction(String function) {
 		this.function = function;
+	}
+	
+	public void setAppName(String appName) {
+		this.appName = appName;
 	}
 
 	public void setStartService(
@@ -92,12 +109,11 @@ public class AppManager extends AbstractNodeMain {
 	public void startApp() {
 		String startTopic = resolver.resolve(this.startTopic).toString();
 
-
 		ServiceClient<StartAppRequest, StartAppResponse> startAppClient;
 		try {
 			Log.i("RosAndroid", "Start app service client created");
-			startAppClient = connectedNode.newServiceClient(
-					startTopic, StartApp._TYPE);
+			startAppClient = connectedNode.newServiceClient(startTopic,
+					StartApp._TYPE);
 		} catch (ServiceNotFoundException e) {
 			throw new RosRuntimeException(e);
 		}
@@ -109,13 +125,12 @@ public class AppManager extends AbstractNodeMain {
 
 	public void stopApp() {
 		String stopTopic = resolver.resolve(this.stopTopic).toString();
-		
 
 		ServiceClient<StopAppRequest, StopAppResponse> stopAppClient;
 		try {
 			Log.i("RosAndroid", "Stop app service client created");
-			stopAppClient = connectedNode.newServiceClient(
-					stopTopic, StopApp._TYPE);
+			stopAppClient = connectedNode.newServiceClient(stopTopic,
+					StopApp._TYPE);
 		} catch (ServiceNotFoundException e) {
 			throw new RosRuntimeException(e);
 		}
@@ -127,12 +142,12 @@ public class AppManager extends AbstractNodeMain {
 
 	public void listApps() {
 		String listTopic = resolver.resolve(this.listTopic).toString();
-	
+
 		ServiceClient<ListAppsRequest, ListAppsResponse> listAppsClient;
 		try {
-			Log.i("RosAndroid", "List app service client created");
-			listAppsClient = connectedNode.newServiceClient(
-					listTopic, ListApps._TYPE);
+			Log.i("RosAndroid", "List app service client created" + listTopic);
+			listAppsClient = connectedNode.newServiceClient(listTopic,
+					ListApps._TYPE);
 		} catch (ServiceNotFoundException e) {
 			throw new RosRuntimeException(e);
 		}

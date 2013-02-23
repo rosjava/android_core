@@ -57,7 +57,7 @@ public class Dashboard implements NodeMain {
 	}
 
 	private static final String turtlebotDashboardPath = "org.ros.android.robotapp.view.TurtlebotDashboard";
-	private static final String pr2DashboardPath = "org.ros.android.robotapp.view.Pr2";
+	private static final String pr2DashboardPath = "org.ros.android.robotapp.view.Pr2Dashboard";
 
 	private DashboardInterface dashboard;
 	private Activity activity;

@@ -85,7 +85,7 @@ public abstract class RosAppActivity extends RosActivity {
 		}
 		defaultAppName = name;
 	}
-	
+
 	protected void setCustomDashboardPath(String path) {
 		dashboard.setCustomDashboardPath(path);
 	}
@@ -152,7 +152,6 @@ public abstract class RosAppActivity extends RosActivity {
 		nodeConfiguration = NodeConfiguration.newPublic(InetAddressFactory
 				.newNonLoopback().getHostAddress(), getMasterUri());
 
-
 		if (fromAppChooser && robotDescription != null) {
 			robotNameResolver.setRobot(robotDescription);
 		}
@@ -168,7 +167,12 @@ public abstract class RosAppActivity extends RosActivity {
 		nodeMainExecutor.execute(dashboard,
 				nodeConfiguration.setNodeName("dashboard"));
 
-		if (startApplication) {
+		if (fromAppChooser && startApplication) {
+			if (getIntent().getBooleanExtra("runningNodes", false)) {
+				restartApp();
+			}
+			else startApp();
+		} else if (startApplication) {
 			startApp();
 		}
 	}
@@ -227,6 +231,34 @@ public abstract class RosAppActivity extends RosActivity {
 
 	}
 
+	private void restartApp() {
+		Log.i("RosAndroid", "Restarting application");
+		AppManager appManager = new AppManager("*", getRobotNameSpace());
+		appManager.setFunction("stop");
+
+		appManager
+				.setStopService(new ServiceResponseListener<StopAppResponse>() {
+					@Override
+					public void onSuccess(StopAppResponse message) {
+						Log.i("RosAndroid", "App stopped successfully");
+						try {
+							Thread.sleep(1000);
+						} catch (Exception e) {
+
+						}
+						startApp();
+					}
+
+					@Override
+					public void onFailure(RemoteException e) {
+						Log.e("RosAndroid", "App failed to stop!");
+					}
+				});
+		nodeMainExecutor.execute(appManager,
+				nodeConfiguration.setNodeName("start_app"));
+
+	}
+
 	private void startApp() {
 		Log.i("RosAndroid", "Starting application");
 
@@ -238,11 +270,13 @@ public abstract class RosAppActivity extends RosActivity {
 				.setStartService(new ServiceResponseListener<StartAppResponse>() {
 					@Override
 					public void onSuccess(StartAppResponse message) {
-						if (fromAppChooser == true) {
-							startingDialog.dismiss();
-						}
-						Log.i("RosAndroid", "App started successfully");
-
+						if (message.getStarted()) {
+							if (fromAppChooser == true) {
+								startingDialog.dismiss();
+							}
+							Log.i("RosAndroid", "App started successfully");
+						} else
+							Log.e("RosAndroid", "App failed to start!");
 					}
 
 					@Override
