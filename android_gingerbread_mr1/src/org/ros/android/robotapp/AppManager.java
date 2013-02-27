@@ -142,6 +142,8 @@ public class AppManager extends AbstractNodeMain {
 
 	public void listApps() {
 		String listTopic = resolver.resolve(this.listTopic).toString();
+		
+		Log.v("debugPR2",listTopic);
 
 		ServiceClient<ListAppsRequest, ListAppsResponse> listAppsClient;
 		try {

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              >
+  <!-- Mode button (robot on/off) with "waiting" spinner. -->
+  <FrameLayout android:layout_width="50dp" android:layout_height="50dp">
+    <ImageButton android:layout_width="50dp" android:layout_height="50dp" android:scaleType="fitCenter" android:padding="0dp"
+                 android:cropToPadding="false"
+                 android:gravity="center"
+                 android:src="@drawable/gear"
+                 android:id="@+id/pr2_mode_button"/>
+    <ProgressBar android:layout_width="50dp"
+                 android:layout_height="50dp"
+                 android:padding="10dp"
+                 android:id="@+id/pr2_mode_waiting_spinner"/>
+  </FrameLayout>
+  <!-- E stops -->
+  <FrameLayout android:layout_width="50dp" android:layout_height="50dp">
+    <ImageView android:layout_width="50dp" android:layout_height="50dp" android:scaleType="fitCenter" android:padding="0dp"
+                 android:cropToPadding="false"
+                 android:gravity="center"
+                 android:src="@drawable/physical_runstop"
+                 android:id="@+id/pr2_physical_estop"/>
+  </FrameLayout>
+  <FrameLayout android:layout_width="50dp" android:layout_height="50dp">
+    <ImageView android:layout_width="50dp" android:layout_height="50dp" android:scaleType="fitCenter" android:padding="0dp"
+                 android:cropToPadding="false"
+                 android:gravity="center"
+                 android:src="@drawable/wireless_runstop"
+                 android:id="@+id/pr2_wireless_estop"/>
+  </FrameLayout>
+  <!-- Robot battery level indicator. -->
+  <LinearLayout android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="5dp">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp"
+              android:text="Robot"/>
+    <org.ros.android.view.BatteryLevelView android:layout_width="40dp"
+                                        android:layout_height="25dp"
+                                        android:id="@+id/pr2_robot_battery"/>
+  </LinearLayout>
+</LinearLayout>

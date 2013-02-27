@@ -126,9 +126,9 @@ public class Dashboard implements NodeMain {
 	private static DashboardInterface createDashboard(Context context) {
 		if (customDashboardPath != null) {
 			return createDashboard(customDashboardPath, context);
-		} else if (robotName.equals("/turtlebot")) {
+		} else if (robotName.equals("turtlebot")) {
 			return createDashboard(turtlebotDashboardPath, context);
-		} else if (robotName.equals("/pr2")) {
+		} else if (robotName.equals("pr2")) {
 			return createDashboard(pr2DashboardPath, context);
 		}
 

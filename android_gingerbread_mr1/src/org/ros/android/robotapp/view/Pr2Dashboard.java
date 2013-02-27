@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -103,6 +104,7 @@ public class Pr2Dashboard extends LinearLayout implements DashboardInterface {
 	public void onStart(ConnectedNode connectedNode) {
 		stop();
 		this.connectedNode = connectedNode;
+		Log.v("debugPR2", "pr2Dashboard-connection");
 		try {
 			dashboardSubscriber = connectedNode.newSubscriber("dashboard_agg",
 					"pr2_msgs/DashboardState");
@@ -110,6 +112,7 @@ public class Pr2Dashboard extends LinearLayout implements DashboardInterface {
 					.addMessageListener(new MessageListener<DashboardState>() {
 						@Override
 						public void onNewMessage(final DashboardState msg) {
+							Log.v("debugPR2", "pr2Dashboard-getMessage");
 							Pr2Dashboard.this.post(new Runnable() {
 								@Override
 								public void run() {
@@ -118,6 +121,7 @@ public class Pr2Dashboard extends LinearLayout implements DashboardInterface {
 							});
 						}
 					});
+			Log.v("debugPR2", "subscribe success");
 			// NameResolver resolver =
 			// connectedNode.getResolver().createResolver(GraphName.of("/"));
 		} catch (Exception ex) {
@@ -138,7 +142,8 @@ public class Pr2Dashboard extends LinearLayout implements DashboardInterface {
 	 * thread.
 	 */
 	private void handleDashboardState(DashboardState msg) {
-		robotBattery.setBatteryPercent((int) msg.getPowerState().getRelativeCapacity());
+		robotBattery.setBatteryPercent((int) msg.getPowerState()
+				.getRelativeCapacity());
 		robotBattery.setPluggedIn(msg.getPowerState().getACPresent() != 0);
 		if (msg.getPowerBoardState().getWirelessStop() == false) {
 			physicalEstop.setColorFilter(Color.GRAY);
@@ -151,17 +156,19 @@ public class Pr2Dashboard extends LinearLayout implements DashboardInterface {
 				physicalEstop.setColorFilter(Color.RED);
 			}
 		}
+		Log.v("debugPR2", "pr2Dashboard-state-update");
 		Pr2RobotState previous_state = state;
 		boolean breaker_state = true;
 		if (msg.getPowerBoardStateValid() == true
 				&& msg.getPowerStateValid() == true) {
-			for (int i = 0; i < msg.getPowerBoardState().getCircuitState().capacity(); i++) {
+			for (int i = 0; i < msg.getPowerBoardState().getCircuitState()
+					.readableBytes(); i++) {
 				if (msg.getPowerBoardState().getCircuitState().getInt(i) != 3) { // Breaker
-																	// invalid
 					breaker_state = false;
 				}
 			}
-			nBreakers = msg.getPowerBoardState().getCircuitState().capacity();
+			nBreakers = msg.getPowerBoardState().getCircuitState()
+					.readableBytes();
 			serialNumber = msg.getPowerBoardState().getSerialNum();
 		} else {
 			breaker_state = false;
@@ -193,119 +200,162 @@ public class Pr2Dashboard extends LinearLayout implements DashboardInterface {
 	}
 
 	private void onModeButtonClicked() {
-	    ServiceClient<EmptyRequest, EmptyResponse> motorServiceClient = null;
-	    ServiceClient<PowerBoardCommandRequest, PowerBoardCommandResponse> modeServiceClient = null;
-	    EmptyRequest motorRequest = connectedNode.getTopicMessageFactory().newFromType(EmptyRequest._TYPE);
-	    PowerBoardCommandRequest modeRequest;
-	    switch (state) {
-	    case BREAKERS_OUT:
-	      waitingState = Pr2RobotState.MOTORS_OUT;
-	      setModeWaiting(true);
-	      clickOnTransition = true;
-	      //Send reset to the breakers.
-	      for (int i = 0; i < nBreakers; i++) {
-	                modeRequest = connectedNode.getTopicMessageFactory().newFromType(PowerBoardCommandRequest._TYPE);
-	        modeRequest.setBreakerNumber(i);
-	        modeRequest.setCommand("start");
-	        modeRequest.setSerialNumber((int) serialNumber);
-	        try {
-	          modeServiceClient =
-	          connectedNode.newServiceClient("power_board/control", "pr2_power_board/PowerBoardCommand");
-	        } catch( ServiceNotFoundException ex ) {
-	          this.connectedNode = null;
-	          //throw( new RosException( ex.toString() ));
-	        }
-	        modeServiceClient.call(modeRequest, new ServiceResponseListener<PowerBoardCommandResponse>() {
-	            @Override
-	            public void onSuccess(PowerBoardCommandResponse message) { } //Diagnostics will update.
-	            @Override
-	            public void onFailure(RemoteException ex) {
-	              final Exception e = ex;
-	              Pr2Dashboard.this.post(new Runnable() {
-	                  public void run() {
-	                    alertBuilder.setMessage("Cannot reset the breakers: " + e.toString()).show();
-	                  }});
-	            }});
-	      }
-	      break;
-	    case MOTORS_OUT:
-	      waitingState = Pr2RobotState.WORKING;
-	      setModeWaiting(true);
-	      //Send reset to the motors.
-	      try {
-	        motorServiceClient =
-	          connectedNode.newServiceClient("pr2_etherCAT/reset_motors", "std_srvs/Empty");
-	      } catch( ServiceNotFoundException ex ) {
-	        this.connectedNode = null;
-	        //throw( new RosException( ex.toString() ));
-	      }
-	      motorServiceClient.call(motorRequest, new ServiceResponseListener<EmptyResponse>() {
-	          @Override
-	          public void onSuccess(EmptyResponse message) { } //Diagnostics will update.
-	          @Override
-	          public void onFailure(RemoteException ex) {
-	            final Exception e = ex;
-	            Pr2Dashboard.this.post(new Runnable() {
-	                public void run() {
-	                  alertBuilder.setMessage("Cannot reset the motors: " + e.toString()).show();
-	                }});
-	          }});
-	      break;
-	    case WORKING:
-	      setModeWaiting(true);
-	      waitingState = Pr2RobotState.BREAKERS_OUT;
-	      //Stop the breakers
-	      for (int i = 0; i < nBreakers; i++) {
-	                modeRequest = connectedNode.getTopicMessageFactory().newFromType(PowerBoardCommandRequest._TYPE);
-	        modeRequest.setBreakerNumber(i);
-	        modeRequest.setCommand("stop");
-	        modeRequest.setSerialNumber((int) serialNumber);
-	        try {
-	          modeServiceClient =
-	            connectedNode.newServiceClient("power_board/control", "pr2_power_board/PowerBoardCommand");
-	        } catch( ServiceNotFoundException ex ) {
-	          this.connectedNode = null;
-	          //throw( new RosException( ex.toString() ));
-	        }
-	        modeServiceClient.call(modeRequest, new ServiceResponseListener<PowerBoardCommandResponse>() {
-	            @Override
-	            public void onSuccess(PowerBoardCommandResponse message) { } //Diagnostics will update.
-	            @Override
-	            public void onFailure(RemoteException ex) {
-	              final Exception e = ex;
-	              Pr2Dashboard.this.post(new Runnable() {
-	                  public void run() {
-	                    alertBuilder.setMessage("Cannot reset the breakers: " + e.toString()).show();
-	                  }});
-	            }});
-	      }
-	      //Send halt to the motors.
-	      try {
-	        motorServiceClient =
-	          connectedNode.newServiceClient("pr2_etherCAT/halt_motors", "std_srvs/Empty");
-	      } catch( ServiceNotFoundException ex ) {
-	        this.connectedNode = null;
-	        //throw( new RosException( ex.toString() ));
-	      }
-	      motorServiceClient.call(motorRequest, new ServiceResponseListener<std_srvs.EmptyResponse>() {
-	          @Override
-	          public void onSuccess(EmptyResponse message) { } //Diagnostics will update.
-	          @Override
-	          public void onFailure(RemoteException ex) {
-	            final Exception e = ex;
-	            Pr2Dashboard.this.post(new Runnable() {
-	                public void run() {
-	                  alertBuilder.setMessage("Cannot reset the motors: " + e.toString()).show();
-	                }});
-	          }});
-	      break;
-	    default:
-	      Pr2Dashboard.this.post(new Runnable() {
-	          public void run() {
-	            alertBuilder.setMessage("Robot is in an unknown or invalid state. Please wait and try again.").show();
-	          }});
-	      break;
-	    }
+		ServiceClient<EmptyRequest, EmptyResponse> motorServiceClient = null;
+		ServiceClient<PowerBoardCommandRequest, PowerBoardCommandResponse> modeServiceClient = null;
+		EmptyRequest motorRequest = connectedNode.getTopicMessageFactory()
+				.newFromType(EmptyRequest._TYPE);
+		PowerBoardCommandRequest modeRequest;
+		switch (state) {
+		case BREAKERS_OUT:
+			waitingState = Pr2RobotState.MOTORS_OUT;
+			setModeWaiting(true);
+			clickOnTransition = true;
+			// Send reset to the breakers.
+			for (int i = 0; i < nBreakers; i++) {
+				modeRequest = connectedNode.getTopicMessageFactory()
+						.newFromType(PowerBoardCommandRequest._TYPE);
+				modeRequest.setBreakerNumber(i);
+				modeRequest.setCommand("start");
+				modeRequest.setSerialNumber((int) serialNumber);
+				try {
+					modeServiceClient = connectedNode.newServiceClient(
+							"power_board/control",
+							"pr2_power_board/PowerBoardCommand");
+				} catch (ServiceNotFoundException ex) {
+					this.connectedNode = null;
+					// throw( new RosException( ex.toString() ));
+				}
+				modeServiceClient
+						.call(modeRequest,
+								new ServiceResponseListener<PowerBoardCommandResponse>() {
+									@Override
+									public void onSuccess(
+											PowerBoardCommandResponse message) {
+									} // Diagnostics will update.
+
+									@Override
+									public void onFailure(RemoteException ex) {
+										final Exception e = ex;
+										Pr2Dashboard.this.post(new Runnable() {
+											public void run() {
+												alertBuilder.setMessage(
+														"Cannot reset the breakers: "
+																+ e.toString())
+														.show();
+											}
+										});
+									}
+								});
+			}
+			break;
+		case MOTORS_OUT:
+			waitingState = Pr2RobotState.WORKING;
+			setModeWaiting(true);
+			// Send reset to the motors.
+			try {
+				motorServiceClient = connectedNode.newServiceClient(
+						"pr2_etherCAT/reset_motors", "std_srvs/Empty");
+			} catch (ServiceNotFoundException ex) {
+				this.connectedNode = null;
+				// throw( new RosException( ex.toString() ));
+			}
+			motorServiceClient.call(motorRequest,
+					new ServiceResponseListener<EmptyResponse>() {
+						@Override
+						public void onSuccess(EmptyResponse message) {
+						} // Diagnostics will update.
+
+						@Override
+						public void onFailure(RemoteException ex) {
+							final Exception e = ex;
+							Pr2Dashboard.this.post(new Runnable() {
+								public void run() {
+									alertBuilder.setMessage(
+											"Cannot reset the motors: "
+													+ e.toString()).show();
+								}
+							});
+						}
+					});
+			break;
+		case WORKING:
+			setModeWaiting(true);
+			waitingState = Pr2RobotState.BREAKERS_OUT;
+			// Stop the breakers
+			for (int i = 0; i < nBreakers; i++) {
+				modeRequest = connectedNode.getTopicMessageFactory()
+						.newFromType(PowerBoardCommandRequest._TYPE);
+				modeRequest.setBreakerNumber(i);
+				modeRequest.setCommand("stop");
+				modeRequest.setSerialNumber((int) serialNumber);
+				try {
+					modeServiceClient = connectedNode.newServiceClient(
+							"power_board/control",
+							"pr2_power_board/PowerBoardCommand");
+				} catch (ServiceNotFoundException ex) {
+					this.connectedNode = null;
+					// throw( new RosException( ex.toString() ));
+				}
+				modeServiceClient
+						.call(modeRequest,
+								new ServiceResponseListener<PowerBoardCommandResponse>() {
+									@Override
+									public void onSuccess(
+											PowerBoardCommandResponse message) {
+									} // Diagnostics will update.
+
+									@Override
+									public void onFailure(RemoteException ex) {
+										final Exception e = ex;
+										Pr2Dashboard.this.post(new Runnable() {
+											public void run() {
+												alertBuilder.setMessage(
+														"Cannot reset the breakers: "
+																+ e.toString())
+														.show();
+											}
+										});
+									}
+								});
+			}
+			// Send halt to the motors.
+			try {
+				motorServiceClient = connectedNode.newServiceClient(
+						"pr2_etherCAT/halt_motors", "std_srvs/Empty");
+			} catch (ServiceNotFoundException ex) {
+				this.connectedNode = null;
+				// throw( new RosException( ex.toString() ));
+			}
+			motorServiceClient.call(motorRequest,
+					new ServiceResponseListener<std_srvs.EmptyResponse>() {
+						@Override
+						public void onSuccess(EmptyResponse message) {
+						} // Diagnostics will update.
+
+						@Override
+						public void onFailure(RemoteException ex) {
+							final Exception e = ex;
+							Pr2Dashboard.this.post(new Runnable() {
+								public void run() {
+									alertBuilder.setMessage(
+											"Cannot reset the motors: "
+													+ e.toString()).show();
+								}
+							});
+						}
+					});
+			break;
+		default:
+			Pr2Dashboard.this.post(new Runnable() {
+				public void run() {
+					alertBuilder
+							.setMessage(
+									"Robot is in an unknown or invalid state. Please wait and try again.")
+							.show();
+				}
+			});
+			break;
+		}
 	}
 
 	private void setModeWaiting(final boolean waiting) {

@@ -14,6 +14,7 @@ public class RobotNameResolver extends AbstractNodeMain {
 	private NameResolver robotNameResolver;
 	private GraphName name;
 	private GraphName app;
+	private ConnectedNode connectedNode;
 
 	public RobotNameResolver() {
 	}
@@ -30,6 +31,10 @@ public class RobotNameResolver extends AbstractNodeMain {
 	public void setRobotName(String name) {
 		this.name = GraphName.of(name);
 	}
+	
+	public void resetRobotName(String name) {
+		robotNameResolver = connectedNode.getResolver().newChild(name);
+	}
 
 
 	protected NameResolver getAppNameSpace() {
@@ -42,6 +47,7 @@ public class RobotNameResolver extends AbstractNodeMain {
 
 	@Override
 	public void onStart(final ConnectedNode connectedNode) {
+		this.connectedNode = connectedNode;
 		if (currentRobot != null) {
 			name = GraphName.of(currentRobot.getRobotName());
 		}

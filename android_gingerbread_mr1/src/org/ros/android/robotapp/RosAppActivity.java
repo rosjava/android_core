@@ -63,8 +63,8 @@ public abstract class RosAppActivity extends RosActivity {
 	private NodeMainExecutor nodeMainExecutor;
 	private URI uri;
 	private ProgressDialog startingDialog;
-	private RobotNameResolver robotNameResolver;
-	private RobotDescription robotDescription;
+	protected RobotNameResolver robotNameResolver;
+	protected RobotDescription robotDescription;
 	protected boolean fromApplication = false;
 
 	protected void setDashboardResource(int resource) {
@@ -115,10 +115,7 @@ public abstract class RosAppActivity extends RosActivity {
 		setContentView(mainWindowId);
 
 		robotNameResolver = new RobotNameResolver();
-		if (getIntent().hasExtra(ROBOT_DESCRIPTION_EXTRA)) {
-			robotDescription = (RobotDescription) getIntent()
-					.getSerializableExtra(ROBOT_DESCRIPTION_EXTRA);
-		}
+
 		if (defaultRobotName != null) {
 			robotNameResolver.setRobotName(defaultRobotName);
 		}
@@ -152,8 +149,9 @@ public abstract class RosAppActivity extends RosActivity {
 		nodeConfiguration = NodeConfiguration.newPublic(InetAddressFactory
 				.newNonLoopback().getHostAddress(), getMasterUri());
 
-		if (fromAppChooser && robotDescription != null) {
-			robotNameResolver.setRobot(robotDescription);
+		if (getIntent().hasExtra(ROBOT_DESCRIPTION_EXTRA)) {
+			robotDescription = (RobotDescription) getIntent()
+					.getSerializableExtra(ROBOT_DESCRIPTION_EXTRA);
 		}
 		nodeMainExecutor.execute(robotNameResolver,
 				nodeConfiguration.setNodeName("robotNameResolver"));
@@ -163,15 +161,23 @@ public abstract class RosAppActivity extends RosActivity {
 			} catch (Exception e) {
 			}
 		}
-		dashboard.setRobotName(getRobotNameSpace().getNamespace().toString());
+		if (robotDescription != null) {
+			if (fromAppChooser) {
+				robotNameResolver.setRobot(robotDescription);
+			}
+			dashboard.setRobotName(robotDescription.getRobotType());
+		} else {
+			dashboard.setRobotName(getRobotNameSpace().getNamespace()
+					.toString());
+		}
 		nodeMainExecutor.execute(dashboard,
 				nodeConfiguration.setNodeName("dashboard"));
 
 		if (fromAppChooser && startApplication) {
 			if (getIntent().getBooleanExtra("runningNodes", false)) {
 				restartApp();
-			}
-			else startApp();
+			} else
+				startApp();
 		} else if (startApplication) {
 			startApp();
 		}
