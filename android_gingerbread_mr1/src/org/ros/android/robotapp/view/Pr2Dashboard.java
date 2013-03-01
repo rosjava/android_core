@@ -104,7 +104,6 @@ public class Pr2Dashboard extends LinearLayout implements DashboardInterface {
 	public void onStart(ConnectedNode connectedNode) {
 		stop();
 		this.connectedNode = connectedNode;
-		Log.v("debugPR2", "pr2Dashboard-connection");
 		try {
 			dashboardSubscriber = connectedNode.newSubscriber("dashboard_agg",
 					"pr2_msgs/DashboardState");
@@ -112,7 +111,6 @@ public class Pr2Dashboard extends LinearLayout implements DashboardInterface {
 					.addMessageListener(new MessageListener<DashboardState>() {
 						@Override
 						public void onNewMessage(final DashboardState msg) {
-							Log.v("debugPR2", "pr2Dashboard-getMessage");
 							Pr2Dashboard.this.post(new Runnable() {
 								@Override
 								public void run() {
@@ -121,7 +119,6 @@ public class Pr2Dashboard extends LinearLayout implements DashboardInterface {
 							});
 						}
 					});
-			Log.v("debugPR2", "subscribe success");
 			// NameResolver resolver =
 			// connectedNode.getResolver().createResolver(GraphName.of("/"));
 		} catch (Exception ex) {
@@ -156,7 +153,6 @@ public class Pr2Dashboard extends LinearLayout implements DashboardInterface {
 				physicalEstop.setColorFilter(Color.RED);
 			}
 		}
-		Log.v("debugPR2", "pr2Dashboard-state-update");
 		Pr2RobotState previous_state = state;
 		boolean breaker_state = true;
 		if (msg.getPowerBoardStateValid() == true
@@ -370,7 +366,5 @@ public class Pr2Dashboard extends LinearLayout implements DashboardInterface {
 
 	@Override
 	public void onShutdown(Node node) {
-		// TODO Auto-generated method stub
-
 	}
 }
