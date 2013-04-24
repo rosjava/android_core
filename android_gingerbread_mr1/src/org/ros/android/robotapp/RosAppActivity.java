@@ -153,14 +153,6 @@ public abstract class RosAppActivity extends RosActivity {
 			robotDescription = (RobotDescription) getIntent()
 					.getSerializableExtra(ROBOT_DESCRIPTION_EXTRA);
 		}
-		nodeMainExecutor.execute(robotNameResolver,
-				nodeConfiguration.setNodeName("robotNameResolver"));
-		while (getAppNameSpace() == null) {
-			try {
-				Thread.sleep(100);
-			} catch (Exception e) {
-			}
-		}
 		if (robotDescription != null) {
 			if (fromAppChooser) {
 				robotNameResolver.setRobot(robotDescription);
@@ -169,10 +161,20 @@ public abstract class RosAppActivity extends RosActivity {
 		} else {
 			dashboard.setRobotName(getRobotNameSpace().getNamespace()
 					.toString());
+		}		
+		nodeMainExecutor.execute(robotNameResolver,
+				nodeConfiguration.setNodeName("robotNameResolver"));
+		while (getAppNameSpace() == null) {
+			try {
+				Thread.sleep(100);
+			} catch (Exception e) {
+			}
 		}
+		
 		nodeMainExecutor.execute(dashboard,
 				nodeConfiguration.setNodeName("dashboard"));
 
+	
 		if (fromAppChooser && startApplication) {
 			if (getIntent().getBooleanExtra("runningNodes", false)) {
 				restartApp();
