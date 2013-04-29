@@ -14,8 +14,25 @@
  * the License.
  */
 
-include 'android_gingerbread_mr1', 'android_tutorial_pubsub', 'android_honeycomb_mr2',
-        'android_tutorial_teleop', 'android_tutorial_hokuyo', 'android_acm_serial',
-        'android_tutorial_camera', 'android_tutorial_image_transport',
-        'android_tutorial_map_viewer', 'android_benchmarks', 'docs'
+group 'ros.android_core'
+version = '0.0.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+repositories {
+  mavenLocal()
+  maven {
+    url 'http://robotbrains.hideho.org/nexus/content/groups/ros-public'
+  }
+}
+
+dependencies {
+  compile 'ros.rosjava_core:rosjava:0.0.0-SNAPSHOT'
+  testCompile 'junit:junit:4.8.2'
+}
 
