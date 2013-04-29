@@ -1,9 +1,0 @@
-<package>
-  <description brief="android_image_transport_tutorial">
-    android_image_transport_tutorial
-  </description>
-  <author>Damon Kohler</author>
-  <license>Apache 2.0</license>
-  <review status="unreviewed" notes="" />
-  <url>http://ros.org/wiki/android_image_transport_tutorial</url>
-</package>

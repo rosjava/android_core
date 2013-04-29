@@ -1,9 +1,0 @@
-<package>
-  <description brief="android_camera_tutorial">
-     android_camera_tutorial
-  </description>
-  <author>Damon Kohler (damonkohler@google.com)</author>
-  <license>Apache 2.0</license>
-  <review status="unreviewed" notes="" />
-  <url>http://ros.org/wiki/android_camera_tutorial</url>
-</package>
