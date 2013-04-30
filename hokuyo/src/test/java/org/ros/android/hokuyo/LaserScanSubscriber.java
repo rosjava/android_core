@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.hokuyo;
+package org.ros.android.hokuyo;
 
 import static org.junit.Assert.assertEquals;
 

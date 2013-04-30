@@ -14,17 +14,19 @@
  * the License.
  */
 
-package org.ros.hokuyo.scip20;
+package org.ros.android.hokuyo.scip20;
 
 import com.google.common.base.Preconditions;
+
+import org.ros.android.hokuyo.LaserScan;
+import org.ros.android.hokuyo.LaserScanListener;
+import org.ros.android.hokuyo.LaserScannerConfiguration;
+import org.ros.android.hokuyo.LaserScannerDevice;
+
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RosRuntimeException;
-import org.ros.hokuyo.LaserScan;
-import org.ros.hokuyo.LaserScanListener;
-import org.ros.hokuyo.LaserScannerConfiguration;
-import org.ros.hokuyo.LaserScannerDevice;
 import org.ros.message.Time;
 import org.ros.time.RemoteUptimeClock;
 import org.ros.time.TimeProvider;

@@ -14,25 +14,28 @@
  * the License.
  */
 
-package org.ros.hokuyo.scip20;
+package org.ros.android.hokuyo;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TmException extends RuntimeException {
+public interface LaserScannerDevice {
 
-  public TmException(String status) {
-    super(getMessage(status));
-  }
+  /**
+   * Starts continuously scanning.
+   * 
+   * @param listener
+   *          called for each new scan
+   */
+  void startScanning(LaserScanListener listener);
 
-  private static String getMessage(String status) {
-    if (status.equals("01")) {
-      return "Invalid control code.";
-    }
-    if (status.equals("04")) {
-      return "Adjust mode is off when requested for time.";
-    }
+  /**
+   * Shuts down the device and releases any shared resources.
+   */
+  void shutdown();
 
-    return "Unknown status code: " + status;
-  }
+  /**
+   * @return the device configuration
+   */
+  LaserScannerConfiguration getConfiguration();
 }

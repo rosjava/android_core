@@ -14,10 +14,18 @@
  * the License.
  */
 
-package org.ros.hokuyo.scip20;
+package org.ros.android.hokuyo;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ChecksumException extends RuntimeException {
+public interface LaserScanListener {
+  
+  /**
+   * Called for each new laser scan.
+   * 
+   * @param scan
+   *          the new laser scan
+   */
+  void onNewLaserScan(LaserScan scan);
 }

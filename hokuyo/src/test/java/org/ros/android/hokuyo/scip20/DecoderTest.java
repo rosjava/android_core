@@ -14,10 +14,13 @@
  * the License.
  */
 
-package org.ros.hokuyo.scip20;
+package org.ros.android.hokuyo.scip20;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import org.ros.android.hokuyo.scip20.Decoder;
+
 
 import org.junit.Test;
 

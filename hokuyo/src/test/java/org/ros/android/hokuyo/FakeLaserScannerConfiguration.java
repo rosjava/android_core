@@ -14,9 +14,9 @@
  * the License.
  */
 
-package org.ros.hokuyo;
+package org.ros.android.hokuyo;
 
-import org.ros.hokuyo.LaserScannerConfiguration;
+import org.ros.android.hokuyo.LaserScannerConfiguration;
 
 /**
  * @author moesenle@google.com (Lorenz Moesenlechner)

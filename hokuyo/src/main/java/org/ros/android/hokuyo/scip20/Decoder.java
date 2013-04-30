@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.hokuyo.scip20;
+package org.ros.android.hokuyo.scip20;
 
 import com.google.common.base.Preconditions;
 

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.hokuyo;
+package org.ros.android.hokuyo;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;

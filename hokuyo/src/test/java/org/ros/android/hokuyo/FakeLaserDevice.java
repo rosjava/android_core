@@ -14,7 +14,12 @@
  * the License.
  */
 
-package org.ros.hokuyo;
+package org.ros.android.hokuyo;
+
+import org.ros.android.hokuyo.LaserScan;
+import org.ros.android.hokuyo.LaserScanListener;
+import org.ros.android.hokuyo.LaserScannerConfiguration;
+import org.ros.android.hokuyo.LaserScannerDevice;
 
 import org.ros.message.Time;
 

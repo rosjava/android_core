@@ -14,18 +14,25 @@
  * the License.
  */
 
-package org.ros.hokuyo;
+package org.ros.android.hokuyo.scip20;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface LaserScanListener {
-  
-  /**
-   * Called for each new laser scan.
-   * 
-   * @param scan
-   *          the new laser scan
-   */
-  void onNewLaserScan(LaserScan scan);
+public class TmException extends RuntimeException {
+
+  public TmException(String status) {
+    super(getMessage(status));
+  }
+
+  private static String getMessage(String status) {
+    if (status.equals("01")) {
+      return "Invalid control code.";
+    }
+    if (status.equals("04")) {
+      return "Adjust mode is off when requested for time.";
+    }
+
+    return "Unknown status code: " + status;
+  }
 }

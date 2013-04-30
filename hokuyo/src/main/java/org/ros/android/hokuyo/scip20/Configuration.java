@@ -14,12 +14,14 @@
  * the License.
  */
 
-package org.ros.hokuyo.scip20;
+package org.ros.android.hokuyo.scip20;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
-import org.ros.hokuyo.LaserScannerConfiguration;
+import org.ros.android.hokuyo.LaserScannerConfiguration;
+
+
 
 
 /**

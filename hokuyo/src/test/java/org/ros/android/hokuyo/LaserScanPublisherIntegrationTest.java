@@ -14,9 +14,12 @@
  * the License.
  */
 
-package org.ros.hokuyo;
+package org.ros.android.hokuyo;
 
 import static org.junit.Assert.assertTrue;
+
+import org.ros.android.hokuyo.LaserScanPublisher;
+
 
 import org.junit.After;
 import org.junit.Before;

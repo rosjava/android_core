@@ -14,9 +14,9 @@
  * the License.
  */
 
-package org.ros.hokuyo.scip20;
+package org.ros.android.hokuyo.scip20;
 
-import org.ros.hokuyo.scip20.Configuration;
+import org.ros.android.hokuyo.scip20.Configuration;
 
 import junit.framework.TestCase;
 
