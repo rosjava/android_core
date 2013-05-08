@@ -924,6 +924,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   @Override
   public void onStart(ConnectedNode connectedNode) {
     publisher = connectedNode.newPublisher("~cmd_vel", geometry_msgs.Twist._TYPE);
+    currentVelocityCommand = publisher.newMessage();
     Subscriber<nav_msgs.Odometry> subscriber =
         connectedNode.newSubscriber("odom", nav_msgs.Odometry._TYPE);
     subscriber.addMessageListener(this);
