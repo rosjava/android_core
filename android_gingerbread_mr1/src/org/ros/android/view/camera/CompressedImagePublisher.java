@@ -34,7 +34,7 @@ import org.ros.node.topic.Publisher;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-class CompressedImagePublisher implements RawImageListener {
+public class CompressedImagePublisher implements RawImageListener {
 
   private final ConnectedNode connectedNode;
   private final Publisher<sensor_msgs.CompressedImage> imagePublisher;
