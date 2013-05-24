@@ -239,19 +239,23 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    */
   private Timer publisherTimer;
   private geometry_msgs.Twist currentVelocityCommand;
+  private String topicName;
 
   public VirtualJoystickView(Context context) {
     super(context);
     initVirtualJoystick(context);
+    topicName = "~cmd_vel";
   }
 
   public VirtualJoystickView(Context context, AttributeSet attrs) {
     super(context, attrs);
     initVirtualJoystick(context);
+    topicName = "~cmd_vel";
   }
 
   public VirtualJoystickView(Context context, AttributeSet attrs, int defStyle) {
     super(context, attrs, defStyle);
+    topicName = "~cmd_vel";
   }
 
   /**
@@ -915,15 +919,21 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     }
     return false;
   }
+  
+  public void setTopicName(String topicName) {
+	  this.topicName = topicName;
+  }
 
   @Override
   public GraphName getDefaultNodeName() {
     return GraphName.of("android_honeycomb_mr2/virtual_joystick_view");
   }
+  
 
   @Override
   public void onStart(ConnectedNode connectedNode) {
-    publisher = connectedNode.newPublisher("~cmd_vel", geometry_msgs.Twist._TYPE);
+    publisher = connectedNode.newPublisher(topicName, geometry_msgs.Twist._TYPE);
+    currentVelocityCommand = publisher.newMessage();
     Subscriber<nav_msgs.Odometry> subscriber =
         connectedNode.newSubscriber("odom", nav_msgs.Odometry._TYPE);
     subscriber.addMessageListener(this);

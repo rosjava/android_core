@@ -56,6 +56,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
 
   private boolean ready;
   private GraphName frame;
+  private GL10 previousGl;
 
   public OccupancyGridLayer(String topic) {
     this(GraphName.of(topic));
@@ -70,6 +71,10 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
 
   @Override
   public void draw(GL10 gl) {
+	if (previousGl != gl) {
+		  textureBitmap.clearHandle();
+		  previousGl = gl;
+	}
     if (ready) {
       textureBitmap.draw(gl);
     }
@@ -84,6 +89,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   public void onStart(ConnectedNode connectedNode, Handler handler,
       FrameTransformTree frameTransformTree, Camera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
+    previousGl = null;
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.OccupancyGrid>() {
       @Override
       public void onNewMessage(nav_msgs.OccupancyGrid message) {

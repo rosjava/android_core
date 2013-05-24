@@ -112,6 +112,10 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     layer.onShutdown(this, connectedNode);
     layers.remove(layer);
   }
+  
+  public void hideLayer(Layer layer) {
+	  layers.remove(layer);
+  }
 
   @Override
   public void onStart(ConnectedNode connectedNode) {

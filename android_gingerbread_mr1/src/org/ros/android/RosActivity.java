@@ -43,7 +43,7 @@ public abstract class RosActivity extends Activity {
   private final String notificationTicker;
   private final String notificationTitle;
 
-  private NodeMainExecutorService nodeMainExecutorService;
+  protected NodeMainExecutorService nodeMainExecutorService;
 
   private final class NodeMainExecutorServiceConnection implements ServiceConnection {
     @Override
@@ -97,7 +97,6 @@ public abstract class RosActivity extends Activity {
       // up again.
       nodeMainExecutorService = null;
     }
-    Toast.makeText(this, notificationTitle + " shut down.", Toast.LENGTH_SHORT).show();
     super.onDestroy();
   }
 
@@ -112,7 +111,7 @@ public abstract class RosActivity extends Activity {
    */
   protected abstract void init(NodeMainExecutor nodeMainExecutor);
 
-  private void startMasterChooser() {
+  public void startMasterChooser() {
     Preconditions.checkState(getMasterUri() == null);
     // Call this method on super to avoid triggering our precondition in the
     // overridden startActivityForResult().
@@ -133,8 +132,8 @@ public abstract class RosActivity extends Activity {
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
+    if (resultCode == RESULT_OK) {
     if (requestCode == MASTER_CHOOSER_REQUEST_CODE) {
-      if (resultCode == RESULT_OK) {
         if (data == null) {
           nodeMainExecutorService.startMaster();
         } else {
