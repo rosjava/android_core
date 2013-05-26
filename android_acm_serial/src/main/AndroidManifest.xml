@@ -6,4 +6,11 @@
 
     <uses-sdk android:minSdkVersion="13" />
 
+    <!-- 
+      You shouldn't need an application tag for a library, but this is a 
+      workaround to get past a gradle android plugin bug in 0.4.
+    
+      It should disappear in 0.5
+    -->
+    <application />
 </manifest>

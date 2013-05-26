@@ -18,3 +18,9 @@ dependencies {
   compile 'ros.rosjava_core:rosjava:0.0.0-SNAPSHOT'
 }
 
+apply plugin: 'android-library'
+
+android {
+    compileSdkVersion 10
+    buildToolsVersion androidBuildToolsVersion
+}
