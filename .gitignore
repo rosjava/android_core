@@ -1,0 +1,12 @@
+.classpath
+.gradle
+.project
+.settings
+bin
+build
+build.xml
+gen
+libs
+local.properties
+proguard-project.txt
+

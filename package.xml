@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package>
+  <name>android_core</name>
+  <version>0.0.0</version>
+  <description>
+    Android support packages for rosjava.
+  </description>
+  <url>http://ros.org/wiki/android_core</url>
+  <maintainer email="damonkohler@google.com">Damon Kohler</maintainer>
+  <license>Apache 2.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+</package>
+

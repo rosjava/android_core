@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -14,8 +14,28 @@
  * the License.
  */
 
-include 'android_gingerbread_mr1', 'android_tutorial_pubsub', 'android_honeycomb_mr2',
-        'android_tutorial_teleop', 'android_tutorial_hokuyo', 'android_acm_serial',
-        'android_tutorial_camera', 'android_tutorial_image_transport',
-        'android_tutorial_map_viewer', 'android_benchmarks', 'docs'
+package org.ros.android.hokuyo;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
+public interface LaserScannerDevice {
+
+  /**
+   * Starts continuously scanning.
+   * 
+   * @param listener
+   *          called for each new scan
+   */
+  void startScanning(LaserScanListener listener);
+
+  /**
+   * Shuts down the device and releases any shared resources.
+   */
+  void shutdown();
+
+  /**
+   * @return the device configuration
+   */
+  LaserScannerConfiguration getConfiguration();
+}
