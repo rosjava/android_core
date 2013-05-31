@@ -14,5 +14,13 @@
  * the License.
  */
 
-debug.dependsOn project(':android_honeycomb_mr2').tasks.debug
+dependencies {
+  compile project(':android_honeycomb_mr2')
+}
 
+apply plugin: 'android'
+
+android {
+    compileSdkVersion 13
+    buildToolsVersion androidBuildToolsVersion
+}

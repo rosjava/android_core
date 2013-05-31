@@ -15,52 +15,61 @@
  */
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '1.5'
+    gradleVersion = '1.6'
 }
 
+ext.androidBuildToolsVersion = "17"
+
 allprojects {
-  group 'ros.android_core'
-  version = '0.0.0-SNAPSHOT'
+    group 'ros.android_core'
+    version = '0.0.0-SNAPSHOT'
 }
 
 subprojects {
-  if (name != 'docs') {
-    repositories {
-      mavenLocal()
-      maven {
-        url 'http://robotbrains.hideho.org/nexus/content/groups/ros-public'
-      }
+    if (name != 'docs') {
+        buildscript {
+            repositories {
+                mavenCentral()
+            }
+            dependencies {
+                classpath 'com.android.tools.build:gradle:0.4.1'
+            }
+        }
+        apply plugin: 'maven'
+        repositories {
+            mavenLocal()
+            maven {
+                url 'http://robotbrains.hideho.org/nexus/content/groups/ros-public'
+            }
+        }
+        configurations.add('compile') {
+            exclude group: 'junit'
+            exclude group: 'xml-apis'
+        }
+        /*
+          EXPERIMENTAL: Trick to get local maven installs until the plugin supports an
+          install step for aar's (coming soon).
+        */
+        uploadArchives {
+            repositories {
+                mavenDeployer {
+                    repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
+                }
+            }
+        }
+        task install() << {
+            description = 'installs .aar files to the local maven repository.'
+        }
+        afterEvaluate { Project project ->
+            if (plugins.findPlugin('android-library')) {
+                task doDebugArchives() << {
+                    project.artifacts.add("default", bundleDebug)
+                }
+                doDebugArchives.dependsOn('bundleDebug')
+                uploadArchives.dependsOn('doDebugArchives')
+                install.dependsOn('uploadArchives')
+            }
+        }
     }
-
-    configurations.add('compile') {
-      exclude group: 'junit'
-      exclude group: 'xml-apis'
-    }
-
-    task deployLibs(type: Copy) {
-      from { configurations.compile }
-      into "${projectDir}/libs"
-    }
-
-    task clean << {
-      ant.delete file: "${projectDir}/local.properties"
-      ant.delete file: "${projectDir}/proguard-project.txt"
-      ant.delete file: "${projectDir}/build.xml"
-      ant.delete dir: "${projectDir}/bin"
-      ant.delete dir: "${projectDir}/gen"
-      ant.delete dir: "${projectDir}/libs"
-    }
-
-    task updateProject(type: Exec) {
-      commandLine 'android', 'update', 'project', '-p', projectDir
-    }
-
-    task debug(type: Exec) {
-      dependsOn updateProject, deployLibs
-      commandLine 'ant', 'debug'
-    }
-  }
 }
-
-defaultTasks 'debug'
 
