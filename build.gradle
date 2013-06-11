@@ -57,17 +57,12 @@ subprojects {
                 }
             }
         }
-        task install() << {
+        task publishToMavenLocal() << {
             description = 'installs .aar files to the local maven repository.'
         }
         afterEvaluate { Project project ->
             if (plugins.findPlugin('android-library')) {
-                task doDebugArchives() << {
-                    project.artifacts.add("default", bundleDebug)
-                }
-                doDebugArchives.dependsOn('bundleDebug')
-                uploadArchives.dependsOn('doDebugArchives')
-                install.dependsOn('uploadArchives')
+                publishToMavenLocal.dependsOn('uploadArchives')
             }
         }
     }
