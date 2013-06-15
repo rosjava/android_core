@@ -52,7 +52,9 @@ public abstract class RosActivity extends Activity {
       nodeMainExecutorService.addListener(new NodeMainExecutorServiceListener() {
         @Override
         public void onShutdown(NodeMainExecutorService nodeMainExecutorService) {
-          RosActivity.this.finish();
+          if ( !isFinishing() ) {
+            RosActivity.this.finish();
+          }
         }
       });
       startMasterChooser();
