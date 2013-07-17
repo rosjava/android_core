@@ -14,5 +14,13 @@
  * the License.
  */
 
-debug.dependsOn project(':android_gingerbread_mr1').tasks.debug
+dependencies {
+  compile project(':android_gingerbread_mr1')
+}
 
+apply plugin: 'android'
+
+android {
+    compileSdkVersion 10
+    buildToolsVersion androidBuildToolsVersion
+}
