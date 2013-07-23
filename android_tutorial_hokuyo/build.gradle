@@ -15,8 +15,14 @@
  */
 
 dependencies {
-  compile 'ros.google:hokuyo:0.0.0-SNAPSHOT'
+  compile project(':android_gingerbread_mr1')
+  compile project(':android_acm_serial')
+  compile project(':hokuyo')
 }
 
-debug.dependsOn project(':android_acm_serial').tasks.debug
+apply plugin: 'android'
 
+android {
+  compileSdkVersion 13
+  buildToolsVersion androidBuildToolsVersion
+}

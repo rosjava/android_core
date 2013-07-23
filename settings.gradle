@@ -18,7 +18,7 @@ include 'android_gingerbread_mr1', 'android_benchmarks', 'android_tutorial_camer
         'android_tutorial_image_transport', 'android_tutorial_pubsub'
 
 include 'android_honeycomb_mr2', 'android_acm_serial', 'android_tutorial_map_viewer',
-        'android_tutorial_teleop'
+        'android_tutorial_teleop', 'hokuyo', 'android_tutorial_hokuyo'
 
 include 'docs'
 /*
@@ -30,4 +30,8 @@ include 'docs'
   And of course, the dependency:
   
     android_tutorial_hokuyo
+
+  JAC: 7/19/13: hokuyo and android_tutorial_hokuyo has been re-enable temporarily
+  to allow for experimentation while the final location of these projects
+  is decided
 */
