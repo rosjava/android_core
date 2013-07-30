@@ -31,6 +31,7 @@ import org.ros.node.NodeMainExecutor;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -137,8 +138,22 @@ public abstract class RosActivity extends Activity {
     super.onActivityResult(requestCode, resultCode, data);
     if (resultCode == RESULT_OK) {
       if (requestCode == MASTER_CHOOSER_REQUEST_CODE) {
-        if (data == null) {
-          nodeMainExecutorService.startMaster();
+        if (data.getBooleanExtra("NEW_MASTER", false) == true) {
+          AsyncTask<Boolean, Void, URI> task = new AsyncTask<Boolean, Void, URI>() {
+            @Override
+            protected URI doInBackground(Boolean[] params) {
+              RosActivity.this.nodeMainExecutorService.startMaster(params[0]);
+              return RosActivity.this.nodeMainExecutorService.getMasterUri();
+            }
+          };
+          task.execute(data.getBooleanExtra("ROS_MASTER_PRIVATE", true));
+          try {
+            task.get();
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          } catch (ExecutionException e) {
+            e.printStackTrace();
+          }
         } else {
           URI uri;
           try {

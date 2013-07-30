@@ -1,52 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
-
-    <EditText
-        android:id="@+id/master_chooser_uri"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/master_uri_hint"
-        android:singleLine="true" >
-
-        <requestFocus />
-    </EditText>
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+        >
 
     <LinearLayout
-        android:id="@+id/linearLayout1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
 
         <Button
             android:id="@+id/master_chooser_ok"
-            android:layout_width="100dip"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:onClick="okButtonClicked"
-            android:text="@android:string/ok" />
+            android:text="@string/use_master"
+            android:layout_weight="1"/>
 
-        <Button
-            android:id="@+id/master_chooser_qr_code_button"
-            android:layout_width="wrap_content"
+        <EditText
+            android:id="@+id/master_chooser_uri"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:onClick="qrCodeButtonClicked"
-            android:text="@string/qr_code" />
+            android:hint="@string/master_uri_hint"
+            android:singleLine="true"
+            android:layout_weight="2">
+
+            <requestFocus />
+        </EditText>
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
 
         <Button
             android:id="@+id/master_chooser_new_master_button"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
             android:onClick="newMasterButtonClicked"
-            android:text="@string/new_master" />
-        
+            android:text="@string/new_master"
+            android:layout_weight="1"/>
+
         <Button
-            android:id="@+id/master_chooser_cancel"
-            android:layout_width="100dip"
-            android:layout_height="wrap_content"
-            android:onClick="cancelButtonClicked"
-            android:text="@string/cancel" />
+                android:id="@+id/master_chooser_new_private_master_button"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:onClick="newPrivateMasterButtonClicked"
+                android:text="@string/new_private_master"
+                android:layout_weight="1"/>
     </LinearLayout>
+
+    <Button
+        android:id="@+id/master_chooser_qr_code_button"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:onClick="qrCodeButtonClicked"
+        android:text="@string/qr_code" />
+
+    <Button
+        android:id="@+id/master_chooser_cancel"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:onClick="cancelButtonClicked"
+        android:text="@string/cancel"
+        android:layout_gravity="bottom"/>
 
 </LinearLayout>

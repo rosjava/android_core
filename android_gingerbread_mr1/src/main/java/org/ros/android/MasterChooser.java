@@ -114,6 +114,7 @@ public class MasterChooser extends Activity {
     editor.commit();
     // Package the intent to be consumed by the calling activity.
     Intent intent = new Intent();
+    intent.putExtra("NEW_MASTER", false);
     intent.putExtra("ROS_MASTER_URI", masterUri);
     setResult(RESULT_OK, intent);
     finish();
@@ -134,8 +135,20 @@ public class MasterChooser extends Activity {
     }
   }
 
+  public Intent createNewMasterIntent (Boolean isPrivate) {
+    Intent intent = new Intent();
+    intent.putExtra("NEW_MASTER", true);
+    intent.putExtra("ROS_MASTER_PRIVATE", isPrivate);
+    return intent;
+  }
+
   public void newMasterButtonClicked(View unused) {
-    setResult(RESULT_OK, null);
+    setResult(RESULT_OK, createNewMasterIntent(false));
+    finish();
+  }
+
+  public void newPrivateMasterButtonClicked(View unused) {
+    setResult(RESULT_OK, createNewMasterIntent(true));
     finish();
   }
 

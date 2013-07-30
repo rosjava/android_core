@@ -201,8 +201,12 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
     masterUri = uri;
   }
 
-  public void startMaster() {
-    rosCore = RosCore.newPrivate();
+  public void startMaster(Boolean isPrivate) {
+    if (isPrivate) {
+      rosCore = RosCore.newPrivate();
+    } else {
+      rosCore = RosCore.newPublic(11311);
+    }
     rosCore.start();
     try {
       rosCore.awaitStart();
