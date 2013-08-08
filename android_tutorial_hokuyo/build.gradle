@@ -17,7 +17,7 @@
 dependencies {
   compile project(':android_gingerbread_mr1')
   compile project(':android_acm_serial')
-  compile project(':hokuyo')
+  compile 'ros.rosjava_extras:hokuyo:0.0.0-SNAPSHOT'
 }
 
 apply plugin: 'android'
