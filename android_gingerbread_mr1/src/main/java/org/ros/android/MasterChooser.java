@@ -26,6 +26,8 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 import org.ros.android.android_gingerbread_mr1.R;
@@ -132,6 +134,19 @@ public class MasterChooser extends Activity {
     } else {
       // Call the Barcode Scanner to let the user scan a QR code.
       startActivityForResult(intent, 0);
+    }
+  }
+
+  public void advancedCheckboxClicked(View view) {
+    boolean checked = ((CheckBox) view).isChecked();
+    Button new_public_master = (Button) findViewById(R.id.master_chooser_new_master_button);
+    Button new_private_master = (Button) findViewById(R.id.master_chooser_new_private_master_button);
+    if (checked) {
+      new_private_master.setVisibility(View.VISIBLE);
+      new_public_master.setVisibility(View.VISIBLE);
+    } else {
+      new_private_master.setVisibility(View.GONE);
+      new_public_master.setVisibility(View.GONE);
     }
   }
 
