@@ -27,6 +27,7 @@ import org.ros.android.view.visualization.TextureBitmap;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
+import org.ros.rosjava_geometry.FrameName;
 import org.ros.rosjava_geometry.FrameTransformTree;
 import org.ros.rosjava_geometry.Transform;
 
@@ -57,7 +58,7 @@ public class CompressedOccupancyGridLayer extends SubscriberLayer<nav_msgs.Occup
   private final TextureBitmap textureBitmap;
 
   private boolean ready;
-  private GraphName frame;
+  private FrameName frame;
 
   public CompressedOccupancyGridLayer(String topic) {
     this(GraphName.of(topic));
@@ -77,7 +78,7 @@ public class CompressedOccupancyGridLayer extends SubscriberLayer<nav_msgs.Occup
   }
 
   @Override
-  public GraphName getFrame() {
+  public FrameName getFrame() {
     return frame;
   }
 
@@ -116,7 +117,7 @@ public class CompressedOccupancyGridLayer extends SubscriberLayer<nav_msgs.Occup
     float resolution = message.getInfo().getResolution();
     Transform origin = Transform.fromPoseMessage(message.getInfo().getOrigin());
     textureBitmap.updateFromPixelArray(pixels, stride, resolution, origin, COLOR_UNKNOWN);
-    frame = GraphName.of(message.getHeader().getFrameId());
+    frame = FrameName.of(message.getHeader().getFrameId());
     ready = true;
   }
 }

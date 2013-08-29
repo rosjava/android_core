@@ -24,6 +24,7 @@ import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
 import org.ros.rosjava_geometry.FrameTransformTree;
+import org.ros.rosjava_geometry.FrameName;
 import sensor_msgs.LaserScan;
 
 import java.nio.FloatBuffer;
@@ -45,7 +46,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
 
   private final Object mutex;
 
-  private GraphName frame;
+  private FrameName frame;
   private Camera camera;
   private FloatBuffer vertexFrontBuffer;
   private FloatBuffer vertexBackBuffer;
@@ -83,7 +84,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
     subscriber.addMessageListener(new MessageListener<LaserScan>() {
       @Override
       public void onNewMessage(LaserScan laserScan) {
-        frame = GraphName.of(laserScan.getHeader().getFrameId());
+        frame = FrameName.of(laserScan.getHeader().getFrameId());
         updateVertexBuffer(laserScan, LASER_SCAN_STRIDE);
       }
     });
@@ -127,7 +128,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
   }
 
   @Override
-  public GraphName getFrame() {
+  public FrameName getFrame() {
     return frame;
   }
 }
