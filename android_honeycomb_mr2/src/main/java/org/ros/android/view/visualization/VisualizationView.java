@@ -138,10 +138,10 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   }
 
   private void startTransformListener() {
-    Subscriber<tf.tfMessage> tfSubscriber = connectedNode.newSubscriber("tf", tf.tfMessage._TYPE);
-    tfSubscriber.addMessageListener(new MessageListener<tf.tfMessage>() {
+    Subscriber<tf2_msgs.TFMessage> tfSubscriber = connectedNode.newSubscriber("tf", tf2_msgs.TFMessage._TYPE); // tf.tfMessage
+    tfSubscriber.addMessageListener(new MessageListener<tf2_msgs.TFMessage>() {
       @Override
-      public void onNewMessage(tf.tfMessage message) {
+      public void onNewMessage(tf2_msgs.TFMessage message) {
         for (geometry_msgs.TransformStamped transform : message.getTransforms()) {
           frameTransformTree.update(transform);
         }
