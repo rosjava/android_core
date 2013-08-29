@@ -30,6 +30,7 @@ import org.ros.android.view.visualization.VisualizationView;
 import org.ros.android.view.visualization.layer.CameraControlLayer;
 import org.ros.android.view.visualization.layer.CameraControlListener;
 import org.ros.android.view.visualization.layer.CompressedOccupancyGridLayer;
+import org.ros.android.view.visualization.layer.OccupancyGridLayer;
 import org.ros.android.view.visualization.layer.LaserScanLayer;
 import org.ros.android.view.visualization.layer.RobotLayer;
 import org.ros.node.NodeConfiguration;
@@ -89,6 +90,9 @@ public class MainActivity extends RosActivity {
     visualizationView.addLayer(cameraControlLayer);
     visualizationView.addLayer(new CompressedOccupancyGridLayer("map/png"));
     visualizationView.addLayer(new LaserScanLayer("scan"));
+    // Turtlebot configuration
+    // visualizationView.addLayer(new OccupancyGridLayer("turtlebot/application/map"));
+    // visualizationView.addLayer(new LaserScanLayer("turtlebot/application/scan"));
     visualizationView.addLayer(new RobotLayer(ROBOT_FRAME));
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress(),
