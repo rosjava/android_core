@@ -16,7 +16,12 @@
 
 dependencies {
   compile 'ros.rosjava_core:rosjava_tutorial_pubsub:0.0.0-SNAPSHOT'
+  compile project(':android_gingerbread_mr1')
 }
 
-debug.dependsOn project(':android_gingerbread_mr1').tasks.debug
+apply plugin: 'android'
 
+android {
+    compileSdkVersion 10
+    buildToolsVersion androidBuildToolsVersion
+}
