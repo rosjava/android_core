@@ -61,6 +61,7 @@ public class OpenGlTransform {
     for (double value : transform.toMatrix()) {
       matrix.put((float) value);
     }
+    matrix.position(0);
     gl.glMultMatrixf(matrix);
   }
 }
