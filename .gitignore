@@ -10,3 +10,10 @@ libs
 local.properties
 proguard-project.txt
 
+# These are Android Studio files, might be worth including these later.
+.idea
+*.iml
+build.log
+build-log.xml
+docs.iml
+
