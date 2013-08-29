@@ -19,9 +19,9 @@ package org.ros.android.view.visualization;
 import com.google.common.base.Preconditions;
 
 import org.ros.math.RosMath;
-import org.ros.namespace.GraphName;
 import org.ros.rosjava_geometry.FrameTransform;
 import org.ros.rosjava_geometry.FrameTransformTree;
+import org.ros.rosjava_geometry.FrameName;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
 
@@ -62,7 +62,7 @@ public class Camera {
    * instance, base_link, the view follows the robot and the robot itself is in
    * the origin.
    */
-  private GraphName frame;
+  private FrameName frame;
 
   public Camera(FrameTransformTree frameTransformTree) {
     this.frameTransformTree = frameTransformTree;
@@ -81,7 +81,7 @@ public class Camera {
     }
   }
 
-  public boolean applyFrameTransform(GL10 gl, GraphName frame) {
+    public boolean applyFrameTransform(GL10 gl, FrameName frame) {
     Preconditions.checkNotNull(frame);
     if (this.frame != null) {
       FrameTransform frameTransform = frameTransformTree.transform(frame, this.frame);
@@ -161,7 +161,7 @@ public class Camera {
     return transform.invert().apply(new Vector3(centeredX, centeredY, 0));
   }
 
-  public GraphName getFrame() {
+  public FrameName getFrame() {
     return frame;
   }
 
@@ -173,7 +173,7 @@ public class Camera {
    * @param frame
    *          the new camera frame
    */
-  public void setFrame(GraphName frame) {
+  public void setFrame(FrameName frame) {
     Preconditions.checkNotNull(frame);
     synchronized (mutex) {
       if (this.frame != null && this.frame != frame) {
@@ -189,10 +189,10 @@ public class Camera {
   }
 
   /**
-   * @see #setFrame(GraphName)
+   * @see #setFrame(FrameName)
    */
   public void setFrame(String frame) {
-    setFrame(GraphName.of(frame));
+    setFrame(FrameName.of(frame));
   }
 
   /**
@@ -202,7 +202,7 @@ public class Camera {
    * @param frame
    *          the new camera frame
    */
-  public void jumpToFrame(GraphName frame) {
+  public void jumpToFrame(FrameName frame) {
     synchronized (mutex) {
       this.frame = frame;
       double zoom = getZoom();
@@ -212,10 +212,10 @@ public class Camera {
   }
 
   /**
-   * @see #jumpToFrame(GraphName)
+   * @see #jumpToFrame(FrameName)
    */
   public void jumpToFrame(String frame) {
-    jumpToFrame(GraphName.of(frame));
+    jumpToFrame(FrameName.of(frame));
   }
 
   public void setViewport(Viewport viewport) {

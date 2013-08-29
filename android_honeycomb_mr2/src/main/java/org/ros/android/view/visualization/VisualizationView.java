@@ -27,7 +27,6 @@ import org.ros.android.view.visualization.layer.Layer;
 import org.ros.exception.RosRuntimeException;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
-import org.ros.namespace.NameResolver;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
@@ -45,8 +44,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
 
   private static final boolean DEBUG = false;
 
-  private final NameResolver nameResolver = NameResolver.newRoot();
-  private final FrameTransformTree frameTransformTree = new FrameTransformTree(nameResolver);
+  private final FrameTransformTree frameTransformTree = new FrameTransformTree();
   private final Camera camera = new Camera(frameTransformTree);
   private final XYOrthographicRenderer renderer = new XYOrthographicRenderer(camera);
   private final List<Layer> layers = Lists.newArrayList();
