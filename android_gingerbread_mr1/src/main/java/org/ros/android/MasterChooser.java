@@ -26,6 +26,8 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 import org.ros.android.android_gingerbread_mr1.R;
@@ -114,6 +116,7 @@ public class MasterChooser extends Activity {
     editor.commit();
     // Package the intent to be consumed by the calling activity.
     Intent intent = new Intent();
+    intent.putExtra("NEW_MASTER", false);
     intent.putExtra("ROS_MASTER_URI", masterUri);
     setResult(RESULT_OK, intent);
     finish();
@@ -134,8 +137,33 @@ public class MasterChooser extends Activity {
     }
   }
 
+  public void advancedCheckboxClicked(View view) {
+    boolean checked = ((CheckBox) view).isChecked();
+    Button new_public_master = (Button) findViewById(R.id.master_chooser_new_master_button);
+    Button new_private_master = (Button) findViewById(R.id.master_chooser_new_private_master_button);
+    if (checked) {
+      new_private_master.setVisibility(View.VISIBLE);
+      new_public_master.setVisibility(View.VISIBLE);
+    } else {
+      new_private_master.setVisibility(View.GONE);
+      new_public_master.setVisibility(View.GONE);
+    }
+  }
+
+  public Intent createNewMasterIntent (Boolean isPrivate) {
+    Intent intent = new Intent();
+    intent.putExtra("NEW_MASTER", true);
+    intent.putExtra("ROS_MASTER_PRIVATE", isPrivate);
+    return intent;
+  }
+
   public void newMasterButtonClicked(View unused) {
-    setResult(RESULT_OK, null);
+    setResult(RESULT_OK, createNewMasterIntent(false));
+    finish();
+  }
+
+  public void newPrivateMasterButtonClicked(View unused) {
+    setResult(RESULT_OK, createNewMasterIntent(true));
     finish();
   }
 
