@@ -201,8 +201,22 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
     masterUri = uri;
   }
 
+  /**
+   * This version of startMaster can only create private masters.
+   *
+   * @deprecated use {@link public void startMaster(Boolean isPrivate)} instead.
+   */
+  @Deprecated
   public void startMaster() {
-    rosCore = RosCore.newPrivate();
+    startMaster(true);
+  }
+
+  public void startMaster(Boolean isPrivate) {
+    if (isPrivate) {
+      rosCore = RosCore.newPrivate();
+    } else {
+      rosCore = RosCore.newPublic(11311);
+    }
     rosCore.start();
     try {
       rosCore.awaitStart();
