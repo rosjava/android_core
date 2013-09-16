@@ -21,8 +21,8 @@ task wrapper(type: Wrapper) {
 ext.androidBuildToolsVersion = "17"
 
 allprojects {
-    group 'ros.android_core'
-    version = '0.0.0-SNAPSHOT'
+    group 'org.ros.android_core'
+    version = '0.1.0'
 }
 
 subprojects {
