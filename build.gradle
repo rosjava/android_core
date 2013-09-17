@@ -15,7 +15,7 @@
  */
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.6'
+    gradleVersion = '1.7'
 }
 
 ext.androidBuildToolsVersion = "17"
@@ -32,7 +32,7 @@ subprojects {
                 mavenCentral()
             }
             dependencies {
-                classpath 'com.android.tools.build:gradle:0.5.0'
+                classpath 'com.android.tools.build:gradle:0.5.6'
             }
         }
         apply plugin: 'maven'
