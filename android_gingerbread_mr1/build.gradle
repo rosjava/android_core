@@ -15,12 +15,12 @@
  */
 
 dependencies {
-  compile 'ros.rosjava_core:rosjava:0.0.0-SNAPSHOT'
+  compile 'org.ros.rosjava_core:rosjava:0.1.+'
+  compile 'org.ros.rosjava_messages:sensor_msgs:1.10.+'
 }
 
 apply plugin: 'android-library'
 
 android {
     compileSdkVersion 10
-    buildToolsVersion androidBuildToolsVersion
 }

@@ -14,19 +14,14 @@
  * the License.
  */
 
-include 'android_gingerbread_mr1', 
-/*
-'android_benchmarks', 'android_tutorial_camera',
-        'android_tutorial_image_transport', 'android_tutorial_pubsub'
-
+include 'android_gingerbread_mr1', 'android_benchmarks', 'android_tutorial_camera',
+        'android_tutorial_image_transport', 'android_tutorial_pubsub' 
 include 'android_honeycomb_mr2', 'android_acm_serial', 'android_tutorial_map_viewer',
-        'android_tutorial_teleop', 'android_tutorial_hokuyo'
-
+        'android_tutorial_teleop'
 include 'docs'
-*/
 /*
   The following code is not included in the multi-project yet till its sorted
   whereabouts they should actually live (should they be in a java repo instead?)
 
-    hokuyo, polling_input_stream, compressed_map_transport
+    polling_input_stream, compressed_map_transport
 */

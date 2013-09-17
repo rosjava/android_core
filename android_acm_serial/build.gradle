@@ -24,5 +24,4 @@ apply plugin: 'android-library'
 
 android {
     compileSdkVersion 13
-    buildToolsVersion androidBuildToolsVersion
 }

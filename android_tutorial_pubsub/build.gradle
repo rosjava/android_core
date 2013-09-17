@@ -15,7 +15,7 @@
  */
 
 dependencies {
-  compile 'ros.rosjava_core:rosjava_tutorial_pubsub:0.0.0-SNAPSHOT'
+  compile 'org.ros.rosjava_core:rosjava_tutorial_pubsub:0.1.+'
   compile project(':android_gingerbread_mr1')
 }
 
@@ -23,5 +23,4 @@ apply plugin: 'android'
 
 android {
     compileSdkVersion 10
-    buildToolsVersion androidBuildToolsVersion
 }

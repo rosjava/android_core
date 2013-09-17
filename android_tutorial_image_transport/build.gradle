@@ -22,6 +22,5 @@ apply plugin: 'android'
 
 android {
     compileSdkVersion 10
-    buildToolsVersion androidBuildToolsVersion
 }
 
