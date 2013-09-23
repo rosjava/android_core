@@ -24,3 +24,4 @@ apply plugin: 'android-library'
 android {
     compileSdkVersion 10
 }
+

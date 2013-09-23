@@ -45,25 +45,6 @@ allprojects {
 
 subprojects {
     if (name != 'docs') {
-        apply plugin: 'maven'
-        apply plugin: 'ros'
         apply plugin: 'ros-android'
-        buildscript {
-            repositories {
-                mavenCentral()
-            }
-            dependencies {
-                classpath 'com.android.tools.build:gradle:0.5.6'
-            }
-        }
-        afterEvaluate { Project project ->
-            /* 
-             * Delayed configuration here, because we delay the decision for
-             * applying android or android-library plugins until inside the sub-projects.
-             */
-            project.android {
-                buildToolsVersion project.rosandroid.buildToolsVersion
-            }
-        }
     }
 }
