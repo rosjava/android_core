@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:focusable="false"
+    style="@style/padded">
+
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            >
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/uri_text"
+                android:id="@+id/textView"
+                android:layout_weight="1"
+                android:textSize="18dp"/>
+
+        <EditText
+            android:id="@+id/master_chooser_uri"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/master_uri_hint"
+            android:singleLine="true"
+            android:layout_weight="20">
+
+            <requestFocus />
+        </EditText>
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            style="@style/padded">
+
+        <Button
+                android:id="@+id/master_chooser_qr_code_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="qrCodeButtonClicked"
+                android:text="@string/qr_code"
+                android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/master_chooser_ok"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:onClick="okButtonClicked"
+            android:text="@string/use_master"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
+    <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/show_advanced"
+            android:id="@+id/advanced_checkBox"
+            android:checked="false"
+            android:onClick="advancedCheckboxClicked"
+            style="@style/padded"/>
+
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+        <Button
+            android:id="@+id/master_chooser_new_master_button"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:onClick="newMasterButtonClicked"
+            android:text="@string/new_master"
+            android:layout_weight="1"
+            android:visibility="gone"/>
+
+        <Button
+                android:id="@+id/master_chooser_new_private_master_button"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:onClick="newPrivateMasterButtonClicked"
+                android:text="@string/new_private_master"
+                android:layout_weight="1"
+                android:visibility="gone"/>
+    </LinearLayout>
+
+    <Button
+            android:id="@+id/master_chooser_cancel"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:onClick="cancelButtonClicked"
+            android:text="@string/cancel"
+            android:layout_gravity="bottom"
+            style="@style/padded"/>
+
+</LinearLayout>

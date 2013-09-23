@@ -42,3 +42,7 @@ task clean << {
   ant.delete file: 'src/main/sphinx/conf.py'
 }
 
+/* Dummy task to stop android studio barfing */
+task assembleDebug {}
+task assembleRelease {}
+task assemble {}
