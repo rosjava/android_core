@@ -5,55 +5,19 @@ Getting started
 
 Before diving into ROS enabled Android application development, you should be
 familiar with :ref:`rosjava <rosjava-core:getting-started>` and `Android
-application development`_ in general.
+application development`_ in general. Note that any information regarding
+command-line adt and eclipse development is depracating - we have moved early
+to a gradle-`android studio`_ environment.
 
 .. _Android application development: http://developer.android.com/training/index.html
+.. _android studio: http://wiki.ros.org/android/Android Studio
 
 Creating a new Android application
 ----------------------------------
 
-.. note:: This is still a work in progress. There are many obvious limitations
-  and the process will be improved in the near future.
+Refer to the `RosWiki`_ for tutorials.
 
-Currently, the easiest way to create a new application is to create your own
-package in the android_core stack by copying one of the tutorial packages (e.g.
-android_tutorial_pubsub).
-
-.. code-block:: bash
-
-  roscd android_core
-  cp -a android_tutorial_pubsub my_package
-
-After that, modify android_core/settings.gradle to include your new package.
-
-.. code-block:: bash
-
-  rosed android_core/settings.gradle
-  ./gradlew my_package:clean my_package:debug
-
-At this point, you may interact with your Android projects as described in the
-`Android documentation`_. Please start there if the following quick start
-instructions are insufficient for you.
-
-Use `Apache Ant`_ to install your new Android application:
-
-.. code-block:: bash
-
-  roscd my_package
-  ant installd
-
-You can also use ant to build the application. However, if you add, remove, or
-modify a dependency in the build.gradle file, you will need to execute the
-`gradle wrapper`_ as described above in order to update the Android
-application's external dependencies (located in the ``my_package/libs``
-directory).
-
-.. note:: You may also build and run your application from Eclipse. For more
-  information, see :doc:`building`.
-
-.. _Android documentation: http://developer.android.com/guide/developing/building/building-cmdline.html
-.. _Apache Ant: http://ant.apache.org/
-.. _gradle wrapper: http://gradle.org/docs/current/userguide/gradle_wrapper.html
+.. _RosWiki: http://wiki.ros.org/android
 
 .. _life-of-a-rosactivity:
 
