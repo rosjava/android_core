@@ -19,6 +19,7 @@ package org.ros.android;
 import com.google.common.base.Preconditions;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -26,15 +27,25 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Toast;
 import org.ros.android.android_10.R;
+import org.ros.exception.RosRuntimeException;
 import org.ros.node.NodeConfiguration;
 
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -63,19 +74,67 @@ public class MasterChooser extends Activity {
       "com.google.zxing.client.android.SCAN";
 
   private String masterUri;
+  private String selectedInterface;
   private EditText uriText;
+
+  private class StableArrayAdapter extends ArrayAdapter<String> {
+
+    HashMap<String, Integer> idMap = new HashMap<String, Integer>();
+
+    public StableArrayAdapter(Context context, int textViewResourceId, List<String> objects) {
+      super(context, textViewResourceId, objects);
+      for (int i = 0; i < objects.size(); ++i) {
+        idMap.put(objects.get(i), i);
+      }
+    }
+
+    @Override
+    public long getItemId(int position) {
+      String item = getItem(position);
+      return idMap.get(item);
+    }
+
+    @Override
+    public boolean hasStableIds() {
+      return true;
+    }
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.master_chooser);
     uriText = (EditText) findViewById(R.id.master_chooser_uri);
-    // Get the URI from preferences and display it. Since only primitive types
-    // can be saved in preferences the URI is stored as a string.
-    masterUri =
-        getPreferences(MODE_PRIVATE).getString(PREFS_KEY_NAME,
-            NodeConfiguration.DEFAULT_MASTER_URI.toString());
+    // Get the URI from preferences and display it. Since only primitive types can be saved in
+    // preferences the URI is stored as a string.
+    masterUri = getPreferences(MODE_PRIVATE).getString(PREFS_KEY_NAME, NodeConfiguration.DEFAULT_MASTER_URI.toString());
     uriText.setText(masterUri);
+
+    ListView interfacesList = (ListView) findViewById(R.id.networkInterfaces);
+    final List<String> list = new ArrayList<String>();
+
+    try {
+      for (NetworkInterface networkInterface : Collections.list(NetworkInterface.getNetworkInterfaces())) {
+        if (networkInterface.isUp() && !networkInterface.isLoopback()) {
+          list.add(networkInterface.getName());
+        }
+      }
+    } catch (SocketException e) {
+      throw new RosRuntimeException(e);
+    }
+
+    // Fallback to previous behaviour when no interface is selected.
+    selectedInterface = "";
+
+    final StableArrayAdapter adapter = new StableArrayAdapter(this, android.R.layout.simple_list_item_1, list);
+    interfacesList.setAdapter(adapter);
+
+    interfacesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+      @Override
+      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        selectedInterface = parent.getItemAtPosition(position).toString();
+      }
+    });
   }
 
   @Override
@@ -115,9 +174,7 @@ public class MasterChooser extends Activity {
     editor.putString(PREFS_KEY_NAME, masterUri);
     editor.commit();
     // Package the intent to be consumed by the calling activity.
-    Intent intent = new Intent();
-    intent.putExtra("NEW_MASTER", false);
-    intent.putExtra("ROS_MASTER_URI", masterUri);
+    Intent intent = createNewMasterIntent(false, true);
     setResult(RESULT_OK, intent);
     finish();
   }
@@ -127,8 +184,8 @@ public class MasterChooser extends Activity {
     intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
     // Check if the Barcode Scanner is installed.
     if (!isQRCodeReaderInstalled(intent)) {
-      // Open the Market and take them to the page from which they can download
-      // the Barcode Scanner app.
+      // Open the Market and take them to the page from which they can download the Barcode Scanner
+      // app.
       startActivity(new Intent(Intent.ACTION_VIEW,
           Uri.parse("market://details?id=com.google.zxing.client.android")));
     } else {
@@ -139,31 +196,30 @@ public class MasterChooser extends Activity {
 
   public void advancedCheckboxClicked(View view) {
     boolean checked = ((CheckBox) view).isChecked();
-    Button new_public_master = (Button) findViewById(R.id.master_chooser_new_master_button);
-    Button new_private_master = (Button) findViewById(R.id.master_chooser_new_private_master_button);
+    LinearLayout advancedOptions = (LinearLayout) findViewById(R.id.advancedOptions);
     if (checked) {
-      new_private_master.setVisibility(View.VISIBLE);
-      new_public_master.setVisibility(View.VISIBLE);
+      advancedOptions.setVisibility(View.VISIBLE);
     } else {
-      new_private_master.setVisibility(View.GONE);
-      new_public_master.setVisibility(View.GONE);
+      advancedOptions.setVisibility(View.GONE);
     }
   }
 
-  public Intent createNewMasterIntent (Boolean isPrivate) {
+  public Intent createNewMasterIntent(boolean newMaster, boolean isPrivate) {
     Intent intent = new Intent();
-    intent.putExtra("NEW_MASTER", true);
+    intent.putExtra("ROS_MASTER_CREATE_NEW", newMaster);
     intent.putExtra("ROS_MASTER_PRIVATE", isPrivate);
+    intent.putExtra("ROS_MASTER_URI", masterUri);
+    intent.putExtra("ROS_MASTER_NETWORK_INTERFACE", selectedInterface);
     return intent;
   }
 
   public void newMasterButtonClicked(View unused) {
-    setResult(RESULT_OK, createNewMasterIntent(false));
+    setResult(RESULT_OK, createNewMasterIntent(true, false));
     finish();
   }
 
   public void newPrivateMasterButtonClicked(View unused) {
-    setResult(RESULT_OK, createNewMasterIntent(true));
+    setResult(RESULT_OK, createNewMasterIntent(true, true));
     finish();
   }
 

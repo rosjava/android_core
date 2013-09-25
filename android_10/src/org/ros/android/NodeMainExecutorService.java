@@ -27,6 +27,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -37,6 +38,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 import org.ros.RosCore;
 import org.ros.android.android_10.R;
+import org.ros.address.InetAddressFactory;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
 import org.ros.exception.RosRuntimeException;
@@ -48,6 +50,7 @@ import org.ros.node.NodeMainExecutor;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -74,6 +77,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
   private WifiLock wifiLock;
   private RosCore rosCore;
   private URI masterUri;
+  private String rosHostname;
 
   /**
    * Class for clients to access. Because we know this service always runs in
@@ -87,6 +91,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
 
   public NodeMainExecutorService() {
     super();
+    rosHostname = null;
     nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
     binder = new LocalBinder();
     listeners =
@@ -230,6 +235,13 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
     masterUri = uri;
   }
 
+  public void setRosHostname(String hostname) {
+    rosHostname = hostname;
+  }
+
+  public String getRosHostname() {
+    return rosHostname;
+  }
   /**
    * This version of startMaster can only create private masters.
    *
@@ -240,9 +252,37 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
     startMaster(true);
   }
 
-  public void startMaster(Boolean isPrivate) {
+  /**
+   * Starts a new ros master in an AsyncTask.
+   * @param isPrivate
+   */
+  public void startMaster(boolean isPrivate) {
+    AsyncTask<Boolean, Void, URI> task = new AsyncTask<Boolean, Void, URI>() {
+      @Override
+      protected URI doInBackground(Boolean[] params) {
+        NodeMainExecutorService.this.startMasterBlocking(params[0]);
+        return NodeMainExecutorService.this.getMasterUri();
+      }
+    };
+    task.execute(isPrivate);
+    try {
+      task.get();
+    } catch (InterruptedException e) {
+      throw new RosRuntimeException(e);
+    } catch (ExecutionException e) {
+      throw new RosRuntimeException(e);
+    }
+  }
+
+  /**
+   * Private blocking method to start a Ros Master.
+   * @param isPrivate
+   */
+  private void startMasterBlocking(boolean isPrivate) {
     if (isPrivate) {
       rosCore = RosCore.newPrivate();
+    } else if (rosHostname != null) {
+      rosCore = RosCore.newPublic(rosHostname, 11311);
     } else {
       rosCore = RosCore.newPublic(11311);
     }

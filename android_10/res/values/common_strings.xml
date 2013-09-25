@@ -9,6 +9,7 @@
     <string name="new_master">New Public Master</string>
     <string name="new_private_master">New Private Master</string>
     <string name="show_advanced">Show advanced options</string>
+    <string name="select_interface">Select network interface</string>
     <string name="uri_text">Robot URI:</string>
 
 </resources>
