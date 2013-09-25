@@ -31,7 +31,7 @@ development of data driven Android UIs (e.g.
 android_gingerbread_mr1 library project
 ---------------------------------------
 
-android_gingerbread_mr1 (API level 9) is the lowest API level supported. It
+android_gingerbread_mr1 (API level 10) is the lowest API level supported. It
 provides the base `Activity`_ (:javadoc:`org.ros.android.RosActivity`) and
 `Service`_ (:javadoc:`org.ros.android.NodeMainExecutorService`) for executing
 and managing the lifecycle of your :javadoc:`org.ros.node.NodeMain`\s.
