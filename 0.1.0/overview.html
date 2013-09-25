@@ -1,0 +1,119 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Overview &mdash; android_core 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/theme_extras.js"></script>
+    <link rel="top" title="android_core 0.1.0 documentation" href="index.html" />
+    <link rel="next" title="Installing" href="installing.html" />
+    <link rel="prev" title="android_core" href="index.html" /> 
+  </head>
+  <body>
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>android_core 0.1.0 documentation</span></a></h1>
+        <h2 class="heading"><span>Overview</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="index.html">android_core</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="installing.html">Installing</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<p>The android_core stack is currently under active development. Consider all
+APIs and documentation to be volatile.</p>
+<p><a class="reference external" href="javadoc/index.html">Javadoc</a> is used extensively and cross referenced from
+this documentation.</p>
+<div class="section" id="ros-enabling-android-applications">
+<h2>ROS-enabling Android applications<a class="headerlink" href="#ros-enabling-android-applications" title="Permalink to this headline">¶</a></h2>
+<p>android_core provides <a class="reference external" href="http://developer.android.com/guide/developing/projects/index.html#LibraryProjects">Android Library Projects</a> to help you write ROS
+applications for Android. The library projects are named for the <a class="reference external" href="http://developer.android.com/guide/appendix/api-levels.html">Android API
+level</a> they require (e.g. android_gingerbread_mr1 and android_honeycomb_mr2).
+Each class or feature is defined in the library project that represents the
+minimum version of Android required for it to work.</p>
+<p>Your application can depend on multiple library projects. This allows you to
+easily target your application for different API levels.</p>
+<p>Beyond specific features, android_core defines the pattern of combining the
+Android <a class="reference external" href="http://developer.android.com/reference/android/view/View.html">View</a> and <a class="reference external" href="javadoc/org/ros/node/NodeMain.html#">NodeMain</a> concepts to enable the
+development of data driven Android UIs (e.g.
+<a class="reference external" href="javadoc/org/ros/android/view/RosTextView.html#">RosTextView</a>).</p>
+</div>
+<div class="section" id="android-gingerbread-mr1-library-project">
+<h2>android_gingerbread_mr1 library project<a class="headerlink" href="#android-gingerbread-mr1-library-project" title="Permalink to this headline">¶</a></h2>
+<p>android_gingerbread_mr1 (API level 10) is the lowest API level supported. It
+provides the base <a class="reference external" href="http://developer.android.com/reference/android/app/Activity.html">Activity</a> (<a class="reference external" href="javadoc/org/ros/android/RosActivity.html#">RosActivity</a>) and
+<a class="reference external" href="http://developer.android.com/reference/android/app/Service.html">Service</a> (<a class="reference external" href="javadoc/org/ros/android/NodeMainExecutorService.html#">NodeMainExecutorService</a>) for executing
+and managing the lifecycle of your <a class="reference external" href="javadoc/org/ros/node/NodeMain.html#">NodeMain</a>s.</p>
+<p>A few of the other features provided include:</p>
+<ul class="simple">
+<li>camera publisher</li>
+<li>image view</li>
+<li>orientation publisher</li>
+</ul>
+</div>
+<div class="section" id="android-honeycomb-mr2-library-project">
+<h2>android_honeycomb_mr2 library project<a class="headerlink" href="#android-honeycomb-mr2-library-project" title="Permalink to this headline">¶</a></h2>
+<p>android_honeycomb_mr2 (API level 13) provides features that require multitouch
+and other APIs that are only available in devices with Android Honeycomb MR2 or
+higher.</p>
+<p>A few of the features provided include:</p>
+<ul class="simple">
+<li>2D mapping and navigation</li>
+<li>2D laser scan visualization</li>
+<li>virtual joystick</li>
+</ul>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="index.html">android_core</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="installing.html">Installing</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, Google, Inc..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

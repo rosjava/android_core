@@ -1,0 +1,139 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting started &mdash; android_core 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/theme_extras.js"></script>
+    <link rel="top" title="android_core 0.1.0 documentation" href="index.html" />
+    <link rel="prev" title="Building" href="building.html" /> 
+  </head>
+  <body>
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>android_core 0.1.0 documentation</span></a></h1>
+        <h2 class="heading"><span>Getting started</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="building.html">Building</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="getting-started">
+<span id="id1"></span><h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p>Before diving into ROS enabled Android application development, you should be
+familiar with <em class="xref std std-ref">rosjava</em> and <a class="reference external" href="http://developer.android.com/training/index.html">Android
+application development</a> in general. Note that any information regarding
+command-line adt and eclipse development is depracating - we have moved early
+to a gradle-<a class="reference external" href="http://wiki.ros.org/android/AndroidStudio">android studio</a> environment.</p>
+<div class="section" id="creating-a-new-android-application">
+<h2>Creating a new Android application<a class="headerlink" href="#creating-a-new-android-application" title="Permalink to this headline">¶</a></h2>
+<p>Refer to the <a class="reference external" href="http://wiki.ros.org/android">RosWiki</a> for tutorials.</p>
+</div>
+<div class="section" id="using-rosactivity">
+<span id="life-of-a-rosactivity"></span><h2>Using RosActivity<a class="headerlink" href="#using-rosactivity" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference external" href="javadoc/org/ros/android/RosActivity.html#">RosActivity</a> class is the base class for all of
+your ROS enabled Android applications. Let&#8217;s consider the following example
+from the android_tutorial_pubsub package. In this example, we create a
+<a class="reference external" href="javadoc/org/ros/node/topic/Publisher.html#">Publisher</a> and a
+<a class="reference external" href="javadoc/org/ros/node/topic/Subscriber.html#">Subscriber</a> that will exchange &#8220;Hello, World&#8221;
+messages.</p>
+<p>On line 14, we extend <a class="reference external" href="javadoc/org/ros/android/RosActivity.html#">RosActivity</a>.  When our
+<a class="reference external" href="http://developer.android.com/reference/android/app/Activity.html">activity</a> starts, the <a class="reference external" href="javadoc/org/ros/android/RosActivity.html#">RosActivity</a> super class will:</p>
+<ul class="simple">
+<li>start the <a class="reference external" href="javadoc/org/ros/android/NodeMainExecutorService.html#">NodeMainExecutorService</a> as a <a class="reference external" href="http://developer.android.com/reference/android/app/Service.html">service</a>
+in the <a class="reference external" href="http://developer.android.com/reference/android/app/Service.html#startForeground(int,android.app.Notification)">foreground</a>,</li>
+<li>launch the <a class="reference external" href="javadoc/org/ros/android/MasterChooser.html#">MasterChooser</a> activity to prompt the
+user to configure a master URI,</li>
+<li>and display an ongoing <a class="reference external" href="http://developer.android.com/reference/android/app/Notification.html">notification</a> informing the user that ROS nodes are
+running in the background.</li>
+</ul>
+<p>On line 22 we call the super constructor with two strings that become the title
+and ticker message of an Android <a class="reference external" href="http://developer.android.com/reference/android/app/Notification.html">notification</a>. The user may tap on the
+notification to shut down all ROS nodes associated with the application.</p>
+<p>Lines 28-30 should look familiar to Android developers. We load the <a class="reference external" href="http://developer.android.com/reference/android/app/Activity.html">activity</a>
+layout and get a reference to our
+<a class="reference external" href="javadoc/org/ros/android/view/RosTextView.html#">RosTextView</a> (more on that later).</p>
+<p>On line 42 we define the abstract method
+<a class="reference external" href="javadoc/org/ros/android/RosActivity.html#init(org.ros.node.NodeMainExecutor)">RosActivity.init</a>.
+This is where we kick off our <a class="reference external" href="javadoc/org/ros/node/NodeMain.html#">NodeMain</a>s and other
+business logic.</p>
+<p>And that&#8217;s it. <a class="reference external" href="javadoc/org/ros/android/RosActivity.html#">RosActivity</a> handles the rest of the
+application&#8217;s lifecycle management including:</p>
+<ul class="simple">
+<li>acquiring and releasing <a class="reference external" href="http://developer.android.com/reference/android/os/PowerManager.WakeLock.html">WakeLocks</a> and <a class="reference external" href="http://developer.android.com/reference/android/net/wifi/WifiManager.WifiLock.html">WifiLocks</a>,</li>
+<li>binding and unbinding the <a class="reference external" href="javadoc/org/ros/android/NodeMainExecutorService.html#">NodeMainExecutorService</a>,</li>
+<li>and shutting down <a class="reference external" href="javadoc/org/ros/node/NodeMain.html#">NodeMain</a>s when the application exits.</li>
+</ul>
+</div>
+<div class="section" id="nodes-and-views">
+<h2>Nodes and Views<a class="headerlink" href="#nodes-and-views" title="Permalink to this headline">¶</a></h2>
+<p>The android_core stack provides a number of Android <a class="reference external" href="http://developer.android.com/reference/android/view/View.html">Views</a> which implement
+<a class="reference external" href="javadoc/org/ros/node/NodeMain.html#">NodeMain</a>. For example, let&#8217;s look at the implementation
+of <a class="reference external" href="javadoc/org/ros/android/view/RosTextView.html#">RosTextView</a>. The intent of this view is
+to display the textual representation of published messages.</p>
+<p>The view is configured with a topic name, message type, and a
+<a class="reference external" href="javadoc/org/ros/android/MessageCallable.html#">MessageCallable</a>. On line 40, in the
+<a class="reference external" href="javadoc/org/ros/node/NodeMain.html#onStart(Node)">NodeMain.onStart</a> method, we create a new
+<a class="reference external" href="javadoc/org/ros/node/topic/Subscriber.html#">Subscriber</a> for the configured topic and message
+type.</p>
+<p>When a new message arrives, we either use the configured callable to transform
+the incoming message to a string (line 49), or we use the default
+<tt class="docutils literal"><span class="pre">toString()</span></tt> method if no callable was configured (line 56). We then set the
+text of the view to the string representation of the incoming message.</p>
+<p>As with any other <a class="reference external" href="javadoc/org/ros/node/NodeMain.html#">NodeMain</a>, the
+<a class="reference external" href="javadoc/org/ros/android/view/RosTextView.html#">RosTextView</a> must be executed by the
+<a class="reference external" href="javadoc/org/ros/node/NodeMainExecutor.html#">NodeMainExecutor</a>. In the <a class="reference internal" href="#life-of-a-rosactivity"><em>Using RosActivity</em></a>
+example, we execute it in
+<a class="reference external" href="javadoc/org/ros/android/RosActivity.html#init(NodeMainExecutor)">RosActivity.init</a> and use the it to
+display incoming messages from the
+<a class="reference external" href="javadoc/org/ros/rosjava_tutorial_pubsub/Talker.html#">Talker</a> node.</p>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="building.html">Building</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, Google, Inc..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
