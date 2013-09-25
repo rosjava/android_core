@@ -17,6 +17,7 @@
 package org.ros.android.android_tutorial_pubsub;
 
 import android.os.Bundle;
+
 import org.ros.android.MessageCallable;
 import org.ros.android.RosActivity;
 import org.ros.android.view.RosTextView;
@@ -57,9 +58,13 @@ public class MainActivity extends RosActivity {
   @Override
   protected void init(NodeMainExecutor nodeMainExecutor) {
     talker = new Talker();
-    NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate();
+
     // At this point, the user has already been prompted to either enter the URI
     // of a master to use or to start a master locally.
+
+    // The user can easily use the selected ROS Hostname in the master chooser
+    // activity.
+    NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(getRosHostname());
     nodeConfiguration.setMasterUri(getMasterUri());
     nodeMainExecutor.execute(talker, nodeConfiguration);
     // The RosTextView is also a NodeMain that must be executed in order to
