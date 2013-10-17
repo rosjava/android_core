@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  package="org.ros.android.android_ice_cream_sandwich"
+  android:versionCode="1"
+  android:versionName="1.0">
+  <uses-sdk android:minSdkVersion="14" />
+
+  <!-- 
+    You shouldn't need an application tag for a library, but this is a 
+    workaround to get past a gradle android plugin bug in 0.4.
+    
+    It should disappear in 0.5
+  -->
+  <application />
+</manifest>

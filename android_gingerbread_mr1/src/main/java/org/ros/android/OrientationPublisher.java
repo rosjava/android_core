@@ -20,7 +20,12 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.SystemClock;
+
 import geometry_msgs.PoseStamped;
+import geometry_msgs.Quaternion;
+import std_msgs.Header;
+
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
@@ -54,13 +59,17 @@ public class OrientationPublisher extends AbstractNodeMain {
         float[] quaternion = new float[4];
         SensorManager.getQuaternionFromVector(quaternion, event.values);
         PoseStamped pose = publisher.newMessage();
-        pose.getHeader().setFrameId("/map");
-        // TODO(damonkohler): Should get time from the Node.
+        Header header = pose.getHeader();
+        header.setFrameId("android_orientation_link");
+        // Convert event.timestamp (nanoseconds uptime) into system time, use that as the header stamp
+        long time_delta_millis = System.currentTimeMillis() - SystemClock.uptimeMillis();
+        header.setStamp(Time.fromMillis(time_delta_millis + event.timestamp / 1000000));
         pose.getHeader().setStamp(Time.fromMillis(System.currentTimeMillis()));
-        pose.getPose().getOrientation().setW(quaternion[0]);
-        pose.getPose().getOrientation().setX(quaternion[1]);
-        pose.getPose().getOrientation().setY(quaternion[2]);
-        pose.getPose().getOrientation().setZ(quaternion[3]);
+        Quaternion q = pose.getPose().getOrientation();
+        q.setW(quaternion[0]);
+        q.setX(quaternion[1]);
+        q.setY(quaternion[2]);
+        q.setZ(quaternion[3]);
         publisher.publish(pose);
       }
     }
@@ -72,7 +81,7 @@ public class OrientationPublisher extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return GraphName.of("android/orientiation_sensor");
+    return GraphName.of("android/orientation_publisher");
   }
 
   @Override
