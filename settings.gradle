@@ -14,7 +14,7 @@
  * the License.
  */
 
-include 'android_gingerbread_mr1', 'android_benchmarks', 'android_tutorial_camera',
+include 'android_10', 'android_benchmarks', 'android_tutorial_camera',
         'android_tutorial_image_transport', 'android_tutorial_pubsub' 
 include 'android_honeycomb_mr2', 'android_acm_serial', 'android_tutorial_map_viewer',
         'android_tutorial_teleop'

@@ -16,7 +16,7 @@
 
 dependencies {
   compile 'org.ros.rosjava_core:rosjava_benchmarks:0.1.+'
-  compile project(':android_gingerbread_mr1')
+  compile project(':android_10')
 }
 
 apply plugin: 'android'

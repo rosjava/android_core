@@ -30,7 +30,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
-import org.ros.android.android_gingerbread_mr1.R;
+import org.ros.android.android_10.R;
 import org.ros.node.NodeConfiguration;
 
 import java.net.URI;
