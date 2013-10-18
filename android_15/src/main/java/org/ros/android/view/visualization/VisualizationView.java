@@ -74,7 +74,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return GraphName.of("android_honeycomb_mr2/visualization_view");
+    return GraphName.of("android_15/visualization_view");
   }
 
   @Override

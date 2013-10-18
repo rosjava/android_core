@@ -31,7 +31,7 @@ import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import org.ros.android.android_honeycomb_mr2.R;
+import org.ros.android.android_15.R;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
@@ -926,7 +926,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
 
   @Override
   public GraphName getDefaultNodeName() {
-    return GraphName.of("android_honeycomb_mr2/virtual_joystick_view");
+    return GraphName.of("android_15/virtual_joystick_view");
   }
 
   @Override

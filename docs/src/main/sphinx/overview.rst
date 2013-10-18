@@ -12,7 +12,7 @@ ROS-enabling Android applications
 
 android_core provides `Android Library Projects`_ to help you write ROS
 applications for Android. The library projects are named for the `Android API
-level`_ they require (e.g. android_10 and android_honeycomb_mr2).
+level`_ they require (e.g. android_10 and android_15).
 Each class or feature is defined in the library project that represents the
 minimum version of Android required for it to work.
 
@@ -45,10 +45,10 @@ A few of the other features provided include:
 .. _Activity: http://developer.android.com/reference/android/app/Activity.html
 .. _Service: http://developer.android.com/reference/android/app/Service.html
 
-android_honeycomb_mr2 library project
+android_15 library project
 -------------------------------------
 
-android_honeycomb_mr2 (API level 13) provides features that require multitouch
+android_15 (API level 13) provides features that require multitouch
 and other APIs that are only available in devices with Android Honeycomb MR2 or
 higher.
 

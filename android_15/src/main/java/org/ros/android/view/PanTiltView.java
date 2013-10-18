@@ -25,7 +25,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import org.ros.android.android_honeycomb_mr2.R;
+import org.ros.android.android_15.R;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
@@ -507,7 +507,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
 
   @Override
   public GraphName getDefaultNodeName() {
-    return GraphName.of("android_honeycomb_mr2/pan_tilt_view");
+    return GraphName.of("android_15/pan_tilt_view");
   }
 
   @Override

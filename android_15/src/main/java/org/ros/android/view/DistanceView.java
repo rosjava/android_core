@@ -99,7 +99,7 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
 
   @Override
   public GraphName getDefaultNodeName() {
-    return GraphName.of("android_honeycomb_mr2/distance_view");
+    return GraphName.of("android_15/distance_view");
   }
 
   @Override
