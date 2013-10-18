@@ -15,6 +15,7 @@
  */
 
 dependencies {
+  compile 'com.android.support:support-v4:18.0.+'
   compile 'org.ros.rosjava_core:rosjava_geometry:0.1.+'
   compile project(':android_gingerbread_mr1')
 }
@@ -22,5 +23,13 @@ dependencies {
 apply plugin: 'android-library'
 
 android {
-    compileSdkVersion 13
+  compileSdkVersion 15
+
+  defaultConfig {
+    minSdkVersion 15
+    packageName "org.ros.android.android_honeycomb_mr2"
+    targetSdkVersion 15
+    versionCode 1
+    versionName "1.0"
+  }
 }

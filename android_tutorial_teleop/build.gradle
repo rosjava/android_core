@@ -21,5 +21,13 @@ dependencies {
 apply plugin: 'android'
 
 android {
-    compileSdkVersion 13
+  compileSdkVersion 15
+
+  defaultConfig {
+    minSdkVersion 15
+    packageName "org.ros.android.android_tutorial_teleop"
+    targetSdkVersion 15
+    versionCode 1
+    versionName "1.0"
+  }
 }

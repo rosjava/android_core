@@ -21,6 +21,13 @@ dependencies {
 apply plugin: 'android'
 
 android {
-    compileSdkVersion 10
-}
+  compileSdkVersion 10
 
+  defaultConfig {
+    minSdkVersion 10
+    packageName "org.ros.android.android_tutorial_image_transport"
+    targetSdkVersion 10
+    versionCode 1
+    versionName "1.0"
+  }
+}
