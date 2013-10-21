@@ -17,6 +17,7 @@
 package org.ros.android.android_tutorial_pubsub;
 
 import android.os.Bundle;
+import org.ros.address.InetAddressFactory;
 import org.ros.android.MessageCallable;
 import org.ros.android.RosActivity;
 import org.ros.android.view.RosTextView;
@@ -57,10 +58,11 @@ public class MainActivity extends RosActivity {
   @Override
   protected void init(NodeMainExecutor nodeMainExecutor) {
     talker = new Talker();
-    NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate();
     // At this point, the user has already been prompted to either enter the URI
     // of a master to use or to start a master locally.
-    nodeConfiguration.setMasterUri(getMasterUri());
+    String host = InetAddressFactory.newNonLoopback().getHostName();
+    NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(host, getMasterUri());
+
     nodeMainExecutor.execute(talker, nodeConfiguration);
     // The RosTextView is also a NodeMain that must be executed in order to
     // start displaying incoming messages.
