@@ -20,7 +20,7 @@ import com.google.common.base.Preconditions;
 
 import android.os.Handler;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.ros.android.view.visualization.Camera;
+import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.TextureBitmap;
 import org.ros.internal.message.MessageBuffers;
 import org.ros.message.MessageListener;
@@ -88,7 +88,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
 
   @Override
   public void onStart(ConnectedNode connectedNode, Handler handler,
-      FrameTransformTree frameTransformTree, Camera camera) {
+      FrameTransformTree frameTransformTree, XYOrthographicCamera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
     previousGl = null;
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.OccupancyGrid>() {

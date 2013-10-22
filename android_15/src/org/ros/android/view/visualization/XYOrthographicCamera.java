@@ -31,7 +31,7 @@ import javax.microedition.khronos.opengles.GL10;
  * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public class Camera {
+public class XYOrthographicCamera {
 
   /**
    * Pixels per meter in the world. If zoom is set to the number of pixels per
@@ -64,7 +64,7 @@ public class Camera {
    */
   private FrameName frame;
 
-  public Camera(FrameTransformTree frameTransformTree) {
+  public XYOrthographicCamera(FrameTransformTree frameTransformTree) {
     this.frameTransformTree = frameTransformTree;
     mutex = new Object();
     resetTransform();
@@ -81,7 +81,7 @@ public class Camera {
     }
   }
 
-    public boolean applyFrameTransform(GL10 gl, FrameName frame) {
+  public boolean applyFrameTransform(GL10 gl, FrameName frame) {
     Preconditions.checkNotNull(frame);
     if (this.frame != null) {
       FrameTransform frameTransform = frameTransformTree.transform(frame, this.frame);
@@ -95,11 +95,9 @@ public class Camera {
 
   /**
    * Translates the camera.
-   * 
-   * @param deltaX
-   *          distance to move in x in pixels
-   * @param deltaY
-   *          distance to move in y in pixels
+   *
+   * @param deltaX distance to move in x in pixels
+   * @param deltaY distance to move in y in pixels
    */
   public void translate(double deltaX, double deltaY) {
     synchronized (mutex) {
@@ -109,32 +107,25 @@ public class Camera {
 
   /**
    * Rotates the camera round the specified coordinates.
-   * 
-   * @param focusX
-   *          the x coordinate to focus on
-   * @param focusY
-   *          the y coordinate to focus on
-   * @param deltaAngle
-   *          the camera will be rotated by {@code deltaAngle} radians
+   *
+   * @param focusX     the x coordinate to focus on
+   * @param focusY     the y coordinate to focus on
+   * @param deltaAngle the camera will be rotated by {@code deltaAngle} radians
    */
   public void rotate(double focusX, double focusY, double deltaAngle) {
     synchronized (mutex) {
       Transform focus = Transform.translation(toMetricCoordinates((int) focusX, (int) focusY));
-      transform =
-          transform.multiply(focus).multiply(Transform.zRotation(deltaAngle))
-              .multiply(focus.invert());
+      transform = transform.multiply(focus).multiply(Transform.zRotation(deltaAngle))
+          .multiply(focus.invert());
     }
   }
 
   /**
    * Zooms the camera around the specified focus coordinates.
-   * 
-   * @param focusX
-   *          the x coordinate to focus on
-   * @param focusY
-   *          the y coordinate to focus on
-   * @param factor
-   *          the zoom will be scaled by this factor
+   *
+   * @param focusX the x coordinate to focus on
+   * @param focusY the y coordinate to focus on
+   * @param factor the zoom will be scaled by this factor
    */
   public void zoom(double focusX, double focusY, double factor) {
     synchronized (mutex) {
@@ -153,7 +144,7 @@ public class Camera {
 
   /**
    * @return the metric coordinates of the provided pixel coordinates where the
-   *         origin is the top left corner of the view
+   * origin is the top left corner of the view
    */
   public Vector3 toMetricCoordinates(int x, int y) {
     double centeredX = x - viewport.getWidth() / 2.0d;
@@ -167,11 +158,10 @@ public class Camera {
 
   /**
    * Changes the camera frame to the specified frame.
-   * <p>
+   * <p/>
    * If possible, the camera will avoid jumping on the next frame.
-   * 
-   * @param frame
-   *          the new camera frame
+   *
+   * @param frame the new camera frame
    */
   public void setFrame(FrameName frame) {
     Preconditions.checkNotNull(frame);
@@ -198,9 +188,8 @@ public class Camera {
   /**
    * Changes the camera frame to the specified frame and aligns the camera with
    * the new frame.
-   * 
-   * @param frame
-   *          the new camera frame
+   *
+   * @param frame the new camera frame
    */
   public void jumpToFrame(FrameName frame) {
     synchronized (mutex) {

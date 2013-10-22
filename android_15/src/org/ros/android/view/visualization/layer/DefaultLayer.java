@@ -18,7 +18,7 @@ package org.ros.android.view.visualization.layer;
 
 import android.os.Handler;
 import android.view.MotionEvent;
-import org.ros.android.view.visualization.Camera;
+import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
@@ -44,7 +44,7 @@ public abstract class DefaultLayer implements Layer {
 
   @Override
   public void onStart(ConnectedNode connectedNode, Handler handler,
-      FrameTransformTree frameTransformTree, Camera camera) {
+      FrameTransformTree frameTransformTree, XYOrthographicCamera camera) {
   }
 
   @Override

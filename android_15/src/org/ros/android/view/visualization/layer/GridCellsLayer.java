@@ -17,7 +17,7 @@
 package org.ros.android.view.visualization.layer;
 
 import android.os.Handler;
-import org.ros.android.view.visualization.Camera;
+import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.Color;
 import org.ros.android.view.visualization.Vertices;
 import org.ros.message.MessageListener;
@@ -40,7 +40,7 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
   private final Lock lock;
 
   private FrameName frame;
-  private Camera camera;
+  private XYOrthographicCamera camera;
   private boolean ready;
   private nav_msgs.GridCells message;
 
@@ -84,7 +84,7 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
 
   @Override
   public void onStart(ConnectedNode connectedNode, Handler handler,
-      final FrameTransformTree frameTransformTree, Camera camera) {
+      final FrameTransformTree frameTransformTree, XYOrthographicCamera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
     this.camera = camera;
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.GridCells>() {

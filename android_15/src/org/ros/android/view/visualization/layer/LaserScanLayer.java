@@ -16,20 +16,21 @@
 
 package org.ros.android.view.visualization.layer;
 
-import org.ros.android.view.visualization.Camera;
 import org.ros.android.view.visualization.Color;
 import org.ros.android.view.visualization.Vertices;
+import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
-import org.ros.rosjava_geometry.FrameTransformTree;
 import org.ros.rosjava_geometry.FrameName;
-import sensor_msgs.LaserScan;
+import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
+
+import sensor_msgs.LaserScan;
 
 /**
  * A {@link SubscriberLayer} that visualizes sensor_msgs/LaserScan messages.
@@ -47,7 +48,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
   private final Object mutex;
 
   private FrameName frame;
-  private Camera camera;
+  private XYOrthographicCamera camera;
   private FloatBuffer vertexFrontBuffer;
   private FloatBuffer vertexBackBuffer;
 
@@ -77,7 +78,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
 
   @Override
   public void onStart(ConnectedNode connectedNode, android.os.Handler handler,
-      FrameTransformTree frameTransformTree, Camera camera) {
+      FrameTransformTree frameTransformTree, XYOrthographicCamera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
     this.camera = camera;
     Subscriber<LaserScan> subscriber = getSubscriber();

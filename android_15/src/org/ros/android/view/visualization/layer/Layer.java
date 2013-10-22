@@ -18,7 +18,7 @@ package org.ros.android.view.visualization.layer;
 
 import android.os.Handler;
 import android.view.MotionEvent;
-import org.ros.android.view.visualization.Camera;
+import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.OpenGlDrawable;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.node.ConnectedNode;
@@ -47,7 +47,7 @@ public interface Layer extends OpenGlDrawable {
    * Called when the layer is registered at the navigation view.
    */
   void onStart(ConnectedNode connectedNode, Handler handler, FrameTransformTree frameTransformTree,
-      Camera camera);
+      XYOrthographicCamera camera);
 
   /**
    * Called when the view is removed from the view.

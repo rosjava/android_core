@@ -23,6 +23,7 @@ import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+
 import org.ros.android.view.visualization.layer.Layer;
 import org.ros.exception.RosRuntimeException;
 import org.ros.message.MessageListener;
@@ -45,8 +46,10 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   private static final boolean DEBUG = false;
 
   private final FrameTransformTree frameTransformTree = new FrameTransformTree();
-  private final Camera camera = new Camera(frameTransformTree);
-  private final XYOrthographicRenderer renderer = new XYOrthographicRenderer(camera);
+  private final XYOrthographicCamera camera = new XYOrthographicCamera(
+      frameTransformTree);
+  private final XYOrthographicRenderer renderer = new XYOrthographicRenderer(
+      camera);
   private final List<Layer> layers = Lists.newArrayList();
   private final CountDownLatch attachedToWindow = new CountDownLatch(1);
 
@@ -84,14 +87,14 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
         return true;
       }
     }
-    return false;
+    return super.onTouchEvent(event);
   }
 
   public XYOrthographicRenderer getRenderer() {
     return renderer;
   }
 
-  public Camera getCamera() {
+  public XYOrthographicCamera getCamera() {
     return camera;
   }
 
@@ -136,7 +139,8 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   }
 
   private void startTransformListener() {
-    Subscriber<tf2_msgs.TFMessage> tfSubscriber = connectedNode.newSubscriber("tf", tf2_msgs.TFMessage._TYPE); // tf.tfMessage
+    Subscriber<tf2_msgs.TFMessage> tfSubscriber = connectedNode.newSubscriber(
+        "tf", tf2_msgs.TFMessage._TYPE);
     tfSubscriber.addMessageListener(new MessageListener<tf2_msgs.TFMessage>() {
       @Override
       public void onNewMessage(tf2_msgs.TFMessage message) {

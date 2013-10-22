@@ -22,7 +22,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import org.ros.android.view.visualization.Camera;
+import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.android.view.visualization.shape.PoseShape;
 import org.ros.android.view.visualization.shape.Shape;
@@ -49,7 +49,7 @@ public class PosePublisherLayer extends DefaultLayer {
   private GraphName topic;
   private GestureDetector gestureDetector;
   private Transform pose;
-  private Camera camera;
+  private XYOrthographicCamera camera;
   private ConnectedNode connectedNode;
 
   public PosePublisherLayer(String topic, Context context) {
@@ -102,7 +102,7 @@ public class PosePublisherLayer extends DefaultLayer {
 
   @Override
   public void onStart(ConnectedNode connectedNode, Handler handler,
-      FrameTransformTree frameTransformTree, final Camera camera) {
+      FrameTransformTree frameTransformTree, final XYOrthographicCamera camera) {
     this.connectedNode = connectedNode;
     this.camera = camera;
     shape = new PoseShape(camera);

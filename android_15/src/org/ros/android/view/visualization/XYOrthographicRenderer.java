@@ -39,9 +39,9 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
    */
   private List<Layer> layers;
 
-  private Camera camera;
+  private XYOrthographicCamera camera;
 
-  public XYOrthographicRenderer(Camera camera) {
+  public XYOrthographicRenderer(XYOrthographicCamera camera) {
     this.camera = camera;
   }
 

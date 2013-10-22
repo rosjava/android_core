@@ -17,7 +17,7 @@
 package org.ros.android.view.visualization.layer;
 
 import android.os.Handler;
-import org.ros.android.view.visualization.Camera;
+import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.shape.RobotShape;
 import org.ros.android.view.visualization.shape.Shape;
 import org.ros.node.ConnectedNode;
@@ -50,7 +50,7 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
 
   @Override
   public void onStart(ConnectedNode connectedNode, Handler handler,
-      final FrameTransformTree frameTransformTree, final Camera camera) {
+      final FrameTransformTree frameTransformTree, final XYOrthographicCamera camera) {
   }
 
   @Override

@@ -22,7 +22,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.ros.android.view.visualization.Camera;
+import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.TextureBitmap;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
@@ -84,7 +84,7 @@ public class CompressedOccupancyGridLayer extends SubscriberLayer<nav_msgs.Occup
 
   @Override
   public void onStart(ConnectedNode connectedNode, Handler handler,
-      FrameTransformTree frameTransformTree, Camera camera) {
+      FrameTransformTree frameTransformTree, XYOrthographicCamera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.OccupancyGrid>() {
       @Override

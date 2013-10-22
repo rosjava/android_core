@@ -20,7 +20,7 @@ import org.ros.android.view.visualization.Color;
 
 import android.os.Handler;
 import geometry_msgs.PoseStamped;
-import org.ros.android.view.visualization.Camera;
+import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
@@ -71,7 +71,7 @@ public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer
 
   @Override
   public void onStart(ConnectedNode connectedNode, Handler handler, FrameTransformTree frameTransformTree,
-      Camera camera) {
+      XYOrthographicCamera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.Path>() {
       @Override

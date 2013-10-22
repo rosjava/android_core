@@ -16,9 +16,9 @@
 
 package org.ros.android.view.visualization.shape;
 
-import org.ros.android.view.visualization.Camera;
-
 import javax.microedition.khronos.opengles.GL10;
+
+import org.ros.android.view.visualization.XYOrthographicCamera;
 
 /**
  * Represents the pose that will be published.
@@ -30,9 +30,9 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class PoseShape extends GoalShape {
 
-  private final Camera camera;
+  private final XYOrthographicCamera camera;
 
-  public PoseShape(Camera camera) {
+  public PoseShape(XYOrthographicCamera camera) {
     this.camera = camera;
   }
 

@@ -17,7 +17,7 @@
 package org.ros.android.view.visualization.layer;
 
 import android.os.Handler;
-import org.ros.android.view.visualization.Camera;
+import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.shape.GoalShape;
 import org.ros.android.view.visualization.shape.Shape;
 import org.ros.message.MessageListener;
@@ -60,7 +60,7 @@ public class PoseSubscriberLayer extends SubscriberLayer<geometry_msgs.PoseStamp
 
   @Override
   public void onStart(ConnectedNode connectedNode, Handler handler,
-      final FrameTransformTree frameTransformTree, Camera camera) {
+      final FrameTransformTree frameTransformTree, XYOrthographicCamera camera) {
     super.onStart(connectedNode, handler, frameTransformTree, camera);
     shape = new GoalShape();
     getSubscriber().addMessageListener(new MessageListener<geometry_msgs.PoseStamped>() {
