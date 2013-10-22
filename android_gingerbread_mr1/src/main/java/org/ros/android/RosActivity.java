@@ -31,6 +31,8 @@ import org.ros.exception.RosRuntimeException;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.ExecutionException;
@@ -146,15 +148,20 @@ public abstract class RosActivity extends Activity {
     if (resultCode == RESULT_OK) {
       if (requestCode == MASTER_CHOOSER_REQUEST_CODE) {
         String host;
-        String networkInterface = data.getStringExtra("NETWORK_INTERFACE");
+        String networkInterfaceName = data.getStringExtra("ROS_MASTER_NETWORK_INTERFACE");
         // Handles the default selection and prevents possible errors
-        if (networkInterface == null || networkInterface.equals("")) {
+        if (networkInterfaceName == null || networkInterfaceName.equals("")) {
             host = InetAddressFactory.newNonLoopback().getHostAddress();
         } else {
-            host = InetAddressFactory.newNonLoopback(networkInterface).getHostAddress();
+            try {
+                NetworkInterface networkInterface = NetworkInterface.getByName(networkInterfaceName);
+                host = InetAddressFactory.newNonLoopbackForNetworkInterface(networkInterface).getHostAddress();
+            } catch (SocketException e) {
+                throw new RosRuntimeException(e);
+            }
         }
         nodeMainExecutorService.setRosHostname(host);
-        if (data.getBooleanExtra("NEW_MASTER", false)) {
+        if (data.getBooleanExtra("ROS_MASTER_CREATE_NEW", false)) {
           AsyncTask<Boolean, Void, URI> task = new AsyncTask<Boolean, Void, URI>() {
             @Override
             protected URI doInBackground(Boolean[] params) {

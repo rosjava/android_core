@@ -43,6 +43,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -80,20 +81,20 @@ public class MasterChooser extends Activity {
 
   private class StableArrayAdapter extends ArrayAdapter<String> {
 
-    HashMap<String, Integer> mIdMap = new HashMap<String, Integer>();
+    HashMap<String, Integer> idMap = new HashMap<String, Integer>();
 
     public StableArrayAdapter(Context context, int textViewResourceId,
                               List<String> objects) {
       super(context, textViewResourceId, objects);
       for (int i = 0; i < objects.size(); ++i) {
-        mIdMap.put(objects.get(i), i);
+        idMap.put(objects.get(i), i);
       }
     }
 
     @Override
     public long getItemId(int position) {
       String item = getItem(position);
-      return mIdMap.get(item);
+      return idMap.get(item);
     }
 
     @Override
@@ -116,12 +117,10 @@ public class MasterChooser extends Activity {
     uriText.setText(masterUri);
 
     interfacesList = (ListView) findViewById(R.id.interfacesView);
-    final ArrayList<String> list = new ArrayList<String>();
+    final List<String> list = new ArrayList<String>();
 
     try {
-      Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-      while (networkInterfaces.hasMoreElements()) {
-        NetworkInterface networkInterface = networkInterfaces.nextElement();
+      for (NetworkInterface networkInterface : Collections.list(NetworkInterface.getNetworkInterfaces())) {
         if (networkInterface.isUp() && !networkInterface.isLoopback()) {
           list.add(networkInterface.getName());
         }
@@ -143,8 +142,6 @@ public class MasterChooser extends Activity {
       public void onItemClick(AdapterView<?> parent, View view,
                               int position, long id) {
         selectedInterface = parent.getItemAtPosition(position).toString();
-        Toast.makeText(getApplicationContext(), "Selected: " + selectedInterface,
-            Toast.LENGTH_SHORT).show();
       }
     });
   }
@@ -218,10 +215,10 @@ public class MasterChooser extends Activity {
 
   public Intent createNewMasterIntent(Boolean newMaster, Boolean isPrivate) {
     Intent intent = new Intent();
-    intent.putExtra("NEW_MASTER", newMaster);
+    intent.putExtra("ROS_MASTER_CREATE_NEW", newMaster);
     intent.putExtra("ROS_MASTER_PRIVATE", isPrivate);
     intent.putExtra("ROS_MASTER_URI", masterUri);
-    intent.putExtra("NETWORK_INTERFACE", selectedInterface);
+    intent.putExtra("ROS_MASTER_NETWORK_INTERFACE", selectedInterface);
     return intent;
   }
 
