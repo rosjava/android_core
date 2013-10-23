@@ -18,7 +18,9 @@ package org.ros.android.view.visualization.layer;
 
 import com.google.common.base.Preconditions;
 
+import android.content.Context;
 import android.os.Handler;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.TextureBitmap;
@@ -71,13 +73,13 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   }
 
   @Override
-  public void draw(GL10 gl) {
+  public void draw(Context context, GL10 gl) {
     if (previousGl != gl) {
       textureBitmap.clearHandle();
       previousGl = gl;
     }
     if (ready) {
-      textureBitmap.draw(gl);
+      textureBitmap.draw(context, gl);
     }
   }
 

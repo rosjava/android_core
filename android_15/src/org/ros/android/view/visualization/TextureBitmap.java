@@ -18,8 +18,10 @@ package org.ros.android.view.visualization;
 
 import com.google.common.base.Preconditions;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.opengl.GLUtils;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.rosjava_geometry.Transform;
 
@@ -155,7 +157,7 @@ public class TextureBitmap implements OpenGlDrawable {
   }
 
   @Override
-  public void draw(GL10 gl) {
+  public void draw(Context context, GL10 gl) {
     gl.glEnable(GL10.GL_TEXTURE_2D);
     bind(gl);
     gl.glPushMatrix();

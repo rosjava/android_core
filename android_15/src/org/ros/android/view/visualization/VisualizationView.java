@@ -48,11 +48,10 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   private final FrameTransformTree frameTransformTree = new FrameTransformTree();
   private final XYOrthographicCamera camera = new XYOrthographicCamera(
       frameTransformTree);
-  private final XYOrthographicRenderer renderer = new XYOrthographicRenderer(
-      camera);
   private final List<Layer> layers = Lists.newArrayList();
   private final CountDownLatch attachedToWindow = new CountDownLatch(1);
 
+  private XYOrthographicRenderer renderer;
   private ConnectedNode connectedNode;
 
   public VisualizationView(Context context) {
@@ -72,6 +71,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     }
     setEGLConfigChooser(8, 8, 8, 8, 0, 0);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
+    renderer = new XYOrthographicRenderer(getContext(), camera);
     setRenderer(renderer);
   }
 

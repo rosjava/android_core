@@ -18,8 +18,10 @@ package org.ros.android.view.visualization.layer;
 
 import org.ros.android.view.visualization.Color;
 
+import android.content.Context;
 import android.os.Handler;
 import geometry_msgs.PoseStamped;
+
 import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
@@ -58,7 +60,7 @@ public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer
   }
 
   @Override
-  public void draw(GL10 gl) {
+  public void draw(Context context, GL10 gl) {
     if (ready) {
       gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
       gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);

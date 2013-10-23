@@ -16,7 +16,9 @@
 
 package org.ros.android.view.visualization.layer;
 
+import android.content.Context;
 import android.os.Handler;
+
 import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.shape.RobotShape;
 import org.ros.android.view.visualization.shape.Shape;
@@ -44,8 +46,8 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
   }
 
   @Override
-  public void draw(GL10 gl) {
-    shape.draw(gl);
+  public void draw(Context context, GL10 gl) {
+    shape.draw(context, gl);
   }
 
   @Override

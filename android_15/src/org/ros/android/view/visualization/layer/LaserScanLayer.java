@@ -26,6 +26,8 @@ import org.ros.node.topic.Subscriber;
 import org.ros.rosjava_geometry.FrameName;
 import org.ros.rosjava_geometry.FrameTransformTree;
 
+import android.content.Context;
+
 import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -62,7 +64,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
   }
 
   @Override
-  public void draw(GL10 gl) {
+  public void draw(Context context, GL10 gl) {
     if (vertexFrontBuffer != null) {
       synchronized (mutex) {
         Vertices.drawTriangleFan(gl, vertexFrontBuffer, FREE_SPACE_COLOR);

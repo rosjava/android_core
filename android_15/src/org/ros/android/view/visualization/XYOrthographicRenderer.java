@@ -16,10 +16,13 @@
 
 package org.ros.android.view.visualization;
 
+import android.content.Context;
 import android.opengl.GLSurfaceView;
+
 import org.ros.android.view.visualization.layer.Layer;
 import org.ros.android.view.visualization.layer.TfLayer;
 import org.ros.rosjava_geometry.FrameName;
+
 import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -33,15 +36,17 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
 
+  private final XYOrthographicCamera camera;
+  private final Context context;
+
   /**
    * List of layers to draw. Layers are drawn in-order, i.e. the layer with
    * index 0 is the bottom layer and is drawn first.
    */
   private List<Layer> layers;
 
-  private XYOrthographicCamera camera;
-
-  public XYOrthographicRenderer(XYOrthographicCamera camera) {
+  public XYOrthographicRenderer(Context context, XYOrthographicCamera camera) {
+    this.context = context;
     this.camera = camera;
   }
 
@@ -77,10 +82,10 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
       if (layer instanceof TfLayer) {
         FrameName layerFrame = ((TfLayer) layer).getFrame();
         if (layerFrame != null && camera.applyFrameTransform(gl, layerFrame)) {
-          layer.draw(gl);
+          layer.draw(context, gl);
         }
       } else {
-        layer.draw(gl);
+        layer.draw(context, gl);
       }
       gl.glPopMatrix();
     }

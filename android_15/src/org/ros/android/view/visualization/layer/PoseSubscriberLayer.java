@@ -16,7 +16,9 @@
 
 package org.ros.android.view.visualization.layer;
 
+import android.content.Context;
 import android.os.Handler;
+
 import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.shape.GoalShape;
 import org.ros.android.view.visualization.shape.Shape;
@@ -52,9 +54,9 @@ public class PoseSubscriberLayer extends SubscriberLayer<geometry_msgs.PoseStamp
   }
 
   @Override
-  public void draw(GL10 gl) {
+  public void draw(Context context, GL10 gl) {
     if (ready) {
-      shape.draw(gl);
+      shape.draw(context, gl);
     }
   }
 

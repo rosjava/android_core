@@ -16,8 +16,10 @@
 
 package org.ros.android.view.visualization.layer;
 
+import android.content.Context;
 import android.os.Handler;
 import android.view.MotionEvent;
+
 import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.node.ConnectedNode;
@@ -34,7 +36,7 @@ import javax.microedition.khronos.opengles.GL10;
 public abstract class DefaultLayer implements Layer {
 
   @Override
-  public void draw(GL10 gl) {
+  public void draw(Context context, GL10 gl) {
   }
 
   @Override

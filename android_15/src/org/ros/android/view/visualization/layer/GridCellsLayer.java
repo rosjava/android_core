@@ -16,7 +16,9 @@
 
 package org.ros.android.view.visualization.layer;
 
+import android.content.Context;
 import android.os.Handler;
+
 import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.Color;
 import org.ros.android.view.visualization.Vertices;
@@ -57,11 +59,11 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
   }
 
   @Override
-  public void draw(GL10 gl) {
+  public void draw(Context context, GL10 gl) {
     if (!ready) {
       return;
     }
-    super.draw(gl);
+    super.draw(context, gl);
     lock.lock();
     float pointSize =
         (float) (Math.max(message.getCellWidth(), message.getCellHeight()) * camera.getZoom());

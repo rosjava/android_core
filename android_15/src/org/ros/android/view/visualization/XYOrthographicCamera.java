@@ -211,4 +211,9 @@ public class XYOrthographicCamera {
     Preconditions.checkNotNull(viewport);
     this.viewport = viewport;
   }
+
+  public Viewport getViewport() {
+    Preconditions.checkNotNull(viewport);
+    return viewport;
+  }
 }

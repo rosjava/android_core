@@ -1,5 +1,7 @@
 package org.ros.android.view.visualization.shape;
 
+import android.content.Context;
+
 import com.google.common.base.Preconditions;
 
 import org.ros.android.view.visualization.Color;
@@ -20,7 +22,7 @@ abstract class BaseShape implements Shape {
   private Transform transform;
 
   @Override
-  public void draw(GL10 gl) {
+  public void draw(Context context, GL10 gl) {
     OpenGlTransform.apply(gl, getTransform());
     scale(gl);
   }
