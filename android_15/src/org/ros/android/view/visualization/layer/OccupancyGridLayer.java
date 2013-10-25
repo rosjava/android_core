@@ -22,13 +22,12 @@ import android.content.Context;
 import android.os.Handler;
 
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.TextureBitmap;
+import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.internal.message.MessageBuffers;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
-import org.ros.rosjava_geometry.FrameName;
 import org.ros.rosjava_geometry.FrameTransformTree;
 import org.ros.rosjava_geometry.Transform;
 
@@ -58,7 +57,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   private final TextureBitmap textureBitmap;
 
   private boolean ready;
-  private FrameName frame;
+  private GraphName frame;
   private GL10 previousGl;
 
   public OccupancyGridLayer(String topic) {
@@ -84,7 +83,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   }
 
   @Override
-  public FrameName getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 
@@ -120,7 +119,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
     Transform origin = Transform.fromPoseMessage(message.getInfo().getOrigin());
     textureBitmap.updateFromPixelBuffer(pixels, stride, resolution, origin, COLOR_UNKNOWN);
     pixels.clear();
-    frame = FrameName.of(message.getHeader().getFrameId());
+    frame = GraphName.of(message.getHeader().getFrameId());
     ready = true;
   }
 }

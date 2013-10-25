@@ -22,9 +22,9 @@ import android.os.Handler;
 import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.shape.RobotShape;
 import org.ros.android.view.visualization.shape.Shape;
+import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.rosjava_geometry.FrameTransformTree;
-import org.ros.rosjava_geometry.FrameName;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -33,16 +33,16 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class RobotLayer extends DefaultLayer implements TfLayer {
 
-  private final FrameName frame;
+  private final GraphName frame;
   private final Shape shape;
 
-  public RobotLayer(FrameName frame) {
+  public RobotLayer(GraphName frame) {
     this.frame = frame;
     shape = new RobotShape();
   }
 
   public RobotLayer(String frame) {
-    this(FrameName.of(frame));
+    this(GraphName.of(frame));
   }
 
   @Override
@@ -56,7 +56,7 @@ public class RobotLayer extends DefaultLayer implements TfLayer {
   }
 
   @Override
-  public FrameName getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 }

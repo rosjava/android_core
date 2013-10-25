@@ -22,10 +22,10 @@ import android.os.Handler;
 import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.Color;
 import org.ros.android.view.visualization.Vertices;
+import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
-import org.ros.rosjava_geometry.FrameName;
 import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.util.concurrent.locks.Lock;
@@ -41,7 +41,7 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
   private final Color color;
   private final Lock lock;
 
-  private FrameName frame;
+  private GraphName frame;
   private XYOrthographicCamera camera;
   private boolean ready;
   private nav_msgs.GridCells message;
@@ -92,7 +92,7 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.GridCells>() {
       @Override
       public void onNewMessage(nav_msgs.GridCells data) {
-        frame = FrameName.of(data.getHeader().getFrameId());
+        frame = GraphName.of(data.getHeader().getFrameId());
         if (frameTransformTree.lookUp(frame) != null) {
           if (lock.tryLock()) {
             message = data;
@@ -105,7 +105,7 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
   }
 
   @Override
-  public FrameName getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 }

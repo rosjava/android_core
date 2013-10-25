@@ -26,7 +26,6 @@ import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.rosjava_geometry.FrameTransform;
-import org.ros.rosjava_geometry.FrameName;
 import org.ros.rosjava_geometry.FrameTransformTree;
 import org.ros.rosjava_geometry.Transform;
 
@@ -38,7 +37,7 @@ import javax.microedition.khronos.opengles.GL10;
 public class PoseSubscriberLayer extends SubscriberLayer<geometry_msgs.PoseStamped> implements
     TfLayer {
 
-  private final FrameName targetFrame;
+  private final GraphName targetFrame;
 
   private Shape shape;
   private boolean ready;
@@ -49,7 +48,7 @@ public class PoseSubscriberLayer extends SubscriberLayer<geometry_msgs.PoseStamp
 
   public PoseSubscriberLayer(GraphName topic) {
     super(topic, "geometry_msgs/PoseStamped");
-    targetFrame = FrameName.of("map");
+    targetFrame = GraphName.of("map");
     ready = false;
   }
 
@@ -68,7 +67,7 @@ public class PoseSubscriberLayer extends SubscriberLayer<geometry_msgs.PoseStamp
     getSubscriber().addMessageListener(new MessageListener<geometry_msgs.PoseStamped>() {
       @Override
       public void onNewMessage(geometry_msgs.PoseStamped pose) {
-          FrameName source = FrameName.of(pose.getHeader().getFrameId());
+          GraphName source = GraphName.of(pose.getHeader().getFrameId());
         FrameTransform frameTransform = frameTransformTree.transform(source, targetFrame);
         if (frameTransform != null) {
           Transform poseTransform = Transform.fromPoseMessage(pose.getPose());
@@ -80,7 +79,7 @@ public class PoseSubscriberLayer extends SubscriberLayer<geometry_msgs.PoseStamp
   }
 
   @Override
-  public FrameName getFrame() {
+  public GraphName getFrame() {
     return targetFrame;
   }
 }

@@ -18,10 +18,9 @@ package org.ros.android.view.visualization;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
-
 import org.ros.android.view.visualization.layer.Layer;
 import org.ros.android.view.visualization.layer.TfLayer;
-import org.ros.rosjava_geometry.FrameName;
+import org.ros.namespace.GraphName;
 
 import java.util.List;
 
@@ -80,7 +79,7 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
     for (Layer layer : getLayers()) {
       gl.glPushMatrix();
       if (layer instanceof TfLayer) {
-        FrameName layerFrame = ((TfLayer) layer).getFrame();
+        GraphName layerFrame = ((TfLayer) layer).getFrame();
         if (layerFrame != null && camera.applyFrameTransform(gl, layerFrame)) {
           layer.draw(context, gl);
         }
