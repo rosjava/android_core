@@ -15,19 +15,19 @@
  */
 
 dependencies {
-  compile project(':android_15')
-  compile project(':android_10')
+  compile 'org.ros.rosjava_core:rosjava:0.1.+'
+  compile 'org.ros.rosjava_messages:sensor_msgs:1.10.+'
 }
 
 apply plugin: 'android-library'
 
 android {
-  compileSdkVersion 15
+  compileSdkVersion 10
 
   defaultConfig {
-    minSdkVersion 15
-    packageName "org.ros.android.android_acm_serial"
-    targetSdkVersion 15
+    minSdkVersion 10
+    packageName "org.ros.android.android_10"
+    targetSdkVersion 10
     versionCode 1
     versionName "1.0"
   }

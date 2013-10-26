@@ -15,7 +15,8 @@
  */
 
 dependencies {
-  compile project(':android_15')
+  compile 'com.android.support:support-v4:18.0.+'
+  compile 'org.ros.rosjava_core:rosjava_geometry:0.1.+'
   compile project(':android_10')
 }
 
@@ -26,7 +27,7 @@ android {
 
   defaultConfig {
     minSdkVersion 15
-    packageName "org.ros.android.android_acm_serial"
+    packageName "org.ros.android.android_15"
     targetSdkVersion 15
     versionCode 1
     versionName "1.0"
