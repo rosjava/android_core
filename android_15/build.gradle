@@ -15,19 +15,20 @@
  */
 
 dependencies {
-  compile 'org.ros.rosjava_core:rosjava_tutorial_pubsub:[0.2,)'
+  compile 'org.ros.rosjava_core:rosjava_geometry:[0.2,)'
+  compile 'com.android.support:support-v4:18.0.+'
   compile project(':android_10')
 }
 
-apply plugin: 'android'
+apply plugin: 'android-library'
 
 android {
-  compileSdkVersion 10
+  compileSdkVersion 15
 
   defaultConfig {
-    minSdkVersion 10
-    packageName "org.ros.android.android_tutorial_pubsub"
-    targetSdkVersion 10
+    minSdkVersion 15
+    packageName "org.ros.android.android_15"
+    targetSdkVersion 15
     versionCode 1
     versionName "1.0"
   }
