@@ -15,7 +15,7 @@
  */
 
 dependencies {
-  compile 'org.ros.rosjava_core:rosjava_tutorial_pubsub:0.1.+'
+  compile 'org.ros.rosjava_core:rosjava_tutorial_pubsub:[0.1,)'
   compile project(':android_gingerbread_mr1')
 }
 
