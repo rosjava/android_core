@@ -15,11 +15,19 @@
  */
 
 dependencies {
-  compile project(':android_honeycomb_mr2')
+  compile project(':android_15')
 }
 
 apply plugin: 'android'
 
 android {
-    compileSdkVersion 13
+  compileSdkVersion 15
+
+  defaultConfig {
+    minSdkVersion 15
+    packageName "org.ros.android.android_tutorial_map_viewer"
+    targetSdkVersion 15
+    versionCode 1
+    versionName "1.0"
+  }
 }

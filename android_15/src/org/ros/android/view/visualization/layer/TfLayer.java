@@ -14,21 +14,19 @@
  * the License.
  */
 
-dependencies {
-  compile project(':android_15')
-  compile project(':android_10')
-}
+package org.ros.android.view.visualization.layer;
 
-apply plugin: 'android-library'
+import org.ros.namespace.GraphName;
 
-android {
-  compileSdkVersion 15
+/**
+ * Interface for layers that are positioned by using Tf.
+ * 
+ * @author moesenle@google.com (Lorenz Moesenlechner)
+ */
+public interface TfLayer {
 
-  defaultConfig {
-    minSdkVersion 15
-    packageName "org.ros.android.android_acm_serial"
-    targetSdkVersion 15
-    versionCode 1
-    versionName "1.0"
-  }
+  /**
+   * @return the {@link Layer}'s reference frame
+   */
+  GraphName getFrame();
 }

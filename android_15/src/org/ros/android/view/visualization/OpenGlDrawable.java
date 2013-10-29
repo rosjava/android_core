@@ -14,21 +14,15 @@
  * the License.
  */
 
-dependencies {
-  compile project(':android_15')
-  compile project(':android_10')
-}
+package org.ros.android.view.visualization;
 
-apply plugin: 'android-library'
+import javax.microedition.khronos.opengles.GL10;
 
-android {
-  compileSdkVersion 15
+import android.content.Context;
 
-  defaultConfig {
-    minSdkVersion 15
-    packageName "org.ros.android.android_acm_serial"
-    targetSdkVersion 15
-    versionCode 1
-    versionName "1.0"
-  }
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
+public interface OpenGlDrawable {
+  void draw(Context context, GL10 gl);
 }
