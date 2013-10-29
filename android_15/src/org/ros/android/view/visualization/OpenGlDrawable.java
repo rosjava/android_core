@@ -18,9 +18,11 @@ package org.ros.android.view.visualization;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import android.content.Context;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public interface OpenGlDrawable {
-  void draw(GL10 gl);
+  void draw(Context context, GL10 gl);
 }

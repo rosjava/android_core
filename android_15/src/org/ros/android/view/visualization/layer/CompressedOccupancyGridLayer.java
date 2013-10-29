@@ -18,16 +18,17 @@ package org.ros.android.view.visualization.layer;
 
 import com.google.common.base.Preconditions;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
+
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.TextureBitmap;
+import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
-import org.ros.rosjava_geometry.FrameName;
 import org.ros.rosjava_geometry.FrameTransformTree;
 import org.ros.rosjava_geometry.Transform;
 
@@ -58,7 +59,7 @@ public class CompressedOccupancyGridLayer extends SubscriberLayer<nav_msgs.Occup
   private final TextureBitmap textureBitmap;
 
   private boolean ready;
-  private FrameName frame;
+  private GraphName frame;
 
   public CompressedOccupancyGridLayer(String topic) {
     this(GraphName.of(topic));
@@ -71,14 +72,14 @@ public class CompressedOccupancyGridLayer extends SubscriberLayer<nav_msgs.Occup
   }
 
   @Override
-  public void draw(GL10 gl) {
+  public void draw(Context context, GL10 gl) {
     if (ready) {
-      textureBitmap.draw(gl);
+      textureBitmap.draw(context, gl);
     }
   }
 
   @Override
-  public FrameName getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 
@@ -117,7 +118,7 @@ public class CompressedOccupancyGridLayer extends SubscriberLayer<nav_msgs.Occup
     float resolution = message.getInfo().getResolution();
     Transform origin = Transform.fromPoseMessage(message.getInfo().getOrigin());
     textureBitmap.updateFromPixelArray(pixels, stride, resolution, origin, COLOR_UNKNOWN);
-    frame = FrameName.of(message.getHeader().getFrameId());
+    frame = GraphName.of(message.getHeader().getFrameId());
     ready = true;
   }
 }

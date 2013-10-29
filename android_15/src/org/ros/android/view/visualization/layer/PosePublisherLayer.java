@@ -63,10 +63,10 @@ public class PosePublisherLayer extends DefaultLayer {
   }
 
   @Override
-  public void draw(GL10 gl) {
+  public void draw(Context context, GL10 gl) {
     if (visible) {
       Preconditions.checkNotNull(pose);
-      shape.draw(gl);
+      shape.draw(context, gl);
     }
   }
 

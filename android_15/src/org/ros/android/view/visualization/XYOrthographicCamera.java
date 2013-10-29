@@ -19,9 +19,9 @@ package org.ros.android.view.visualization;
 import com.google.common.base.Preconditions;
 
 import org.ros.math.RosMath;
+import org.ros.namespace.GraphName;
 import org.ros.rosjava_geometry.FrameTransform;
 import org.ros.rosjava_geometry.FrameTransformTree;
-import org.ros.rosjava_geometry.FrameName;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
 
@@ -62,7 +62,7 @@ public class XYOrthographicCamera {
    * instance, base_link, the view follows the robot and the robot itself is in
    * the origin.
    */
-  private FrameName frame;
+  private GraphName frame;
 
   public XYOrthographicCamera(FrameTransformTree frameTransformTree) {
     this.frameTransformTree = frameTransformTree;
@@ -81,7 +81,7 @@ public class XYOrthographicCamera {
     }
   }
 
-  public boolean applyFrameTransform(GL10 gl, FrameName frame) {
+  public boolean applyFrameTransform(GL10 gl, GraphName frame) {
     Preconditions.checkNotNull(frame);
     if (this.frame != null) {
       FrameTransform frameTransform = frameTransformTree.transform(frame, this.frame);
@@ -152,7 +152,7 @@ public class XYOrthographicCamera {
     return transform.invert().apply(new Vector3(centeredX, centeredY, 0));
   }
 
-  public FrameName getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 
@@ -163,7 +163,7 @@ public class XYOrthographicCamera {
    *
    * @param frame the new camera frame
    */
-  public void setFrame(FrameName frame) {
+  public void setFrame(GraphName frame) {
     Preconditions.checkNotNull(frame);
     synchronized (mutex) {
       if (this.frame != null && this.frame != frame) {
@@ -179,10 +179,10 @@ public class XYOrthographicCamera {
   }
 
   /**
-   * @see #setFrame(FrameName)
+   * @see #setFrame(GraphName)
    */
   public void setFrame(String frame) {
-    setFrame(FrameName.of(frame));
+    setFrame(GraphName.of(frame));
   }
 
   /**
@@ -191,7 +191,7 @@ public class XYOrthographicCamera {
    *
    * @param frame the new camera frame
    */
-  public void jumpToFrame(FrameName frame) {
+  public void jumpToFrame(GraphName frame) {
     synchronized (mutex) {
       this.frame = frame;
       double zoom = getZoom();
@@ -201,14 +201,19 @@ public class XYOrthographicCamera {
   }
 
   /**
-   * @see #jumpToFrame(FrameName)
+   * @see #jumpToFrame(GraphName)
    */
   public void jumpToFrame(String frame) {
-    jumpToFrame(FrameName.of(frame));
+    jumpToFrame(GraphName.of(frame));
   }
 
   public void setViewport(Viewport viewport) {
     Preconditions.checkNotNull(viewport);
     this.viewport = viewport;
+  }
+
+  public Viewport getViewport() {
+    Preconditions.checkNotNull(viewport);
+    return viewport;
   }
 }

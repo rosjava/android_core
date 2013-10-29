@@ -18,13 +18,14 @@ package org.ros.android.view.visualization.layer;
 
 import org.ros.android.view.visualization.Color;
 
+import android.content.Context;
 import android.os.Handler;
 import geometry_msgs.PoseStamped;
+
 import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
-import org.ros.rosjava_geometry.FrameName;
 import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.nio.ByteBuffer;
@@ -46,7 +47,7 @@ public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer
 
   private FloatBuffer vertexBuffer;
   private boolean ready;
-  private FrameName frame;
+  private GraphName frame;
 
   public PathLayer(String topic) {
     this(GraphName.of(topic));
@@ -58,7 +59,7 @@ public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer
   }
 
   @Override
-  public void draw(GL10 gl) {
+  public void draw(Context context, GL10 gl) {
     if (ready) {
       gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
       gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
@@ -88,7 +89,7 @@ public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer
     goalVertexByteBuffer.order(ByteOrder.nativeOrder());
     vertexBuffer = goalVertexByteBuffer.asFloatBuffer();
     if (path.getPoses().size() > 0) {
-      frame = FrameName.of(path.getPoses().get(0).getHeader().getFrameId());
+      frame = GraphName.of(path.getPoses().get(0).getHeader().getFrameId());
       // Path poses are densely packed and will make the path look like a solid
       // line even if it is drawn as points. Skipping poses provides the visual
       // point separation were looking for.
@@ -108,7 +109,7 @@ public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer
   }
 
   @Override
-  public FrameName getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 }

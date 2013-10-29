@@ -23,8 +23,10 @@ import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
-import org.ros.rosjava_geometry.FrameName;
 import org.ros.rosjava_geometry.FrameTransformTree;
+
+import sensor_msgs.LaserScan;
+import android.content.Context;
 
 import java.nio.FloatBuffer;
 
@@ -47,7 +49,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
 
   private final Object mutex;
 
-  private FrameName frame;
+  private GraphName frame;
   private XYOrthographicCamera camera;
   private FloatBuffer vertexFrontBuffer;
   private FloatBuffer vertexBackBuffer;
@@ -62,7 +64,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
   }
 
   @Override
-  public void draw(GL10 gl) {
+  public void draw(Context context, GL10 gl) {
     if (vertexFrontBuffer != null) {
       synchronized (mutex) {
         Vertices.drawTriangleFan(gl, vertexFrontBuffer, FREE_SPACE_COLOR);
@@ -85,7 +87,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
     subscriber.addMessageListener(new MessageListener<LaserScan>() {
       @Override
       public void onNewMessage(LaserScan laserScan) {
-        frame = FrameName.of(laserScan.getHeader().getFrameId());
+        frame = GraphName.of(laserScan.getHeader().getFrameId());
         updateVertexBuffer(laserScan, LASER_SCAN_STRIDE);
       }
     });
@@ -129,7 +131,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
   }
 
   @Override
-  public FrameName getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 }
