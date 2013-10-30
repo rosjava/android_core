@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.IBinder;
-import android.widget.Toast;
 import org.ros.exception.RosRuntimeException;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
@@ -53,12 +52,18 @@ public abstract class RosActivity extends Activity {
       nodeMainExecutorService.addListener(new NodeMainExecutorServiceListener() {
         @Override
         public void onShutdown(NodeMainExecutorService nodeMainExecutorService) {
-          if ( !isFinishing() ) {
+          // We may have added multiple shutdown listeners and we only want to
+          // call finish() once.
+          if (!RosActivity.this.isFinishing()) {
             RosActivity.this.finish();
           }
         }
       });
-      startMasterChooser();
+      if (getMasterUri() == null) {
+        startMasterChooser();
+      } else {
+        init();
+      }
     }
 
     @Override
@@ -76,10 +81,10 @@ public abstract class RosActivity extends Activity {
   @Override
   protected void onStart() {
     super.onStart();
-    startNodeMainExecutorService();
+    bindNodeMainExecutorService();
   }
 
-  private void startNodeMainExecutorService() {
+  private void bindNodeMainExecutorService() {
     Intent intent = new Intent(this, NodeMainExecutorService.class);
     intent.setAction(NodeMainExecutorService.ACTION_START);
     intent.putExtra(NodeMainExecutorService.EXTRA_NOTIFICATION_TICKER, notificationTicker);
@@ -92,16 +97,20 @@ public abstract class RosActivity extends Activity {
 
   @Override
   protected void onDestroy() {
-    if (nodeMainExecutorService != null) {
-      nodeMainExecutorService.shutdown();
-      unbindService(nodeMainExecutorServiceConnection);
-      // NOTE(damonkohler): The activity could still be restarted. In that case,
-      // nodeMainExectuorService needs to be null for everything to be started
-      // up again.
-      nodeMainExecutorService = null;
-    }
-    Toast.makeText(this, notificationTitle + " shut down.", Toast.LENGTH_SHORT).show();
+    unbindService(nodeMainExecutorServiceConnection);
     super.onDestroy();
+  }
+
+  private void init() {
+    // Run init() in a new thread as a convenience since it often requires
+    // network access.
+    new AsyncTask<Void, Void, Void>() {
+      @Override
+      protected Void doInBackground(Void... params) {
+        RosActivity.this.init(nodeMainExecutorService);
+        return null;
+      }
+    }.execute();
   }
 
   /**
@@ -135,13 +144,12 @@ public abstract class RosActivity extends Activity {
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode, resultCode, data);
-    if (resultCode == RESULT_OK) {
-      if (requestCode == MASTER_CHOOSER_REQUEST_CODE) {
+    if (requestCode == MASTER_CHOOSER_REQUEST_CODE) {
+      if (resultCode == RESULT_OK) {
         if (data.getBooleanExtra("NEW_MASTER", false) == true) {
           AsyncTask<Boolean, Void, URI> task = new AsyncTask<Boolean, Void, URI>() {
             @Override
-            protected URI doInBackground(Boolean[] params) {
+            protected URI doInBackground(Boolean... params) {
               RosActivity.this.nodeMainExecutorService.startMaster(params[0]);
               return RosActivity.this.nodeMainExecutorService.getMasterUri();
             }
@@ -163,20 +171,12 @@ public abstract class RosActivity extends Activity {
           }
           nodeMainExecutorService.setMasterUri(uri);
         }
-        // Run init() in a new thread as a convenience since it often requires
-        // network access.
-        new AsyncTask<Void, Void, Void>() {
-          @Override
-          protected Void doInBackground(Void... params) {
-            RosActivity.this.init(nodeMainExecutorService);
-            return null;
-          }
-        }.execute();
+        init();
       } else {
         // Without a master URI configured, we are in an unusable state.
-        nodeMainExecutorService.shutdown();
-        finish();
+        nodeMainExecutorService.forceShutdown();
       }
     }
+    super.onActivityResult(requestCode, resultCode, data);
   }
 }
