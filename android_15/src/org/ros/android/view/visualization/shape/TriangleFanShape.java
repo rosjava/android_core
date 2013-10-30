@@ -29,7 +29,7 @@ import javax.microedition.khronos.opengles.GL10;
  * <p>
  * Note that this class is intended to be wrapped. No transformations are
  * performed in the {@link #draw(Context, GL10)} method.
- * 
+ *
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -50,7 +50,7 @@ public class TriangleFanShape extends BaseShape {
   }
 
   @Override
-  public void innerDraw(Context context, GL10 gl) {
+  public void drawShape(Context context, GL10 gl) {
     Vertices.drawTriangleFan(gl, vertices, getColor());
   }
 }
