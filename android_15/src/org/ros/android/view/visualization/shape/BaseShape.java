@@ -1,9 +1,8 @@
 package org.ros.android.view.visualization.shape;
 
-import android.content.Context;
-
 import com.google.common.base.Preconditions;
 
+import android.content.Context;
 import org.ros.android.view.visualization.Color;
 import org.ros.android.view.visualization.OpenGlTransform;
 import org.ros.rosjava_geometry.Transform;
@@ -21,11 +20,27 @@ abstract class BaseShape implements Shape {
   private Color color;
   private Transform transform;
 
+  public BaseShape() {
+    setTransform(Transform.identity());
+  }
+
   @Override
   public void draw(Context context, GL10 gl) {
+    gl.glPushMatrix();
     OpenGlTransform.apply(gl, getTransform());
     scale(gl);
+    innerDraw(context, gl);
+    gl.glPopMatrix();
   }
+
+  /**
+   * To be implemented by children. Should draw the shape in a identity base
+   * frame.
+   * 
+   * @param context
+   * @param gl
+   */
+  abstract protected void innerDraw(Context context, GL10 gl);
 
   /**
    * Scales the coordinate system.
