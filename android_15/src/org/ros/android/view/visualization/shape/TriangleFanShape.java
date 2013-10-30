@@ -16,11 +16,9 @@
 
 package org.ros.android.view.visualization.shape;
 
+import android.content.Context;
 import org.ros.android.view.visualization.Color;
 import org.ros.android.view.visualization.Vertices;
-import org.ros.rosjava_geometry.Transform;
-
-import android.content.Context;
 
 import java.nio.FloatBuffer;
 
@@ -31,7 +29,7 @@ import javax.microedition.khronos.opengles.GL10;
  * <p>
  * Note that this class is intended to be wrapped. No transformations are
  * performed in the {@link #draw(Context, GL10)} method.
- * 
+ *
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -46,14 +44,13 @@ public class TriangleFanShape extends BaseShape {
    *          the {@link Color} of the {@link Shape}
    */
   public TriangleFanShape(float[] vertices, Color color) {
+    super();
     this.vertices = Vertices.toFloatBuffer(vertices);
     setColor(color);
-    setTransform(Transform.identity());
   }
 
   @Override
-  public void draw(Context context, GL10 gl) {
-    super.draw(context, gl);
+  public void drawShape(Context context, GL10 gl) {
     Vertices.drawTriangleFan(gl, vertices, getColor());
   }
 }
