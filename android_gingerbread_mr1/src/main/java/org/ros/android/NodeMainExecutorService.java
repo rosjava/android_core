@@ -30,6 +30,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import org.ros.RosCore;
+import org.ros.address.InetAddressFactory;
 import org.ros.android.android_gingerbread_mr1.R;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
@@ -67,6 +68,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
   private WifiLock wifiLock;
   private RosCore rosCore;
   private URI masterUri;
+  private String rosHostname;
 
   /**
    * Class for clients to access. Because we know this service always runs in
@@ -80,6 +82,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
 
   public NodeMainExecutorService() {
     super();
+    rosHostname = null;
     nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
     binder = new LocalBinder();
     listeners =
@@ -201,6 +204,13 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
     masterUri = uri;
   }
 
+  public void setRosHostname(String hostname) {
+    rosHostname = hostname;
+  }
+
+  public String getRosHostname() {
+    return rosHostname;
+  }
   /**
    * This version of startMaster can only create private masters.
    *
@@ -214,6 +224,8 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
   public void startMaster(Boolean isPrivate) {
     if (isPrivate) {
       rosCore = RosCore.newPrivate();
+    } else if (rosHostname != null) {
+      rosCore = RosCore.newPublic(rosHostname, 11311);
     } else {
       rosCore = RosCore.newPublic(11311);
     }

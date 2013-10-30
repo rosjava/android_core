@@ -25,10 +25,14 @@ import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.widget.Toast;
+
+import org.ros.address.InetAddressFactory;
 import org.ros.exception.RosRuntimeException;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.ExecutionException;
@@ -127,6 +131,11 @@ public abstract class RosActivity extends Activity {
     return nodeMainExecutorService.getMasterUri();
   }
 
+  public String getRosHostname() {
+    Preconditions.checkNotNull(nodeMainExecutorService);
+    return nodeMainExecutorService.getRosHostname();
+  }
+
   @Override
   public void startActivityForResult(Intent intent, int requestCode) {
     Preconditions.checkArgument(requestCode != MASTER_CHOOSER_REQUEST_CODE);
@@ -138,7 +147,21 @@ public abstract class RosActivity extends Activity {
     super.onActivityResult(requestCode, resultCode, data);
     if (resultCode == RESULT_OK) {
       if (requestCode == MASTER_CHOOSER_REQUEST_CODE) {
-        if (data.getBooleanExtra("NEW_MASTER", false) == true) {
+        String host;
+        String networkInterfaceName = data.getStringExtra("ROS_MASTER_NETWORK_INTERFACE");
+        // Handles the default selection and prevents possible errors
+        if (networkInterfaceName == null || networkInterfaceName.equals("")) {
+            host = InetAddressFactory.newNonLoopback().getHostAddress();
+        } else {
+            try {
+                NetworkInterface networkInterface = NetworkInterface.getByName(networkInterfaceName);
+                host = InetAddressFactory.newNonLoopbackForNetworkInterface(networkInterface).getHostAddress();
+            } catch (SocketException e) {
+                throw new RosRuntimeException(e);
+            }
+        }
+        nodeMainExecutorService.setRosHostname(host);
+        if (data.getBooleanExtra("ROS_MASTER_CREATE_NEW", false)) {
           AsyncTask<Boolean, Void, URI> task = new AsyncTask<Boolean, Void, URI>() {
             @Override
             protected URI doInBackground(Boolean[] params) {
@@ -163,6 +186,7 @@ public abstract class RosActivity extends Activity {
           }
           nodeMainExecutorService.setMasterUri(uri);
         }
+
         // Run init() in a new thread as a convenience since it often requires
         // network access.
         new AsyncTask<Void, Void, Void>() {
