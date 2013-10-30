@@ -77,14 +77,11 @@ public class MasterChooser extends Activity {
   private String selectedInterface;
   private EditText uriText;
 
-  private ListView interfacesList;
-
   private class StableArrayAdapter extends ArrayAdapter<String> {
 
     HashMap<String, Integer> idMap = new HashMap<String, Integer>();
 
-    public StableArrayAdapter(Context context, int textViewResourceId,
-                              List<String> objects) {
+    public StableArrayAdapter(Context context, int textViewResourceId, List<String> objects) {
       super(context, textViewResourceId, objects);
       for (int i = 0; i < objects.size(); ++i) {
         idMap.put(objects.get(i), i);
@@ -101,7 +98,6 @@ public class MasterChooser extends Activity {
     public boolean hasStableIds() {
       return true;
     }
-
   }
 
   @Override
@@ -109,14 +105,12 @@ public class MasterChooser extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.master_chooser);
     uriText = (EditText) findViewById(R.id.master_chooser_uri);
-    // Get the URI from preferences and display it. Since only primitive types
-    // can be saved in preferences the URI is stored as a string.
-    masterUri =
-        getPreferences(MODE_PRIVATE).getString(PREFS_KEY_NAME,
-            NodeConfiguration.DEFAULT_MASTER_URI.toString());
+    // Get the URI from preferences and display it. Since only primitive types can be saved in
+    // preferences the URI is stored as a string.
+    masterUri = getPreferences(MODE_PRIVATE).getString(PREFS_KEY_NAME, NodeConfiguration.DEFAULT_MASTER_URI.toString());
     uriText.setText(masterUri);
 
-    interfacesList = (ListView) findViewById(R.id.interfacesView);
+    ListView interfacesList = (ListView) findViewById(R.id.networkInterfaces);
     final List<String> list = new ArrayList<String>();
 
     try {
@@ -129,18 +123,15 @@ public class MasterChooser extends Activity {
       throw new RosRuntimeException(e);
     }
 
-    // Fallback to previous behaviour when no interface
-    // is selected.
+    // Fallback to previous behaviour when no interface is selected.
     selectedInterface = "";
 
-    final StableArrayAdapter adapter = new StableArrayAdapter(this,
-        android.R.layout.simple_list_item_1, list);
+    final StableArrayAdapter adapter = new StableArrayAdapter(this, android.R.layout.simple_list_item_1, list);
     interfacesList.setAdapter(adapter);
 
     interfacesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
-      public void onItemClick(AdapterView<?> parent, View view,
-                              int position, long id) {
+      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         selectedInterface = parent.getItemAtPosition(position).toString();
       }
     });
@@ -193,8 +184,8 @@ public class MasterChooser extends Activity {
     intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
     // Check if the Barcode Scanner is installed.
     if (!isQRCodeReaderInstalled(intent)) {
-      // Open the Market and take them to the page from which they can download
-      // the Barcode Scanner app.
+      // Open the Market and take them to the page from which they can download the Barcode Scanner
+      // app.
       startActivity(new Intent(Intent.ACTION_VIEW,
           Uri.parse("market://details?id=com.google.zxing.client.android")));
     } else {
@@ -205,7 +196,7 @@ public class MasterChooser extends Activity {
 
   public void advancedCheckboxClicked(View view) {
     boolean checked = ((CheckBox) view).isChecked();
-    LinearLayout advancedOptions = (LinearLayout) findViewById(R.id.advanceOptions);
+    LinearLayout advancedOptions = (LinearLayout) findViewById(R.id.advancedOptions);
     if (checked) {
       advancedOptions.setVisibility(View.VISIBLE);
     } else {
@@ -213,7 +204,7 @@ public class MasterChooser extends Activity {
     }
   }
 
-  public Intent createNewMasterIntent(Boolean newMaster, Boolean isPrivate) {
+  public Intent createNewMasterIntent(boolean newMaster, boolean isPrivate) {
     Intent intent = new Intent();
     intent.putExtra("ROS_MASTER_CREATE_NEW", newMaster);
     intent.putExtra("ROS_MASTER_PRIVATE", isPrivate);
