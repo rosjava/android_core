@@ -16,17 +16,13 @@
 
 package org.ros.android.view.visualization.layer;
 
-import android.content.Context;
-import android.os.Handler;
-
-import org.ros.android.view.visualization.XYOrthographicCamera;
+import org.ros.android.view.visualization.VisualizationView;
 import org.ros.android.view.visualization.shape.GoalShape;
 import org.ros.android.view.visualization.shape.Shape;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.rosjava_geometry.FrameTransform;
-import org.ros.rosjava_geometry.FrameTransformTree;
 import org.ros.rosjava_geometry.Transform;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -47,28 +43,27 @@ public class PoseSubscriberLayer extends SubscriberLayer<geometry_msgs.PoseStamp
   }
 
   public PoseSubscriberLayer(GraphName topic) {
-    super(topic, "geometry_msgs/PoseStamped");
+    super(topic, geometry_msgs.PoseStamped._TYPE);
     targetFrame = GraphName.of("map");
     ready = false;
   }
 
   @Override
-  public void draw(Context context, GL10 gl) {
+  public void draw(VisualizationView view, GL10 gl) {
     if (ready) {
-      shape.draw(context, gl);
+      shape.draw(view, gl);
     }
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler,
-      final FrameTransformTree frameTransformTree, XYOrthographicCamera camera) {
-    super.onStart(connectedNode, handler, frameTransformTree, camera);
+  public void onStart(final VisualizationView view, ConnectedNode connectedNode) {
+    super.onStart(view, connectedNode);
     shape = new GoalShape();
     getSubscriber().addMessageListener(new MessageListener<geometry_msgs.PoseStamped>() {
       @Override
       public void onNewMessage(geometry_msgs.PoseStamped pose) {
-          GraphName source = GraphName.of(pose.getHeader().getFrameId());
-        FrameTransform frameTransform = frameTransformTree.transform(source, targetFrame);
+        GraphName source = GraphName.of(pose.getHeader().getFrameId());
+        FrameTransform frameTransform = view.getFrameTransformTree().transform(source, targetFrame);
         if (frameTransform != null) {
           Transform poseTransform = Transform.fromPoseMessage(pose.getPose());
           shape.setTransform(frameTransform.getTransform().multiply(poseTransform));

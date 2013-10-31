@@ -16,6 +16,8 @@
 
 package org.ros.android.android_tutorial_teleop;
 
+import com.google.common.collect.Lists;
+
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,6 +28,7 @@ import org.ros.android.view.VirtualJoystickView;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.android.view.visualization.layer.CameraControlLayer;
 import org.ros.android.view.visualization.layer.LaserScanLayer;
+import org.ros.android.view.visualization.layer.Layer;
 import org.ros.android.view.visualization.layer.OccupancyGridLayer;
 import org.ros.android.view.visualization.layer.PathLayer;
 import org.ros.android.view.visualization.layer.PosePublisherLayer;
@@ -80,20 +83,17 @@ public class MainActivity extends RosActivity {
     setContentView(R.layout.main);
     virtualJoystickView = (VirtualJoystickView) findViewById(R.id.virtual_joystick);
     visualizationView = (VisualizationView) findViewById(R.id.visualization);
-    visualizationView.getCamera().setFrame("map");
+    visualizationView.getCamera().jumpToFrame("map");
+    visualizationView.onCreate(Lists.<Layer>newArrayList(new CameraControlLayer(),
+        new OccupancyGridLayer("map"), new PathLayer("move_base/NavfnROS/plan"), new PathLayer(
+            "move_base_dynamic/NavfnROS/plan"), new LaserScanLayer("base_scan"),
+        new PoseSubscriberLayer("simple_waypoints_server/goal_pose"), new PosePublisherLayer(
+            "simple_waypoints_server/goal_pose"), new RobotLayer("base_footprint")));
   }
 
   @Override
   protected void init(NodeMainExecutor nodeMainExecutor) {
-    visualizationView.addLayer(new CameraControlLayer(this, nodeMainExecutor
-        .getScheduledExecutorService()));
-    visualizationView.addLayer(new OccupancyGridLayer("map"));
-    visualizationView.addLayer(new PathLayer("move_base/NavfnROS/plan"));
-    visualizationView.addLayer(new PathLayer("move_base_dynamic/NavfnROS/plan"));
-    visualizationView.addLayer(new LaserScanLayer("base_scan"));
-    visualizationView.addLayer(new PoseSubscriberLayer("simple_waypoints_server/goal_pose"));
-    visualizationView.addLayer(new PosePublisherLayer("simple_waypoints_server/goal_pose", this));
-    visualizationView.addLayer(new RobotLayer("base_footprint"));
+    visualizationView.init(nodeMainExecutor);
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress(),
             getMasterUri());

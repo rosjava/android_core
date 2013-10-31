@@ -18,19 +18,15 @@ package org.ros.android.view.visualization.layer;
 
 import com.google.common.base.Preconditions;
 
-import android.content.Context;
-import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.VisualizationView;
-import org.ros.android.view.visualization.shape.PoseShape;
+import org.ros.android.view.visualization.shape.PixelSpacePoseShape;
 import org.ros.android.view.visualization.shape.Shape;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
-import org.ros.rosjava_geometry.FrameTransformTree;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
 
@@ -41,32 +37,28 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class PosePublisherLayer extends DefaultLayer {
 
-  private final Context context;
-
   private Shape shape;
   private Publisher<geometry_msgs.PoseStamped> posePublisher;
   private boolean visible;
   private GraphName topic;
   private GestureDetector gestureDetector;
   private Transform pose;
-  private XYOrthographicCamera camera;
   private ConnectedNode connectedNode;
 
-  public PosePublisherLayer(String topic, Context context) {
-    this(GraphName.of(topic), context);
+  public PosePublisherLayer(String topic) {
+    this(GraphName.of(topic));
   }
 
-  public PosePublisherLayer(GraphName topic, Context context) {
+  public PosePublisherLayer(GraphName topic) {
     this.topic = topic;
-    this.context = context;
     visible = false;
   }
 
   @Override
-  public void draw(Context context, GL10 gl) {
+  public void draw(VisualizationView view, GL10 gl) {
     if (visible) {
       Preconditions.checkNotNull(pose);
-      shape.draw(context, gl);
+      shape.draw(view, gl);
     }
   }
 
@@ -82,7 +74,8 @@ public class PosePublisherLayer extends DefaultLayer {
       Preconditions.checkNotNull(pose);
       if (event.getAction() == MotionEvent.ACTION_MOVE) {
         Vector3 poseVector = pose.apply(Vector3.zero());
-        Vector3 pointerVector = camera.toMetricCoordinates((int) event.getX(), (int) event.getY());
+        Vector3 pointerVector =
+            view.getCamera().toCameraFrame((int) event.getX(), (int) event.getY());
         double angle =
             angle(pointerVector.getX(), pointerVector.getY(), poseVector.getX(), poseVector.getY());
         pose = Transform.translation(poseVector).multiply(Transform.zRotation(angle));
@@ -90,7 +83,7 @@ public class PosePublisherLayer extends DefaultLayer {
         return true;
       }
       if (event.getAction() == MotionEvent.ACTION_UP) {
-        posePublisher.publish(pose.toPoseStampedMessage(camera.getFrame(),
+        posePublisher.publish(pose.toPoseStampedMessage(view.getCamera().getFrame(),
             connectedNode.getCurrentTime(), posePublisher.newMessage()));
         visible = false;
         return true;
@@ -101,21 +94,20 @@ public class PosePublisherLayer extends DefaultLayer {
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler,
-      FrameTransformTree frameTransformTree, final XYOrthographicCamera camera) {
+  public void onStart(final VisualizationView view, ConnectedNode connectedNode) {
     this.connectedNode = connectedNode;
-    this.camera = camera;
-    shape = new PoseShape(camera);
-    posePublisher = connectedNode.newPublisher(topic, "geometry_msgs/PoseStamped");
-    handler.post(new Runnable() {
+    shape = new PixelSpacePoseShape();
+    posePublisher = connectedNode.newPublisher(topic, geometry_msgs.PoseStamped._TYPE);
+    view.post(new Runnable() {
       @Override
       public void run() {
         gestureDetector =
-            new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+            new GestureDetector(view.getContext(), new GestureDetector.SimpleOnGestureListener() {
               @Override
               public void onLongPress(MotionEvent e) {
                 pose =
-                    Transform.translation(camera.toMetricCoordinates((int) e.getX(), (int) e.getY()));
+                    Transform.translation(view.getCamera().toCameraFrame((int) e.getX(),
+                        (int) e.getY()));
                 shape.setTransform(pose);
                 visible = true;
               }

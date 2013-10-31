@@ -16,13 +16,10 @@
 
 package org.ros.android.view.visualization;
 
-import android.content.Context;
 import android.opengl.GLSurfaceView;
 import org.ros.android.view.visualization.layer.Layer;
 import org.ros.android.view.visualization.layer.TfLayer;
 import org.ros.namespace.GraphName;
-
-import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -35,66 +32,57 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
 
-  private final XYOrthographicCamera camera;
-  private final Context context;
+  private static final Color BACKGROUND_COLOR = new Color(0.87f, 0.87f, 0.87f, 1.f);
 
-  /**
-   * List of layers to draw. Layers are drawn in-order, i.e. the layer with
-   * index 0 is the bottom layer and is drawn first.
-   */
-  private List<Layer> layers;
+  private final VisualizationView view;
 
-  public XYOrthographicRenderer(Context context, XYOrthographicCamera camera) {
-    this.context = context;
-    this.camera = camera;
+  public XYOrthographicRenderer(VisualizationView view) {
+    this.view = view;
   }
 
   @Override
   public void onSurfaceChanged(GL10 gl, int width, int height) {
     Viewport viewport = new Viewport(width, height);
     viewport.apply(gl);
-    camera.setViewport(viewport);
+    view.getCamera().setViewport(viewport);
     gl.glMatrixMode(GL10.GL_MODELVIEW);
     gl.glEnable(GL10.GL_BLEND);
     gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
     gl.glDisable(GL10.GL_DEPTH_TEST);
+    gl.glClearColor(BACKGROUND_COLOR.getRed(), BACKGROUND_COLOR.getGreen(),
+        BACKGROUND_COLOR.getBlue(), BACKGROUND_COLOR.getAlpha());
+    for (Layer layer : view.getLayers()) {
+      layer.onSurfaceChanged(view, gl, width, height);
+    }
   }
 
   @Override
   public void onDrawFrame(GL10 gl) {
     gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
     gl.glLoadIdentity();
-    camera.apply(gl);
+    view.getCamera().apply(gl);
     drawLayers(gl);
   }
 
-  @Override
-  public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-  }
-
   private void drawLayers(GL10 gl) {
-    if (layers == null) {
-      return;
-    }
-    for (Layer layer : getLayers()) {
+    for (Layer layer : view.getLayers()) {
       gl.glPushMatrix();
       if (layer instanceof TfLayer) {
         GraphName layerFrame = ((TfLayer) layer).getFrame();
-        if (layerFrame != null && camera.applyFrameTransform(gl, layerFrame)) {
-          layer.draw(context, gl);
+        if (layerFrame != null && view.getCamera().applyFrameTransform(gl, layerFrame)) {
+          layer.draw(view, gl);
         }
       } else {
-        layer.draw(context, gl);
+        layer.draw(view, gl);
       }
       gl.glPopMatrix();
     }
   }
 
-  public List<Layer> getLayers() {
-    return layers;
-  }
-
-  public void setLayers(List<Layer> layers) {
-    this.layers = layers;
+  @Override
+  public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+    for (Layer layer : view.getLayers()) {
+      layer.onSurfaceCreated(view, gl, config);
+    }
   }
 }

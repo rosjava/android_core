@@ -18,17 +18,13 @@ package org.ros.android.view.visualization.layer;
 
 import com.google.common.base.Preconditions;
 
-import android.content.Context;
-import android.os.Handler;
-
+import org.ros.android.view.visualization.VisualizationView;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.android.view.visualization.TextureBitmap;
-import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.internal.message.MessageBuffers;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
-import org.ros.rosjava_geometry.FrameTransformTree;
 import org.ros.rosjava_geometry.Transform;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -41,17 +37,17 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   /**
    * Color of occupied cells in the map.
    */
-  private static final int COLOR_OCCUPIED = 0xdfffffff;
+  private static final int COLOR_OCCUPIED = 0xff111111;
 
   /**
    * Color of free cells in the map.
    */
-  private static final int COLOR_FREE = 0xff8d8d8d;
+  private static final int COLOR_FREE = 0xffffffff;
 
   /**
    * Color of unknown cells in the map.
    */
-  private static final int COLOR_UNKNOWN = 0xff000000;
+  private static final int COLOR_UNKNOWN = 0xffdddddd;
 
   private final ChannelBuffer pixels;
   private final TextureBitmap textureBitmap;
@@ -72,13 +68,13 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   }
 
   @Override
-  public void draw(Context context, GL10 gl) {
+  public void draw(VisualizationView view, GL10 gl) {
     if (previousGl != gl) {
       textureBitmap.clearHandle();
       previousGl = gl;
     }
     if (ready) {
-      textureBitmap.draw(context, gl);
+      textureBitmap.draw(view, gl);
     }
   }
 
@@ -88,9 +84,8 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler,
-      FrameTransformTree frameTransformTree, XYOrthographicCamera camera) {
-    super.onStart(connectedNode, handler, frameTransformTree, camera);
+  public void onStart(VisualizationView view, ConnectedNode connectedNode) {
+    super.onStart(view, connectedNode);
     previousGl = null;
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.OccupancyGrid>() {
       @Override
