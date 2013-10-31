@@ -15,8 +15,8 @@
  */
 
 dependencies {
-  compile 'org.ros.rosjava_core:rosjava_geometry:[0.2,)'
-  compile 'com.android.support:support-v4:18.0.+'
+  compile 'org.ros.rosjava_core:rosjava_geometry:[0.2,0.3)'
+  compile 'com.android.support:support-v4:[18.0,18.1)'
   compile project(':android_10')
 }
 
