@@ -18,6 +18,7 @@ package org.ros.android.view.visualization.shape;
 
 import org.ros.android.view.visualization.Color;
 import org.ros.android.view.visualization.Vertices;
+import org.ros.android.view.visualization.OpenGlTransform;
 import org.ros.rosjava_geometry.Transform;
 
 import java.nio.FloatBuffer;
@@ -35,7 +36,7 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class TriangleFanShape extends BaseShape {
 
-  private final FloatBuffer vertices;
+  private FloatBuffer vertices;
 
   /**
    * @param vertices
@@ -53,5 +54,10 @@ public class TriangleFanShape extends BaseShape {
   public void draw(GL10 gl) {
     super.draw(gl);
     Vertices.drawTriangleFan(gl, vertices, getColor());
+    OpenGlTransform.apply(gl, getTransform().invert());
+  }
+
+  protected void setVertices(float[] vertices) {
+    this.vertices = Vertices.toFloatBuffer(vertices);
   }
 }
