@@ -16,23 +16,18 @@
 
 package org.ros.android.view.visualization.layer;
 
+import org.ros.android.view.visualization.VisualizationView;
 import org.ros.android.view.visualization.Color;
 import org.ros.android.view.visualization.Vertices;
-import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
-import org.ros.rosjava_geometry.FrameTransformTree;
-
 import sensor_msgs.LaserScan;
-import android.content.Context;
 
 import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
-
-import sensor_msgs.LaserScan;
 
 /**
  * A {@link SubscriberLayer} that visualizes sensor_msgs/LaserScan messages.
@@ -42,15 +37,14 @@ import sensor_msgs.LaserScan;
  */
 public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> implements TfLayer {
 
-  private static final Color FREE_SPACE_COLOR = Color.fromHexAndAlpha("00adff", 0.3f);
-  private static final Color OCCUPIED_SPACE_COLOR = Color.fromHexAndAlpha("ffffff", 0.6f);
-  private static final float LASER_SCAN_POINT_SIZE = 0.1f; // M
+  private static final Color FREE_SPACE_COLOR = Color.fromHexAndAlpha("377dfa", 0.1f);
+  private static final Color OCCUPIED_SPACE_COLOR = Color.fromHexAndAlpha("377dfa", 0.3f);
+  private static final float LASER_SCAN_POINT_SIZE = 10.f;
   private static final int LASER_SCAN_STRIDE = 15;
 
   private final Object mutex;
 
   private GraphName frame;
-  private XYOrthographicCamera camera;
   private FloatBuffer vertexFrontBuffer;
   private FloatBuffer vertexBackBuffer;
 
@@ -64,7 +58,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
   }
 
   @Override
-  public void draw(Context context, GL10 gl) {
+  public void draw(VisualizationView view, GL10 gl) {
     if (vertexFrontBuffer != null) {
       synchronized (mutex) {
         Vertices.drawTriangleFan(gl, vertexFrontBuffer, FREE_SPACE_COLOR);
@@ -72,17 +66,14 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
         // not a range reading.
         FloatBuffer pointVertices = vertexFrontBuffer.duplicate();
         pointVertices.position(3);
-        Vertices.drawPoints(gl, pointVertices, OCCUPIED_SPACE_COLOR,
-            (float) (LASER_SCAN_POINT_SIZE * camera.getZoom()));
+        Vertices.drawPoints(gl, pointVertices, OCCUPIED_SPACE_COLOR, LASER_SCAN_POINT_SIZE);
       }
     }
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, android.os.Handler handler,
-      FrameTransformTree frameTransformTree, XYOrthographicCamera camera) {
-    super.onStart(connectedNode, handler, frameTransformTree, camera);
-    this.camera = camera;
+  public void onStart(VisualizationView view, ConnectedNode connectedNode) {
+    super.onStart(view, connectedNode);
     Subscriber<LaserScan> subscriber = getSubscriber();
     subscriber.addMessageListener(new MessageListener<LaserScan>() {
       @Override

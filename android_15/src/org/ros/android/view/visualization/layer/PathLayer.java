@@ -16,17 +16,12 @@
 
 package org.ros.android.view.visualization.layer;
 
+import org.ros.android.view.visualization.VisualizationView;
 import org.ros.android.view.visualization.Color;
-
-import android.content.Context;
-import android.os.Handler;
 import geometry_msgs.PoseStamped;
-
-import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
-import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -59,7 +54,7 @@ public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer
   }
 
   @Override
-  public void draw(Context context, GL10 gl) {
+  public void draw(VisualizationView view, GL10 gl) {
     if (ready) {
       gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
       gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
@@ -71,9 +66,8 @@ public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler, FrameTransformTree frameTransformTree,
-      XYOrthographicCamera camera) {
-    super.onStart(connectedNode, handler, frameTransformTree, camera);
+  public void onStart(VisualizationView view, ConnectedNode connectedNode) {
+    super.onStart(view, connectedNode);
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.Path>() {
       @Override
       public void onNewMessage(nav_msgs.Path path) {

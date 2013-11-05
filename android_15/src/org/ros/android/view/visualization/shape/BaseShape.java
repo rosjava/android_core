@@ -2,9 +2,9 @@ package org.ros.android.view.visualization.shape;
 
 import com.google.common.base.Preconditions;
 
-import android.content.Context;
 import org.ros.android.view.visualization.Color;
 import org.ros.android.view.visualization.OpenGlTransform;
+import org.ros.android.view.visualization.VisualizationView;
 import org.ros.rosjava_geometry.Transform;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -25,32 +25,27 @@ abstract class BaseShape implements Shape {
   }
 
   @Override
-  public void draw(Context context, GL10 gl) {
+  public void draw(VisualizationView view, GL10 gl) {
     gl.glPushMatrix();
     OpenGlTransform.apply(gl, getTransform());
-    scale(gl);
-    drawShape(context, gl);
+    scale(view, gl);
+    drawShape(view, gl);
     gl.glPopMatrix();
   }
 
   /**
    * To be implemented by children. Draws the shape after the shape's
    * transform and scaling have been applied.
-   *
-   * @param context
-   * @param gl
    */
-  abstract protected void drawShape(Context context, GL10 gl);
+  abstract protected void drawShape(VisualizationView view, GL10 gl);
 
   /**
    * Scales the coordinate system.
    * <p>
    * This is called after transforming the surface according to
    * {@link #transform}.
-   *
-   * @param gl
    */
-  protected void scale(GL10 gl) {
+  protected void scale(VisualizationView view, GL10 gl) {
     // The default scale is in metric space.
   }
 

@@ -18,18 +18,14 @@ package org.ros.android.view.visualization.layer;
 
 import com.google.common.base.Preconditions;
 
-import android.content.Context;
+import org.ros.android.view.visualization.VisualizationView;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Handler;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.android.view.visualization.TextureBitmap;
-import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
-import org.ros.rosjava_geometry.FrameTransformTree;
 import org.ros.rosjava_geometry.Transform;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -72,9 +68,9 @@ public class CompressedOccupancyGridLayer extends SubscriberLayer<nav_msgs.Occup
   }
 
   @Override
-  public void draw(Context context, GL10 gl) {
+  public void draw(VisualizationView view, GL10 gl) {
     if (ready) {
-      textureBitmap.draw(context, gl);
+      textureBitmap.draw(view, gl);
     }
   }
 
@@ -84,9 +80,8 @@ public class CompressedOccupancyGridLayer extends SubscriberLayer<nav_msgs.Occup
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler,
-      FrameTransformTree frameTransformTree, XYOrthographicCamera camera) {
-    super.onStart(connectedNode, handler, frameTransformTree, camera);
+  public void onStart(VisualizationView view, ConnectedNode connectedNode) {
+    super.onStart(view, connectedNode);
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.OccupancyGrid>() {
       @Override
       public void onNewMessage(nav_msgs.OccupancyGrid message) {

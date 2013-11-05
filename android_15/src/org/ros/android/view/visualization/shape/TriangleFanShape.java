@@ -16,7 +16,8 @@
 
 package org.ros.android.view.visualization.shape;
 
-import android.content.Context;
+import org.ros.android.view.visualization.VisualizationView;
+
 import org.ros.android.view.visualization.Color;
 import org.ros.android.view.visualization.Vertices;
 
@@ -28,7 +29,7 @@ import javax.microedition.khronos.opengles.GL10;
  * A {@link Shape} defined by vertices using OpenGl's GL_TRIANGLE_FAN method.
  * <p>
  * Note that this class is intended to be wrapped. No transformations are
- * performed in the {@link #draw(Context, GL10)} method.
+ * performed in the {@link #draw(VisualizationView, GL10)} method.
  *
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * @author damonkohler@google.com (Damon Kohler)
@@ -50,7 +51,7 @@ public class TriangleFanShape extends BaseShape {
   }
 
   @Override
-  public void drawShape(Context context, GL10 gl) {
+  public void drawShape(VisualizationView view, GL10 gl) {
     Vertices.drawTriangleFan(gl, vertices, getColor());
   }
 }
