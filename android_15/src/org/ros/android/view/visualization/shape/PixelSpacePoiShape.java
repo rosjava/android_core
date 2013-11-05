@@ -30,12 +30,12 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class PixelSpacePoiShape extends MetricSpacePoiShape {
 
-  private static final float PIXELS_PER_METER = 250.f;
+  private static final float PIXELS_PER_METER = 100.f;
 
   @Override
   protected void scale(VisualizationView view, GL10 gl) {
     // Adjust for metric scale definition of MetricSpacePoseShape vertices.
-    gl.glScalef(PIXELS_PER_METER, 250.f, 1.f);
+    gl.glScalef(PIXELS_PER_METER, PIXELS_PER_METER, 1.f);
     // Counter adjust for the camera zoom.
     gl.glScalef(1 / (float) view.getCamera().getZoom(), 1 / (float) view.getCamera().getZoom(),
         1.0f);
