@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/padded"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:focusable="false"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/uri_text"
+            android:textSize="18dp"/>
+
+        <EditText
+            android:id="@+id/master_chooser_uri"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="20"
+            android:hint="@string/master_uri_hint"
+            android:singleLine="true">
+
+            <requestFocus/>
+        </EditText>
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/padded"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <Button
+            android:id="@+id/master_chooser_qr_code_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="qrCodeButtonClicked"
+            android:text="@string/qr_code"/>
+
+        <Button
+            android:id="@+id/master_chooser_ok"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:onClick="okButtonClicked"
+            android:text="@string/use_master"/>
+    </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/advanced_checkBox"
+        style="@style/padded"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:onClick="advancedCheckboxClicked"
+        android:text="@string/show_advanced"/>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <Button
+            android:id="@+id/master_chooser_new_master_button"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="newMasterButtonClicked"
+            android:text="@string/new_master"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/master_chooser_new_private_master_button"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="newPrivateMasterButtonClicked"
+            android:text="@string/new_private_master"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/master_chooser_cancel"
+        style="@style/padded"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:onClick="cancelButtonClicked"
+        android:text="@string/cancel"/>
+
+</LinearLayout>

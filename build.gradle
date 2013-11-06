@@ -15,7 +15,7 @@
  */
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.7'
+    gradleVersion = '1.8'
 }
 
 buildscript {
@@ -43,8 +43,25 @@ allprojects {
     version = project.catkin.pkg.version
 }
 
-subprojects {
-    if (name != 'docs') {
-        apply plugin: 'ros-android'
+configure(subprojects.findAll {it.name.startsWith('android_')}) {
+    apply plugin: 'ros-android'
+    afterEvaluate { Project project ->
+        // Change the layout of Android projects to be compatible with Eclipse.
+        android {
+            sourceSets {
+                main {
+                    manifest.srcFile 'AndroidManifest.xml'
+                    res.srcDirs 'res'
+                    assets.srcDirs 'assets'
+                    java.srcDirs 'src'
+                }
+            }
+        }
+
+        // Copy JAR dependencies into the libs directory for Eclipse.
+        task deployLibs(type: Copy) {
+          from { configurations.compile }
+          into { "${project.projectDir}/libs" }
+        }
     }
 }
