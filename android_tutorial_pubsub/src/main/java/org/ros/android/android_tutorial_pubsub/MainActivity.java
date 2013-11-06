@@ -60,7 +60,7 @@ public class MainActivity extends RosActivity {
     talker = new Talker();
     // At this point, the user has already been prompted to either enter the URI
     // of a master to use or to start a master locally.
-    String host = InetAddressFactory.newNonLoopback().getHostName();
+    String host = InetAddressFactory.newNonLoopback().getHostAddress();
     NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(host, getMasterUri());
 
     nodeMainExecutor.execute(talker, nodeConfiguration);
