@@ -16,22 +16,18 @@
 
 package org.ros.android.view.visualization.layer;
 
-import android.content.Context;
-import android.os.Handler;
+import com.google.common.base.Preconditions;
+
 import android.support.v4.view.GestureDetectorCompat;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-
 import org.ros.android.view.visualization.RotateGestureDetector;
 import org.ros.android.view.visualization.VisualizationView;
-import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
 import org.ros.node.ConnectedNode;
-import org.ros.rosjava_geometry.FrameTransformTree;
-
-import java.util.concurrent.ExecutorService;
+import org.ros.node.NodeMainExecutor;
 
 /**
  * Provides gesture control of the camera for translate, rotate, and zoom.
@@ -41,28 +37,19 @@ import java.util.concurrent.ExecutorService;
  */
 public class CameraControlLayer extends DefaultLayer {
 
-  private final Context context;
-  private final ListenerGroup<CameraControlListener> listeners;
-
+  private ListenerGroup<CameraControlListener> listeners;
   private GestureDetectorCompat translateGestureDetector;
   private RotateGestureDetector rotateGestureDetector;
   private ScaleGestureDetector zoomGestureDetector;
 
-  /**
-   * Creates a new {@link CameraControlLayer}.
-   * <p/>
-   * The camera's frame will be set to {@code frame} once when this layer is
-   * started and always when the camera is translated.
-   *
-   * @param context         the application's {@link Context}
-   * @param executorService
-   */
-  public CameraControlLayer(Context context, ExecutorService executorService) {
-    this.context = context;
-    listeners = new ListenerGroup<CameraControlListener>(executorService);
+  @Override
+  public void init(NodeMainExecutor nodeMainExecutor) {
+    listeners =
+        new ListenerGroup<CameraControlListener>(nodeMainExecutor.getScheduledExecutorService());
   }
 
   public void addListener(CameraControlListener listener) {
+    Preconditions.checkNotNull(listeners);
     listeners.add(listener);
   }
 
@@ -75,18 +62,17 @@ public class CameraControlLayer extends DefaultLayer {
     final boolean translateGestureHandled = translateGestureDetector.onTouchEvent(event);
     final boolean rotateGestureHandled = rotateGestureDetector.onTouchEvent(event);
     final boolean zoomGestureHandled = zoomGestureDetector.onTouchEvent(event);
-    return translateGestureHandled || rotateGestureHandled || zoomGestureHandled ||
-        super.onTouchEvent(view, event);
+    return translateGestureHandled || rotateGestureHandled || zoomGestureHandled
+        || super.onTouchEvent(view, event);
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler,
-                      FrameTransformTree frameTransformTree, final XYOrthographicCamera camera) {
-    handler.post(new Runnable() {
+  public void onStart(final VisualizationView view, ConnectedNode connectedNode) {
+    view.post(new Runnable() {
       @Override
       public void run() {
         translateGestureDetector =
-            new GestureDetectorCompat(context, new GestureDetector.SimpleOnGestureListener() {
+            new GestureDetectorCompat(view.getContext(), new GestureDetector.SimpleOnGestureListener() {
               @Override
               public boolean onDown(MotionEvent e) {
                 // This must return true in order for onScroll() to trigger.
@@ -95,8 +81,8 @@ public class CameraControlLayer extends DefaultLayer {
 
               @Override
               public boolean onScroll(MotionEvent event1, MotionEvent event2,
-                                      final float distanceX, final float distanceY) {
-                camera.translate(-distanceX, distanceY);
+                  final float distanceX, final float distanceY) {
+                view.getCamera().translate(-distanceX, distanceY);
                 listeners.signal(new SignalRunnable<CameraControlListener>() {
                   @Override
                   public void run(CameraControlListener listener) {
@@ -110,10 +96,10 @@ public class CameraControlLayer extends DefaultLayer {
             new RotateGestureDetector(new RotateGestureDetector.OnRotateGestureListener() {
               @Override
               public boolean onRotate(MotionEvent event1, MotionEvent event2,
-                                      final double deltaAngle) {
+                  final double deltaAngle) {
                 final double focusX = (event1.getX(0) + event1.getX(1)) / 2;
                 final double focusY = (event1.getY(0) + event1.getY(1)) / 2;
-                camera.rotate(focusX, focusY, deltaAngle);
+                view.getCamera().rotate(focusX, focusY, deltaAngle);
                 listeners.signal(new SignalRunnable<CameraControlListener>() {
                   @Override
                   public void run(CameraControlListener listener) {
@@ -124,7 +110,7 @@ public class CameraControlLayer extends DefaultLayer {
               }
             });
         zoomGestureDetector =
-            new ScaleGestureDetector(context,
+            new ScaleGestureDetector(view.getContext(),
                 new ScaleGestureDetector.SimpleOnScaleGestureListener() {
                   @Override
                   public boolean onScale(ScaleGestureDetector detector) {
@@ -134,7 +120,7 @@ public class CameraControlLayer extends DefaultLayer {
                     final float focusX = detector.getFocusX();
                     final float focusY = detector.getFocusY();
                     final float factor = detector.getScaleFactor();
-                    camera.zoom(focusX, focusY, factor);
+                    view.getCamera().zoom(focusX, focusY, factor);
                     listeners.signal(new SignalRunnable<CameraControlListener>() {
                       @Override
                       public void run(CameraControlListener listener) {

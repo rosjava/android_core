@@ -19,25 +19,22 @@ package org.ros.android.view.visualization.shape;
 import org.ros.android.view.visualization.Color;
 
 /**
- * Represents the robot.
+ * Represents a pose.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RobotShape extends TriangleFanShape {
+public class MetricSpacePoseShape extends TriangleFanShape {
   
-  private static final Color COLOR = Color.fromHexAndAlpha("ffa800", 1.0f);
+  private static final Color COLOR = Color.fromHexAndAlpha("377dfa", 1.0f);
   private static final float VERTICES[] = {
-      0.0f, 0.0f, 0.0f,
-      -0.1f, 0.0f, 0.0f,
-      -0.2f, -0.05f, 0.0f,
-      -0.2f, -0.2f, 0.0f,
-      0.2f, 0.0f, 0.0f,
-      -0.2f, 0.2f, 0.0f,
-      -0.2f, 0.05f, 0.0f,
-      -0.1f, 0.0f, 0.0f
+      0.2f, 0.f, 0.f,
+      -0.2f, -0.15f, 0.f,
+      -0.05f, 0.f, 0.f,
+      -0.2f, 0.15f, 0.f,
+      0.2f, 0.f, 0.f
       };
 
-  public RobotShape() {
+  public MetricSpacePoseShape() {
     super(VERTICES, COLOR);
   }
 }

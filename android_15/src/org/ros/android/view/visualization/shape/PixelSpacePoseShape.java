@@ -16,19 +16,28 @@
 
 package org.ros.android.view.visualization.shape;
 
-import org.ros.android.view.visualization.Color;
+import org.ros.android.view.visualization.VisualizationView;
+
+import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Represents the robot's current goal pose.
+ * Represents a pose.
+ * <p>
+ * This shape is defined in pixel space and will not be affected by the zoom
+ * level of the camera.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class GoalShape extends MetricSpacePoseShape {
-  
-  private static final Color COLOR = Color.fromHexAndAlpha("03d5c9", 0.3f);
-  
-  public GoalShape() {
-    super();
-    setColor(COLOR);
+public class PixelSpacePoseShape extends MetricSpacePoseShape {
+
+  private static final float PIXELS_PER_METER = 250.f;
+
+  @Override
+  protected void scale(VisualizationView view, GL10 gl) {
+    // Adjust for metric scale definition of MetricSpacePoseShape vertices.
+    gl.glScalef(PIXELS_PER_METER, 250.f, 1.f);
+    // Counter adjust for the camera zoom.
+    gl.glScalef(1 / (float) view.getCamera().getZoom(), 1 / (float) view.getCamera().getZoom(),
+        1.0f);
   }
 }

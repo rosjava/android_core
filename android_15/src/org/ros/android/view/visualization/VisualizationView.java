@@ -16,26 +16,29 @@
 
 package org.ros.android.view.visualization;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-
+import org.ros.android.RosActivity;
 import org.ros.android.view.visualization.layer.Layer;
-import org.ros.exception.RosRuntimeException;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
+import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Subscriber;
 import org.ros.rosjava_geometry.FrameTransformTree;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -46,33 +49,49 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   private static final boolean DEBUG = false;
 
   private final FrameTransformTree frameTransformTree = new FrameTransformTree();
-  private final XYOrthographicCamera camera = new XYOrthographicCamera(
-      frameTransformTree);
-  private final List<Layer> layers = Lists.newArrayList();
-  private final CountDownLatch attachedToWindow = new CountDownLatch(1);
+  private final XYOrthographicCamera camera = new XYOrthographicCamera(frameTransformTree);
 
+  private List<Layer> layers;
   private XYOrthographicRenderer renderer;
   private ConnectedNode connectedNode;
 
   public VisualizationView(Context context) {
     super(context);
-    init();
   }
 
   public VisualizationView(Context context, AttributeSet attrs) {
     super(context, attrs);
-    init();
   }
 
-  private void init() {
+  /**
+   * Must be called in {@link Activity#onCreate(Bundle)}.
+   * 
+   * @param layers
+   */
+  public void onCreate(List<Layer> layers) {
+    Preconditions.checkNotNull(layers);
+    this.layers = layers;
+    setDebugFlags(DEBUG_CHECK_GL_ERROR);
     if (DEBUG) {
-      // Turn on OpenGL error-checking and logging.
-      setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
+      // Turn on OpenGL logging.
+      setDebugFlags(getDebugFlags() | DEBUG_LOG_GL_CALLS);
     }
     setEGLConfigChooser(8, 8, 8, 8, 0, 0);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
-    renderer = new XYOrthographicRenderer(getContext(), camera);
+    renderer = new XYOrthographicRenderer(this);
     setRenderer(renderer);
+  }
+  
+  /**
+   * Must be called in {@link RosActivity#init(NodeMainExecutor)}
+   * 
+   * @param nodeMainExecutor
+   */
+  public void init(NodeMainExecutor nodeMainExecutor) {
+    Preconditions.checkNotNull(layers);
+    for (Layer layer : layers) {
+      layer.init(nodeMainExecutor);
+    }
   }
 
   @Override
@@ -98,49 +117,24 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     return camera;
   }
 
-  /**
-   * Adds a new layer at the end of the layers collection. The new layer will be
-   * drawn last, i.e. on top of all other layers.
-   * 
-   * @param layer
-   *          layer to add
-   */
-  public void addLayer(Layer layer) {
-    layers.add(layer);
+  public FrameTransformTree getFrameTransformTree() {
+    return frameTransformTree;
   }
 
-  public void removeLayer(Layer layer) {
-    layer.onShutdown(this, connectedNode);
-    layers.remove(layer);
-  }
-
-  public void hideLayer(Layer layer) {
-    layers.remove(layer);
+  public List<Layer> getLayers() {
+    return Collections.unmodifiableList(layers);
   }
 
   @Override
   public void onStart(ConnectedNode connectedNode) {
     this.connectedNode = connectedNode;
     startTransformListener();
-    try {
-      attachedToWindow.await();
-    } catch (InterruptedException e) {
-      throw new RosRuntimeException(e);
-    }
-    // startLayers() must be called after we've attached to the window in order
-    // to ensure that getHandler() will not return null.
     startLayers();
   }
 
-  @Override
-  protected void onAttachedToWindow() {
-    super.onAttachedToWindow();
-    attachedToWindow.countDown();
-  }
-
   private void startTransformListener() {
-    Subscriber<tf2_msgs.TFMessage> tfSubscriber = connectedNode.newSubscriber(
-        "tf", tf2_msgs.TFMessage._TYPE);
+    Subscriber<tf2_msgs.TFMessage> tfSubscriber =
+        connectedNode.newSubscriber("tf", tf2_msgs.TFMessage._TYPE);
     tfSubscriber.addMessageListener(new MessageListener<tf2_msgs.TFMessage>() {
       @Override
       public void onNewMessage(tf2_msgs.TFMessage message) {
@@ -153,14 +147,12 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
 
   private void startLayers() {
     for (Layer layer : layers) {
-      layer.onStart(connectedNode, getHandler(), frameTransformTree, camera);
+      layer.onStart(this, connectedNode);
     }
-    renderer.setLayers(layers);
   }
 
   @Override
   public void onShutdown(Node node) {
-    renderer.setLayers(null);
     for (Layer layer : layers) {
       layer.onShutdown(this, node);
     }

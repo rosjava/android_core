@@ -25,17 +25,24 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Toast;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Toast;
 import org.ros.android.android_10.R;
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.node.client.MasterClient;
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
+import org.ros.namespace.GraphName;
 import org.ros.node.NodeConfiguration;
 
 import java.net.NetworkInterface;
@@ -73,9 +80,9 @@ public class MasterChooser extends Activity {
   private static final String BAR_CODE_SCANNER_PACKAGE_NAME =
       "com.google.zxing.client.android.SCAN";
 
-  private String masterUri;
   private String selectedInterface;
   private EditText uriText;
+  private Button connectButton;
 
   private class StableArrayAdapter extends ArrayAdapter<String> {
 
@@ -105,10 +112,25 @@ public class MasterChooser extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.master_chooser);
     uriText = (EditText) findViewById(R.id.master_chooser_uri);
-    // Get the URI from preferences and display it. Since only primitive types can be saved in
-    // preferences the URI is stored as a string.
-    masterUri = getPreferences(MODE_PRIVATE).getString(PREFS_KEY_NAME, NodeConfiguration.DEFAULT_MASTER_URI.toString());
-    uriText.setText(masterUri);
+    connectButton = (Button) findViewById(R.id.master_chooser_ok);
+    uriText.addTextChangedListener(new TextWatcher() {
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+        if (s.length() > 0) {
+          connectButton.setEnabled(true);
+        } else {
+          connectButton.setEnabled(false);
+        }
+      }
+
+      @Override
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+      }
+
+      @Override
+      public void afterTextChanged(Editable s) {
+      }
+    });
 
     ListView interfacesList = (ListView) findViewById(R.id.networkInterfaces);
     final List<String> list = new ArrayList<String>();
@@ -135,6 +157,13 @@ public class MasterChooser extends Activity {
         selectedInterface = parent.getItemAtPosition(position).toString();
       }
     });
+
+    // Get the URI from preferences and display it. Since only primitive types
+    // can be saved in preferences the URI is stored as a string.
+    String uri =
+        getPreferences(MODE_PRIVATE).getString(PREFS_KEY_NAME,
+            NodeConfiguration.DEFAULT_MASTER_URI.toString());
+    uriText.setText(uri);
   }
 
   @Override
@@ -143,7 +172,8 @@ public class MasterChooser extends Activity {
     if (requestCode == 0) {
       if (resultCode == RESULT_OK) {
         String scanResultFormat = intent.getStringExtra("SCAN_RESULT_FORMAT");
-        Preconditions.checkState(scanResultFormat.equals("TEXT_TYPE") || scanResultFormat.equals("QR_CODE"));
+        Preconditions.checkState(scanResultFormat.equals("TEXT_TYPE")
+            || scanResultFormat.equals("QR_CODE"));
         String contents = intent.getStringExtra("SCAN_RESULT");
         uriText.setText(contents);
       }
@@ -151,32 +181,57 @@ public class MasterChooser extends Activity {
   }
 
   public void okButtonClicked(View unused) {
-    // Get the current text entered for URI.
-    String userUri = uriText.getText().toString();
+    // Prevent further edits while we verify the URI.
+    uriText.setEnabled(false);
+    connectButton.setEnabled(false);
+    final String uri = uriText.getText().toString();
 
-    if (userUri.length() == 0) {
-      // If there is no text input then set it to the default URI.
-      userUri = NodeConfiguration.DEFAULT_MASTER_URI.toString();
-      uriText.setText(userUri);
-      Toast.makeText(MasterChooser.this, "Empty URI not allowed.", Toast.LENGTH_SHORT).show();
-    }
-    // Make sure the URI can be parsed correctly.
-    try {
-      new URI(userUri);
-    } catch (URISyntaxException e) {
-      Toast.makeText(MasterChooser.this, "Invalid URI.", Toast.LENGTH_SHORT).show();
-      return;
-    }
+    // Make sure the URI can be parsed correctly and that the master is
+    // reachable.
+    new AsyncTask<Void, Void, Boolean>() {
+      @Override
+      protected Boolean doInBackground(Void... params) {
+        try {
+          toast("Trying to reach master...");
+          MasterClient masterClient = new MasterClient(new URI(uri));
+          masterClient.getUri(GraphName.of("android/master_chooser_activity"));
+          toast("Connected!");
+          return true;
+        } catch (URISyntaxException e) {
+          toast("Invalid URI.");
+          return false;
+        } catch (XmlRpcTimeoutException e) {
+          toast("Master unreachable!");
+          return false;
+        }
+      }
 
-    // If the displayed URI is valid then pack that into the intent.
-    masterUri = userUri;
-    SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
-    editor.putString(PREFS_KEY_NAME, masterUri);
-    editor.commit();
-    // Package the intent to be consumed by the calling activity.
-    Intent intent = createNewMasterIntent(false, true);
-    setResult(RESULT_OK, intent);
-    finish();
+      @Override
+      protected void onPostExecute(Boolean result) {
+        if (result) {
+          // If the displayed URI is valid then pack that into the intent.
+          SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+          editor.putString(PREFS_KEY_NAME, uri);
+          editor.commit();
+          // Package the intent to be consumed by the calling activity.
+          Intent intent = createNewMasterIntent(false, true);
+          setResult(RESULT_OK, intent);
+          finish();
+        } else {
+          connectButton.setEnabled(true);
+          uriText.setEnabled(true);
+        }
+      }
+    }.execute();
+  }
+
+  private void toast(final String text) {
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        Toast.makeText(MasterChooser.this, text, Toast.LENGTH_SHORT).show();
+      }
+    });
   }
 
   public void qrCodeButtonClicked(View unused) {
@@ -206,9 +261,10 @@ public class MasterChooser extends Activity {
 
   public Intent createNewMasterIntent(boolean newMaster, boolean isPrivate) {
     Intent intent = new Intent();
+    final String uri = uriText.getText().toString();
     intent.putExtra("ROS_MASTER_CREATE_NEW", newMaster);
     intent.putExtra("ROS_MASTER_PRIVATE", isPrivate);
-    intent.putExtra("ROS_MASTER_URI", masterUri);
+    intent.putExtra("ROS_MASTER_URI", uri);
     intent.putExtra("ROS_MASTER_NETWORK_INTERFACE", selectedInterface);
     return intent;
   }
