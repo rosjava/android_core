@@ -14,22 +14,28 @@
  * the License.
  */
 
-dependencies {
-  compile 'org.ros.rosjava_core:rosjava:[0.2,0.3)'
-  compile 'org.ros.rosjava_messages:sensor_msgs:[1.10,1.11)'
-  compile 'org.ros.rosjava_messages:diagnostic_msgs:[1.10,1.11)'
-}
+package org.ros.android.view.visualization.shape;
 
-apply plugin: 'android-library'
+import org.ros.android.view.visualization.Color;
 
-android {
-  compileSdkVersion 10
+/**
+ * Represents a pose.
+ * 
+ * @author damonkohler@google.com (Damon Kohler)
+ */
+public class MetricSpacePoiShape extends TriangleFanShape {
+  
+  private static final Color COLOR = Color.fromHexAndAlpha("377dfa", 1.0f);
+  private static final float VERTICES[] = {
+      -0.2f, 0.2f, 0.f,
+      0.2f, 0.2f, 0.f,
+      0.5f, 0.f, 0.f,
+      0.2f, -0.2f, 0.f,
+      -0.2f, -0.2f, 0.f,
+      -0.2f, 0.2f, 0.f
+      };
 
-  defaultConfig {
-    minSdkVersion 10
-    packageName "org.ros.android.android_10"
-    targetSdkVersion 10
-    versionCode 1
-    versionName "1.0"
+  public MetricSpacePoiShape() {
+    super(VERTICES, COLOR);
   }
 }

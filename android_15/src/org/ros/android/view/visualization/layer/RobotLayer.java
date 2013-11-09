@@ -16,13 +16,11 @@
 
 package org.ros.android.view.visualization.layer;
 
-import android.os.Handler;
-import org.ros.android.view.visualization.XYOrthographicCamera;
-import org.ros.android.view.visualization.shape.RobotShape;
+import org.ros.android.view.visualization.VisualizationView;
+import org.ros.android.view.visualization.shape.PixelSpacePoseShape;
 import org.ros.android.view.visualization.shape.Shape;
+import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
-import org.ros.rosjava_geometry.FrameTransformTree;
-import org.ros.rosjava_geometry.FrameName;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -31,30 +29,32 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class RobotLayer extends DefaultLayer implements TfLayer {
 
-  private final FrameName frame;
-  private final Shape shape;
+  private final GraphName frame;
 
-  public RobotLayer(FrameName frame) {
+  private Shape shape;
+
+  public RobotLayer(GraphName frame) {
     this.frame = frame;
-    shape = new RobotShape();
   }
 
   public RobotLayer(String frame) {
-    this(FrameName.of(frame));
+    this(GraphName.of(frame));
   }
 
   @Override
-  public void draw(GL10 gl) {
-    shape.draw(gl);
+  public void draw(VisualizationView view, GL10 gl) {
+    if (shape != null) {
+      shape.draw(view, gl);
+    }
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler,
-      final FrameTransformTree frameTransformTree, final XYOrthographicCamera camera) {
+  public void onStart(VisualizationView view, ConnectedNode connectedNode) {
+    shape = new PixelSpacePoseShape();
   }
 
   @Override
-  public FrameName getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 }

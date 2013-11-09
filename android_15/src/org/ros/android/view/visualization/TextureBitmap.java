@@ -141,11 +141,11 @@ public class TextureBitmap implements OpenGlDrawable {
     if (handle == null) {
       handle = new int[1];
       gl.glGenTextures(1, handle, 0);
-      gl.glBindTexture(GL10.GL_TEXTURE_2D, handle[0]);
-      gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
-      gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_NEAREST);
       reload = true;
     }
+    gl.glBindTexture(GL10.GL_TEXTURE_2D, handle[0]);
+    gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
+    gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_NEAREST);
     synchronized (mutex) {
       if (reload) {
         GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmapFront, 0);
@@ -155,7 +155,7 @@ public class TextureBitmap implements OpenGlDrawable {
   }
 
   @Override
-  public void draw(GL10 gl) {
+  public void draw(VisualizationView view, GL10 gl) {
     gl.glEnable(GL10.GL_TEXTURE_2D);
     bind(gl);
     gl.glPushMatrix();
@@ -170,6 +170,7 @@ public class TextureBitmap implements OpenGlDrawable {
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
     gl.glPopMatrix();
+    gl.glBindTexture(GL10.GL_TEXTURE_2D, 0);
     gl.glDisable(GL10.GL_TEXTURE_2D);
   }
 }

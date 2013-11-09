@@ -18,17 +18,23 @@ package org.ros.android;
 
 import com.google.common.base.Preconditions;
 
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
+import android.view.WindowManager;
+import android.widget.Toast;
 import org.ros.RosCore;
 import org.ros.android.android_10.R;
 import org.ros.concurrent.ListenerGroup;
@@ -63,6 +69,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
   private final IBinder binder;
   private final ListenerGroup<NodeMainExecutorServiceListener> listeners;
 
+  private Handler handler;
   private WakeLock wakeLock;
   private WifiLock wifiLock;
   private RosCore rosCore;
@@ -89,6 +96,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
 
   @Override
   public void onCreate() {
+    handler = new Handler();
     PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
     wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
     wakeLock.acquire();
@@ -127,20 +135,31 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
 
   @Override
   public void shutdown() {
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(NodeMainExecutorService.this);
+        builder.setMessage("Continue shutting down?");
+        builder.setPositiveButton("Shutdown", new OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            forceShutdown();
+          }
+        });
+        builder.setNegativeButton("Cancel", new OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+          }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        alertDialog.show();
+      }
+    });
+  }
+
+  public void forceShutdown() {
     signalOnShutdown();
-    // NOTE(damonkohler): This may be called multiple times. Shutting down a
-    // NodeMainExecutor multiple times is safe. It simply calls shutdown on all
-    // NodeMains.
-    nodeMainExecutor.shutdown();
-    if (rosCore != null) {
-      rosCore.shutdown();
-    }
-    if (wakeLock.isHeld()) {
-      wakeLock.release();
-    }
-    if (wifiLock.isHeld()) {
-      wifiLock.release();
-    }
     stopForeground(true);
     stopSelf();
   }
@@ -160,7 +179,17 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
 
   @Override
   public void onDestroy() {
-    shutdown();
+    toast("Shutting down...");
+    nodeMainExecutor.shutdown();
+    if (rosCore != null) {
+      rosCore.shutdown();
+    }
+    if (wakeLock.isHeld()) {
+      wakeLock.release();
+    }
+    if (wifiLock.isHeld()) {
+      wifiLock.release();
+    }
     super.onDestroy();
   }
 
@@ -224,5 +253,14 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
       throw new RosRuntimeException(e);
     }
     masterUri = rosCore.getUri();
+  }
+
+  public void toast(final String text) {
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        Toast.makeText(NodeMainExecutorService.this, text, Toast.LENGTH_SHORT).show();
+      }
+    });
   }
 }

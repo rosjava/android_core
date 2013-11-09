@@ -18,16 +18,13 @@ package org.ros.android.view.visualization.layer;
 
 import com.google.common.base.Preconditions;
 
-import android.os.Handler;
+import org.ros.android.view.visualization.VisualizationView;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.TextureBitmap;
 import org.ros.internal.message.MessageBuffers;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
-import org.ros.rosjava_geometry.FrameName;
-import org.ros.rosjava_geometry.FrameTransformTree;
 import org.ros.rosjava_geometry.Transform;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -40,23 +37,23 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   /**
    * Color of occupied cells in the map.
    */
-  private static final int COLOR_OCCUPIED = 0xdfffffff;
+  private static final int COLOR_OCCUPIED = 0xff111111;
 
   /**
    * Color of free cells in the map.
    */
-  private static final int COLOR_FREE = 0xff8d8d8d;
+  private static final int COLOR_FREE = 0xffffffff;
 
   /**
    * Color of unknown cells in the map.
    */
-  private static final int COLOR_UNKNOWN = 0xff000000;
+  private static final int COLOR_UNKNOWN = 0xffdddddd;
 
   private final ChannelBuffer pixels;
   private final TextureBitmap textureBitmap;
 
   private boolean ready;
-  private FrameName frame;
+  private GraphName frame;
   private GL10 previousGl;
 
   public OccupancyGridLayer(String topic) {
@@ -71,25 +68,24 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   }
 
   @Override
-  public void draw(GL10 gl) {
+  public void draw(VisualizationView view, GL10 gl) {
     if (previousGl != gl) {
       textureBitmap.clearHandle();
       previousGl = gl;
     }
     if (ready) {
-      textureBitmap.draw(gl);
+      textureBitmap.draw(view, gl);
     }
   }
 
   @Override
-  public FrameName getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler,
-      FrameTransformTree frameTransformTree, XYOrthographicCamera camera) {
-    super.onStart(connectedNode, handler, frameTransformTree, camera);
+  public void onStart(VisualizationView view, ConnectedNode connectedNode) {
+    super.onStart(view, connectedNode);
     previousGl = null;
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.OccupancyGrid>() {
       @Override
@@ -118,7 +114,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
     Transform origin = Transform.fromPoseMessage(message.getInfo().getOrigin());
     textureBitmap.updateFromPixelBuffer(pixels, stride, resolution, origin, COLOR_UNKNOWN);
     pixels.clear();
-    frame = FrameName.of(message.getHeader().getFrameId());
+    frame = GraphName.of(message.getHeader().getFrameId());
     ready = true;
   }
 }

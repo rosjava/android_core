@@ -16,15 +16,13 @@
 
 package org.ros.android.view.visualization.layer;
 
-import android.os.Handler;
-import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.Color;
 import org.ros.android.view.visualization.Vertices;
+import org.ros.android.view.visualization.VisualizationView;
+import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
-import org.ros.rosjava_geometry.FrameName;
-import org.ros.rosjava_geometry.FrameTransformTree;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -39,7 +37,7 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
   private final Color color;
   private final Lock lock;
 
-  private FrameName frame;
+  private GraphName frame;
   private XYOrthographicCamera camera;
   private boolean ready;
   private nav_msgs.GridCells message;
@@ -57,11 +55,11 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
   }
 
   @Override
-  public void draw(GL10 gl) {
+  public void draw(VisualizationView view, GL10 gl) {
     if (!ready) {
       return;
     }
-    super.draw(gl);
+    super.draw(view, gl);
     lock.lock();
     float pointSize =
         (float) (Math.max(message.getCellWidth(), message.getCellHeight()) * camera.getZoom());
@@ -83,15 +81,13 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler,
-      final FrameTransformTree frameTransformTree, XYOrthographicCamera camera) {
-    super.onStart(connectedNode, handler, frameTransformTree, camera);
-    this.camera = camera;
+  public void onStart(final VisualizationView view, ConnectedNode connectedNode) {
+    super.onStart(view, connectedNode);
     getSubscriber().addMessageListener(new MessageListener<nav_msgs.GridCells>() {
       @Override
       public void onNewMessage(nav_msgs.GridCells data) {
-        frame = FrameName.of(data.getHeader().getFrameId());
-        if (frameTransformTree.lookUp(frame) != null) {
+        frame = GraphName.of(data.getHeader().getFrameId());
+        if (view.getFrameTransformTree().lookUp(frame) != null) {
           if (lock.tryLock()) {
             message = data;
             ready = true;
@@ -103,7 +99,7 @@ public class GridCellsLayer extends SubscriberLayer<nav_msgs.GridCells> implemen
   }
 
   @Override
-  public FrameName getFrame() {
+  public GraphName getFrame() {
     return frame;
   }
 }

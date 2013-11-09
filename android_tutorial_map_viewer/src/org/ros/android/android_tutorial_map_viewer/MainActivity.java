@@ -17,6 +17,7 @@
 package org.ros.android.android_tutorial_map_viewer;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import android.os.Bundle;
 import android.view.View;
@@ -29,9 +30,9 @@ import org.ros.android.RosActivity;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.android.view.visualization.layer.CameraControlLayer;
 import org.ros.android.view.visualization.layer.CameraControlListener;
-import org.ros.android.view.visualization.layer.CompressedOccupancyGridLayer;
-import org.ros.android.view.visualization.layer.OccupancyGridLayer;
 import org.ros.android.view.visualization.layer.LaserScanLayer;
+import org.ros.android.view.visualization.layer.Layer;
+import org.ros.android.view.visualization.layer.OccupancyGridLayer;
 import org.ros.android.view.visualization.layer.RobotLayer;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
@@ -48,6 +49,7 @@ public class MainActivity extends RosActivity {
 
   private VisualizationView visualizationView;
   private ToggleButton followMeToggleButton;
+  private CameraControlLayer cameraControlLayer;
 
   public MainActivity() {
     super("Map Viewer", "Map Viewer");
@@ -62,14 +64,16 @@ public class MainActivity extends RosActivity {
         WindowManager.LayoutParams.FLAG_FULLSCREEN);
     setContentView(R.layout.main);
     visualizationView = (VisualizationView) findViewById(R.id.visualization);
+    cameraControlLayer = new CameraControlLayer();
+    visualizationView.onCreate(Lists.<Layer>newArrayList(cameraControlLayer,
+        new OccupancyGridLayer("map"), new LaserScanLayer("scan"), new RobotLayer(ROBOT_FRAME)));
     followMeToggleButton = (ToggleButton) findViewById(R.id.follow_me_toggle_button);
     enableFollowMe();
   }
 
   @Override
   protected void init(NodeMainExecutor nodeMainExecutor) {
-    CameraControlLayer cameraControlLayer =
-        new CameraControlLayer(this, nodeMainExecutor.getScheduledExecutorService());
+    visualizationView.init(nodeMainExecutor);
     cameraControlLayer.addListener(new CameraControlListener() {
       @Override
       public void onZoom(double focusX, double focusY, double factor) {
@@ -87,13 +91,6 @@ public class MainActivity extends RosActivity {
       }
 
     });
-    visualizationView.addLayer(cameraControlLayer);
-    visualizationView.addLayer(new CompressedOccupancyGridLayer("map/png"));
-    visualizationView.addLayer(new LaserScanLayer("scan"));
-    // Turtlebot configuration
-    // visualizationView.addLayer(new OccupancyGridLayer("turtlebot/application/map"));
-    // visualizationView.addLayer(new LaserScanLayer("turtlebot/application/scan"));
-    visualizationView.addLayer(new RobotLayer(ROBOT_FRAME));
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress(),
             getMasterUri());

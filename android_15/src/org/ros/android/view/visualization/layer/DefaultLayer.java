@@ -16,14 +16,13 @@
 
 package org.ros.android.view.visualization.layer;
 
-import android.os.Handler;
 import android.view.MotionEvent;
-import org.ros.android.view.visualization.XYOrthographicCamera;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
-import org.ros.rosjava_geometry.FrameTransformTree;
+import org.ros.node.NodeMainExecutor;
 
+import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
@@ -34,7 +33,11 @@ import javax.microedition.khronos.opengles.GL10;
 public abstract class DefaultLayer implements Layer {
 
   @Override
-  public void draw(GL10 gl) {
+  public void init(NodeMainExecutor nodeMainExecutor) {
+  }
+  
+  @Override
+  public void draw(VisualizationView view, GL10 gl) {
   }
 
   @Override
@@ -43,11 +46,18 @@ public abstract class DefaultLayer implements Layer {
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode, Handler handler,
-      FrameTransformTree frameTransformTree, XYOrthographicCamera camera) {
+  public void onStart(VisualizationView view, ConnectedNode connectedNode) {
   }
 
   @Override
   public void onShutdown(VisualizationView view, Node node) {
+  }
+  
+  @Override
+  public void onSurfaceChanged(VisualizationView view, GL10 gl, int width, int height) {
+  }
+  
+  @Override
+  public void onSurfaceCreated(VisualizationView view, GL10 gl, EGLConfig config) {
   }
 }
