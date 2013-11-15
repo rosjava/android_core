@@ -17,7 +17,6 @@
 package org.ros.android.android_tutorial_pubsub;
 
 import android.os.Bundle;
-
 import org.ros.android.MessageCallable;
 import org.ros.android.RosActivity;
 import org.ros.android.view.RosTextView;
