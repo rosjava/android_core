@@ -24,10 +24,13 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import org.ros.address.InetAddressFactory;
 import org.ros.exception.RosRuntimeException;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.ExecutionException;
@@ -136,6 +139,11 @@ public abstract class RosActivity extends Activity {
     return nodeMainExecutorService.getMasterUri();
   }
 
+  public String getRosHostname() {
+    Preconditions.checkNotNull(nodeMainExecutorService);
+    return nodeMainExecutorService.getRosHostname();
+  }
+
   @Override
   public void startActivityForResult(Intent intent, int requestCode) {
     Preconditions.checkArgument(requestCode != MASTER_CHOOSER_REQUEST_CODE);
@@ -144,24 +152,25 @@ public abstract class RosActivity extends Activity {
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (requestCode == MASTER_CHOOSER_REQUEST_CODE) {
-      if (resultCode == RESULT_OK) {
-        if (data.getBooleanExtra("NEW_MASTER", false) == true) {
-          AsyncTask<Boolean, Void, URI> task = new AsyncTask<Boolean, Void, URI>() {
-            @Override
-            protected URI doInBackground(Boolean... params) {
-              RosActivity.this.nodeMainExecutorService.startMaster(params[0]);
-              return RosActivity.this.nodeMainExecutorService.getMasterUri();
-            }
-          };
-          task.execute(data.getBooleanExtra("ROS_MASTER_PRIVATE", true));
+    super.onActivityResult(requestCode, resultCode, data);
+    if (resultCode == RESULT_OK) {
+      if (requestCode == MASTER_CHOOSER_REQUEST_CODE) {
+        String host;
+        String networkInterfaceName = data.getStringExtra("ROS_MASTER_NETWORK_INTERFACE");
+        // Handles the default selection and prevents possible errors
+        if (networkInterfaceName == null || networkInterfaceName.equals("")) {
+          host = InetAddressFactory.newNonLoopback().getHostAddress();
+        } else {
           try {
-            task.get();
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          } catch (ExecutionException e) {
-            e.printStackTrace();
+            NetworkInterface networkInterface = NetworkInterface.getByName(networkInterfaceName);
+            host = InetAddressFactory.newNonLoopbackForNetworkInterface(networkInterface).getHostAddress();
+          } catch (SocketException e) {
+            throw new RosRuntimeException(e);
           }
+        }
+        nodeMainExecutorService.setRosHostname(host);
+        if (data.getBooleanExtra("ROS_MASTER_CREATE_NEW", false)) {
+          nodeMainExecutorService.startMaster(data.getBooleanExtra("ROS_MASTER_PRIVATE", true));
         } else {
           URI uri;
           try {
@@ -171,7 +180,14 @@ public abstract class RosActivity extends Activity {
           }
           nodeMainExecutorService.setMasterUri(uri);
         }
-        init();
+        // Run init() in a new thread as a convenience since it often requires network access.
+        new AsyncTask<Void, Void, Void>() {
+          @Override
+          protected Void doInBackground(Void... params) {
+            RosActivity.this.init(nodeMainExecutorService);
+            return null;
+          }
+        }.execute();
       } else {
         // Without a master URI configured, we are in an unusable state.
         nodeMainExecutorService.forceShutdown();

@@ -63,26 +63,52 @@
         android:text="@string/show_advanced"/>
 
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="fill_parent"
+        android:visibility="gone"
+        android:id="@+id/advancedOptions">
 
-        <Button
-            android:id="@+id/master_chooser_new_master_button"
+        <TextView
             android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:onClick="newMasterButtonClicked"
-            android:text="@string/new_master"
-            android:visibility="gone"/>
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/select_interface"
+            android:id="@+id/interfaceLabel"
+            android:layout_gravity="center"
+            android:autoText="true"/>
 
-        <Button
-            android:id="@+id/master_chooser_new_private_master_button"
+        <ListView
             android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
+            android:layout_height="0dp"
+            android:id="@+id/networkInterfaces"
             android:layout_weight="1"
-            android:onClick="newPrivateMasterButtonClicked"
-            android:text="@string/new_private_master"
-            android:visibility="gone"/>
+            android:visibility="visible"/>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <Button
+                android:id="@+id/master_chooser_new_master_button"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:onClick="newMasterButtonClicked"
+                android:text="@string/new_master"
+                android:layout_weight="1"
+                android:visibility="visible"/>
+
+            <Button
+                android:id="@+id/master_chooser_new_private_master_button"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:onClick="newPrivateMasterButtonClicked"
+                android:text="@string/new_private_master"
+                android:layout_weight="1"
+                android:visibility="visible"/>
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <Button
