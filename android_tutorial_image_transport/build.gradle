@@ -22,7 +22,11 @@ apply plugin: 'android'
 
 android {
   compileSdkVersion 10
-
+  packagingOptions {
+    /* https://github.com/rosjava/android_core/issues/194 */
+    exclude 'META-INF/LICENSE.txt'
+    exclude 'META-INF/NOTICE.txt'
+  }
   defaultConfig {
     minSdkVersion 10
     packageName "org.ros.android.android_tutorial_image_transport"
