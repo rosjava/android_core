@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 
 import android.graphics.Bitmap;
 import android.opengl.GLUtils;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.rosjava_geometry.Transform;
 
@@ -38,12 +39,12 @@ public class TextureBitmap implements OpenGlDrawable {
   /**
    * The maximum height of a texture.
    */
-  private final static int TEXTURE_HEIGHT = 1024;
+  public final static int HEIGHT = 1024;
 
   /**
    * The maximum width of a texture.
    */
-  private final static int TEXTURE_STRIDE = 1024;
+  public final static int STRIDE = 1024;
 
   private final int[] pixels;
   private final FloatBuffer surfaceVertices;
@@ -59,7 +60,7 @@ public class TextureBitmap implements OpenGlDrawable {
   private boolean reload;
 
   public TextureBitmap() {
-    pixels = new int[TEXTURE_HEIGHT * TEXTURE_STRIDE];
+    pixels = new int[HEIGHT * STRIDE];
     surfaceVertices = Vertices.toFloatBuffer(new float[] {
         // Triangle strip
         0.0f, 0.0f, 0.0f, // Bottom left
@@ -74,8 +75,8 @@ public class TextureBitmap implements OpenGlDrawable {
         0.0f, 1.0f, // Top left
         1.0f, 1.0f, // Top right
     });
-    bitmapFront = Bitmap.createBitmap(TEXTURE_STRIDE, TEXTURE_HEIGHT, Bitmap.Config.ARGB_8888);
-    bitmapBack = Bitmap.createBitmap(TEXTURE_STRIDE, TEXTURE_HEIGHT, Bitmap.Config.ARGB_8888);
+    bitmapFront = Bitmap.createBitmap(STRIDE, HEIGHT, Bitmap.Config.ARGB_8888);
+    bitmapBack = Bitmap.createBitmap(STRIDE, HEIGHT, Bitmap.Config.ARGB_8888);
     mutex = new Object();
     reload = true;
   }
@@ -84,13 +85,13 @@ public class TextureBitmap implements OpenGlDrawable {
       int fillColor) {
     Preconditions.checkArgument(pixels.length % stride == 0);
     int height = pixels.length / stride;
-    for (int y = 0; y < TEXTURE_HEIGHT; y++) {
-      for (int x = 0; x < TEXTURE_STRIDE; x++) {
+    for (int y = 0; y < HEIGHT; y++) {
+      for (int x = 0; x < STRIDE; x++) {
         // If the pixel is within the bounds of the specified pixel array then
         // we copy the specified value. Otherwise, we use the specified fill
         // color.
         int sourceIndex = y * stride + x;
-        int targetIndex = y * TEXTURE_STRIDE + x;
+        int targetIndex = y * STRIDE + x;
         if (x < stride && y < height) {
           this.pixels[targetIndex] = pixels[sourceIndex];
         } else {
@@ -105,8 +106,8 @@ public class TextureBitmap implements OpenGlDrawable {
       Transform origin, int fillColor) {
     Preconditions.checkNotNull(pixels);
     Preconditions.checkNotNull(origin);
-    for (int y = 0, i = 0; y < TEXTURE_HEIGHT; y++) {
-      for (int x = 0; x < TEXTURE_STRIDE; x++, i++) {
+    for (int y = 0, i = 0; y < HEIGHT; y++) {
+      for (int x = 0; x < STRIDE; x++, i++) {
         // If the pixel is within the bounds of the specified pixel array then
         // we copy the specified value. Otherwise, we use the specified fill
         // color.
@@ -126,9 +127,9 @@ public class TextureBitmap implements OpenGlDrawable {
 
   private void update(Transform origin, int stride, float resolution, int fillColor) {
     this.origin = origin;
-    scaledWidth = TEXTURE_STRIDE * resolution;
-    scaledHeight = TEXTURE_HEIGHT * resolution;
-    bitmapBack.setPixels(pixels, 0, TEXTURE_STRIDE, 0, 0, TEXTURE_STRIDE, TEXTURE_HEIGHT);
+    scaledWidth = STRIDE * resolution;
+    scaledHeight = HEIGHT * resolution;
+    bitmapBack.setPixels(pixels, 0, STRIDE, 0, 0, STRIDE, HEIGHT);
     synchronized (mutex) {
       Bitmap tmp = bitmapFront;
       bitmapFront = bitmapBack;
