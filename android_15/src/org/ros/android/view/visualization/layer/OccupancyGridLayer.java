@@ -17,15 +17,20 @@
 package org.ros.android.view.visualization.layer;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
-import org.ros.android.view.visualization.VisualizationView;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.android.view.visualization.TextureBitmap;
+import org.ros.android.view.visualization.VisualizationView;
 import org.ros.internal.message.MessageBuffers;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
+import org.ros.rosjava_geometry.Quaternion;
 import org.ros.rosjava_geometry.Transform;
+import org.ros.rosjava_geometry.Vector3;
+
+import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -49,8 +54,54 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
    */
   private static final int COLOR_UNKNOWN = 0xffdddddd;
 
-  private final ChannelBuffer pixels;
-  private final TextureBitmap textureBitmap;
+  private class Tile {
+
+    private final float resolution;
+
+    private final ChannelBuffer pixelBuffer = MessageBuffers.dynamicBuffer();
+    private final TextureBitmap textureBitmap = new TextureBitmap();
+
+    private Transform origin;
+    private int stride;
+    private boolean ready;
+
+    public Tile(float resolution) {
+      this.resolution = resolution;
+      ready = false;
+    }
+
+    public void draw(VisualizationView view, GL10 gl) {
+      if (ready) {
+        textureBitmap.draw(view, gl);
+      }
+    }
+
+    public void clearHandle() {
+      textureBitmap.clearHandle();
+    }
+
+    public void writeInt(int value) {
+      pixelBuffer.writeInt(value);
+    }
+
+    public void update() {
+      Preconditions.checkNotNull(origin);
+      Preconditions.checkNotNull(stride);
+      textureBitmap.updateFromPixelBuffer(pixelBuffer, stride, resolution, origin, COLOR_UNKNOWN);
+      pixelBuffer.clear();
+      ready = true;
+    }
+
+    public void setOrigin(Transform origin) {
+      this.origin = origin;
+    }
+
+    public void setStride(int stride) {
+      this.stride = stride;
+    }
+  }
+
+  private final List<Tile> tiles;
 
   private boolean ready;
   private GraphName frame;
@@ -62,19 +113,22 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
 
   public OccupancyGridLayer(GraphName topic) {
     super(topic, nav_msgs.OccupancyGrid._TYPE);
-    pixels = MessageBuffers.dynamicBuffer();
-    textureBitmap = new TextureBitmap();
+    tiles = Lists.newArrayList();
     ready = false;
   }
 
   @Override
   public void draw(VisualizationView view, GL10 gl) {
     if (previousGl != gl) {
-      textureBitmap.clearHandle();
+      for (Tile tile : tiles) {
+        tile.clearHandle();
+      }
       previousGl = gl;
     }
     if (ready) {
-      textureBitmap.draw(view, gl);
+      for (Tile tile : tiles) {
+        tile.draw(view, gl);
+      }
     }
   }
 
@@ -96,24 +150,58 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   }
 
   private void update(nav_msgs.OccupancyGrid message) {
-    int stride = message.getInfo().getWidth();
-    Preconditions.checkArgument(stride <= 1024);
-    Preconditions.checkArgument(message.getInfo().getHeight() <= 1024);
-    ChannelBuffer buffer = message.getData();
-    while (buffer.readable()) {
-      byte pixel = buffer.readByte();
-      if (pixel == -1) {
-        pixels.writeInt(COLOR_UNKNOWN);
-      } else if (pixel == 0) {
-        pixels.writeInt(COLOR_FREE);
-      } else {
-        pixels.writeInt(COLOR_OCCUPIED);
+    final float resolution = message.getInfo().getResolution();
+    final int width = message.getInfo().getWidth();
+    final int height = message.getInfo().getHeight();
+    final int numTilesWide = (int) Math.ceil(width / (float) TextureBitmap.STRIDE);
+    final int numTilesHigh = (int) Math.ceil(height / (float) TextureBitmap.STRIDE);
+    final int numTiles = numTilesWide * numTilesHigh;
+    final Transform origin = Transform.fromPoseMessage(message.getInfo().getOrigin());
+
+    while (tiles.size() < numTiles) {
+      tiles.add(new Tile(resolution));
+    }
+
+    for (int y = 0; y < numTilesHigh; ++y) {
+      for (int x = 0; x < numTilesWide; ++x) {
+        final int tileIndex = y * numTilesWide + x;
+        tiles.get(tileIndex).setOrigin(origin.multiply(new Transform(new Vector3(x *
+            resolution * TextureBitmap.STRIDE,
+            y * resolution * TextureBitmap.HEIGHT, 0.), Quaternion.identity())));
+        if (x < numTilesWide - 1) {
+          tiles.get(tileIndex).setStride(TextureBitmap.STRIDE);
+        } else {
+          tiles.get(tileIndex).setStride(width % TextureBitmap.STRIDE);
+        }
       }
     }
-    float resolution = message.getInfo().getResolution();
-    Transform origin = Transform.fromPoseMessage(message.getInfo().getOrigin());
-    textureBitmap.updateFromPixelBuffer(pixels, stride, resolution, origin, COLOR_UNKNOWN);
-    pixels.clear();
+
+    int x = 0;
+    int y = 0;
+    final ChannelBuffer buffer = message.getData();
+    while (buffer.readable()) {
+      Preconditions.checkState(y < height);
+      final int tileIndex = (y / TextureBitmap.STRIDE) * numTilesWide + x / TextureBitmap.STRIDE;
+      final byte pixel = buffer.readByte();
+      if (pixel == -1) {
+        tiles.get(tileIndex).writeInt(COLOR_UNKNOWN);
+      } else if (pixel == 0) {
+        tiles.get(tileIndex).writeInt(COLOR_FREE);
+      } else {
+        tiles.get(tileIndex).writeInt(COLOR_OCCUPIED);
+      }
+
+      ++x;
+      if (x == width) {
+        x = 0;
+        ++y;
+      }
+    }
+
+    for (Tile tile : tiles) {
+      tile.update();
+    }
+
     frame = GraphName.of(message.getHeader().getFrameId());
     ready = true;
   }
