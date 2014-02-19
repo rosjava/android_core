@@ -25,8 +25,8 @@ include "android_tutorial_pubsub"
 include "android_tutorial_teleop"
 include "docs"
 
-// The following projects are not included in the multi-project yet till its
-// sorted whereabouts they should actually live (should they be in a java
-// repo instead?)
+// TODO(damonkohler): The following projects are not included in the
+// multi-project yet till its sorted whereabouts they should actually live
+// (should they be in a java repo instead?)
 // include "compressed_map_transport"
 // include "polling_input_stream"
