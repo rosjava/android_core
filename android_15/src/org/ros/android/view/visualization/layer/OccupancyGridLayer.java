@@ -54,15 +54,33 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
    */
   private static final int COLOR_UNKNOWN = 0xffdddddd;
 
+  /**
+   * In order to draw maps with a size outside the maximum size of a texture,
+   * we split the map into multiple tiles and draw one texture per tile.
+   */
   private class Tile {
-
-    private final float resolution;
 
     private final ChannelBuffer pixelBuffer = MessageBuffers.dynamicBuffer();
     private final TextureBitmap textureBitmap = new TextureBitmap();
 
+    /**
+     * Resolution of the {@link nav_msgs.OccupancyGrid}.
+     */
+    private final float resolution;
+
+    /**
+     * Points to the top left of the {@link Tile}.
+     */
     private Transform origin;
+
+    /**
+     * Width of the {@link Tile}.
+     */
     private int stride;
+
+    /**
+     * {@code true} when the {@link Tile} is ready to be drawn.
+     */
     private boolean ready;
 
     public Tile(float resolution) {
@@ -113,7 +131,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
 
   public OccupancyGridLayer(GraphName topic) {
     super(topic, nav_msgs.OccupancyGrid._TYPE);
-    tiles = Lists.newArrayList();
+    tiles = Lists.newCopyOnWriteArrayList();
     ready = false;
   }
 
