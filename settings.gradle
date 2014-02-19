@@ -14,14 +14,19 @@
  * the License.
  */
 
-include 'android_10', 'android_benchmarks', 'android_tutorial_camera',
-        'android_tutorial_image_transport', 'android_tutorial_pubsub' 
-include 'android_15', 'android_acm_serial', 'android_tutorial_map_viewer',
-        'android_tutorial_teleop'
-include 'docs'
-/*
-  The following code is not included in the multi-project yet till its sorted
-  whereabouts they should actually live (should they be in a java repo instead?)
+include "android_10"
+include "android_15"
+include "android_acm_serial"
+include "android_benchmarks"
+include "android_tutorial_camera"
+include "android_tutorial_image_transport"
+include "android_tutorial_map_viewer"
+include "android_tutorial_pubsub"
+include "android_tutorial_teleop"
+include "docs"
 
-    polling_input_stream, compressed_map_transport
-*/
+// The following projects are not included in the multi-project yet till its
+// sorted whereabouts they should actually live (should they be in a java
+// repo instead?)
+// include "compressed_map_transport"
+// include "polling_input_stream"
