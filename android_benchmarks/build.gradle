@@ -28,4 +28,5 @@ android {
         exclude 'META-INF/NOTICE.txt'
     }
     compileSdkVersion 10
+    buildToolsVersion '19.0.3'
 }

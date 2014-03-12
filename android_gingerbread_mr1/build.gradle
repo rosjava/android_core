@@ -23,5 +23,5 @@ apply plugin: 'android-library'
 
 android {
     compileSdkVersion 10
+    buildToolsVersion '19.0.3'
 }
-

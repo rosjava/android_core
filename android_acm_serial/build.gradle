@@ -14,7 +14,6 @@
  * the License.
  */
 
-
 dependencies {
   compile project(':android_honeycomb_mr2')
   compile project(':android_gingerbread_mr1')
@@ -24,4 +23,5 @@ apply plugin: 'android-library'
 
 android {
     compileSdkVersion 13
+    buildToolsVersion '19.0.3'
 }
