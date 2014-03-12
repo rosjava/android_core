@@ -96,6 +96,11 @@ public class GLText {
       spaceX = 0.0f;
    }
 
+  public boolean load(String file, int size, int padX, int padY) {
+    Typeface tf = Typeface.createFromAsset( assets, file );  // Create the Typeface from Font File
+    return load(tf, size, padX, padY);
+  }
+
    //--Load Font--//
    // description
    //    this will load the specified font file, create a texture for the defined
@@ -104,14 +109,13 @@ public class GLText {
    //    file - Filename of the font (.ttf, .otf) to use. In 'Assets' folder.
    //    size - Requested pixel size of font (height)
    //    padX, padY - Extra padding per character (X+Y Axis); to prevent overlapping characters.
-   public boolean load(String file, int size, int padX, int padY) {
+   public boolean load(Typeface tf, int size, int padX, int padY) {
 
       // setup requested values
       fontPadX = padX;                                // Set Requested X Axis Padding
       fontPadY = padY;                                // Set Requested Y Axis Padding
 
-      // load the font and setup paint instance for drawing
-      Typeface tf = Typeface.createFromAsset( assets, file );  // Create the Typeface from Font File
+      // setup paint instance for drawing
       Paint paint = new Paint();                      // Create Android Paint Instance
       paint.setAntiAlias( true );                     // Enable Anti Alias
       paint.setTextSize( size );                      // Set Text Size
