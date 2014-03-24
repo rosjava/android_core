@@ -16,18 +16,19 @@
 
 package org.ros.android.view.visualization.layer;
 
-import org.ros.android.view.visualization.VisualizationView;
 import org.ros.android.view.visualization.Color;
 import org.ros.android.view.visualization.Vertices;
+import org.ros.android.view.visualization.VisualizationView;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
-import sensor_msgs.LaserScan;
 
 import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
+
+import sensor_msgs.LaserScan;
 
 /**
  * A {@link SubscriberLayer} that visualizes sensor_msgs/LaserScan messages.
@@ -116,7 +117,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
     vertexBackBuffer.position(0);
     synchronized (mutex) {
       FloatBuffer tmp = vertexFrontBuffer;
-      LaserScanLayer.this.vertexFrontBuffer = vertexBackBuffer;
+      vertexFrontBuffer = vertexBackBuffer;
       vertexBackBuffer = tmp;
     }
   }

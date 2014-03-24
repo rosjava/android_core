@@ -26,6 +26,7 @@ import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+
 import org.ros.android.RosActivity;
 import org.ros.android.view.visualization.layer.Layer;
 import org.ros.message.MessageListener;
@@ -48,6 +49,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
 
   private static final boolean DEBUG = false;
 
+  private final Object mutex = new Object();
   private final FrameTransformTree frameTransformTree = new FrameTransformTree();
   private final XYOrthographicCamera camera = new XYOrthographicCamera(frameTransformTree);
 
@@ -65,7 +67,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
 
   /**
    * Must be called in {@link Activity#onCreate(Bundle)}.
-   * 
+   *
    * @param layers
    */
   public void onCreate(List<Layer> layers) {
@@ -81,10 +83,10 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     renderer = new XYOrthographicRenderer(this);
     setRenderer(renderer);
   }
-  
+
   /**
    * Must be called in {@link RosActivity#init(NodeMainExecutor)}
-   * 
+   *
    * @param nodeMainExecutor
    */
   public void init(NodeMainExecutor nodeMainExecutor) {
@@ -133,13 +135,27 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   }
 
   private void startTransformListener() {
-    Subscriber<tf2_msgs.TFMessage> tfSubscriber =
+    final Subscriber<tf2_msgs.TFMessage> tfSubscriber =
         connectedNode.newSubscriber("tf", tf2_msgs.TFMessage._TYPE);
     tfSubscriber.addMessageListener(new MessageListener<tf2_msgs.TFMessage>() {
       @Override
       public void onNewMessage(tf2_msgs.TFMessage message) {
-        for (geometry_msgs.TransformStamped transform : message.getTransforms()) {
-          frameTransformTree.update(transform);
+        synchronized (mutex) {
+          for (geometry_msgs.TransformStamped transform : message.getTransforms()) {
+            frameTransformTree.update(transform);
+          }
+        }
+      }
+    });
+    final Subscriber<tf2_msgs.TFMessage> tfStaticSubscriber =
+        connectedNode.newSubscriber("tf_static", tf2_msgs.TFMessage._TYPE);
+    tfStaticSubscriber.addMessageListener(new MessageListener<tf2_msgs.TFMessage>() {
+      @Override
+      public void onNewMessage(tf2_msgs.TFMessage message) {
+        synchronized (mutex) {
+          for (geometry_msgs.TransformStamped transform : message.getTransforms()) {
+            frameTransformTree.update(transform);
+          }
         }
       }
     });

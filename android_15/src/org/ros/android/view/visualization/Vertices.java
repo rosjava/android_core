@@ -49,25 +49,41 @@ public class Vertices {
   }
 
   public static void drawPoints(GL10 gl, FloatBuffer vertices, Color color, float size) {
+    vertices.mark();
     color.apply(gl);
     gl.glPointSize(size);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
     gl.glDrawArrays(GL10.GL_POINTS, 0, countVertices(vertices, 3));
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
+    vertices.reset();
   }
 
   public static void drawTriangleFan(GL10 gl, FloatBuffer vertices, Color color) {
+    vertices.mark();
     color.apply(gl);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
     gl.glDrawArrays(GL10.GL_TRIANGLE_FAN, 0, countVertices(vertices, 3));
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
+    vertices.reset();
+  }
+
+  public static void drawLineLoop(GL10 gl, FloatBuffer vertices, Color color, float width) {
+    vertices.mark();
+    color.apply(gl);
+    gl.glLineWidth(width);
+    gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+    gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
+    gl.glDrawArrays(GL10.GL_LINE_LOOP, 0, countVertices(vertices, 3));
+    gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
+    vertices.reset();
   }
 
   private static int countVertices(FloatBuffer vertices, int size) {
     // FloatBuffer accounts for the size of each float when calling remaining().
-    Preconditions.checkArgument(vertices.remaining() % size == 0);
+    Preconditions.checkArgument(vertices.remaining() % size == 0,
+        "Number of vertices: " + vertices.remaining());
     return vertices.remaining() / size;
   }
 }
