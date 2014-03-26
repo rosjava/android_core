@@ -101,10 +101,10 @@ public class PointCloud2DLayer extends SubscriberLayer<PointCloud2> implements T
     Preconditions.checkArgument(pointCloud.getFields().get(2).getDatatype() == PointField.FLOAT32);
     Preconditions.checkArgument(pointCloud.getPointStep() == 16);
     Preconditions.checkArgument(pointCloud.getData().order().equals(ByteOrder.LITTLE_ENDIAN));
-    final int numVertices = (pointCloud.getRowStep() / pointCloud.getPointStep() +
+    final int size = (pointCloud.getRowStep() / pointCloud.getPointStep() +
         1 /* triangle fan origin */) * 3 /* x, y, z */;
-    if (vertexBackBuffer == null || vertexBackBuffer.capacity() < numVertices) {
-      vertexBackBuffer = Vertices.allocateBuffer(numVertices);
+    if (vertexBackBuffer == null || vertexBackBuffer.capacity() < size) {
+      vertexBackBuffer = Vertices.allocateBuffer(size);
     }
     vertexBackBuffer.clear();
     // We start with the origin of the triangle fan.

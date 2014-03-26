@@ -117,7 +117,7 @@ public class Triangulate {
         m++;
 
         // Remove v from remaining polygon.
-        for (int s = v, int t = v + 1; t < nv; s++, t++) {
+        for (int s = v, t = v + 1; t < nv; s++, t++) {
           V[s] = V[t];
         }
         nv--;
