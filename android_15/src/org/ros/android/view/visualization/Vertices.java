@@ -80,6 +80,17 @@ public class Vertices {
     vertices.reset();
   }
 
+  public static void drawLines(GL10 gl, FloatBuffer vertices, Color color, float width) {
+    vertices.mark();
+    color.apply(gl);
+    gl.glLineWidth(width);
+    gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+    gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
+    gl.glDrawArrays(GL10.GL_LINES, 0, countVertices(vertices, 3));
+    gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
+    vertices.reset();
+  }
+
   private static int countVertices(FloatBuffer vertices, int size) {
     // FloatBuffer accounts for the size of each float when calling remaining().
     Preconditions.checkArgument(vertices.remaining() % size == 0,

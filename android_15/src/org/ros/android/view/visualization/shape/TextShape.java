@@ -1,25 +1,49 @@
 package org.ros.android.view.visualization.shape;
 
+import org.ros.android.view.visualization.Vertices;
 import org.ros.android.view.visualization.VisualizationView;
-import uk.co.blogspot.fractiousg.texample.GLText;
+
+import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
+
+import uk.co.blogspot.fractiousg.texample.GLText;
 
 public class TextShape extends BaseShape {
 
   private final GLText glText;
   private final String text;
+
   private float x;
   private float y;
+  private FloatBuffer lines;
 
   public TextShape(GLText glText, String text) {
     this.glText = glText;
     this.text = text;
+    lines = Vertices.allocateBuffer(4 * 3);
   }
 
   public void setOffset(float x, float y) {
     this.x = x;
     this.y = y;
+    lines.put(0.f);
+    lines.put(0.f);
+    lines.put(0.f);
+
+    lines.put(x);
+    lines.put(y);
+    lines.put(0.f);
+
+    lines.put(x);
+    lines.put(y);
+    lines.put(0.f);
+
+    lines.put(x + glText.getLength(text));
+    lines.put(y);
+    lines.put(0.f);
+
+    lines.flip();
   }
 
   @Override
@@ -31,6 +55,7 @@ public class TextShape extends BaseShape {
 
   @Override
   protected void drawShape(VisualizationView view, GL10 gl) {
+    Vertices.drawLines(gl, lines, getColor(), 3.f);
     gl.glEnable(GL10.GL_TEXTURE_2D);
     glText.begin(getColor().getRed(), getColor().getGreen(), getColor().getBlue(), getColor()
         .getAlpha());
