@@ -80,7 +80,7 @@ public class Triangulate {
     int nv = n;
 
     // Remove nv-2 Vertices, creating 1 triangle every time.
-    int count = 2 * nv;   /* error detection */
+    int count = 2 * nv;  // error detection
 
     for (int m = 0, v = nv - 1; nv > 2; ) {
       // If we loop, it is probably a non-simple polygon.
@@ -104,12 +104,10 @@ public class Triangulate {
       }
 
       if (snip(contour, u, v, w, nv, V)) {
-        int a, b, c, s, t;
-
         // True names of the vertices.
-        a = V[u];
-        b = V[v];
-        c = V[w];
+        final int a = V[u];
+        final int b = V[v];
+        final int c = V[w];
 
         // Output Triangle
         result.add(contour[a]);
@@ -119,7 +117,7 @@ public class Triangulate {
         m++;
 
         // Remove v from remaining polygon.
-        for (s = v, t = v + 1; t < nv; s++, t++) {
+        for (int s = v, int t = v + 1; t < nv; s++, t++) {
           V[s] = V[t];
         }
         nv--;

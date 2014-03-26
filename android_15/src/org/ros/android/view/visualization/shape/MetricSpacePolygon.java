@@ -71,7 +71,7 @@ public class MetricSpacePolygon extends BaseShape {
       Vertices.drawTriangleFan(gl, triangle, translucent);
     }
     final Color opaque = getColor();
-    translucent.setAlpha(1.f);
+    opaque.setAlpha(1.f);
     Vertices.drawLineLoop(gl, vertexBuffer, opaque, 3.f);
     Vertices.drawPoints(gl, vertexBuffer, opaque, 10.f);
   }
