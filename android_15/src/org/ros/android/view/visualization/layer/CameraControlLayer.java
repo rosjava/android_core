@@ -28,6 +28,7 @@ import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
 import org.ros.node.ConnectedNode;
 import org.ros.node.NodeMainExecutor;
+import org.ros.rosjava_geometry.Vector3;
 
 /**
  * Provides gesture control of the camera for translate, rotate, and zoom.
@@ -87,6 +88,20 @@ public class CameraControlLayer extends DefaultLayer {
                   @Override
                   public void run(CameraControlListener listener) {
                     listener.onTranslate(-distanceX, distanceY);
+                  }
+                });
+                return true;
+              }
+
+              @Override
+              public boolean onDoubleTap (MotionEvent e) {
+                float x = e.getX();
+                float y = e.getY();
+                final Vector3 tapVector = view.getCamera().toCameraFrame((int)x, (int)y);
+                listeners.signal(new SignalRunnable<CameraControlListener>() {
+                  @Override
+                  public void run(CameraControlListener listener) {
+                    listener.onDoubleTap(tapVector);
                   }
                 });
                 return true;
