@@ -25,6 +25,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
 import org.ros.address.InetAddressFactory;
 import org.ros.android.RosActivity;
 import org.ros.android.view.visualization.VisualizationView;
@@ -36,7 +37,6 @@ import org.ros.android.view.visualization.layer.OccupancyGridLayer;
 import org.ros.android.view.visualization.layer.RobotLayer;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
-import org.ros.rosjava_geometry.Vector3;
 import org.ros.time.NtpTimeProvider;
 
 import java.util.concurrent.TimeUnit;
@@ -77,7 +77,7 @@ public class MainActivity extends RosActivity {
     visualizationView.init(nodeMainExecutor);
     cameraControlLayer.addListener(new CameraControlListener() {
       @Override
-      public void onZoom(double focusX, double focusY, double factor) {
+      public void onZoom(float focusX, float focusY, float factor) {
         disableFollowMe();
       }
 
@@ -87,12 +87,12 @@ public class MainActivity extends RosActivity {
       }
 
       @Override
-      public void onRotate(double focusX, double focusY, double deltaAngle) {
+      public void onRotate(float focusX, float focusY, double deltaAngle) {
         disableFollowMe();
       }
 
       @Override
-      public void onDoubleTap(Vector3 tap) {
+      public void onDoubleTap(float x, float y) {
       }
     });
     NodeConfiguration nodeConfiguration =
