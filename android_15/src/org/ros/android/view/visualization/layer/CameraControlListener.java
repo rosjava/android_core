@@ -16,17 +16,15 @@
 
 package org.ros.android.view.visualization.layer;
 
-import org.ros.rosjava_geometry.Vector3;
-
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public interface CameraControlListener {
   void onTranslate(float distanceX, float distanceY);
 
-  void onRotate(double focusX, double focusY, double deltaAngle);
+  void onRotate(float focusX, float focusY, double deltaAngle);
 
-  void onZoom(double focusX, double focusY, double factor);
+  void onZoom(float focusX, float focusY, float factor);
 
-  void onDoubleTap(Vector3 tap);
+  void onDoubleTap(float x, float y);
 }

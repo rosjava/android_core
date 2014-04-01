@@ -22,13 +22,13 @@ import android.support.v4.view.GestureDetectorCompat;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+
 import org.ros.android.view.visualization.RotateGestureDetector;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
 import org.ros.node.ConnectedNode;
 import org.ros.node.NodeMainExecutor;
-import org.ros.rosjava_geometry.Vector3;
 
 /**
  * Provides gesture control of the camera for translate, rotate, and zoom.
@@ -94,14 +94,11 @@ public class CameraControlLayer extends DefaultLayer {
               }
 
               @Override
-              public boolean onDoubleTap (MotionEvent e) {
-                float x = e.getX();
-                float y = e.getY();
-                final Vector3 tapVector = view.getCamera().toCameraFrame((int)x, (int)y);
+              public boolean onDoubleTap (final MotionEvent e) {
                 listeners.signal(new SignalRunnable<CameraControlListener>() {
                   @Override
                   public void run(CameraControlListener listener) {
-                    listener.onDoubleTap(tapVector);
+                    listener.onDoubleTap(e.getX(), e.getY());
                   }
                 });
                 return true;
@@ -112,8 +109,8 @@ public class CameraControlLayer extends DefaultLayer {
               @Override
               public boolean onRotate(MotionEvent event1, MotionEvent event2,
                   final double deltaAngle) {
-                final double focusX = (event1.getX(0) + event1.getX(1)) / 2;
-                final double focusY = (event1.getY(0) + event1.getY(1)) / 2;
+                final float focusX = (event1.getX(0) + event1.getX(1)) / 2;
+                final float focusY = (event1.getY(0) + event1.getY(1)) / 2;
                 view.getCamera().rotate(focusX, focusY, deltaAngle);
                 listeners.signal(new SignalRunnable<CameraControlListener>() {
                   @Override

@@ -108,11 +108,9 @@ public class XYOrthographicCamera {
 
   /**
    * Translates the camera.
-   * 
-   * @param deltaX
-   *          distance to move in x in pixels
-   * @param deltaY
-   *          distance to move in y in pixels
+   *
+   * @param deltaX distance to move in x in pixels
+   * @param deltaY distance to move in y in pixels
    */
   public void translate(double deltaX, double deltaY) {
     synchronized (mutex) {
@@ -133,13 +131,10 @@ public class XYOrthographicCamera {
 
   /**
    * Rotates the camera round the specified coordinates.
-   * 
-   * @param focusX
-   *          the x coordinate to focus on
-   * @param focusY
-   *          the y coordinate to focus on
-   * @param deltaAngle
-   *          the camera will be rotated by {@code deltaAngle} radians
+   *
+   * @param focusX     the x coordinate to focus on
+   * @param focusY     the y coordinate to focus on
+   * @param deltaAngle the camera will be rotated by {@code deltaAngle} radians
    */
   public void rotate(double focusX, double focusY, double deltaAngle) {
     synchronized (mutex) {
@@ -152,13 +147,10 @@ public class XYOrthographicCamera {
 
   /**
    * Zooms the camera around the specified focus coordinates.
-   * 
-   * @param focusX
-   *          the x coordinate to focus on
-   * @param focusY
-   *          the y coordinate to focus on
-   * @param factor
-   *          the zoom will be scaled by this factor
+   *
+   * @param focusX the x coordinate to focus on
+   * @param focusY the y coordinate to focus on
+   * @param factor the zoom will be scaled by this factor
    */
   public void zoom(double focusX, double focusY, double factor) {
     synchronized (mutex) {
@@ -179,12 +171,25 @@ public class XYOrthographicCamera {
 
   /**
    * @return the provided pixel coordinates (where the origin is the top left
-   *         corner of the view) in {@link #frame}
+   * corner of the view) in the camera {@link #frame}
    */
   public Vector3 toCameraFrame(int pixelX, int pixelY) {
     final double centeredX = pixelX - viewport.getWidth() / 2.0d;
     final double centeredY = viewport.getHeight() / 2.0d - pixelY;
     return getCameraToScreenTransform().invert().apply(new Vector3(centeredX, centeredY, 0));
+  }
+
+  /**
+   * @param pixelX the x coordinate on the screen (origin top left) in pixels
+   * @param pixelY the y coordinate on the screen (origin top left) in pixels
+   * @param frame  the frame to transform the coordinates into (e.g. "map")
+   * @return the pixel coordinate in the specified frame
+   */
+  public Transform toFrame(final int pixelX, final int pixelY, final GraphName frame) {
+    final Transform translation = Transform.translation(toCameraFrame(pixelX, pixelY));
+    final FrameTransform cameraToFrame =
+        frameTransformTree.transform(this.frame, frame);
+    return cameraToFrame.getTransform().multiply(translation);
   }
 
   public GraphName getFrame() {
@@ -193,11 +198,10 @@ public class XYOrthographicCamera {
 
   /**
    * Changes the camera frame to the specified frame.
-   * <p>
+   * <p/>
    * If possible, the camera will avoid jumping on the next frame.
-   * 
-   * @param frame
-   *          the new camera frame
+   *
+   * @param frame the new camera frame
    */
   public void setFrame(GraphName frame) {
     Preconditions.checkNotNull(frame);
@@ -224,9 +228,8 @@ public class XYOrthographicCamera {
   /**
    * Changes the camera frame to the specified frame and aligns the camera with
    * the new frame.
-   * 
-   * @param frame
-   *          the new camera frame
+   *
+   * @param frame the new camera frame
    */
   public void jumpToFrame(GraphName frame) {
     synchronized (mutex) {
