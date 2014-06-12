@@ -203,10 +203,12 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
       final byte pixel = buffer.readByte();
       if (pixel == -1) {
         tiles.get(tileIndex).writeInt(COLOR_UNKNOWN);
-      } else if (pixel == 0) {
-        tiles.get(tileIndex).writeInt(COLOR_FREE);
       } else {
-        tiles.get(tileIndex).writeInt(COLOR_OCCUPIED);
+        if (pixel < 50) {
+          tiles.get(tileIndex).writeInt(COLOR_FREE);
+        } else {
+          tiles.get(tileIndex).writeInt(COLOR_OCCUPIED);
+        }
       }
 
       ++x;
