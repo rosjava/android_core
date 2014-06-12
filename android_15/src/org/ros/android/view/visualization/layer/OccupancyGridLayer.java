@@ -19,8 +19,6 @@ package org.ros.android.view.visualization.layer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import android.graphics.Color;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.android.view.visualization.TextureBitmap;
 import org.ros.android.view.visualization.VisualizationView;
@@ -44,12 +42,12 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   /**
    * Color of occupied cells in the map.
    */
-  private static final byte BYTE_OCCUPIED = (byte) 0x11;
+  private static final int COLOR_OCCUPIED = 0xff111111;
 
   /**
    * Color of free cells in the map.
    */
-  private static final byte BYTE_FREE = (byte) 0xff;
+  private static final int COLOR_FREE = 0xffffffff;
 
   /**
    * Color of unknown cells in the map.
@@ -186,9 +184,8 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
       for (int x = 0; x < numTilesWide; ++x) {
         final int tileIndex = y * numTilesWide + x;
         tiles.get(tileIndex).setOrigin(origin.multiply(new Transform(new Vector3(x *
-                resolution * TextureBitmap.STRIDE,
-                y * resolution * TextureBitmap.HEIGHT, 0.
-        ), Quaternion.identity())));
+            resolution * TextureBitmap.STRIDE,
+            y * resolution * TextureBitmap.HEIGHT, 0.), Quaternion.identity())));
         if (x < numTilesWide - 1) {
           tiles.get(tileIndex).setStride(TextureBitmap.STRIDE);
         } else {
@@ -207,13 +204,11 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
       if (pixel == -1) {
         tiles.get(tileIndex).writeInt(COLOR_UNKNOWN);
       } else {
-        final int byteValue;
         if (pixel < 50) {
-          byteValue = BYTE_FREE;
+          tiles.get(tileIndex).writeInt(COLOR_FREE);
         } else {
-          byteValue = BYTE_OCCUPIED;
+          tiles.get(tileIndex).writeInt(COLOR_OCCUPIED);
         }
-        tiles.get(tileIndex).writeInt(Color.argb(255, byteValue, byteValue, byteValue));
       }
 
       ++x;
