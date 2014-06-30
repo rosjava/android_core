@@ -30,7 +30,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 /**
  * Renders a texture.
- * 
+ *
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -39,12 +39,12 @@ public class TextureBitmap implements OpenGlDrawable {
   /**
    * The maximum height of a texture.
    */
-  public final static int HEIGHT = 1024;
+  public final static int HEIGHT = 128;
 
   /**
    * The maximum width of a texture.
    */
-  public final static int STRIDE = 1024;
+  public final static int STRIDE = 128;
 
   private final int[] pixels;
   private final FloatBuffer surfaceVertices;
