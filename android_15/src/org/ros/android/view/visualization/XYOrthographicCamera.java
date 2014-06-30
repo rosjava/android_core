@@ -49,12 +49,12 @@ public class XYOrthographicCamera {
       PIXELS_PER_METER);
 
   /**
-   * Most the user can zoom in.
+   * Most the user can zoom out.
    */
-  private static final float MINIMUM_ZOOM_FACTOR = 0.1f;
+  private static final float MINIMUM_ZOOM_FACTOR = 0.01f;
 
   /**
-   * Most the user can zoom out.
+   * Most the user can zoom in.
    */
   private static final float MAXIMUM_ZOOM_FACTOR = 5.f;
 
