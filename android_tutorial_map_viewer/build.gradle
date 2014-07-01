@@ -25,7 +25,7 @@ android {
 
   defaultConfig {
     minSdkVersion 15
-    packageName "org.ros.android.android_tutorial_map_viewer"
+    applicationId "org.ros.android.android_tutorial_map_viewer"
     targetSdkVersion 15
     versionCode 1
     versionName "1.0"

@@ -26,7 +26,7 @@ android {
 
   defaultConfig {
     minSdkVersion 10
-    packageName "org.ros.android.android_tutorial_pubsub"
+    applicationId "org.ros.android.android_tutorial_pubsub"
     targetSdkVersion 10
     versionCode 1
     versionName "1.0"
