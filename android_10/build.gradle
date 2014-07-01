@@ -27,7 +27,7 @@ android {
 
   defaultConfig {
     minSdkVersion 10
-    packageName "org.ros.android.android_10"
+    applicationId "org.ros.android.android_10"
     targetSdkVersion 10
     versionCode 1
     versionName "1.0"

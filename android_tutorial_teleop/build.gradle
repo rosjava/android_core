@@ -25,7 +25,7 @@ android {
 
   defaultConfig {
     minSdkVersion 15
-    packageName "org.ros.android.android_tutorial_teleop"
+    applicationId "org.ros.android.android_tutorial_teleop"
     targetSdkVersion 15
     versionCode 1
     versionName "1.0"
