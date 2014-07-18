@@ -81,6 +81,11 @@ public class TextureBitmap implements OpenGlDrawable {
     reload = true;
   }
 
+  public void recycle() {
+    bitmapFront.recycle();
+    bitmapBack.recycle();
+  }
+
   public void updateFromPixelArray(int[] pixels, int stride, float resolution, Transform origin,
       int fillColor) {
     Preconditions.checkArgument(pixels.length % stride == 0);

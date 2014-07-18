@@ -98,6 +98,10 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
       textureBitmap.clearHandle();
     }
 
+    public void recycle() {
+      textureBitmap.recycle();
+    }
+
     public void writeInt(int value) {
       pixelBuffer.writeInt(value);
     }
@@ -175,6 +179,14 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
     final int numTilesHigh = (int) Math.ceil(height / (float) TextureBitmap.STRIDE);
     final int numTiles = numTilesWide * numTilesHigh;
     final Transform origin = Transform.fromPoseMessage(message.getInfo().getOrigin());
+
+    if (numTiles < tiles.size()) {
+      // The map size has decreased and we need to clear all the tiles.
+      for (Tile tile : tiles) {
+        tile.recycle();
+      }
+      tiles.clear();
+    }
 
     while (tiles.size() < numTiles) {
       tiles.add(new Tile(resolution));
