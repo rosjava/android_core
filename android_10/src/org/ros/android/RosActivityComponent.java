@@ -103,10 +103,6 @@ public class RosActivityComponent {
     nodeMainExecutorServiceConnection = new NodeMainExecutorServiceConnection();
   }
 
-  public NodeMainExecutorService getNodeMainExecutorService() {
-    return nodeMainExecutorService;
-  }
-
   public void onStart() {
     bindNodeMainExecutorService();
   }

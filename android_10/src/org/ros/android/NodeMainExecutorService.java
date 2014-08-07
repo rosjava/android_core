@@ -36,6 +36,7 @@ import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
+
 import org.ros.RosCore;
 import org.ros.android.android_10.R;
 import org.ros.address.InetAddressFactory;
@@ -119,7 +120,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
 
   @Override
   public void execute(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
-      Collection<NodeListener> nodeListeneners) {
+                      Collection<NodeListener> nodeListeneners) {
     nodeMainExecutor.execute(nodeMain, nodeConfiguration, nodeListeneners);
   }
 
@@ -242,6 +243,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
   public String getRosHostname() {
     return rosHostname;
   }
+
   /**
    * This version of startMaster can only create private masters.
    *
@@ -254,6 +256,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
 
   /**
    * Starts a new ros master in an AsyncTask.
+   *
    * @param isPrivate
    */
   public void startMaster(boolean isPrivate) {
@@ -276,6 +279,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
 
   /**
    * Private blocking method to start a Ros Master.
+   *
    * @param isPrivate
    */
   private void startMasterBlocking(boolean isPrivate) {
