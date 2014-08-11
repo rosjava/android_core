@@ -64,22 +64,13 @@ public class RosActivityComponent {
   private final RosActivityEvents rosActivityEventsHandler;
 
   private NodeMainExecutorService nodeMainExecutorService;
+  private boolean serviceBound = false;
 
   private final class NodeMainExecutorServiceConnection implements ServiceConnection {
     @Override
     public void onServiceConnected(ComponentName name, IBinder binder) {
       nodeMainExecutorService = ((NodeMainExecutorService.LocalBinder) binder).getService();
       rosActivityEventsHandler.onNodeMainExecutorServiceConnected(nodeMainExecutorService);
-      nodeMainExecutorService.addListener(new NodeMainExecutorServiceListener() {
-        @Override
-        public void onShutdown(NodeMainExecutorService nodeMainExecutorService) {
-          // We may have added multiple shutdown listeners and we only want to
-          // call finish() once.
-          if (!RosActivityComponent.this.parentActivity.isFinishing()) {
-            RosActivityComponent.this.parentActivity.finish();
-          }
-        }
-      });
       if (getMasterUri() == null) {
         startMasterChooser();
       } else {
@@ -103,11 +94,9 @@ public class RosActivityComponent {
     nodeMainExecutorServiceConnection = new NodeMainExecutorServiceConnection();
   }
 
-  public void onStart() {
-    bindNodeMainExecutorService();
-  }
 
-  private void bindNodeMainExecutorService() {
+  public void bindNodeMainExecutorService() {
+    serviceBound = true;
     Intent intent = new Intent(parentActivity, NodeMainExecutorService.class);
     intent.setAction(NodeMainExecutorService.ACTION_START);
     intent.putExtra(NodeMainExecutorService.EXTRA_NOTIFICATION_TICKER, notificationTicker);
@@ -120,7 +109,8 @@ public class RosActivityComponent {
     );
   }
 
-  public void onDestroy() {
+  public void unbindNodeMainExecutorService() {
+    serviceBound = false;
     parentActivity.unbindService(nodeMainExecutorServiceConnection);
   }
 
@@ -192,5 +182,13 @@ public class RosActivityComponent {
         nodeMainExecutorService.forceShutdown();
       }
     }
+  }
+
+  public String getNotificationTitle() {
+    return notificationTitle;
+  }
+
+  public boolean isServiceBound() {
+    return serviceBound;
   }
 }
