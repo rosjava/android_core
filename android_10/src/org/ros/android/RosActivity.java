@@ -17,6 +17,7 @@
 package org.ros.android;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Intent;
 
 import org.ros.node.NodeMainExecutor;
@@ -42,6 +43,19 @@ public abstract class RosActivity extends Activity {
     public void onNodeMainExecutorServiceConnected(final NodeMainExecutorService
                                                        nodeMainExecutorService) {
       RosActivity.this.nodeMainExecutorService = nodeMainExecutorService;
+      nodeMainExecutorService.addNodeMainExecutorServiceListener(new NodeMainExecutorServiceListener() {
+        @Override
+        public void onShutdown(NodeMainExecutorService nodeMainExecutorService) {
+          // We may have added multiple shutdown listeners and we only want to
+          // call finish() once.
+          if (!RosActivity.this.isFinishing()) {
+            RosActivity.this.finish();
+          }
+        }
+      });
+
+      nodeMainExecutorService.updateNotification(rosActivityComponent.getNotificationTitle(),
+          "Tap to shutdown.", nodeMainExecutorService.getPendingIntentForShutdown());
     }
 
     @Override
@@ -71,12 +85,16 @@ public abstract class RosActivity extends Activity {
   @Override
   protected void onStart() {
     super.onStart();
-    rosActivityComponent.onStart();
+    if(!rosActivityComponent.isServiceBound()) {
+      rosActivityComponent.bindNodeMainExecutorService();
+    }
   }
 
   @Override
   protected void onDestroy() {
-    rosActivityComponent.onDestroy();
+    if(rosActivityComponent.isServiceBound()) {
+      rosActivityComponent.unbindNodeMainExecutorService();
+    }
     super.onDestroy();
   }
 

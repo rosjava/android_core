@@ -20,8 +20,10 @@ import com.google.common.base.Preconditions;
 
 import android.app.AlertDialog;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -36,9 +38,9 @@ import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
+
 import org.ros.RosCore;
 import org.ros.android.android_10.R;
-import org.ros.address.InetAddressFactory;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
 import org.ros.exception.RosRuntimeException;
@@ -47,6 +49,7 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeListener;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
+import org.ros.node.NodeMainExecutorListener;
 
 import java.net.URI;
 import java.util.Collection;
@@ -78,6 +81,8 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
   private RosCore rosCore;
   private URI masterUri;
   private String rosHostname;
+  private Notification notification;
+  private NotificationManager notificationManager;
 
   /**
    * Class for clients to access. Because we know this service always runs in
@@ -119,7 +124,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
 
   @Override
   public void execute(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
-      Collection<NodeListener> nodeListeneners) {
+                      Collection<NodeListener> nodeListeneners) {
     nodeMainExecutor.execute(nodeMain, nodeConfiguration, nodeListeneners);
   }
 
@@ -136,6 +141,11 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
   @Override
   public void shutdownNodeMain(NodeMain nodeMain) {
     nodeMainExecutor.shutdownNodeMain(nodeMain);
+  }
+
+  @Override
+  public void addListener(final NodeMainExecutorListener nodeMainExecutorListener) {
+    nodeMainExecutor.addListener(nodeMainExecutorListener);
   }
 
   @Override
@@ -165,11 +175,17 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
 
   public void forceShutdown() {
     signalOnShutdown();
-    stopForeground(true);
-    stopSelf();
+    nodeMainExecutor.addListener(new NodeMainExecutorListener() {
+      @Override
+      public void onShutdownComplete() {
+        stopForeground(true);
+        stopSelf();
+      }
+    });
+    nodeMainExecutor.shutdown();
   }
 
-  public void addListener(NodeMainExecutorServiceListener listener) {
+  public void addNodeMainExecutorServiceListener(final NodeMainExecutorServiceListener listener) {
     listeners.add(listener);
   }
 
@@ -204,22 +220,33 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
       return START_NOT_STICKY;
     }
     if (intent.getAction().equals(ACTION_START)) {
+      notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
       Preconditions.checkArgument(intent.hasExtra(EXTRA_NOTIFICATION_TICKER));
       Preconditions.checkArgument(intent.hasExtra(EXTRA_NOTIFICATION_TITLE));
-      Notification notification =
+      notification =
           new Notification(R.drawable.icon, intent.getStringExtra(EXTRA_NOTIFICATION_TICKER),
               System.currentTimeMillis());
-      Intent notificationIntent = new Intent(this, NodeMainExecutorService.class);
-      notificationIntent.setAction(NodeMainExecutorService.ACTION_SHUTDOWN);
-      PendingIntent pendingIntent = PendingIntent.getService(this, 0, notificationIntent, 0);
       notification.setLatestEventInfo(this, intent.getStringExtra(EXTRA_NOTIFICATION_TITLE),
-          "Tap to shutdown.", pendingIntent);
+          "Starting...", null);
       startForeground(ONGOING_NOTIFICATION, notification);
     }
     if (intent.getAction().equals(ACTION_SHUTDOWN)) {
       shutdown();
     }
     return START_NOT_STICKY;
+  }
+
+  public PendingIntent getPendingIntentForShutdown() {
+    Intent notificationIntent = new Intent(this, NodeMainExecutorService.class);
+    notificationIntent.setAction(NodeMainExecutorService.ACTION_SHUTDOWN);
+    PendingIntent pendingIntent = PendingIntent.getService(this, 0, notificationIntent, 0);
+    return pendingIntent;
+  }
+
+  public void updateNotification(String title, String text,
+                                 PendingIntent pendingIntent) {
+    notification.setLatestEventInfo(this, title, text, pendingIntent);
+    notificationManager.notify(ONGOING_NOTIFICATION, notification);
   }
 
   @Override
@@ -242,6 +269,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
   public String getRosHostname() {
     return rosHostname;
   }
+
   /**
    * This version of startMaster can only create private masters.
    *
@@ -254,6 +282,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
 
   /**
    * Starts a new ros master in an AsyncTask.
+   *
    * @param isPrivate
    */
   public void startMaster(boolean isPrivate) {
@@ -276,6 +305,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
 
   /**
    * Private blocking method to start a Ros Master.
+   *
    * @param isPrivate
    */
   private void startMasterBlocking(boolean isPrivate) {
