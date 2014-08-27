@@ -40,16 +40,6 @@ import javax.microedition.khronos.opengles.GL10;
 public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> implements TfLayer {
 
   /**
-   * Color of occupied cells in the map.
-   */
-  private static final int COLOR_OCCUPIED = 0xff111111;
-
-  /**
-   * Color of free cells in the map.
-   */
-  private static final int COLOR_FREE = 0xffffffff;
-
-  /**
    * Color of unknown cells in the map.
    */
   private static final int COLOR_UNKNOWN = 0xffdddddd;
@@ -216,11 +206,10 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
       if (pixel == -1) {
         tiles.get(tileIndex).writeInt(COLOR_UNKNOWN);
       } else {
-        if (pixel < 50) {
-          tiles.get(tileIndex).writeInt(COLOR_FREE);
-        } else {
-          tiles.get(tileIndex).writeInt(COLOR_OCCUPIED);
-        }
+        // This will not lead to invalid values because 'pixel' is always either -1 or between 0
+        // and 100. See: http://docs.ros.org/api/nav_msgs/html/msg/OccupancyGrid.html
+        final int value = 250 - 2 * pixel;
+        tiles.get(tileIndex).writeInt(0xff000000 | (value << 16) | (value << 8) | value);
       }
 
       ++x;
