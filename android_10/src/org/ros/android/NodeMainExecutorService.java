@@ -75,6 +75,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
   private final IBinder binder;
   private final ListenerGroup<NodeMainExecutorServiceListener> listeners;
 
+  private boolean isShuttingDown;
   private Handler handler;
   private WakeLock wakeLock;
   private WifiLock wifiLock;
@@ -174,6 +175,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
   }
 
   public void forceShutdown() {
+    isShuttingDown = true;
     signalOnShutdown();
     nodeMainExecutor.addListener(new NodeMainExecutorListener() {
       @Override
@@ -183,6 +185,10 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
       }
     });
     nodeMainExecutor.shutdown();
+  }
+
+  public boolean isShuttingDown() {
+    return isShuttingDown;
   }
 
   public void addNodeMainExecutorServiceListener(final NodeMainExecutorServiceListener listener) {
