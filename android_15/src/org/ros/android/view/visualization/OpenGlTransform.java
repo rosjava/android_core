@@ -24,7 +24,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 /**
  * An adapter for applying {@link Transform}s in an OpenGL context.
- * 
+ *
  * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
@@ -50,7 +50,7 @@ public class OpenGlTransform {
 
   /**
    * Applies a {@link Transform} to an OpenGL context.
-   * 
+   *
    * @param gl
    *          the context
    * @param transform
@@ -61,6 +61,7 @@ public class OpenGlTransform {
     for (double value : transform.toMatrix()) {
       matrix.put((float) value);
     }
+    // TODO(hrapp): This should probably be flip().
     matrix.position(0);
     gl.glMultMatrixf(matrix);
   }

@@ -122,7 +122,7 @@ public class PointCloud2DLayer extends SubscriberLayer<PointCloud2> implements T
       // Discard intensity.
       buffer.readFloat();
     }
-    vertexBackBuffer.position(0);
+    vertexBackBuffer.flip();
     synchronized (mutex) {
       FloatBuffer tmp = vertexFrontBuffer;
       vertexFrontBuffer = vertexBackBuffer;

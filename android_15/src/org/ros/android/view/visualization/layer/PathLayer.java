@@ -31,7 +31,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 /**
  * Renders a nav_msgs/Path as a dotted line.
- * 
+ *
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -99,6 +99,7 @@ public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer
         i++;
       }
     }
+    // TODO(hrapp): This should probably be flip().
     vertexBuffer.position(0);
   }
 
