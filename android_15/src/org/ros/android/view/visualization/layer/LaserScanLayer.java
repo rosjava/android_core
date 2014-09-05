@@ -32,7 +32,7 @@ import sensor_msgs.LaserScan;
 
 /**
  * A {@link SubscriberLayer} that visualizes sensor_msgs/LaserScan messages.
- * 
+ *
  * @author munjaldesai@google.com (Munjal Desai)
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -114,7 +114,7 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
       }
       angle += angleIncrement * stride;
     }
-    vertexBackBuffer.position(0);
+    vertexBackBuffer.flip();
     synchronized (mutex) {
       FloatBuffer tmp = vertexFrontBuffer;
       vertexFrontBuffer = vertexBackBuffer;

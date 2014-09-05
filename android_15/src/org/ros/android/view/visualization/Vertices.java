@@ -44,6 +44,7 @@ public class Vertices {
   public static FloatBuffer toFloatBuffer(float[] floats) {
     FloatBuffer floatBuffer = allocateBuffer(floats.length);
     floatBuffer.put(floats);
+    // TODO(hrapp): This should probably be flip().
     floatBuffer.position(0);
     return floatBuffer;
   }

@@ -27,7 +27,7 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * Helper function for the DistanceRenderer that creates the polygons, lines,
  * points, etc based on the received data.
- * 
+ *
  * @author munjaldesai@google.com (Munjal Desai)
  */
 class DistancePoints {
@@ -91,6 +91,7 @@ class DistancePoints {
     // Update the buffers with the latest coordinates.
     initRangeVertexBuffer();
     rangeVertexBuffer.put(rangeVertexArray);
+    // TODO(hrapp): This should probably be flip().
     rangeVertexBuffer.position(0);
   }
 
@@ -107,7 +108,7 @@ class DistancePoints {
   /**
    * Draws the open region in light gray and the objects seen by the laser in
    * red.
-   * 
+   *
    * @param gl
    *          The GL interface.
    */
@@ -132,7 +133,7 @@ class DistancePoints {
 
   /**
    * Draws the reference markers that show the current scale or zoom.
-   * 
+   *
    * @param gl
    *          The GL interface.
    */
@@ -150,7 +151,7 @@ class DistancePoints {
 
   /**
    * Draws the robot.
-   * 
+   *
    * @param gl
    *          The GL interface.
    */
@@ -193,6 +194,7 @@ class DistancePoints {
     vertexByteBuffer.order(ByteOrder.nativeOrder());
     robotVertexBuffer = vertexByteBuffer.asFloatBuffer();
     robotVertexBuffer.put(robotVertices);
+    // TODO(hrapp): This should probably be flip().
     robotVertexBuffer.position(0);
   }
 
@@ -245,6 +247,7 @@ class DistancePoints {
     referenceVertexByteBuffer.order(ByteOrder.nativeOrder());
     referenceVertexBuffer = referenceVertexByteBuffer.asFloatBuffer();
     referenceVertexBuffer.put(referenceVertices);
+    // TODO(hrapp): This should probably be flip().
     referenceVertexBuffer.position(0);
   }
 }
