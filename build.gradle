@@ -15,7 +15,7 @@
  */
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.11'
+    gradleVersion = '1.12'
 }
 
 buildscript {
@@ -48,4 +48,6 @@ subprojects {
     if (name != 'docs') {
         apply plugin: 'ros-android'
     }
+
+    ext.gdxVersion = "1.3.1"
 }
