@@ -23,9 +23,15 @@ apply plugin: 'android'
 android {
     packagingOptions {
         /* https://github.com/rosjava/android_core/issues/194 */
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
     }
     compileSdkVersion 10
-}
 
+    dexOptions {
+        preDexLibraries = false
+    }
+}
