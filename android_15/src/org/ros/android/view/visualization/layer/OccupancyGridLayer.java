@@ -72,15 +72,23 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
      * {@code true} when the {@link Tile} is ready to be drawn.
      */
     private boolean ready;
+    /**
+     * Synchronizes access to the textureBitmap between the drawing thread and the thread that
+     * calls recycle().
+     */
+    private Object mutex;
 
     public Tile(float resolution) {
       this.resolution = resolution;
       ready = false;
+      mutex = new Object();
     }
 
     public void draw(VisualizationView view, GL10 gl) {
-      if (ready) {
-        textureBitmap.draw(view, gl);
+      synchronized (mutex) {
+        if (ready) {
+          textureBitmap.draw(view, gl);
+        }
       }
     }
 
@@ -89,7 +97,10 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
     }
 
     public void recycle() {
-      textureBitmap.recycle();
+      synchronized (mutex) {
+        ready = false;
+        textureBitmap.recycle();
+      }
     }
 
     public void writeInt(int value) {
