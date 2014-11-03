@@ -43,7 +43,6 @@ import sensor_msgs.PointField;
  */
 public class PointCloud2DLayer extends SubscriberLayer<PointCloud2> implements TfLayer {
 
-  private static final Color FREE_SPACE_COLOR = Color.fromHexAndAlpha("377dfa", 0.1f);
   private static final Color OCCUPIED_SPACE_COLOR = Color.fromHexAndAlpha("377dfa", 0.3f);
   private static final float POINT_SIZE = 10.f;
 
@@ -66,7 +65,6 @@ public class PointCloud2DLayer extends SubscriberLayer<PointCloud2> implements T
   public void draw(VisualizationView view, GL10 gl) {
     if (vertexFrontBuffer != null) {
       synchronized (mutex) {
-        Vertices.drawTriangleFan(gl, vertexFrontBuffer, FREE_SPACE_COLOR);
         // Drop the first point which is required for the triangle fan but is
         // not a range reading.
         FloatBuffer pointVertices = vertexFrontBuffer.duplicate();
