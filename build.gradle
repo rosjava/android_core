@@ -34,6 +34,9 @@ configure(subprojects.findAll{ it.name.startsWith("android_") }) {
   afterEvaluate { project ->
     // Change the layout of Android projects to be compatible with Eclipse.
     android {
+      lintOptions {
+        abortOnError false
+      }
       sourceSets {
         main {
           manifest.srcFile "AndroidManifest.xml"
