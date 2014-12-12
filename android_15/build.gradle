@@ -28,7 +28,6 @@ android {
 
   defaultConfig {
     minSdkVersion 15
-    applicationId "org.ros.android.android_15"
     targetSdkVersion 15
     versionCode 1
     versionName "1.0"
