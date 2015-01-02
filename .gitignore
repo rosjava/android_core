@@ -18,3 +18,6 @@ project.properties
 build.log
 build-log.xml
 /opencv/
+/android_all_sensors_driver/
+/android_camera_driver/
+/android_sensors_driver/
