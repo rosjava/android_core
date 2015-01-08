@@ -30,7 +30,3 @@ include "docs"
 // (should they be in a java repo instead?)
 // include "compressed_map_transport"
 // include "polling_input_stream"
-include "opencv"
-include "android_all_sensors_driver"
-include "android_camera_driver"
-include "android_sensors_driver"
