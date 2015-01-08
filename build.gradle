@@ -15,46 +15,46 @@
  */
 
 task wrapper(type: Wrapper) {
-  gradleVersion = "1.11"
+    gradleVersion = "1.11"
 }
 
 buildscript {
-  apply from: project.file("buildscript.gradle")
+    apply from: project.file("buildscript.gradle")
 }
 
 apply plugin: "catkin"
 
 allprojects {
-  group "org.ros.android_core"
-  version = project.catkin.pkg.version
+    group "org.ros.android_core"
+    version = project.catkin.pkg.version
 }
 
-configure(subprojects.findAll{ it.name.startsWith("android_") }) {
-  apply plugin: "ros-android"
-  afterEvaluate { project ->
-    // Change the layout of Android projects to be compatible with Eclipse.
-    android {
-      sourceSets {
-        main {
-          manifest.srcFile "AndroidManifest.xml"
-          res.srcDirs "res"
-          assets.srcDirs "assets"
-          java.srcDirs "src"
+configure(subprojects.findAll { it.name.startsWith("android_") }) {
+    apply plugin: "ros-android"
+    afterEvaluate { project ->
+        // Change the layout of Android projects to be compatible with Eclipse.
+        android {
+            sourceSets {
+                main {
+                    manifest.srcFile "AndroidManifest.xml"
+                    res.srcDirs "res"
+                    assets.srcDirs "assets"
+                    java.srcDirs "src"
+                }
+            }
+
+            // Copy JAR dependencies into the libs directory for Eclipse.
+            task deployLibs(type: Copy) {
+                from { configurations.compile }
+                into { "${project.projectDir}/libs" }
+            }
+
+            // Exclude a few files that are duplicated across our dependencies and
+            // prevent packaging Android applications.
+            packagingOptions {
+                exclude "META-INF/LICENSE.txt"
+                exclude "META-INF/NOTICE.txt"
+            }
         }
-      }
-
-      // Copy JAR dependencies into the libs directory for Eclipse.
-      task deployLibs(type: Copy) {
-        from { configurations.compile }
-        into { "${project.projectDir}/libs" }
-      }
-
-      // Exclude a few files that are duplicated across our dependencies and
-      // prevent packaging Android applications.
-      packagingOptions {
-        exclude "META-INF/LICENSE.txt"
-        exclude "META-INF/NOTICE.txt"
-      }
     }
-  }
 }
