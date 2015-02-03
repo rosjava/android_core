@@ -19,7 +19,7 @@ dependencies {
   compile project(':android_10')
 }
 
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 android {
   compileSdkVersion 10

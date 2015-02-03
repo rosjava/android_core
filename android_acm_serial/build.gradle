@@ -19,14 +19,13 @@ dependencies {
   compile project(':android_10')
 }
 
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 android {
   compileSdkVersion 15
 
   defaultConfig {
     minSdkVersion 15
-    //applicationId "org.ros.android.android_acm_serial"
     targetSdkVersion 15
     versionCode 1
     versionName "1.0"
