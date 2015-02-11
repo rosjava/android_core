@@ -225,7 +225,7 @@ public class MasterChooser extends Activity {
     }.execute();
   }
 
-  private void toast(final String text) {
+  protected void toast(final String text) {
     runOnUiThread(new Runnable() {
       @Override
       public void run() {
@@ -292,7 +292,7 @@ public class MasterChooser extends Activity {
    * @return true if the desired activity is install on the device, false
    *         otherwise.
    */
-  private boolean isQRCodeReaderInstalled(Intent intent) {
+  protected boolean isQRCodeReaderInstalled(Intent intent) {
     List<ResolveInfo> list =
         getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
     return (list.size() > 0);

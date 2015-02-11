@@ -20,14 +20,14 @@ dependencies {
   compile "org.ros.rosjava_messages:sensor_msgs:[0,)"
 }
 
-apply plugin: "android-library"
+apply plugin: "com.android.library"
 
 android {
   compileSdkVersion 10
 
   defaultConfig {
     minSdkVersion 10
-    applicationId "org.ros.android.android_10"
+    //applicationId "org.ros.android.android_10"
     targetSdkVersion 10
     versionCode 1
     versionName "1.0"

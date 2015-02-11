@@ -207,7 +207,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
       Preconditions.checkArgument(intent.hasExtra(EXTRA_NOTIFICATION_TICKER));
       Preconditions.checkArgument(intent.hasExtra(EXTRA_NOTIFICATION_TITLE));
       Notification notification =
-          new Notification(R.drawable.icon, intent.getStringExtra(EXTRA_NOTIFICATION_TICKER),
+          new Notification(R.mipmap.icon, intent.getStringExtra(EXTRA_NOTIFICATION_TICKER),
               System.currentTimeMillis());
       Intent notificationIntent = new Intent(this, NodeMainExecutorService.class);
       notificationIntent.setAction(NodeMainExecutorService.ACTION_SHUTDOWN);
