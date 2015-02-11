@@ -64,6 +64,7 @@ configure(subprojects.findAll { it.name.startsWith("android_") }) {
             // Exclude a few files that are duplicated across our dependencies and
             // prevent packaging Android applications.
             packagingOptions {
+                /* https://github.com/rosjava/android_core/issues/194 */
                 exclude "META-INF/LICENSE.txt"
                 exclude "META-INF/NOTICE.txt"
             }
