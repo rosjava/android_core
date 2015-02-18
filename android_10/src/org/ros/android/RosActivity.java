@@ -87,7 +87,7 @@ public abstract class RosActivity extends Activity {
     bindNodeMainExecutorService();
   }
 
-  private void bindNodeMainExecutorService() {
+  protected void bindNodeMainExecutorService() {
     Intent intent = new Intent(this, NodeMainExecutorService.class);
     intent.setAction(NodeMainExecutorService.ACTION_START);
     intent.putExtra(NodeMainExecutorService.EXTRA_NOTIFICATION_TICKER, notificationTicker);
@@ -104,7 +104,7 @@ public abstract class RosActivity extends Activity {
     super.onDestroy();
   }
 
-  private void init() {
+  protected void init() {
     // Run init() in a new thread as a convenience since it often requires
     // network access.
     new AsyncTask<Void, Void, Void>() {
