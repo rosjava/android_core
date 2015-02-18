@@ -30,6 +30,22 @@ allprojects {
 }
 
 configure(subprojects.findAll { it.name.startsWith("android_") }) {
+    /*
+     * The android plugin configures a few things:
+     *
+     *  - local deployment repository : where it dumps the jars and packaged artifacts)
+     *  - local maven repositories    : where it finds your locally installed/built artifacts)
+     *  - external maven repositories : where it goes looking if it can't find dependencies locally
+     *  - android build tools version : which version we use across the board
+     * 
+     * To modify, or add repos to the default external maven repositories list, pull request against this code:
+     *
+     *   https://github.com/rosjava/rosjava_bootstrap/blob/indigo/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosPlugin.groovy#L31
+     * 
+     * To modify the build tools version, pull request against this code:
+     * 
+     *   https://github.com/rosjava/rosjava_bootstrap/blob/indigo/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosAndroid.groovy#L14
+     */
     apply plugin: "ros-android"
     afterEvaluate { project ->
         // Change the layout of Android projects to be compatible with Eclipse.
