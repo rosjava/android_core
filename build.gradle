@@ -15,11 +15,14 @@
  */
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "2.2.1"
+    gradleVersion = "2.3"
 }
 
 buildscript {
-    apply from: project.file("buildscript.gradle")
+    apply from: "https://github.com/rosjava/rosjava_bootstrap/raw/indigo/buildscript.gradle"
+    dependencies {
+        classpath "com.android.tools.build:gradle:1.0.1"
+    }
 }
 
 apply plugin: "catkin"
@@ -29,7 +32,7 @@ allprojects {
     version = project.catkin.pkg.version
 }
 
-configure(subprojects.findAll { it.name.startsWith("android_") }) {
+subprojects {
     /*
      * The android plugin configures a few things:
      *
@@ -46,32 +49,38 @@ configure(subprojects.findAll { it.name.startsWith("android_") }) {
      * 
      *   https://github.com/rosjava/rosjava_bootstrap/blob/indigo/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosAndroid.groovy#L14
      */
-    apply plugin: "ros-android"
-    afterEvaluate { project ->
-        // Change the layout of Android projects to be compatible with Eclipse.
-        android {
-            sourceSets {
-                //noinspection GroovyAssignabilityCheck
-                main {
-                    manifest.srcFile "AndroidManifest.xml"
-                    res.srcDirs "res"
-                    assets.srcDirs "assets"
-                    java.srcDirs "src"
+    if (name != "docs") {
+        apply plugin: "ros-android"
+        afterEvaluate { project ->
+            // Change the layout of Android projects to be compatible with Eclipse.
+            android {
+                sourceSets {
+                    //noinspection GroovyAssignabilityCheck
+                    main {
+                        manifest.srcFile "AndroidManifest.xml"
+                        res.srcDirs "res"
+                        assets.srcDirs "assets"
+                        java.srcDirs "src"
+                    }
                 }
-            }
 
-            // Copy JAR dependencies into the libs directory for Eclipse.
-            task deployLibs(type: Copy) {
-                from { configurations.compile }
-                into { "${project.projectDir}/libs" }
-            }
+                // Copy JAR dependencies into the libs directory for Eclipse.
+                task deployLibs(type: Copy) {
+                    from { configurations.compile }
+                    into { "${project.projectDir}/libs" }
+                }
 
-            // Exclude a few files that are duplicated across our dependencies and
-            // prevent packaging Android applications.
-            packagingOptions {
-                /* https://github.com/rosjava/android_core/issues/194 */
-                exclude "META-INF/LICENSE.txt"
-                exclude "META-INF/NOTICE.txt"
+                // Exclude a few files that are duplicated across our dependencies and
+                // prevent packaging Android applications.
+                packagingOptions {
+                    /* https://github.com/rosjava/android_core/issues/194 */
+                    exclude "META-INF/LICENSE.txt"
+                    exclude "META-INF/NOTICE.txt"
+                    exclude 'META-INF/gradle-plugins/catkin.properties'
+                    exclude 'META-INF/gradle-plugins/ros.properties'
+                    exclude 'META-INF/gradle-plugins/ros-android.properties'
+                    exclude 'META-INF/gradle-plugins/ros-java.properties'
+                }
             }
         }
     }
