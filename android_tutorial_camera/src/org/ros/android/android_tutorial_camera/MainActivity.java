@@ -27,6 +27,8 @@ import org.ros.android.RosActivity;
 import org.ros.android.view.camera.RosCameraPreviewView;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
+import android.util.Log;
+import java.io.IOException;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
@@ -76,10 +78,19 @@ public class MainActivity extends RosActivity {
   @Override
   protected void init(NodeMainExecutor nodeMainExecutor) {
     cameraId = 0;
+
     rosCameraPreviewView.setCamera(Camera.open(cameraId));
-    NodeConfiguration nodeConfiguration =
-        NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
-    nodeConfiguration.setMasterUri(getMasterUri());
-    nodeMainExecutor.execute(rosCameraPreviewView, nodeConfiguration);
+    try {
+      java.net.Socket socket = new java.net.Socket(getMasterUri().getHost(), getMasterUri().getPort());
+      java.net.InetAddress local_network_address = socket.getLocalAddress();
+      socket.close();
+      NodeConfiguration nodeConfiguration =
+              NodeConfiguration.newPublic(local_network_address.getHostAddress(), getMasterUri());
+      nodeMainExecutor.execute(rosCameraPreviewView, nodeConfiguration);
+    } catch (IOException e) {
+        // Socket problem
+        Log.e("Camera Tutorial", "socket error trying to get networking information from the master uri");
+    }
+
   }
 }
