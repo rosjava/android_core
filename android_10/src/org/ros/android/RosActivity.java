@@ -49,9 +49,22 @@ public abstract class RosActivity extends Activity {
   protected NodeMainExecutorService nodeMainExecutorService;
 
   private final class NodeMainExecutorServiceConnection implements ServiceConnection {
+
+    private URI customMasterUri;
+
+    public NodeMainExecutorServiceConnection(URI customUri) {
+      super();
+      customMasterUri = customUri;
+    }
+
     @Override
     public void onServiceConnected(ComponentName name, IBinder binder) {
       nodeMainExecutorService = ((NodeMainExecutorService.LocalBinder) binder).getService();
+
+      if (customMasterUri != null) {
+        nodeMainExecutorService.setMasterUri(customMasterUri);
+        nodeMainExecutorService.setRosHostname(getDefaultHostAddress());
+      }
       nodeMainExecutorService.addListener(new NodeMainExecutorServiceListener() {
         @Override
         public void onShutdown(NodeMainExecutorService nodeMainExecutorService) {
@@ -75,10 +88,14 @@ public abstract class RosActivity extends Activity {
   };
 
   protected RosActivity(String notificationTicker, String notificationTitle) {
+    this(notificationTicker, notificationTitle, null);
+  }
+
+  protected RosActivity(String notificationTicker, String notificationTitle, URI customMasterUri) {
     super();
     this.notificationTicker = notificationTicker;
     this.notificationTitle = notificationTitle;
-    nodeMainExecutorServiceConnection = new NodeMainExecutorServiceConnection();
+    nodeMainExecutorServiceConnection = new NodeMainExecutorServiceConnection(customMasterUri);
   }
 
   @Override
@@ -159,7 +176,7 @@ public abstract class RosActivity extends Activity {
         String networkInterfaceName = data.getStringExtra("ROS_MASTER_NETWORK_INTERFACE");
         // Handles the default selection and prevents possible errors
         if (networkInterfaceName == null || networkInterfaceName.equals("")) {
-          host = InetAddressFactory.newNonLoopback().getHostAddress();
+          host = getDefaultHostAddress();
         } else {
           try {
             NetworkInterface networkInterface = NetworkInterface.getByName(networkInterfaceName);
@@ -194,5 +211,9 @@ public abstract class RosActivity extends Activity {
       }
     }
     super.onActivityResult(requestCode, resultCode, data);
+  }
+
+  private String getDefaultHostAddress() {
+    return InetAddressFactory.newNonLoopback().getHostAddress();
   }
 }
