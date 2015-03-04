@@ -18,7 +18,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 task javadoc(type: Javadoc) {
   def javaProjects = rootProject.subprojects.findResults {
-    (it.name != 'docs') ? it : null
+    (it.name != 'docs' && it.name !="polling_input_stream") ? it : null
   }
   source javaProjects.collect { fileTree(dir: "${it.projectDir}/src/main/java") }
   classpath = files(javaProjects.collect { it.configurations.compile })
@@ -42,7 +42,4 @@ task clean << {
   ant.delete file: 'src/main/sphinx/conf.py'
 }
 
-/* Dummy task to stop android studio barfing */
-task assembleDebug {}
-task assembleRelease {}
-task assemble {}
+

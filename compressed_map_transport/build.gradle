@@ -14,27 +14,10 @@
  * the License.
  */
 
-group 'ros.android_core'
-version = '0.0.0-SNAPSHOT'
+version = '0.0.0'
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'maven'
-apply plugin: 'application'
-
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
-
-mainClassName = 'org.ros.RosRun'
-
-repositories {
-  mavenLocal()
-  maven {
-    url 'http://robotbrains.hideho.org/nexus/content/groups/ros-public'
-  }
-}
+apply plugin: 'ros-java'
 
 dependencies {
-  compile 'ros.rosjava_core:rosjava:0.0.0-SNAPSHOT'
+  compile 'org.ros.rosjava_core:rosjava:[0.2,0.3)'
 }
-
