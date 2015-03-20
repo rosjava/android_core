@@ -65,6 +65,34 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     super(context, attrs);
   }
 
+
+
+  /**
+   * Must be called in {@link Activity#onCreate(Bundle)}.
+   * If you want to render layer, you must call addLayer before startLayer
+   * dwlee 2015.3.18
+   * @void
+   */
+  public void onCreate() {
+      setDebugFlags(DEBUG_CHECK_GL_ERROR);
+      if (DEBUG) {
+          // Turn on OpenGL logging.
+          setDebugFlags(getDebugFlags() | DEBUG_LOG_GL_CALLS);
+      }
+      setEGLConfigChooser(8, 8, 8, 8, 0, 0);
+      getHolder().setFormat(PixelFormat.TRANSLUCENT);
+      renderer = new XYOrthographicRenderer(this);
+      setRenderer(renderer);
+  }
+  public void addLayer(Layer layer) {
+      layers.add(layer);
+  }
+
+  public void removeLayer(Layer layer) {
+      layer.onShutdown(this, connectedNode);
+      layers.remove(layer);
+  }
+
   /**
    * Must be called in {@link Activity#onCreate(Bundle)}.
    *
