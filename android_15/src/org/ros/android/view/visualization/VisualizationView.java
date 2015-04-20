@@ -71,7 +71,6 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
    * @param layers
    */
   public void onCreate(List<Layer> layers) {
-    Preconditions.checkNotNull(layers);
     this.layers = layers;
     setDebugFlags(DEBUG_CHECK_GL_ERROR);
     if (DEBUG) {
@@ -165,6 +164,10 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
     for (Layer layer : layers) {
       layer.onStart(this, connectedNode);
     }
+  }
+
+  public void addLayer(Layer layer) {
+        layers.add(layer);
   }
 
   @Override
