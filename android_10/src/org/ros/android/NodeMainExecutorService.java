@@ -83,8 +83,8 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
    * Class for clients to access. Because we know this service always runs in
    * the same process as its clients, we don't need to deal with IPC.
    */
-  class LocalBinder extends Binder {
-    NodeMainExecutorService getService() {
+  public class LocalBinder extends Binder {
+    public NodeMainExecutorService getService() {
       return NodeMainExecutorService.this;
     }
   }
