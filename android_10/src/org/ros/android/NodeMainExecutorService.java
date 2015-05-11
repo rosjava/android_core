@@ -63,10 +63,10 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
   // NOTE(damonkohler): If this is 0, the notification does not show up.
   private static final int ONGOING_NOTIFICATION = 1;
 
-  static final String ACTION_START = "org.ros.android.ACTION_START_NODE_RUNNER_SERVICE";
-  static final String ACTION_SHUTDOWN = "org.ros.android.ACTION_SHUTDOWN_NODE_RUNNER_SERVICE";
-  static final String EXTRA_NOTIFICATION_TITLE = "org.ros.android.EXTRA_NOTIFICATION_TITLE";
-  static final String EXTRA_NOTIFICATION_TICKER = "org.ros.android.EXTRA_NOTIFICATION_TICKER";
+  public static final String ACTION_START = "org.ros.android.ACTION_START_NODE_RUNNER_SERVICE";
+  public static final String ACTION_SHUTDOWN = "org.ros.android.ACTION_SHUTDOWN_NODE_RUNNER_SERVICE";
+  public static final String EXTRA_NOTIFICATION_TITLE = "org.ros.android.EXTRA_NOTIFICATION_TITLE";
+  public static final String EXTRA_NOTIFICATION_TICKER = "org.ros.android.EXTRA_NOTIFICATION_TICKER";
 
   private final NodeMainExecutor nodeMainExecutor;
   private final IBinder binder;
