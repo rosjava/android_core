@@ -15,7 +15,7 @@
  */
 
 rootProject.buildscript {
-  apply from: "https://github.com/rosjava/rosjava_bootstrap/raw/indigo/buildscript.gradle"
+  apply from: "https://github.com/rosjava/rosjava_bootstrap/raw/kinetic/buildscript.gradle"
   dependencies {
     classpath "com.android.tools.build:gradle:1.0.+"
   }
