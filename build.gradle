@@ -40,11 +40,11 @@ configure(subprojects.findAll { it.name.startsWith("android_") }) {
      * 
      * To modify, or add repos to the default external maven repositories list, pull request against this code:
      *
-     *   https://github.com/rosjava/rosjava_bootstrap/blob/indigo/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosPlugin.groovy#L31
+     *   https://github.com/rosjava/rosjava_bootstrap/blob/kinetic/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosPlugin.groovy#L31
      * 
      * To modify the build tools version, pull request against this code:
      * 
-     *   https://github.com/rosjava/rosjava_bootstrap/blob/indigo/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosAndroid.groovy#L14
+     *   https://github.com/rosjava/rosjava_bootstrap/blob/kinetic/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosAndroid.groovy#L14
      */
     apply plugin: "ros-android"
     afterEvaluate { project ->
