@@ -24,7 +24,7 @@ dependencies {
 apply plugin: 'com.android.library'
 
 android {
-  compileSdkVersion 15
+  compileSdkVersion 22
 
   defaultConfig {
     minSdkVersion 15

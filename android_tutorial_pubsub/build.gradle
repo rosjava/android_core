@@ -22,7 +22,7 @@ dependencies {
 apply plugin: 'com.android.application'
 
 android {
-  compileSdkVersion 10
+  compileSdkVersion 22
 
   defaultConfig {
     minSdkVersion 10
