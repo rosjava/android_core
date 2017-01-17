@@ -17,6 +17,7 @@
 package org.ros.android.android_tutorial_camera;
 
 import android.hardware.Camera;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.Window;
@@ -60,7 +61,7 @@ public class MainActivity extends RosActivity {
       if (numberOfCameras > 1) {
         cameraId = (cameraId + 1) % numberOfCameras;
         rosCameraPreviewView.releaseCamera();
-        rosCameraPreviewView.setCamera(Camera.open(cameraId));
+        rosCameraPreviewView.setCamera(getCamera());
         toast = Toast.makeText(this, "Switching cameras.", Toast.LENGTH_SHORT);
       } else {
         toast = Toast.makeText(this, "No alternative cameras to switch to.", Toast.LENGTH_SHORT);
@@ -79,7 +80,7 @@ public class MainActivity extends RosActivity {
   protected void init(NodeMainExecutor nodeMainExecutor) {
     cameraId = 0;
 
-    rosCameraPreviewView.setCamera(Camera.open(cameraId));
+    rosCameraPreviewView.setCamera(getCamera());
     try {
       java.net.Socket socket = new java.net.Socket(getMasterUri().getHost(), getMasterUri().getPort());
       java.net.InetAddress local_network_address = socket.getLocalAddress();
@@ -88,9 +89,24 @@ public class MainActivity extends RosActivity {
               NodeConfiguration.newPublic(local_network_address.getHostAddress(), getMasterUri());
       nodeMainExecutor.execute(rosCameraPreviewView, nodeConfiguration);
     } catch (IOException e) {
-        // Socket problem
-        Log.e("Camera Tutorial", "socket error trying to get networking information from the master uri");
+      // Socket problem
+      Log.e("Camera Tutorial", "socket error trying to get networking information from the master uri");
     }
 
+  }
+
+  private Camera getCamera() {
+    Camera cam = Camera.open(cameraId);
+    Camera.Parameters camParams = cam.getParameters();
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+      if (camParams.getSupportedFocusModes().contains(
+              Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+        camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+      } else {
+        camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+      }
+    }
+    cam.setParameters(camParams);
+    return cam;
   }
 }
