@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Forthcoming
------------
+0.3.1 (2017-02-22)
+------------------
 * Update vertex buffer limit - fixes #251.
 * Add autofocus parameters to android_tutorial_camera
 * Use compileSdk compatible with support library version
