@@ -1,6 +1,20 @@
 Changelog
 =========
 
+Forthcoming
+-----------
+* Update vertex buffer limit - fixes #251.
+* Add autofocus parameters to android_tutorial_camera
+* Use compileSdk compatible with support library version
+* Update gradle sdk version
+* Update gradle dependencies
+* Add AppCompatRosActivity class
+* Android Gradle Plug-in 1.0.+ -> 2.2.3
+* Gradle 2.2.1 -> 2.14.1
+* update essential function which is addLayer and delete null check in onCreate
+* revert addlayer to use in android apps
+* Contributors: Daniel Stonier, Ernesto Corbellini, Julian Cerruti, Perrine Aguiar, Sem van den Broek, dwlee
+
 0.3.0 (2016-12-13)
 ------------------
  * Updates for Kinetic release.
