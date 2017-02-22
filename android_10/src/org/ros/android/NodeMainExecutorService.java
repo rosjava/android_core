@@ -33,12 +33,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
 import org.ros.RosCore;
 import org.ros.android.android_10.R;
-import org.ros.address.InetAddressFactory;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
 import org.ros.exception.RosRuntimeException;
@@ -206,14 +206,18 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
     if (intent.getAction().equals(ACTION_START)) {
       Preconditions.checkArgument(intent.hasExtra(EXTRA_NOTIFICATION_TICKER));
       Preconditions.checkArgument(intent.hasExtra(EXTRA_NOTIFICATION_TITLE));
-      Notification notification =
-          new Notification(R.mipmap.icon, intent.getStringExtra(EXTRA_NOTIFICATION_TICKER),
-              System.currentTimeMillis());
+      NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
       Intent notificationIntent = new Intent(this, NodeMainExecutorService.class);
       notificationIntent.setAction(NodeMainExecutorService.ACTION_SHUTDOWN);
       PendingIntent pendingIntent = PendingIntent.getService(this, 0, notificationIntent, 0);
-      notification.setLatestEventInfo(this, intent.getStringExtra(EXTRA_NOTIFICATION_TITLE),
-          "Tap to shutdown.", pendingIntent);
+      Notification notification = builder.setContentIntent(pendingIntent)
+              .setSmallIcon(R.mipmap.icon)
+              .setTicker(intent.getStringExtra(EXTRA_NOTIFICATION_TICKER))
+              .setWhen(System.currentTimeMillis())
+              .setContentTitle(intent.getStringExtra(EXTRA_NOTIFICATION_TITLE))
+              .setAutoCancel(true)
+              .setContentText("Tap to shutdown.")
+              .build();
       startForeground(ONGOING_NOTIFICATION, notification);
     }
     if (intent.getAction().equals(ACTION_SHUTDOWN)) {

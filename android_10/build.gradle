@@ -18,13 +18,13 @@ dependencies {
   compile "org.ros.rosjava_core:rosjava:[0.3,0.4)"
   compile "org.ros.rosjava_messages:diagnostic_msgs:[1.12,1.13)"
   compile "org.ros.rosjava_messages:sensor_msgs:[1.12,1.13)"
-  compile "com.android.support:appcompat-v7:22.2.0"
+  compile "com.android.support:appcompat-v7:25.1.0"
 }
 
 apply plugin: "com.android.library"
 
 android {
-  compileSdkVersion 22
+  compileSdkVersion 25
 
   defaultConfig {
     minSdkVersion 10
