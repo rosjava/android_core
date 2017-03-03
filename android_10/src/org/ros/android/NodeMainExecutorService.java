@@ -173,6 +173,11 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
     listeners.add(listener);
   }
 
+  public void removeListener(NodeMainExecutorServiceListener listener)
+  {
+    listeners.remove(listener);
+  }
+
   private void signalOnShutdown() {
     listeners.signal(new SignalRunnable<NodeMainExecutorServiceListener>() {
       @Override
