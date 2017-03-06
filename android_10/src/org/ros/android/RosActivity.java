@@ -95,7 +95,6 @@ public abstract class RosActivity extends Activity {
     {
       return serviceListener;
     }
-
   };
 
   protected RosActivity(String notificationTicker, String notificationTitle) {
