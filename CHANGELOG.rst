@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Forthcoming
------------
+0.3.2 (2017-03-07)
+------------------
 * Cherry-picked from indigo. Fixing memory leaks with ServiceConnection
 * Contributors: Dan Ambrosio
 
