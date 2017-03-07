@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Forthcoming
+-----------
+* Cherry-picked from indigo. Fixing memory leaks with ServiceConnection
+* Contributors: Dan Ambrosio
+
 0.3.1 (2017-02-22)
 ------------------
 * Update vertex buffer limit - fixes #251.
