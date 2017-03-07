@@ -3,7 +3,7 @@ project(android_core)
 
 find_package(catkin REQUIRED rosjava_build_tools)
 
-catkin_android_setup(assembleRelease uploadArchives)
+catkin_android_setup(assembleRelease uploadArchives publishMavenJavaPublicationToMavenRepository)
 
 catkin_package()
 
