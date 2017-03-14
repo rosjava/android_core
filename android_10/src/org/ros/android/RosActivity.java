@@ -49,6 +49,9 @@ public abstract class RosActivity extends Activity {
   private int masterChooserRequestCode = MASTER_CHOOSER_REQUEST_CODE;
   protected NodeMainExecutorService nodeMainExecutorService;
 
+  /**
+   * Default Activity Result callback - compatible with standard {@link MasterChooser}
+   */
   private OnActivityResultCallback onActivityResultCallback = new OnActivityResultCallback() {
     @Override
     public void execute(int requestCode, int resultCode, Intent data) {
@@ -145,10 +148,23 @@ public abstract class RosActivity extends Activity {
 
   };
 
+  /**
+   * Standard constructor.
+   * Use this constructor to proceed using the standard {@link MasterChooser}.
+   * @param notificationTicker Title to use in Ticker notifications.
+   * @param notificationTitle Title to use in notifications.
+     */
   protected RosActivity(String notificationTicker, String notificationTitle) {
     this(notificationTicker, notificationTitle, null);
   }
 
+  /**
+   * Custom Master URI constructor.
+   * Use this constructor to skip launching {@link MasterChooser}.
+   * @param notificationTicker Title to use in Ticker notifications.
+   * @param notificationTitle Title to use in notifications.
+   * @param customMasterUri URI of the ROS master to connect to.
+     */
   protected RosActivity(String notificationTicker, String notificationTitle, URI customMasterUri) {
     super();
     this.notificationTicker = notificationTicker;
@@ -156,9 +172,20 @@ public abstract class RosActivity extends Activity {
     nodeMainExecutorServiceConnection = new NodeMainExecutorServiceConnection(customMasterUri);
   }
 
-  protected RosActivity(String notificationTicker, String notificationTitle, Class<?> cls, int requestCode) {
+  /**
+   * Custom MasterChooser constructor.
+   * Use this constructor to specify which {@link Activity} should be started in place of {@link MasterChooser}.
+   * The specified activity shall return a result that can be handled by a custom callback.
+   * See {@link #setOnActivityResultCallback(OnActivityResultCallback)} for more information about
+   * how to handle custom request codes and results.
+   * @param notificationTicker Title to use in Ticker notifications.
+   * @param notificationTitle Title to use in notifications.
+   * @param activity {@link Activity} to launch instead of {@link MasterChooser}.
+   * @param requestCode Request identifier to start the given {@link Activity} for a result.
+     */
+  protected RosActivity(String notificationTicker, String notificationTitle, Class<?> activity, int requestCode) {
     this(notificationTicker, notificationTitle);
-    masterChooserActivity = cls;
+    masterChooserActivity = activity;
     masterChooserRequestCode = requestCode;
   }
 
@@ -249,6 +276,12 @@ public abstract class RosActivity extends Activity {
     void execute(int requestCode, int resultCode, Intent data);
   }
 
+  /**
+   * Set a callback that will be called onActivityResult.
+   * Custom callbacks should be able to handle custom request codes configured
+   * in custom Activity constructor {@link #RosActivity(String, String, Class, int)}.
+   * @param callback Action that will be performed when this Activity gets a result.
+     */
   public void setOnActivityResultCallback(OnActivityResultCallback callback) {
     onActivityResultCallback = callback;
   }
