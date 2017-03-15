@@ -11,6 +11,8 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.net.URI;
+
 /**
  * A RosActivity which implements and proxies the necessary calls
  * to be used with AppCompat.
@@ -24,6 +26,14 @@ public abstract class AppCompatRosActivity extends RosActivity {
 
     protected AppCompatRosActivity(String notificationTicker, String notificationTitle) {
         super(notificationTicker, notificationTitle);
+    }
+
+    protected AppCompatRosActivity(String notificationTicker, String notificationTitle, URI customMasterUri) {
+        super(notificationTicker, notificationTitle, customMasterUri);
+    }
+
+    protected AppCompatRosActivity(String notificationTicker, String notificationTitle, Class<?> activity, int requestCode) {
+        super(notificationTicker, notificationTitle, activity, requestCode);
     }
 
     @Override
