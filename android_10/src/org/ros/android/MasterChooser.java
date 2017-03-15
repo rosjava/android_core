@@ -29,6 +29,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -45,6 +46,7 @@ import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.namespace.GraphName;
 import org.ros.node.NodeConfiguration;
 
+import java.net.ConnectException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URI;
@@ -79,6 +81,12 @@ public class MasterChooser extends Activity {
    */
   private static final String BAR_CODE_SCANNER_PACKAGE_NAME =
       "com.google.zxing.client.android.SCAN";
+
+  /**
+   * Lookup text for catching a connection exception when attempting
+   * to connect to a master.
+   */
+  private static final String CONNECTION_EXCEPTION_TEXT = "ECONNREFUSED";
 
   private String selectedInterface;
   private EditText uriText;
@@ -202,6 +210,12 @@ public class MasterChooser extends Activity {
           return false;
         } catch (XmlRpcTimeoutException e) {
           toast("Master unreachable!");
+          return false;
+        }
+        catch (Exception e)
+        {
+          if(e.getMessage().contains(CONNECTION_EXCEPTION_TEXT))
+            toast("Unable to communicate with master!");
           return false;
         }
       }
