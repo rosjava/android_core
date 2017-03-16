@@ -137,16 +137,15 @@ public class MasterChooser extends Activity {
     uriText.addTextChangedListener(new TextWatcher() {
       @Override
       public void onTextChanged(CharSequence s, int start, int before, int count) {
-          final String uri = s.toString();
-          if(!uriPattern.matcher(uri).matches())
-          {
-            uriText.setError("Please enter valid URI");
-            connectButton.setEnabled(false);
-          }
-          else {
-            uriText.setError(null);
-            connectButton.setEnabled(true);
-          }
+        final String uri = s.toString();
+        if(!uriPattern.matcher(uri).matches()) {
+          uriText.setError("Please enter valid URI");
+          connectButton.setEnabled(false);
+        }
+        else {
+          uriText.setError(null);
+          connectButton.setEnabled(true);
+        }
       }
 
       @Override
@@ -209,16 +208,15 @@ public class MasterChooser extends Activity {
   public void okButtonClicked(View unused) {
     String tmpURI = uriText.getText().toString();
 
-    //Check to see if the URI has a port.
+    // Check to see if the URI has a port.
     final Pattern portPattern = RosURIPattern.PORT;
-    if(!portPattern.matcher(tmpURI).find())
-    {
-      //Append the default port to the URI and update the TextView.
+    if(!portPattern.matcher(tmpURI).find()) {
+      // Append the default port to the URI and update the TextView.
       tmpURI = String.format(Locale.getDefault(),"%s:%d/",tmpURI,DEFAULT_PORT);
       uriText.setText(tmpURI);
     }
 
-    //Set the URI for connection.
+    // Set the URI for connection.
     final String uri = tmpURI;
 
     // Prevent further edits while we verify the URI.
@@ -245,8 +243,7 @@ public class MasterChooser extends Activity {
           toast("Master unreachable!");
           return false;
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
           String exceptionMessage = e.getMessage();
           if(exceptionMessage.contains(CONNECTION_EXCEPTION_TEXT))
             toast("Unable to communicate with master!");
@@ -431,6 +428,5 @@ public class MasterChooser extends Activity {
             + ")");
 
     public static final Pattern PORT = Pattern.compile(PORT_NUMBER);
-
   }
 }
