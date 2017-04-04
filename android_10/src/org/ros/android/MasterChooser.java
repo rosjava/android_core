@@ -51,7 +51,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -103,6 +102,7 @@ public class MasterChooser extends Activity {
   private String selectedInterface;
   private EditText uriText;
   private Button connectButton;
+  private LinearLayout connectionLayout;
 
   private class StableArrayAdapter extends ArrayAdapter<String> {
 
@@ -189,6 +189,8 @@ public class MasterChooser extends Activity {
         getPreferences(MODE_PRIVATE).getString(PREFS_KEY_NAME,
             NodeConfiguration.DEFAULT_MASTER_URI.toString());
     uriText.setText(uri);
+
+    connectionLayout = (LinearLayout) findViewById(R.id.connection_layout);
   }
 
   @Override
@@ -229,9 +231,17 @@ public class MasterChooser extends Activity {
     // reachable.
     new AsyncTask<Void, Void, Boolean>() {
       @Override
+      protected void onPreExecute() {
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            connectionLayout.setVisibility(View.VISIBLE);
+          }
+        });
+      }
+      @Override
       protected Boolean doInBackground(Void... params) {
         try {
-          toast("Trying to reach master...");
           MasterClient masterClient = new MasterClient(new URI(uri));
           masterClient.getUri(GraphName.of("android/master_chooser_activity"));
           toast("Connected!");
@@ -257,6 +267,12 @@ public class MasterChooser extends Activity {
 
       @Override
       protected void onPostExecute(Boolean result) {
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            connectionLayout.setVisibility(View.GONE);
+          }
+        });
         if (result) {
           // If the displayed URI is valid then pack that into the intent.
           SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
