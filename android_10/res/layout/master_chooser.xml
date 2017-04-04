@@ -120,4 +120,27 @@
         android:onClick="cancelButtonClicked"
         android:text="@string/cancel"/>
 
+    <LinearLayout
+        android:id="@+id/connection_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        style="@style/padded"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/connection_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/connection_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/connection_text"
+            android:textSize="18sp"/>
+
+    </LinearLayout>
+
 </LinearLayout>
