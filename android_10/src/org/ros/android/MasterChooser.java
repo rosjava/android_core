@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -45,6 +46,7 @@ import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.namespace.GraphName;
 import org.ros.node.NodeConfiguration;
 
+import java.lang.reflect.Array;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URI;
@@ -53,8 +55,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -100,8 +104,23 @@ public class MasterChooser extends Activity {
    */
   private static final int DEFAULT_PORT = 11311;
 
+  /**
+   *The preferences key used for obtaining the number of recent Master URIs.
+   */
+  private static final String RECENT_COUNT_KEY_NAME = "RECENT_MASTER_URI_COUNT";
+
+  /**
+   * The preference key prefix used for obtaining the recent Master URIs.
+   */
+  private static final String RECENT_PREFIX_KEY_NAME = "RECENT_MASTER_URI_";
+
+  /**
+   * Number of recent Master URIs to store into preferences.
+   */
+  private static final int RECENT_MASTER_HISTORY_COUNT = 5;
+
   private String selectedInterface;
-  private EditText uriText;
+  private AutoCompleteTextView uriText;
   private Button connectButton;
 
   private class StableArrayAdapter extends ArrayAdapter<String> {
@@ -132,8 +151,14 @@ public class MasterChooser extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.master_chooser);
     final Pattern uriPattern = RosURIPattern.URI;
-    uriText = (EditText) findViewById(R.id.master_chooser_uri);
+    uriText = (AutoCompleteTextView) findViewById(R.id.master_chooser_uri);
     connectButton = (Button) findViewById(R.id.master_chooser_ok);
+    uriText.setThreshold(RosURIPattern.HTTP_PROTOCOL_LENGTH);
+
+    ArrayAdapter<String> uriAdapter = new ArrayAdapter<>
+            (this,android.R.layout.select_dialog_item,getRecentMasterURIs());
+    uriText.setAdapter(uriAdapter);
+
     uriText.addTextChangedListener(new TextWatcher() {
       @Override
       public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -258,10 +283,9 @@ public class MasterChooser extends Activity {
       @Override
       protected void onPostExecute(Boolean result) {
         if (result) {
+          //Update Recent Master URI
+          setRecentMasterURI(uri);
           // If the displayed URI is valid then pack that into the intent.
-          SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
-          editor.putString(PREFS_KEY_NAME, uri);
-          editor.commit();
           // Package the intent to be consumed by the calling activity.
           Intent intent = createNewMasterIntent(false, true);
           setResult(RESULT_OK, intent);
@@ -348,6 +372,50 @@ public class MasterChooser extends Activity {
   }
 
   /**
+   * Stores the recent Master URI to preferences. This implementation does not use
+   * {@link android.content.SharedPreferences.Editor#putStringSet(String, Set)}
+   * since it is not available in API 10.
+   * @param uri Master URI string to store.
+   */
+  private void setRecentMasterURI(String uri)  {
+    List<String> recentURIs = getRecentMasterURIs();
+    if(!recentURIs.contains(uri)){
+      recentURIs.add(0, uri);
+      if(recentURIs.size() > RECENT_MASTER_HISTORY_COUNT)
+        recentURIs = recentURIs.subList(0, RECENT_MASTER_HISTORY_COUNT);
+    }
+
+    SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+    editor.putString(PREFS_KEY_NAME, uri);
+    for(int i=0; i<recentURIs.size(); i++)
+    {
+      editor.putString(RECENT_PREFIX_KEY_NAME + String.valueOf(i), recentURIs.get(i));
+    }
+    editor.putInt(RECENT_COUNT_KEY_NAME, recentURIs.size());
+    editor.apply();
+  }
+
+  /**
+   * Gets a list of recent Master URIs from preferences. This implementation does not use
+   * {@link android.content.SharedPreferences.Editor#putStringSet(String, Set)}
+   * since it is not available in API 10.
+   * @return List of recent Master URI strings
+   */
+  private List<String> getRecentMasterURIs()  {
+    List<String> recentURIs;
+    SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+    int numRecent = prefs.getInt(RECENT_COUNT_KEY_NAME, 0);
+    recentURIs = new ArrayList<>(numRecent);
+    for(int i=0; i<numRecent; i++) {
+      String uri = prefs.getString(RECENT_PREFIX_KEY_NAME + String.valueOf(i), "");
+      if(!uri.isEmpty()){
+        recentURIs.add(uri);
+      }
+    }
+    return recentURIs;
+  }
+
+  /**
    * Regular expressions used with ROS URIs.
    *
    * The majority of the expressions and variables were copied from
@@ -409,6 +477,8 @@ public class MasterChooser extends Activity {
                     "|" + IP_ADDRESS + ")";
 
     private static final String HTTP_PROTOCOL = "(?i:http):\\/\\/";
+
+    public static final int HTTP_PROTOCOL_LENGTH = ("http://").length();
 
     private static final String PORT_NUMBER = "\\:\\d{1,5}\\/?";
 
