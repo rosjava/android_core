@@ -207,6 +207,12 @@ public class MasterChooser extends Activity {
     }
   }
 
+  @Override
+  public void onBackPressed() {
+    //Prevent user from going back to Launcher Activity since no Master is connected.
+    toast("Please connect to a Master!");
+  }
+
   public void okButtonClicked(View unused) {
     String tmpURI = uriText.getText().toString();
 
