@@ -372,14 +372,15 @@ public class MasterChooser extends Activity {
   }
 
   /**
-   * Stores the recent Master URI to preferences. This implementation does not use
+   * Adds the given URI to the list of recent Master URIs stored in shared preferences.
+   * This implementation does not use
    * {@link android.content.SharedPreferences.Editor#putStringSet(String, Set)}
    * since it is not available in API 10.
    * @param uri Master URI string to store.
    */
-  private void setRecentMasterURI(String uri)  {
+  private void setRecentMasterURI(String uri) {
     List<String> recentURIs = getRecentMasterURIs();
-    if(!recentURIs.contains(uri)){
+    if(!recentURIs.contains(uri)) {
       recentURIs.add(0, uri);
       if(recentURIs.size() > RECENT_MASTER_HISTORY_COUNT)
         recentURIs = recentURIs.subList(0, RECENT_MASTER_HISTORY_COUNT);
@@ -387,16 +388,16 @@ public class MasterChooser extends Activity {
 
     SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
     editor.putString(PREFS_KEY_NAME, uri);
-    for(int i=0; i<recentURIs.size(); i++)
-    {
+    for(int i=0; i<recentURIs.size(); i++) {
       editor.putString(RECENT_PREFIX_KEY_NAME + String.valueOf(i), recentURIs.get(i));
     }
+
     editor.putInt(RECENT_COUNT_KEY_NAME, recentURIs.size());
     editor.apply();
   }
 
   /**
-   * Gets a list of recent Master URIs from preferences. This implementation does not use
+   * Gets a list of recent Master URIs from shared preferences. This implementation does not use
    * {@link android.content.SharedPreferences.Editor#putStringSet(String, Set)}
    * since it is not available in API 10.
    * @return List of recent Master URI strings
@@ -408,10 +409,11 @@ public class MasterChooser extends Activity {
     recentURIs = new ArrayList<>(numRecent);
     for(int i=0; i<numRecent; i++) {
       String uri = prefs.getString(RECENT_PREFIX_KEY_NAME + String.valueOf(i), "");
-      if(!uri.isEmpty()){
+      if(!uri.isEmpty()) {
         recentURIs.add(uri);
       }
     }
+
     return recentURIs;
   }
 
