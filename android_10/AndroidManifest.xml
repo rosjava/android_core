@@ -16,6 +16,7 @@
         android:label="@string/app_name">
         <activity
             android:name="org.ros.android.MasterChooser"
+            android:theme="@style/Theme.AppCompat"
             android:label="@string/app_name"
             android:launchMode="standard"/>
 

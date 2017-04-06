@@ -27,6 +27,7 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -67,7 +68,7 @@ import java.util.regex.Pattern;
  * @author damonkohler@google.com (Damon Kohler)
  * @author munjaldesai@google.com (Munjal Desai)
  */
-public class MasterChooser extends Activity {
+public class MasterChooser extends AppCompatActivity {
 
   /**
    * The key with which the last used {@link URI} will be stored as a
