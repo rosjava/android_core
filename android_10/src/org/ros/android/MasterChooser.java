@@ -33,7 +33,6 @@ import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -46,16 +45,13 @@ import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.namespace.GraphName;
 import org.ros.node.NodeConfiguration;
 
-import java.lang.reflect.Array;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -284,7 +280,7 @@ public class MasterChooser extends Activity {
       protected void onPostExecute(Boolean result) {
         if (result) {
           //Update Recent Master URI
-          setRecentMasterURI(uri);
+          addRecentMasterURI(uri);
           // If the displayed URI is valid then pack that into the intent.
           // Package the intent to be consumed by the calling activity.
           Intent intent = createNewMasterIntent(false, true);
@@ -378,17 +374,17 @@ public class MasterChooser extends Activity {
    * since it is not available in API 10.
    * @param uri Master URI string to store.
    */
-  private void setRecentMasterURI(String uri) {
+  private void addRecentMasterURI(String uri) {
     List<String> recentURIs = getRecentMasterURIs();
-    if(!recentURIs.contains(uri)) {
+    if (!recentURIs.contains(uri)) {
       recentURIs.add(0, uri);
-      if(recentURIs.size() > RECENT_MASTER_HISTORY_COUNT)
+      if (recentURIs.size() > RECENT_MASTER_HISTORY_COUNT)
         recentURIs = recentURIs.subList(0, RECENT_MASTER_HISTORY_COUNT);
     }
 
     SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
     editor.putString(PREFS_KEY_NAME, uri);
-    for(int i=0; i<recentURIs.size(); i++) {
+    for (int i = 0; i < recentURIs.size(); i++) {
       editor.putString(RECENT_PREFIX_KEY_NAME + String.valueOf(i), recentURIs.get(i));
     }
 
@@ -402,14 +398,14 @@ public class MasterChooser extends Activity {
    * since it is not available in API 10.
    * @return List of recent Master URI strings
    */
-  private List<String> getRecentMasterURIs()  {
+  private List<String> getRecentMasterURIs() {
     List<String> recentURIs;
     SharedPreferences prefs = getPreferences(MODE_PRIVATE);
     int numRecent = prefs.getInt(RECENT_COUNT_KEY_NAME, 0);
     recentURIs = new ArrayList<>(numRecent);
-    for(int i=0; i<numRecent; i++) {
+    for (int i = 0; i < numRecent; i++) {
       String uri = prefs.getString(RECENT_PREFIX_KEY_NAME + String.valueOf(i), "");
-      if(!uri.isEmpty()) {
+      if (!uri.isEmpty()) {
         recentURIs.add(uri);
       }
     }
