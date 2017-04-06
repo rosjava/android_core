@@ -18,7 +18,7 @@
             android:text="@string/uri_text"
             android:textSize="18dp"/>
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/master_chooser_uri"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -27,7 +27,7 @@
             android:singleLine="true">
 
             <requestFocus/>
-        </EditText>
+        </AutoCompleteTextView>
     </LinearLayout>
 
     <LinearLayout
