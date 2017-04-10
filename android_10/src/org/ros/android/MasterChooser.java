@@ -230,6 +230,12 @@ public class MasterChooser extends AppCompatActivity {
     }
   }
 
+  @Override
+  public void onBackPressed() {
+    //Prevent user from going back to Launcher Activity since no Master is connected.
+    this.moveTaskToBack(true);
+  }
+
   public void okButtonClicked(View unused) {
     String tmpURI = uriText.getText().toString();
 
