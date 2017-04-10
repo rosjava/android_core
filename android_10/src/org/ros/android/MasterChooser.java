@@ -203,6 +203,7 @@ public class MasterChooser extends AppCompatActivity {
       @Override
       public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         selectedInterface = parent.getItemAtPosition(position).toString();
+        toast("Using " + selectedInterface + " interface.");
       }
     });
 
