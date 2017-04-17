@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Forthcoming
------------
+0.3.3 (2017-04-17)
+------------------
 * Several MasterChooser fixes and improvements.
 * Added all constructors from RosActivity to AppCompat activity.
 * RosActivity can now call a custom activity as a MasterChooser.
