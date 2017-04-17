@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Forthcoming
+-----------
+* Several MasterChooser fixes and improvements.
+* Added all constructors from RosActivity to AppCompat activity.
+* RosActivity can now call a custom activity as a MasterChooser.
+* Cherry-pick from indigo. Fixing memory leaks with ServiceConnection.
+* Contributors: Dan Ambrosio, Juan Ignacio Ubeira, Julian Cerruti
+
 0.3.2 (2017-03-07)
 ------------------
 * Cherry-picked from indigo. Fixing memory leaks with ServiceConnection
