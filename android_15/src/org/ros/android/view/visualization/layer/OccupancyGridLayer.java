@@ -55,6 +55,11 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
   private static final int COLOR_UNKNOWN = 0xffdddddd;
 
   /**
+   * Color of transparent cells in the map.
+   */
+  private static final int COLOR_TRANSPARENT = 0x00000000;
+
+  /**
    * In order to draw maps with a size outside the maximum size of a texture,
    * we split the map into multiple tiles and draw one texture per tile.
    */
@@ -105,7 +110,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
     public void update() {
       Preconditions.checkNotNull(origin);
       Preconditions.checkNotNull(stride);
-      textureBitmap.updateFromPixelBuffer(pixelBuffer, stride, resolution, origin, COLOR_UNKNOWN);
+      textureBitmap.updateFromPixelBuffer(pixelBuffer, stride, resolution, origin, COLOR_TRANSPARENT);
       pixelBuffer.clear();
       ready = true;
     }
