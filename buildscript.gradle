@@ -17,6 +17,6 @@
 rootProject.buildscript {
   apply from: "https://github.com/rosjava/rosjava_bootstrap/raw/kinetic/buildscript.gradle"
   dependencies {
-    classpath "com.android.tools.build:gradle:2.2.3"
+    classpath "com.android.tools.build:gradle:2.3.3"
   }
 }

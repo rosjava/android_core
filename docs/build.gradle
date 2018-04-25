@@ -37,9 +37,11 @@ task docs(type: Exec, dependsOn: [copySphinxConf, javadoc]) {
   commandLine 'make', 'html'
 }
 
-task clean << {
-  ant.delete dir: 'build'
-  ant.delete file: 'src/main/sphinx/conf.py'
+task clean {
+  doLast {
+    ant.delete dir: 'build'
+    ant.delete file: 'src/main/sphinx/conf.py'
+  }
 }
 
 /* Dummy task to stop android studio barfing */
