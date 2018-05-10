@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.ros.android.view.visualization.TextureBitmap;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.internal.message.MessageBuffers;
@@ -201,7 +202,9 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
 
     int x = 0;
     int y = 0;
-    final ChannelBuffer buffer = message.getData();
+    // final ChannelBuffer buffer;
+    // buffer.setBytes(0,message.getData());
+    final ChannelBuffer buffer = ChannelBuffers.wrappedBuffer(message.getData());
     while (buffer.readable()) {
       Preconditions.checkState(y < height);
       final int tileIndex = (y / TextureBitmap.STRIDE) * numTilesWide + x / TextureBitmap.STRIDE;

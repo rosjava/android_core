@@ -22,11 +22,14 @@ import org.ros.android.view.visualization.VisualizationView;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.ros.android.view.visualization.TextureBitmap;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.rosjava_geometry.Transform;
+
+import java.nio.channels.Channel;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -91,7 +94,9 @@ public class CompressedOccupancyGridLayer extends SubscriberLayer<nav_msgs.Occup
   }
 
   void update(nav_msgs.OccupancyGrid message) {
-    ChannelBuffer buffer = message.getData();
+    // final ChannelBuffer buffer;
+    // buffer.setBytes(0,message.getData());
+    final ChannelBuffer buffer = ChannelBuffers.wrappedBuffer(message.getData());
     Bitmap bitmap =
         BitmapFactory.decodeByteArray(buffer.array(), buffer.arrayOffset(), buffer.readableBytes());
     int stride = bitmap.getWidth();
