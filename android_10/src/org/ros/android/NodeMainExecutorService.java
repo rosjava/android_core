@@ -215,42 +215,10 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
     if (intent.getAction().equals(ACTION_START)) {
       Preconditions.checkArgument(intent.hasExtra(EXTRA_NOTIFICATION_TICKER));
       Preconditions.checkArgument(intent.hasExtra(EXTRA_NOTIFICATION_TITLE));
-      Notification.Builder builder = new Notification.Builder(this);
       Intent notificationIntent = new Intent(this, NodeMainExecutorService.class);
       notificationIntent.setAction(NodeMainExecutorService.ACTION_SHUTDOWN);
       PendingIntent pendingIntent = PendingIntent.getService(this, 0, notificationIntent, 0);
-
-      Notification notification = null;
-      if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
-        String NOTIFICATION_CHANNEL_ID = "com.example.simpleapp";
-        String channelName = "My Background Service";
-        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
-        chan.setLightColor(Color.BLUE);
-        chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        assert manager != null;
-        manager.createNotificationChannel(chan);
-
-        builder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
-        notification = builder.setOngoing(true)
-                .setSmallIcon(R.mipmap.icon)
-                .setTicker(intent.getStringExtra(EXTRA_NOTIFICATION_TICKER))
-                .setWhen(System.currentTimeMillis())
-                .setContentTitle(intent.getStringExtra(EXTRA_NOTIFICATION_TITLE))
-                .setAutoCancel(true)
-                .setContentText("Tap to shutdown.")
-                .build();
-      } else {
-        notification = builder.setContentIntent(pendingIntent)
-                .setOngoing(true)
-                .setSmallIcon(R.mipmap.icon)
-                .setTicker(intent.getStringExtra(EXTRA_NOTIFICATION_TICKER))
-                .setWhen(System.currentTimeMillis())
-                .setContentTitle(intent.getStringExtra(EXTRA_NOTIFICATION_TITLE))
-                .setAutoCancel(true)
-                .setContentText("Tap to shutdown.")
-                .build();
-      }
+      Notification notification = buildNotification(intent, pendingIntent);
 
       startForeground(ONGOING_NOTIFICATION, notification);
     }
@@ -340,5 +308,34 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
         Toast.makeText(NodeMainExecutorService.this, text, Toast.LENGTH_SHORT).show();
       }
     });
+  }
+
+  private Notification buildNotification(Intent intent, PendingIntent pendingIntent) {
+    Notification notification = null;
+    Notification.Builder builder = null;
+    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+      String NOTIFICATION_CHANNEL_ID = "com.example.simpleapp";
+      String channelName = "My Background Service";
+      NotificationChannel chan = new NotificationChannel(
+              NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+      chan.setLightColor(Color.BLUE);
+      chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+      NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+      assert manager != null;
+      manager.createNotificationChannel(chan);
+      builder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
+    } else {
+      builder = new Notification.Builder(this);
+    }
+    notification = builder.setContentIntent(pendingIntent)
+            .setOngoing(true)
+            .setSmallIcon(R.mipmap.icon)
+            .setTicker(intent.getStringExtra(EXTRA_NOTIFICATION_TICKER))
+            .setWhen(System.currentTimeMillis())
+            .setContentTitle(intent.getStringExtra(EXTRA_NOTIFICATION_TITLE))
+            .setAutoCancel(true)
+            .setContentText("Tap to shutdown.")
+            .build();
+    return notification;
   }
 }
