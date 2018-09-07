@@ -20,20 +20,24 @@ import com.google.common.base.Preconditions;
 
 import android.app.AlertDialog;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -112,7 +116,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
       // We must be running on a pre-Honeycomb device.
       Log.w(TAG, "Unable to acquire high performance wifi lock.");
     }
-    WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
+    WifiManager wifiManager = WifiManager.class.cast(getApplicationContext().getSystemService(WIFI_SERVICE));
     wifiLock = wifiManager.createWifiLock(wifiLockType, TAG);
     wifiLock.acquire();
   }
@@ -211,18 +215,43 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
     if (intent.getAction().equals(ACTION_START)) {
       Preconditions.checkArgument(intent.hasExtra(EXTRA_NOTIFICATION_TICKER));
       Preconditions.checkArgument(intent.hasExtra(EXTRA_NOTIFICATION_TITLE));
-      NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+      Notification.Builder builder = new Notification.Builder(this);
       Intent notificationIntent = new Intent(this, NodeMainExecutorService.class);
       notificationIntent.setAction(NodeMainExecutorService.ACTION_SHUTDOWN);
       PendingIntent pendingIntent = PendingIntent.getService(this, 0, notificationIntent, 0);
-      Notification notification = builder.setContentIntent(pendingIntent)
-              .setSmallIcon(R.mipmap.icon)
-              .setTicker(intent.getStringExtra(EXTRA_NOTIFICATION_TICKER))
-              .setWhen(System.currentTimeMillis())
-              .setContentTitle(intent.getStringExtra(EXTRA_NOTIFICATION_TITLE))
-              .setAutoCancel(true)
-              .setContentText("Tap to shutdown.")
-              .build();
+
+      Notification notification = null;
+      if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+        String NOTIFICATION_CHANNEL_ID = "com.example.simpleapp";
+        String channelName = "My Background Service";
+        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+        chan.setLightColor(Color.BLUE);
+        chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        assert manager != null;
+        manager.createNotificationChannel(chan);
+
+        builder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
+        notification = builder.setOngoing(true)
+                .setSmallIcon(R.mipmap.icon)
+                .setTicker(intent.getStringExtra(EXTRA_NOTIFICATION_TICKER))
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle(intent.getStringExtra(EXTRA_NOTIFICATION_TITLE))
+                .setAutoCancel(true)
+                .setContentText("Tap to shutdown.")
+                .build();
+      } else {
+        notification = builder.setContentIntent(pendingIntent)
+                .setOngoing(true)
+                .setSmallIcon(R.mipmap.icon)
+                .setTicker(intent.getStringExtra(EXTRA_NOTIFICATION_TICKER))
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle(intent.getStringExtra(EXTRA_NOTIFICATION_TITLE))
+                .setAutoCancel(true)
+                .setContentText("Tap to shutdown.")
+                .build();
+      }
+
       startForeground(ONGOING_NOTIFICATION, notification);
     }
     if (intent.getAction().equals(ACTION_SHUTDOWN)) {

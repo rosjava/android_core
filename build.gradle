@@ -20,6 +20,14 @@ task wrapper(type: Wrapper) {
 
 buildscript {
     apply from: project.file("buildscript.gradle")
+    allprojects {
+        repositories {
+            jcenter()
+            maven {
+                url "https://maven.google.com"
+            }
+        }
+    }
 }
 
 apply plugin: "catkin"
