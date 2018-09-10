@@ -16,7 +16,7 @@
 
 dependencies {
   compile 'org.ros.rosjava_core:rosjava_tutorial_pubsub:[0.3,0.4)'
-  compile project(':android_10')
+  compile project(':android_core_components')
 }
 
 apply plugin: 'com.android.application'
