@@ -42,7 +42,7 @@ import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
 import org.ros.RosCore;
-import org.ros.android.android_10.R;
+import org.ros.android.android_core_components.R;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
 import org.ros.exception.RosRuntimeException;

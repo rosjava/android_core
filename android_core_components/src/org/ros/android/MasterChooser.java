@@ -39,7 +39,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import org.ros.android.android_10.R;
+import org.ros.android.android_core_components.R;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
