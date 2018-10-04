@@ -72,6 +72,9 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
   public static final String EXTRA_NOTIFICATION_TITLE = "org.ros.android.EXTRA_NOTIFICATION_TITLE";
   public static final String EXTRA_NOTIFICATION_TICKER = "org.ros.android.EXTRA_NOTIFICATION_TICKER";
 
+  public static final String NOTIFICATION_CHANNEL_ID = "org.ros.android";
+  public static final String CHANNEL_NAME = "ROS Android background service";
+
   private final NodeMainExecutor nodeMainExecutor;
   private final IBinder binder;
   private final ListenerGroup<NodeMainExecutorServiceListener> listeners;
@@ -161,7 +164,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
           }
         });
         AlertDialog alertDialog = builder.create();
-        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_TOAST);
         alertDialog.show();
       }
     });
@@ -314,10 +317,8 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
     Notification notification = null;
     Notification.Builder builder = null;
     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
-      String NOTIFICATION_CHANNEL_ID = "com.example.simpleapp";
-      String channelName = "My Background Service";
       NotificationChannel chan = new NotificationChannel(
-              NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+              NOTIFICATION_CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_NONE);
       chan.setLightColor(Color.BLUE);
       chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
       NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
