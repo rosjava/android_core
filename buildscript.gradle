@@ -19,4 +19,13 @@ rootProject.buildscript {
   dependencies {
     classpath "com.android.tools.build:gradle:3.2.1"
   }
+
+  allprojects {
+    repositories {
+      jcenter()
+      maven {
+        url "https://maven.google.com"
+      }
+    }
+  }
 }
