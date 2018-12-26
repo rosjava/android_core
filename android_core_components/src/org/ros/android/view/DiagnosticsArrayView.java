@@ -37,7 +37,7 @@ import android.widget.Button;
 import android.widget.TableLayout;
 import diagnostic_msgs.DiagnosticArray;
 import diagnostic_msgs.DiagnosticStatus;
-import org.ros.android.android_10.R;
+import org.ros.android.android_core_components.R;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
@@ -85,7 +85,7 @@ public class DiagnosticsArrayView extends TableLayout implements NodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return GraphName.of("android_10/diagnostics_array_view");
+    return GraphName.of("android_core_components/diagnostics_array_view");
   }
 
   @Override

@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.4.0 (2018-10-04)
+* Deprecating android_10 and android_15; adding support for Android P.
+* Minor fixes for visualization layers.
+* Made LocalBinder class public.
+* Gradle 4.10.2 update.
+* Contributors: Rob (rking788), Juan Ignacio Ubeira, Julian Cerruti.
+
 0.3.3 (2017-04-17)
 ------------------
 * Several MasterChooser fixes and improvements.

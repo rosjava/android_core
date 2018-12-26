@@ -16,18 +16,18 @@
 
 dependencies {
   compile 'org.ros.rosjava_core:rosjava_tutorial_pubsub:[0.3,0.4)'
-  compile project(':android_10')
+  compile project(':android_core_components')
 }
 
 apply plugin: 'com.android.application'
 
 android {
-  compileSdkVersion 25
+  compileSdkVersion 28
 
   defaultConfig {
-    minSdkVersion 10
+    minSdkVersion 16
     applicationId "org.ros.android.android_tutorial_pubsub"
-    targetSdkVersion 10
+    targetSdkVersion 28
     versionCode 1
     versionName "1.0"
   }

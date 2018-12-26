@@ -15,20 +15,23 @@
  */
 
 dependencies {
+  compile "org.ros.rosjava_core:rosjava:[0.3.2,0.4)"
+  compile "org.ros.rosjava_messages:diagnostic_msgs:[1.12,1.13)"
+  compile "org.ros.rosjava_messages:sensor_msgs:[1.12,1.13)"
   compile 'org.ros.rosjava_core:rosjava_geometry:[0.3,0.4)'
-  compile 'com.android.support:support-v4:25.1.0'
   compile 'org.ros.rosjava_messages:visualization_msgs:[1.12,1.13)'
-  compile project(':android_10')
+  compile "com.android.support:appcompat-v7:28.0.0"
+  compile 'com.android.support:support-v4:28.0.0'
 }
 
-apply plugin: 'com.android.library'
+apply plugin: "com.android.library"
 
 android {
-  compileSdkVersion 25
+  compileSdkVersion 28
 
   defaultConfig {
-    minSdkVersion 15
-    targetSdkVersion 15
+    minSdkVersion 16
+    targetSdkVersion 28
     versionCode 1
     versionName "1.0"
   }

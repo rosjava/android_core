@@ -14,8 +14,7 @@
  * the License.
  */
 
-include "android_10"
-include "android_15"
+include "android_core_components"
 include "android_acm_serial"
 include "android_benchmarks"
 include "android_tutorial_camera"

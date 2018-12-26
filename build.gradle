@@ -15,11 +15,19 @@
  */
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "3.5.1"
+    gradleVersion = "4.10.2"
 }
 
 buildscript {
     apply from: project.file("buildscript.gradle")
+    allprojects {
+        repositories {
+            jcenter()
+            maven {
+                url "https://maven.google.com"
+            }
+        }
+    }
 }
 
 apply plugin: "catkin"

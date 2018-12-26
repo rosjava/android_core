@@ -11,8 +11,7 @@ ROS-enabling Android applications
 ----------------------------------
 
 android_core provides `Android Library Projects`_ to help you write ROS
-applications for Android. The library projects are named for the `Android API
-level`_ they require (e.g. android_10 and android_15).
+applications for Android (i.e. android_core_components).
 Each class or feature is defined in the library project that represents the
 minimum version of Android required for it to work.
 
@@ -27,6 +26,14 @@ development of data driven Android UIs (e.g.
 .. _Android Library Projects: http://developer.android.com/guide/developing/projects/index.html#LibraryProjects
 .. _Android API level: http://developer.android.com/guide/appendix/api-levels.html
 .. _View: http://developer.android.com/reference/android/view/View.html
+
+android_core_components library project
+---------------------------------------
+Since version 0.4.0, the previous android_10 and android_15 libraries were merged
+in a single project with minimum API level 16, as the amount of Android devices that
+still use lower APIs are mostly deprecated as of September 2018.
+
+See notes below regarding previous library projects.
 
 android_10 library project
 ---------------------------------------
