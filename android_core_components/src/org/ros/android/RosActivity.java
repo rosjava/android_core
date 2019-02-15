@@ -17,11 +17,13 @@
 package org.ros.android;
 
 import android.app.Activity;
+
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.support.wearable.activity.WearableActivity;
 
 import com.google.common.base.Preconditions;
 
@@ -35,10 +37,11 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public abstract class RosActivity extends Activity {
+public abstract class RosActivity extends WearableActivity {
 
   protected static final int MASTER_CHOOSER_REQUEST_CODE = 0;
 

@@ -3,8 +3,7 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="org.ros.android.android_core_components">
 
-
-
+    <uses-sdk tools:overrideLibrary="org.ros.android.android_core_components"></uses-sdk>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
