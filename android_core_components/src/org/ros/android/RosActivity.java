@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.IBinder;
-import android.support.wearable.activity.WearableActivity;
 
 import com.google.common.base.Preconditions;
 
@@ -41,7 +40,7 @@ import java.net.URISyntaxException;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public abstract class RosActivity extends WearableActivity {
+public abstract class RosActivity extends Activity {
 
   protected static final int MASTER_CHOOSER_REQUEST_CODE = 0;
 
