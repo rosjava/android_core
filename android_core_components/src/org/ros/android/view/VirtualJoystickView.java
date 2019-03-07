@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -48,11 +48,11 @@ import java.util.TimerTask;
  * VirtualJoystickView creates a virtual joystick view that publishes velocity
  * as (geometry_msgs.Twist) messages. The current version contains the following
  * features: snap to axes, turn in place, and resume previous velocity.
- * 
+ *
  * @author munjaldesai@google.com (Munjal Desai)
  */
 public class VirtualJoystickView extends RelativeLayout implements AnimationListener,
-    MessageListener<nav_msgs.Odometry>, NodeMain {
+        MessageListener<nav_msgs.Odometry>, NodeMain {
 
   /**
    * BOX_TO_CIRCLE_RATIO The dimensions of the square box that contains the
@@ -131,7 +131,9 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    * container.
    */
   private TextView magnitudeText;
-  /** contactTheta The current orientation of the virtual joystick in degrees. */
+  /**
+   * contactTheta The current orientation of the virtual joystick in degrees.
+   */
   private float contactTheta;
   /**
    * normalizedMagnitude This is the distance between the center divet and the
@@ -143,16 +145,16 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    * contactRadius This is the distance between the center of the widget and the
    * point of contact normalized between 0 and 1. This is mostly used for
    * animation/display calculations.
-   * 
+   * <p>
    * TODO(munjaldesai): Omnigraffle this for better documentation.
    */
   private float contactRadius;
   /**
    * deadZoneRatio ...
-   * 
+   * <p>
    * TODO(munjaldesai): Write a simple explanation for this. Currently not easy
    * to immediately comprehend it's meaning.
-   * 
+   * <p>
    * TODO(munjaldesai): Omnigraffle this for better documentation.
    */
   private float deadZoneRatio = Float.NaN;
@@ -260,10 +262,9 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   }
 
   /**
-   * @param enabled
-   *          {@code true} if this joystick should publish linear velocities
-   *          along the Y axis instead of angular velocities along the Z axis,
-   *          {@code false} otherwise
+   * @param enabled {@code true} if this joystick should publish linear velocities
+   *                along the Y axis instead of angular velocities along the Z axis,
+   *                {@code false} otherwise
    */
   public void setHolonomic(boolean enabled) {
     holonomic = enabled;
@@ -314,63 +315,63 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   public boolean onTouchEvent(MotionEvent event) {
     final int action = event.getAction();
     switch (action & MotionEvent.ACTION_MASK) {
-    case MotionEvent.ACTION_MOVE: {
-      // If the primary contact point is no longer on the screen then ignore
-      // the event.
-      if (pointerId != INVALID_POINTER_ID) {
-        // If the virtual joystick is in resume-previous-velocity mode.
-        if (previousVelocityMode) {
-          // And the current contact is close to the contact location prior to
-          // ContactUp.
-          if (inLastContactRange(event.getX(event.getActionIndex()),
-              event.getY(event.getActionIndex()))) {
-            // Then use the previous velocity.
-            onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y
-                + joystickRadius);
+      case MotionEvent.ACTION_MOVE: {
+        // If the primary contact point is no longer on the screen then ignore
+        // the event.
+        if (pointerId != INVALID_POINTER_ID) {
+          // If the virtual joystick is in resume-previous-velocity mode.
+          if (previousVelocityMode) {
+            // And the current contact is close to the contact location prior to
+            // ContactUp.
+            if (inLastContactRange(event.getX(event.getActionIndex()),
+                    event.getY(event.getActionIndex()))) {
+              // Then use the previous velocity.
+              onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y
+                      + joystickRadius);
+            }
+            // Since the current contact is not close to the prior location.
+            else {
+              // Exit the resume-previous-velocity mode.
+              previousVelocityMode = false;
+            }
           }
-          // Since the current contact is not close to the prior location.
+          // Since the resume-previous-velocity mode is not active generate
+          // velocities based on current contact position.
           else {
-            // Exit the resume-previous-velocity mode.
-            previousVelocityMode = false;
+            onContactMove(event.getX(event.findPointerIndex(pointerId)),
+                    event.getY(event.findPointerIndex(pointerId)));
           }
         }
-        // Since the resume-previous-velocity mode is not active generate
-        // velocities based on current contact position.
-        else {
-          onContactMove(event.getX(event.findPointerIndex(pointerId)),
-              event.getY(event.findPointerIndex(pointerId)));
+        break;
+      }
+      case MotionEvent.ACTION_DOWN: {
+        // Get the coordinates of the pointer that is initiating the
+        // interaction.
+        pointerId = event.getPointerId(event.getActionIndex());
+        onContactDown();
+        // If the current contact is close to the location of the contact prior
+        // to contactUp.
+        if (inLastContactRange(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()))) {
+          // Trigger resume-previous-velocity mode.
+          previousVelocityMode = true;
+          // The animation calculations/operations are performed in
+          // onContactMove(). If this is not called and the user's finger stays
+          // perfectly still after the down event, no operation is performed.
+          // Calling onContactMove avoids this.
+          onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y + joystickRadius);
+        } else {
+          onContactMove(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()));
         }
+        break;
       }
-      break;
-    }
-    case MotionEvent.ACTION_DOWN: {
-      // Get the coordinates of the pointer that is initiating the
-      // interaction.
-      pointerId = event.getPointerId(event.getActionIndex());
-      onContactDown();
-      // If the current contact is close to the location of the contact prior
-      // to contactUp.
-      if (inLastContactRange(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()))) {
-        // Trigger resume-previous-velocity mode.
-        previousVelocityMode = true;
-        // The animation calculations/operations are performed in
-        // onContactMove(). If this is not called and the user's finger stays
-        // perfectly still after the down event, no operation is performed.
-        // Calling onContactMove avoids this.
-        onContactMove(contactUpLocation.x + joystickRadius, contactUpLocation.y + joystickRadius);
-      } else {
-        onContactMove(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()));
+      case MotionEvent.ACTION_POINTER_UP:
+      case MotionEvent.ACTION_UP: {
+        // Check if the contact that initiated the interaction is up.
+        if ((action & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent.ACTION_POINTER_ID_SHIFT == pointerId) {
+          onContactUp();
+        }
+        break;
       }
-      break;
-    }
-    case MotionEvent.ACTION_POINTER_UP:
-    case MotionEvent.ACTION_UP: {
-      // Check if the contact that initiated the interaction is up.
-      if ((action & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent.ACTION_POINTER_ID_SHIFT == pointerId) {
-        onContactUp();
-      }
-      break;
-    }
     }
     return true;
   }
@@ -428,10 +429,9 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    * between this method and {@link #animateIntensityCircle(float, long)} is
    * that this method does not attach an animation listener and the animation is
    * instantaneous.
-   * 
-   * @param endScale
-   *          The scale factor that must be attained at the end of the
-   *          animation.
+   *
+   * @param endScale The scale factor that must be attained at the end of the
+   *                 animation.
    */
   private void animateIntensityCircle(float endScale) {
     AnimationSet intensityCircleAnimation = new AnimationSet(true);
@@ -445,8 +445,8 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     intensityCircleAnimation.addAnimation(rotateAnim);
     ScaleAnimation scaleAnim;
     scaleAnim =
-        new ScaleAnimation(contactRadius, endScale, contactRadius, endScale, joystickRadius,
-            joystickRadius);
+            new ScaleAnimation(contactRadius, endScale, contactRadius, endScale, joystickRadius,
+                    joystickRadius);
     scaleAnim.setDuration(0);
     scaleAnim.setFillAfter(true);
     intensityCircleAnimation.addAnimation(scaleAnim);
@@ -458,12 +458,10 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    * Scale and rotate the intensity circle over the specified duration. Unlike
    * {@link #animateIntensityCircle(float)} this method registers an animation
    * listener.
-   * 
-   * @param endScale
-   *          The scale factor that must be attained at the end of the
-   *          animation.
-   * @param duration
-   *          The duration in milliseconds the animation should take.
+   *
+   * @param endScale The scale factor that must be attained at the end of the
+   *                 animation.
+   * @param duration The duration in milliseconds the animation should take.
    */
   private void animateIntensityCircle(float endScale, long duration) {
     AnimationSet intensityCircleAnimation = new AnimationSet(true);
@@ -480,8 +478,8 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     intensityCircleAnimation.addAnimation(rotateAnim);
     ScaleAnimation scaleAnim;
     scaleAnim =
-        new ScaleAnimation(contactRadius, endScale, contactRadius, endScale, joystickRadius,
-            joystickRadius);
+            new ScaleAnimation(contactRadius, endScale, contactRadius, endScale, joystickRadius,
+                    joystickRadius);
     scaleAnim.setDuration(duration);
     scaleAnim.setFillAfter(true);
     intensityCircleAnimation.addAnimation(scaleAnim);
@@ -512,13 +510,11 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    * From http://actionsnippet.com/?p=1451. Calculates the difference between 2
    * angles. The result is always the minimum difference between 2 angles (0<
    * result <= 360).
-   * 
-   * @param angle0
-   *          One of 2 angles used to calculate difference. The order of
-   *          arguments does not matter. Must be in degrees.
-   * @param angle1
-   *          One of 2 angles used to calculate difference. The order of
-   *          arguments does not matter. Must be in degrees.
+   *
+   * @param angle0 One of 2 angles used to calculate difference. The order of
+   *               arguments does not matter. Must be in degrees.
+   * @param angle1 One of 2 angles used to calculate difference. The order of
+   *               arguments does not matter. Must be in degrees.
    * @return The difference between the 2 arguments in degrees.
    */
   private float differenceBetweenAngles(float angle0, float angle1) {
@@ -621,11 +617,9 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   /**
    * Updates the virtual joystick layout based on the location of the contact.
    * Generates the velocity messages. Switches in and out of turn-in-place.
-   * 
-   * @param x
-   *          The x coordinates of the contact relative to the parent container.
-   * @param y
-   *          The y coordinates of the contact relative to the parent container.
+   *
+   * @param x The x coordinates of the contact relative to the parent container.
+   * @param y The y coordinates of the contact relative to the parent container.
    */
   private void onContactMove(float x, float y) {
     // Get the coordinates of the contact relative to the center of the main
@@ -635,8 +629,8 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     // Convert the coordinates from Cartesian to Polar.
     contactTheta = (float) (Math.atan2(thumbDivetY, thumbDivetX) * 180 / Math.PI + 90);
     contactRadius =
-        (float) Math.sqrt(thumbDivetX * thumbDivetX + thumbDivetY * thumbDivetY)
-            * normalizingMultiplier;
+            (float) Math.sqrt(thumbDivetX * thumbDivetX + thumbDivetY * thumbDivetY)
+                    * normalizingMultiplier;
     // Calculate the distance (0 to 1) from the center divet to the contact
     // point.
     normalizedMagnitude = (contactRadius - deadZoneRatio) / (1 - deadZoneRatio);
@@ -699,10 +693,10 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     // Publish the velocities.
     if (holonomic) {
       publishVelocity(normalizedMagnitude * Math.cos(contactTheta * Math.PI / 180.0),
-          normalizedMagnitude * Math.sin(contactTheta * Math.PI / 180.0), 0);
+              normalizedMagnitude * Math.sin(contactTheta * Math.PI / 180.0), 0);
     } else {
       publishVelocity(normalizedMagnitude * Math.cos(contactTheta * Math.PI / 180.0), 0,
-          normalizedMagnitude * Math.sin(contactTheta * Math.PI / 180.0));
+              normalizedMagnitude * Math.sin(contactTheta * Math.PI / 180.0));
     }
 
     // Check if the turn-in-place mode needs to be activated/deactivated.
@@ -794,14 +788,12 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
 
   /**
    * Publish the velocity as a ROS Twist message.
-   * 
-   * @param linearVelocityX
-   *          The normalized linear velocity (-1 to 1).
-   * @param angularVelocityZ
-   *          The normalized angular velocity (-1 to 1).
+   *
+   * @param linearVelocityX  The normalized linear velocity (-1 to 1).
+   * @param angularVelocityZ The normalized angular velocity (-1 to 1).
    */
   private void publishVelocity(double linearVelocityX, double linearVelocityY,
-      double angularVelocityZ) {
+                               double angularVelocityZ) {
     currentVelocityCommand.getLinear().setX(linearVelocityX);
     currentVelocityCommand.getLinear().setY(-linearVelocityY);
     currentVelocityCommand.getLinear().setZ(0);
@@ -818,7 +810,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     turnInPlaceStartTheta = (currentOrientation + 360) % 360;
     RotateAnimation rotateAnim;
     rotateAnim =
-        new RotateAnimation(rightTurnOffset, rightTurnOffset, joystickRadius, joystickRadius);
+            new RotateAnimation(rightTurnOffset, rightTurnOffset, joystickRadius, joystickRadius);
     rotateAnim.setInterpolator(new LinearInterpolator());
     rotateAnim.setDuration(0);
     rotateAnim.setFillAfter(true);
@@ -838,9 +830,9 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     if (!turnInPlaceMode) {
       magnitudeText.setText(String.valueOf((int) (normalizedMagnitude * 100)) + "%");
       magnitudeText.setTranslationX((float) (parentSize / 4 * Math.cos((90 + contactTheta)
-          * Math.PI / 180.0)));
+              * Math.PI / 180.0)));
       magnitudeText.setTranslationY((float) (parentSize / 4 * Math.sin((90 + contactTheta)
-          * Math.PI / 180.0)));
+              * Math.PI / 180.0)));
     }
   }
 
@@ -861,14 +853,14 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     // Rotate the 2 arcs based on the offset in orientation.
     RotateAnimation rotateAnim;
     rotateAnim =
-        new RotateAnimation(offsetTheta + rightTurnOffset, offsetTheta + rightTurnOffset,
-            joystickRadius, joystickRadius);
+            new RotateAnimation(offsetTheta + rightTurnOffset, offsetTheta + rightTurnOffset,
+                    joystickRadius, joystickRadius);
     rotateAnim.setInterpolator(new LinearInterpolator());
     rotateAnim.setDuration(0);
     rotateAnim.setFillAfter(true);
     currentRotationRange.startAnimation(rotateAnim);
     rotateAnim =
-        new RotateAnimation(offsetTheta + 15, offsetTheta + 15, joystickRadius, joystickRadius);
+            new RotateAnimation(offsetTheta + 15, offsetTheta + 15, joystickRadius, joystickRadius);
     rotateAnim.setInterpolator(new LinearInterpolator());
     rotateAnim.setDuration(0);
     rotateAnim.setFillAfter(true);
@@ -879,11 +871,9 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    * Moves the {@link #thumbDivet} to the specified coordinates (under the
    * contact) and also orients it so that is facing the direction opposite to
    * the center of the {@link #mainLayout}.
-   * 
-   * @param x
-   *          The x coordinate relative to the center of the {@link #mainLayout}
-   * @param y
-   *          The Y coordinate relative to the center of the {@link #mainLayout}
+   *
+   * @param x The x coordinate relative to the center of the {@link #mainLayout}
+   * @param y The Y coordinate relative to the center of the {@link #mainLayout}
    */
   private void updateThumbDivet(float x, float y) {
     // Offset the specified coordinates to ensure that the center of the thumb
@@ -898,11 +888,11 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
 
   /**
    * Comparing 2 float values.
-   * 
+   *
    * @param v1
    * @param v2
    * @return True if v1 and v2 and within {@value #FLOAT_EPSILON} of each other.
-   *         False otherwise.
+   * False otherwise.
    */
   private boolean floatCompare(float v1, float v2) {
     if (Math.abs(v1 - v2) < FLOAT_EPSILON) {
@@ -914,13 +904,13 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
 
   private boolean inLastContactRange(float x, float y) {
     if (Math.sqrt((x - contactUpLocation.x - joystickRadius)
-        * (x - contactUpLocation.x - joystickRadius) + (y - contactUpLocation.y - joystickRadius)
-        * (y - contactUpLocation.y - joystickRadius)) < THUMB_DIVET_RADIUS) {
+            * (x - contactUpLocation.x - joystickRadius) + (y - contactUpLocation.y - joystickRadius)
+            * (y - contactUpLocation.y - joystickRadius)) < THUMB_DIVET_RADIUS) {
       return true;
     }
     return false;
   }
-  
+
   public void setTopicName(String topicName) {
     this.topicName = topicName;
   }
@@ -935,7 +925,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     publisher = connectedNode.newPublisher(topicName, geometry_msgs.Twist._TYPE);
     currentVelocityCommand = publisher.newMessage();
     Subscriber<nav_msgs.Odometry> subscriber =
-        connectedNode.newSubscriber("odom", nav_msgs.Odometry._TYPE);
+            connectedNode.newSubscriber("odom", nav_msgs.Odometry._TYPE);
     subscriber.addMessageListener(this);
     publisherTimer = new Timer();
     publisherTimer.schedule(new TimerTask() {

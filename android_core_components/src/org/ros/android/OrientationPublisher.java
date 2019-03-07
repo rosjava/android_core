@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -20,7 +20,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+
 import geometry_msgs.PoseStamped;
+
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
@@ -79,7 +81,7 @@ public class OrientationPublisher extends AbstractNodeMain {
   public void onStart(ConnectedNode connectedNode) {
     try {
       Publisher<geometry_msgs.PoseStamped> publisher =
-          connectedNode.newPublisher("android/orientation", "geometry_msgs/PoseStamped");
+              connectedNode.newPublisher("android/orientation", "geometry_msgs/PoseStamped");
       orientationListener = new OrientationListener(publisher);
       Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
       // 10 Hz

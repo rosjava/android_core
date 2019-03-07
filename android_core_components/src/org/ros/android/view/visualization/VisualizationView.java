@@ -28,6 +28,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 import org.ros.android.RosActivity;
+import org.ros.android.RosWearActivity;
 import org.ros.android.view.visualization.layer.Layer;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
@@ -84,7 +85,7 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   }
 
   /**
-   * Must be called in {@link RosActivity#init(NodeMainExecutor)}
+   * Must be called in {@link RosActivity#init(NodeMainExecutor)} or {@link RosWearActivity#init(NodeMainExecutor)}
    *
    * @param nodeMainExecutor
    */

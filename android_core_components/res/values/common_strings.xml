@@ -12,5 +12,8 @@
     <string name="select_interface">Select network interface</string>
     <string name="uri_text">Master URI:</string>
     <string name="connection_text">Trying to reach master&#8230;</string>
+    <string name="connect_button">Connect</string>
+    <string name="port_hint">Port</string>
+    <string name="ip_hint">IP</string>
 
 </resources>

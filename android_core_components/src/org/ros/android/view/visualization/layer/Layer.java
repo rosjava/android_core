@@ -19,6 +19,7 @@ package org.ros.android.view.visualization.layer;
 import android.opengl.GLSurfaceView;
 import android.view.MotionEvent;
 import org.ros.android.RosActivity;
+import org.ros.android.RosWearActivity;
 import org.ros.android.view.visualization.OpenGlDrawable;
 import org.ros.android.view.visualization.VisualizationView;
 import org.ros.node.ConnectedNode;
@@ -37,6 +38,7 @@ public interface Layer extends OpenGlDrawable {
 
   /**
    * @see RosActivity#init(NodeMainExecutor)
+   * @see RosWearActivity#init(NodeMainExecutor)
    */
   void init(NodeMainExecutor nodeMainExecutor);
   

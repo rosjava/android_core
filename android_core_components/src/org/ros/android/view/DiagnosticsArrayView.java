@@ -35,8 +35,10 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.Button;
 import android.widget.TableLayout;
+
 import diagnostic_msgs.DiagnosticArray;
 import diagnostic_msgs.DiagnosticStatus;
+
 import org.ros.android.android_core_components.R;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
@@ -91,8 +93,8 @@ public class DiagnosticsArrayView extends TableLayout implements NodeMain {
   @Override
   public void onStart(ConnectedNode connectedNode) {
     Subscriber<DiagnosticArray> subscriber =
-        connectedNode.newSubscriber(DIAGNOSTICS_AGGREGATOR_TOPIC,
-            diagnostic_msgs.DiagnosticArray._TYPE);
+            connectedNode.newSubscriber(DIAGNOSTICS_AGGREGATOR_TOPIC,
+                    diagnostic_msgs.DiagnosticArray._TYPE);
     subscriber.addMessageListener(new MessageListener<DiagnosticArray>() {
       @Override
       public void onNewMessage(final DiagnosticArray message) {

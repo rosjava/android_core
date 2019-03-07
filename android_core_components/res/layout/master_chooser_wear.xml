@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_grey"
+    android:padding="5dp"
+    tools:deviceIds="wear">
+
+    <TextView
+        android:id="@+id/connection_setup"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_centerHorizontal="true"
+        android:layout_height="wrap_content"
+        android:text="Connection Setup" />
+
+    <EditText
+        android:id="@+id/ip_number"
+        android:layout_width="120dp"
+        android:layout_below="@id/connection_setup"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:ems="5"
+        android:gravity="center_horizontal"
+        android:hint="@string/ip_hint" />
+
+    <EditText
+        android:id="@+id/portNumber"
+        android:layout_width="80dp"
+        android:gravity="center_horizontal"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:hint="@string/port_hint"
+        android:layout_below="@id/ip_number"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="number" />
+
+    <Button
+        android:id="@+id/connectButton"
+        android:layout_below="@id/portNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"
+        android:onClick="connectButtonClicked"
+        android:text="@string/connect_button" />
+
+</RelativeLayout>

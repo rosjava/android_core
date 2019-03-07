@@ -18,6 +18,7 @@ package org.ros.android;
 
 import com.google.common.base.Preconditions;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +40,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+
 import org.ros.android.android_core_components.R;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.client.MasterClient;
@@ -64,7 +66,7 @@ import java.util.regex.Pattern;
  * <p>
  * When this {@link Activity} is started, the last used (or the default)
  * {@link URI} is displayed to the user.
- * 
+ *
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  * @author munjaldesai@google.com (Munjal Desai)
@@ -81,7 +83,7 @@ public class MasterChooser extends AppCompatActivity {
    * Package name of the QR code reader used to scan QR codes.
    */
   private static final String BAR_CODE_SCANNER_PACKAGE_NAME =
-      "com.google.zxing.client.android.SCAN";
+          "com.google.zxing.client.android.SCAN";
 
   /**
    * Lookup text for catching a ConnectionException when attempting to
@@ -102,7 +104,7 @@ public class MasterChooser extends AppCompatActivity {
   private static final int DEFAULT_PORT = 11311;
 
   /**
-   *The preferences key used for obtaining the number of recent Master URIs.
+   * The preferences key used for obtaining the number of recent Master URIs.
    */
   private static final String RECENT_COUNT_KEY_NAME = "RECENT_MASTER_URI_COUNT";
 
@@ -154,18 +156,17 @@ public class MasterChooser extends AppCompatActivity {
     uriText.setThreshold(RosURIPattern.HTTP_PROTOCOL_LENGTH);
 
     ArrayAdapter<String> uriAdapter = new ArrayAdapter<>
-            (this,android.R.layout.select_dialog_item,getRecentMasterURIs());
+            (this, android.R.layout.select_dialog_item, getRecentMasterURIs());
     uriText.setAdapter(uriAdapter);
 
     uriText.addTextChangedListener(new TextWatcher() {
       @Override
       public void onTextChanged(CharSequence s, int start, int before, int count) {
         final String uri = s.toString();
-        if(!uriPattern.matcher(uri).matches()) {
+        if (!uriPattern.matcher(uri).matches()) {
           uriText.setError("Please enter valid URI");
           connectButton.setEnabled(false);
-        }
-        else {
+        } else {
           uriText.setError(null);
           connectButton.setEnabled(true);
         }
@@ -210,8 +211,8 @@ public class MasterChooser extends AppCompatActivity {
     // Get the URI from preferences and display it. Since only primitive types
     // can be saved in preferences the URI is stored as a string.
     String uri =
-        getPreferences(MODE_PRIVATE).getString(PREFS_KEY_NAME,
-            NodeConfiguration.DEFAULT_MASTER_URI.toString());
+            getPreferences(MODE_PRIVATE).getString(PREFS_KEY_NAME,
+                    NodeConfiguration.DEFAULT_MASTER_URI.toString());
     uriText.setText(uri);
 
     connectionLayout = (LinearLayout) findViewById(R.id.connection_layout);
@@ -224,7 +225,7 @@ public class MasterChooser extends AppCompatActivity {
       if (resultCode == RESULT_OK) {
         String scanResultFormat = intent.getStringExtra("SCAN_RESULT_FORMAT");
         Preconditions.checkState(scanResultFormat.equals("TEXT_TYPE")
-            || scanResultFormat.equals("QR_CODE"));
+                || scanResultFormat.equals("QR_CODE"));
         String contents = intent.getStringExtra("SCAN_RESULT");
         uriText.setText(contents);
       }
@@ -237,14 +238,15 @@ public class MasterChooser extends AppCompatActivity {
     this.moveTaskToBack(true);
   }
 
+  @SuppressLint("StaticFieldLeak")
   public void okButtonClicked(View unused) {
     String tmpURI = uriText.getText().toString();
 
     // Check to see if the URI has a port.
     final Pattern portPattern = RosURIPattern.PORT;
-    if(!portPattern.matcher(tmpURI).find()) {
+    if (!portPattern.matcher(tmpURI).find()) {
       // Append the default port to the URI and update the TextView.
-      tmpURI = String.format(Locale.getDefault(),"%s:%d/",tmpURI,DEFAULT_PORT);
+      tmpURI = String.format(Locale.getDefault(), "%s:%d/", tmpURI, DEFAULT_PORT);
       uriText.setText(tmpURI);
     }
 
@@ -269,6 +271,7 @@ public class MasterChooser extends AppCompatActivity {
           }
         });
       }
+
       @Override
       protected Boolean doInBackground(Void... params) {
         try {
@@ -282,12 +285,11 @@ public class MasterChooser extends AppCompatActivity {
         } catch (XmlRpcTimeoutException e) {
           toast("Master unreachable!");
           return false;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
           String exceptionMessage = e.getMessage();
-          if(exceptionMessage.contains(CONNECTION_EXCEPTION_TEXT))
+          if (exceptionMessage.contains(CONNECTION_EXCEPTION_TEXT))
             toast("Unable to communicate with master!");
-          else if(exceptionMessage.contains(UNKNOW_HOST_TEXT))
+          else if (exceptionMessage.contains(UNKNOW_HOST_TEXT))
             toast("Unable to resolve URI hostname!");
           else
             toast("Communication error!");
@@ -336,7 +338,7 @@ public class MasterChooser extends AppCompatActivity {
       // Open the Market and take them to the page from which they can download the Barcode Scanner
       // app.
       startActivity(new Intent(Intent.ACTION_VIEW,
-          Uri.parse("market://details?id=com.google.zxing.client.android")));
+              Uri.parse("market://details?id=com.google.zxing.client.android")));
     } else {
       // Call the Barcode Scanner to let the user scan a QR code.
       startActivityForResult(intent, 0);
@@ -380,15 +382,14 @@ public class MasterChooser extends AppCompatActivity {
 
   /**
    * Check if the specified app is installed.
-   * 
-   * @param intent
-   *          The activity that you wish to look for.
+   *
+   * @param intent The activity that you wish to look for.
    * @return true if the desired activity is install on the device, false
-   *         otherwise.
+   * otherwise.
    */
   protected boolean isQRCodeReaderInstalled(Intent intent) {
     List<ResolveInfo> list =
-        getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+            getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
     return (list.size() > 0);
   }
 
@@ -397,6 +398,7 @@ public class MasterChooser extends AppCompatActivity {
    * This implementation does not use
    * {@link android.content.SharedPreferences.Editor#putStringSet(String, Set)}
    * since it is not available in API 10.
+   *
    * @param uri Master URI string to store.
    */
   private void addRecentMasterURI(String uri) {
@@ -421,6 +423,7 @@ public class MasterChooser extends AppCompatActivity {
    * Gets a list of recent Master URIs from shared preferences. This implementation does not use
    * {@link android.content.SharedPreferences.Editor#putStringSet(String, Set)}
    * since it is not available in API 10.
+   *
    * @return List of recent Master URI strings
    */
   private List<String> getRecentMasterURIs() {
@@ -440,14 +443,13 @@ public class MasterChooser extends AppCompatActivity {
 
   /**
    * Regular expressions used with ROS URIs.
-   *
+   * <p>
    * The majority of the expressions and variables were copied from
    * {@link android.util.Patterns}. The {@link android.util.Patterns} class could not be
    * utilized because the PROTOCOL regex included other web protocols besides http. The
    * http protocol is required by ROS.
-  */
-  private static class RosURIPattern
-  {
+   */
+  private static class RosURIPattern {
     /* A word boundary or end of input.  This is to stop foo.sure from matching as foo.su */
     private static final String WORD_BOUNDARY = "(?:\\b|$|^)";
 
@@ -496,7 +498,7 @@ public class MasterChooser extends AppCompatActivity {
      * Regular expression that matches domain names without a TLD
      */
     private static final String RELAXED_DOMAIN_NAME =
-            "(?:" + "(?:" + IRI_LABEL + "(?:\\.(?=\\S))" +"?)+" +
+            "(?:" + "(?:" + IRI_LABEL + "(?:\\.(?=\\S))" + "?)+" +
                     "|" + IP_ADDRESS + ")";
 
     private static final String HTTP_PROTOCOL = "(?i:http):\\/\\/";
@@ -506,9 +508,9 @@ public class MasterChooser extends AppCompatActivity {
     private static final String PORT_NUMBER = "\\:\\d{1,5}\\/?";
 
     /**
-     *  Regular expression pattern to match valid rosmaster URIs.
-     *  This assumes the port number and trailing "/" will be auto
-     *  populated (default port: 11311) if left out.
+     * Regular expression pattern to match valid rosmaster URIs.
+     * This assumes the port number and trailing "/" will be auto
+     * populated (default port: 11311) if left out.
      */
     public static final Pattern URI = Pattern.compile("("
             + WORD_BOUNDARY

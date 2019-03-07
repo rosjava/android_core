@@ -27,7 +27,7 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * Helper function for the DistanceRenderer that creates the polygons, lines,
  * points, etc based on the received data.
- * 
+ *
  * @author munjaldesai@google.com (Munjal Desai)
  */
 class DistancePoints {
@@ -54,7 +54,7 @@ class DistancePoints {
    * on incoming range data.
    */
   public void updateRange(List<Float> range, float maxRange, float minRange, float minimumTheta,
-      float thetaIncrement) {
+                          float thetaIncrement) {
     // Clear the previous values.
     rangeVertices.clear();
     // The 90 degrees need to be added to offset the orientation differences
@@ -97,7 +97,7 @@ class DistancePoints {
   private void initRangeVertexBuffer() {
     int requiredVertexByteBufferCapacity = rangeVertices.size() * Float.SIZE / 8;
     if (rangeVertexByteBuffer == null
-        || requiredVertexByteBufferCapacity > rangeVertexByteBuffer.capacity()) {
+            || requiredVertexByteBufferCapacity > rangeVertexByteBuffer.capacity()) {
       rangeVertexByteBuffer = ByteBuffer.allocateDirect(requiredVertexByteBufferCapacity);
       rangeVertexByteBuffer.order(ByteOrder.nativeOrder());
     }
@@ -107,9 +107,8 @@ class DistancePoints {
   /**
    * Draws the open region in light gray and the objects seen by the laser in
    * red.
-   * 
-   * @param gl
-   *          The GL interface.
+   *
+   * @param gl The GL interface.
    */
   public void drawRange(GL10 gl) {
     try {
@@ -132,9 +131,8 @@ class DistancePoints {
 
   /**
    * Draws the reference markers that show the current scale or zoom.
-   * 
-   * @param gl
-   *          The GL interface.
+   *
+   * @param gl The GL interface.
    */
   public void drawReferenceMarker(GL10 gl) {
     gl.glEnable(GL10.GL_LINE_SMOOTH);
@@ -150,9 +148,8 @@ class DistancePoints {
 
   /**
    * Draws the robot.
-   * 
-   * @param gl
-   *          The GL interface.
+   *
+   * @param gl The GL interface.
    */
   public void drawRobot(GL10 gl) {
     gl.glEnable(GL10.GL_LINE_SMOOTH);
@@ -241,7 +238,7 @@ class DistancePoints {
     referenceVertices[28] = yOffset + yDelta;
     referenceVertices[29] = 0f;
     ByteBuffer referenceVertexByteBuffer =
-        ByteBuffer.allocateDirect(referenceVertices.length * Float.SIZE / 8);
+            ByteBuffer.allocateDirect(referenceVertices.length * Float.SIZE / 8);
     referenceVertexByteBuffer.order(ByteOrder.nativeOrder());
     referenceVertexBuffer = referenceVertexByteBuffer.asFloatBuffer();
     referenceVertexBuffer.put(referenceVertices);

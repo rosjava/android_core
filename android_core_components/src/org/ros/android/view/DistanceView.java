@@ -23,12 +23,14 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
+
 import sensor_msgs.LaserScan;
 
 import java.util.ArrayList;
@@ -40,11 +42,11 @@ import java.util.List;
  * user can change the zoom level through a pinch/reverse-pinch, the zoom level
  * can auto adjust based on the speed of the robot, and the zoom level can also
  * auto adjust based on the distance to the closest object around the robot.
- * 
+ *
  * @author munjaldesai@google.com (Munjal Desai)
  */
 public class DistanceView extends GLSurfaceView implements OnTouchListener, NodeMain,
-    MessageListener<sensor_msgs.LaserScan> {
+        MessageListener<sensor_msgs.LaserScan> {
 
   /**
    * Topic for the distance scans that this view subscribes to.
@@ -68,13 +70,13 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
 
   /**
    * Initialize the rendering surface.
-   * 
+   *
    * @param context
    */
   public DistanceView(Context context) {
     this(context, null);
   }
-  
+
   public DistanceView(Context context, AttributeSet attrs) {
     super(context, attrs);
     distanceRenderer = new DistanceRenderer();
@@ -89,9 +91,8 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
 
   /**
    * Sets the topic that the distance view node should subscribe to.
-   * 
-   * @param topicName
-   *          Name of the ROS topic.
+   *
+   * @param topicName Name of the ROS topic.
    */
   public void setTopicName(String topicName) {
     this.laserTopic = topicName;
@@ -106,12 +107,12 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
   public void onStart(ConnectedNode connectedNode) {
     // Subscribe to the laser scans.
     Subscriber<sensor_msgs.LaserScan> laserScanSubscriber =
-        connectedNode.newSubscriber(laserTopic, sensor_msgs.LaserScan._TYPE);
+            connectedNode.newSubscriber(laserTopic, sensor_msgs.LaserScan._TYPE);
     laserScanSubscriber.addMessageListener(this);
     // Subscribe to the command velocity. This is needed for auto adjusting the
     // zoom in ZoomMode.VELOCITY_ZOOM_MODE mode.
     Subscriber<geometry_msgs.Twist> twistSubscriber =
-        connectedNode.newSubscriber("cmd_vel", geometry_msgs.Twist._TYPE);
+            connectedNode.newSubscriber("cmd_vel", geometry_msgs.Twist._TYPE);
     twistSubscriber.addMessageListener(new MessageListener<geometry_msgs.Twist>() {
       @Override
       public void onNewMessage(final geometry_msgs.Twist robotVelocity) {
@@ -127,7 +128,7 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
     // Load the last saved setting.
     distanceRenderer.loadPreferences(this.getContext());
   }
-  
+
   @Override
   public void onShutdown(Node node) {
   }
@@ -157,7 +158,7 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
         }
         // Update the renderer with the latest range values.
         distanceRenderer.updateRange(outRanges, message.getRangeMax(), message.getRangeMin(),
-            message.getAngleMin(), message.getAngleIncrement(), minDistToObject);
+                message.getAngleMin(), message.getAngleIncrement(), minDistToObject);
         // Request to render the surface.
         requestRender();
       }
@@ -166,9 +167,8 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
 
   /**
    * Sets the zoom mode to one of the modes in {@link ZoomMode}.
-   * 
-   * @param mode
-   *          The zoom mode that must be set.
+   *
+   * @param mode The zoom mode that must be set.
    */
   public void setZoomMode(ZoomMode mode) {
     distanceRenderer.setZoomMode(mode);
@@ -191,9 +191,8 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
   /**
    * Updates the current speed in {@link #distanceRenderer} which then can
    * adjust the zoom level in velocity mode.
-   * 
-   * @param speed
-   *          The linear velocity of the robot.
+   *
+   * @param speed The linear velocity of the robot.
    */
   public void currentSpeed(double speed) {
     distanceRenderer.currentSpeed(speed);
@@ -208,7 +207,7 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
         if (event.getPointerCount() == 2) {
           // Get the current distance between the 2 contacts.
           double currentContactDistance =
-              calculateDistance(event.getX(0), event.getY(0), event.getX(1), event.getY(1));
+                  calculateDistance(event.getX(0), event.getY(0), event.getX(1), event.getY(1));
           // Calculate the delta between the current contact location and the
           // previous contact locations. Then add (a fraction of) that delta to
           // the existing normalized value for zoom.
@@ -230,7 +229,7 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
       // for the immediate round of interaction.
       case MotionEvent.ACTION_POINTER_1_DOWN: {
         contactDistance =
-            calculateDistance(event.getX(0), event.getY(0), event.getX(1), event.getY(1));
+                calculateDistance(event.getX(0), event.getY(0), event.getX(1), event.getY(1));
         break;
       }
     }

@@ -29,7 +29,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 /**
  * The OpenGL renderer that creates and manages the surface.
- * 
+ *
  * @author munjaldesai@google.com (Munjal Desai)
  */
 class DistanceRenderer implements GLSurfaceView.Renderer {
@@ -68,7 +68,7 @@ class DistanceRenderer implements GLSurfaceView.Renderer {
    * the triangle (distance of the camera from the origin).
    */
   private static final double DISTANCE_VIEW_ZOOM_MULTIPLIER = 1 / Math.tan(Math
-      .toRadians(DISTANCE_VIEW_FIELD_OF_VIEW / 2));
+          .toRadians(DISTANCE_VIEW_FIELD_OF_VIEW / 2));
   /**
    * The key used to save the state of {@link #zoomLocked} in shared
    * preferences.
@@ -88,7 +88,7 @@ class DistanceRenderer implements GLSurfaceView.Renderer {
   private DistancePoints rangeLines;
   /**
    * The amount of rotation (in degrees) applied to the camera.
-   * 
+   * <p>
    * TODO: This must be updated based on the current pan of the front facing
    * camera used to navigate.
    */
@@ -143,9 +143,8 @@ class DistanceRenderer implements GLSurfaceView.Renderer {
 
   /**
    * Rotate the entire display.
-   * 
-   * @param theta
-   *          The amount in degrees by which the display should be rotated.
+   *
+   * @param theta The amount in degrees by which the display should be rotated.
    */
   public void setRotation(float theta) {
     this.theta = theta;
@@ -154,9 +153,8 @@ class DistanceRenderer implements GLSurfaceView.Renderer {
   /**
    * Updates the zoom distance based on the normalized value if the
    * {@link #zoomMode} is set to CUSTOM_ZOOM_MODE.
-   * 
-   * @param normalizedZoomValue
-   *          The zoom value between 0 and 1.
+   *
+   * @param normalizedZoomValue The zoom value between 0 and 1.
    */
   public void setNormalizedZoom(float normalizedZoomValue) {
     if (zoomMode == ZoomMode.CUSTOM_ZOOM_MODE) {
@@ -188,9 +186,8 @@ class DistanceRenderer implements GLSurfaceView.Renderer {
   /**
    * If {@link #zoomMode} if set to VELOCITY_ZOOM_MODE, {@link #zoom} is changed
    * based on the normalized linear velocity.
-   * 
-   * @param speed
-   *          Linear velocity between 1 and -1;
+   *
+   * @param speed Linear velocity between 1 and -1;
    */
   public void currentSpeed(double speed) {
     if (zoomMode == ZoomMode.VELOCITY_ZOOM_MODE) {
@@ -202,22 +199,16 @@ class DistanceRenderer implements GLSurfaceView.Renderer {
    * The new range values are forwarded to {@link #rangeLines} and if
    * {@link #zoomMode} is set to CLUTTER_ZOOM_MODE then {@link #zoom} is based
    * on the distance to the closest object around the robot.
-   * 
-   * @param range
-   *          New set of range values.
-   * @param maxRange
-   *          Maximum range to be considered valid.
-   * @param minRange
-   *          Minimum range to be considered valid.
-   * @param minTh
-   *          The starting theta for the range values.
-   * @param thIncrement
-   *          The delta between incremental range scans.
-   * @param minDistToObject
-   *          The distance to the closest object.
+   *
+   * @param range           New set of range values.
+   * @param maxRange        Maximum range to be considered valid.
+   * @param minRange        Minimum range to be considered valid.
+   * @param minTh           The starting theta for the range values.
+   * @param thIncrement     The delta between incremental range scans.
+   * @param minDistToObject The distance to the closest object.
    */
   public void updateRange(List<Float> range, float maxRange, float minRange, float minTh,
-      float thIncrement, float minDistToObject) {
+                          float thIncrement, float minDistToObject) {
     if (zoomMode == ZoomMode.CLUTTER_ZOOM_MODE) {
       // The closest object should be at the 80% of FOV mark.
       setZoom(minDistToObject * 1.25f);
@@ -228,14 +219,13 @@ class DistanceRenderer implements GLSurfaceView.Renderer {
 
   /**
    * Reads the settings stored in {@link #sharedPreferences} and applies them.
-   * 
-   * @param context
-   *          The context of the application calling this.
+   *
+   * @param context The context of the application calling this.
    */
   public void loadPreferences(Context context) {
     sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     int tmpMode =
-        sharedPreferences.getInt(DISTANCE_VIEW_ZOOM_MODE_KEY, ZoomMode.CUSTOM_ZOOM_MODE.ordinal());
+            sharedPreferences.getInt(DISTANCE_VIEW_ZOOM_MODE_KEY, ZoomMode.CUSTOM_ZOOM_MODE.ordinal());
     if (tmpMode == ZoomMode.CUSTOM_ZOOM_MODE.ordinal()) {
       zoomMode = ZoomMode.CUSTOM_ZOOM_MODE;
     } else if (tmpMode == ZoomMode.CLUTTER_ZOOM_MODE.ordinal()) {
@@ -250,9 +240,8 @@ class DistanceRenderer implements GLSurfaceView.Renderer {
   /**
    * Saves the existing settings in {@link #sharedPreferences} via the
    * {@link #editor}.
-   * 
-   * @param context
-   *          The context of the application calling this.
+   *
+   * @param context The context of the application calling this.
    */
   public void savePreferences(Context context) {
     editor = sharedPreferences.edit();
@@ -264,9 +253,8 @@ class DistanceRenderer implements GLSurfaceView.Renderer {
 
   /**
    * Calculate the height of the camera based on the desired field of view.
-   * 
-   * @param distanceFromCenter
-   *          The region around the robot (in meters) that must be visible.
+   *
+   * @param distanceFromCenter The region around the robot (in meters) that must be visible.
    */
   private void setZoom(float distanceFromCenter) {
     if (!zoomLocked) {

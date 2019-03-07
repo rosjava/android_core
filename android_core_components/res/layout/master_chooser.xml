@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/uri_text"
-            android:textSize="18dp"/>
+            android:textSize="18dp" />
 
         <AutoCompleteTextView
             android:id="@+id/master_chooser_uri"
@@ -26,7 +26,7 @@
             android:hint="@string/master_uri_hint"
             android:singleLine="true">
 
-            <requestFocus/>
+            <requestFocus />
         </AutoCompleteTextView>
     </LinearLayout>
 
@@ -41,7 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="qrCodeButtonClicked"
-            android:text="@string/qr_code"/>
+            android:text="@string/qr_code" />
 
         <Button
             android:id="@+id/master_chooser_ok"
@@ -50,7 +50,7 @@
             android:layout_weight="1"
             android:enabled="false"
             android:onClick="okButtonClicked"
-            android:text="@string/use_master"/>
+            android:text="@string/use_master" />
     </LinearLayout>
 
     <CheckBox
@@ -60,7 +60,7 @@
         android:layout_height="wrap_content"
         android:checked="false"
         android:onClick="advancedCheckboxClicked"
-        android:text="@string/show_advanced"/>
+        android:text="@string/show_advanced" />
 
     <LinearLayout
         android:orientation="vertical"
@@ -76,14 +76,14 @@
             android:text="@string/select_interface"
             android:id="@+id/interfaceLabel"
             android:layout_gravity="center"
-            android:autoText="true"/>
+            android:autoText="true" />
 
         <ListView
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:id="@+id/networkInterfaces"
             android:layout_weight="1"
-            android:visibility="visible"/>
+            android:visibility="visible" />
 
         <LinearLayout
             android:layout_width="fill_parent"
@@ -96,7 +96,7 @@
                 android:onClick="newMasterButtonClicked"
                 android:text="@string/new_master"
                 android:layout_weight="1"
-                android:visibility="visible"/>
+                android:visibility="visible" />
 
             <Button
                 android:id="@+id/master_chooser_new_private_master_button"
@@ -105,7 +105,7 @@
                 android:onClick="newPrivateMasterButtonClicked"
                 android:text="@string/new_private_master"
                 android:layout_weight="1"
-                android:visibility="visible"/>
+                android:visibility="visible" />
 
         </LinearLayout>
 
@@ -118,7 +118,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:onClick="cancelButtonClicked"
-        android:text="@string/cancel"/>
+        android:text="@string/cancel" />
 
     <LinearLayout
         android:id="@+id/connection_layout"
@@ -132,14 +132,14 @@
         <ProgressBar
             android:id="@+id/connection_spinner"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
 
         <TextView
             android:id="@+id/connection_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/connection_text"
-            android:textSize="18sp"/>
+            android:textSize="18sp" />
 
     </LinearLayout>
 

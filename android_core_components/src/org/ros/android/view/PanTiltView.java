@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -36,7 +36,7 @@ import org.ros.node.topic.Publisher;
 /**
  * PanTiltZoomView creates a rosjava view that can be used to control a pan tilt
  * device.
- * 
+ *
  * @author munjaldesai@google.com (Munjal Desai)
  */
 public class PanTiltView extends RelativeLayout implements OnTouchListener, NodeMain {
@@ -48,7 +48,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
    * that represent the section of the view where the POINTER_DOWN event
    * occurred. The MIDDLE_AREA represents the area below the top guide (pan
    * marker) and left of the right guide (tilt marker).
-   * 
+   * <p>
    * TODO(munjaldesai): Since these 3 values are used very often, replace the
    * logic with bitwise operations.
    */
@@ -167,31 +167,31 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
     final int action = event.getAction();
 
     switch (action & MotionEvent.ACTION_MASK) {
-    case MotionEvent.ACTION_MOVE: {
-      // Only proceed if the pointer that initiated the interaction is still
-      // in contact with the screen.
-      if (pointerId == INVALID_POINTER_ID) {
+      case MotionEvent.ACTION_MOVE: {
+        // Only proceed if the pointer that initiated the interaction is still
+        // in contact with the screen.
+        if (pointerId == INVALID_POINTER_ID) {
+          break;
+        }
+        onContactMove(event.getX(event.findPointerIndex(pointerId)),
+                event.getY(event.findPointerIndex(pointerId)));
         break;
       }
-      onContactMove(event.getX(event.findPointerIndex(pointerId)),
-          event.getY(event.findPointerIndex(pointerId)));
-      break;
-    }
-    case MotionEvent.ACTION_DOWN: {
-      // Get the coordinates of the pointer that is initiating the
-      // interaction.
-      pointerId = event.getPointerId(event.getActionIndex());
-      onContactDown(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()));
-      break;
-    }
-    case MotionEvent.ACTION_POINTER_UP:
-    case MotionEvent.ACTION_UP: {
-      // When any pointer (primary or otherwise) fires an UP, prevent further
-      // the interaction.
-      pointerId = INVALID_POINTER_ID;
-      initialPointerLocation = INVALID_POINTER_LOCATION;
-      break;
-    }
+      case MotionEvent.ACTION_DOWN: {
+        // Get the coordinates of the pointer that is initiating the
+        // interaction.
+        pointerId = event.getPointerId(event.getActionIndex());
+        onContactDown(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()));
+        break;
+      }
+      case MotionEvent.ACTION_POINTER_UP:
+      case MotionEvent.ACTION_UP: {
+        // When any pointer (primary or otherwise) fires an UP, prevent further
+        // the interaction.
+        pointerId = INVALID_POINTER_ID;
+        initialPointerLocation = INVALID_POINTER_LOCATION;
+        break;
+      }
     }
     return true;
   }
@@ -199,11 +199,9 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
   /**
    * Calls the necessary methods to update the value(s) (pan and/or tilt) based
    * on the pointer's initial location.
-   * 
-   * @param x
-   *          The x coordinate of the pointer relative to the parent.
-   * @param y
-   *          The y coordinate of the pointer relative to the parent.
+   *
+   * @param x The x coordinate of the pointer relative to the parent.
+   * @param y The y coordinate of the pointer relative to the parent.
    */
   private void onContactMove(float x, float y) {
     // Since movement of the images is done relative to the bottom left of
@@ -240,11 +238,9 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
   /**
    * Calls the necessary methods to update the value(s) (pan and/or tilt). Also
    * sets the initial location based on the location of the DOWN event.
-   * 
-   * @param x
-   *          The x coordinate of the pointer relative to the parent.
-   * @param y
-   *          The y coordinate of the pointer relative to the parent.
+   *
+   * @param x The x coordinate of the pointer relative to the parent.
+   * @param y The y coordinate of the pointer relative to the parent.
    */
   private void onContactDown(float x, float y) {
     if (x > 75 && x < 357 && y > 50 && y < 278) {
@@ -304,9 +300,8 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
   /**
    * Updates the location of the tilt tack on the right and the center tack. It
    * also calls {@link #publishTilt(float)}.
-   * 
-   * @param y
-   *          The y coordinate of the pointer relative to the bottom of the
+   *
+   * @param y The y coordinate of the pointer relative to the bottom of the
    *          parent.
    */
   private void updateRightTack(float y) {
@@ -316,7 +311,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
     } else if (y > 278.0f - offset) {
       y = 278.0f - offset;
     } else if (y < (homeIcon.getTranslationY() + homeIcon.getHeight() / 5 + getHeight() / 2)
-        && y > (homeIcon.getTranslationY() + getHeight() / 2 - homeIcon.getHeight() / 5)) {
+            && y > (homeIcon.getTranslationY() + getHeight() / 2 - homeIcon.getHeight() / 5)) {
       y = homeIcon.getTranslationY() + getHeight() / 2;
     }
     desiredTack.setTranslationY(y - mainLayout.getHeight() / 2);
@@ -335,8 +330,8 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
     for (int i = 0; i < rightSmallTack.length; i++) {
       if (Math.abs(y - mainLayout.getHeight() / 2 - rightSmallTack[i].getTranslationY()) < rangeSmall) {
         rightSmallTack[i].setAlpha(1.0f
-            - Math.abs(y - mainLayout.getHeight() / 2 - rightSmallTack[i].getTranslationY())
-            / rangeSmall);
+                - Math.abs(y - mainLayout.getHeight() / 2 - rightSmallTack[i].getTranslationY())
+                / rangeSmall);
       } else {
         rightSmallTack[i].setAlpha(0.0f);
       }
@@ -347,9 +342,8 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
   /**
    * Updates the location of the pan tack on the top and the center tack. It
    * also calls {@link #publishPan(float)}.
-   * 
-   * @param x
-   *          The x coordinate of the pointer relative to the parent.
+   *
+   * @param x The x coordinate of the pointer relative to the parent.
    */
   private void updateTopTack(float x) {
     float offset = desiredTack.getWidth() / 2;
@@ -358,7 +352,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
     } else if (x > 357 - offset) {
       x = 357 - offset;
     } else if (x < (homeIcon.getTranslationX() + homeIcon.getWidth() / 5 + getWidth() / 2)
-        && x > (homeIcon.getTranslationX() + getWidth() / 2 - homeIcon.getWidth() / 5)) {
+            && x > (homeIcon.getTranslationX() + getWidth() / 2 - homeIcon.getWidth() / 5)) {
       x = homeIcon.getTranslationX() + getWidth() / 2;
     }
     desiredTack.setTranslationX(x - mainLayout.getWidth() / 2);
@@ -381,8 +375,8 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
     for (int i = 0; i < topSmallTack.length; i++) {
       if (Math.abs(x - mainLayout.getWidth() / 2 - topSmallTack[i].getTranslationX()) < rangeSmall) {
         topSmallTack[i].setAlpha(1.0f
-            - Math.abs(x - mainLayout.getWidth() / 2 - topSmallTack[i].getTranslationX())
-            / rangeSmall);
+                - Math.abs(x - mainLayout.getWidth() / 2 - topSmallTack[i].getTranslationX())
+                / rangeSmall);
       } else {
         topSmallTack[i].setAlpha(0.0f);
       }
@@ -461,7 +455,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
   private void loadSettings() {
     // Load the settings from the shared preferences.
     SharedPreferences settings =
-        this.getContext().getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
+            this.getContext().getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
     settings.getFloat(MAX_PAN_KEY_NAME, maxPan);
     settings.getFloat(MIN_PAN_KEY_NAME, minPan);
     settings.getFloat(MAX_TILT_KEY_NAME, maxTilt);
@@ -472,9 +466,8 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
 
   /**
    * Publish the pan position.
-   * 
-   * @param x
-   *          the x coordinate corrected for the tack size, but not normalized
+   *
+   * @param x the x coordinate corrected for the tack size, but not normalized
    */
   private void publishPan(float x) {
     // Normalize the pan value from the current range to (-1:+1).
@@ -484,15 +477,14 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
     // Initialize the message with the pan position value and publish it.
     sensor_msgs.JointState jointState = publisher.newMessage();
     jointState.getName().add("pan");
-    jointState.setPosition(new double[] { pan });
+    jointState.setPosition(new double[]{pan});
     publisher.publish(jointState);
   }
 
   /**
    * Publish the tilt position.
-   * 
-   * @param y
-   *          the y coordinate corrected for the tack size, but not normalized
+   *
+   * @param y the y coordinate corrected for the tack size, but not normalized
    */
   private void publishTilt(float y) {
     // Normalize the tilt value from the current range to (-1:+1).
@@ -502,7 +494,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
     // Initialize the message with the tilt position value and publish it.
     sensor_msgs.JointState jointState = publisher.newMessage();
     jointState.getName().add("tilt");
-    jointState.setPosition(new double[] { tilt });
+    jointState.setPosition(new double[]{tilt});
     publisher.publish(jointState);
   }
 
