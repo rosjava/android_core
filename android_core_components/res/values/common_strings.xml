@@ -15,5 +15,6 @@
     <string name="connect_button">Connect</string>
     <string name="port_hint">Port</string>
     <string name="ip_hint">IP</string>
+    <string name="connection_setup">Connection Setup</string>
 
 </resources>
