@@ -143,8 +143,7 @@ public abstract class RosActivity extends Activity {
       serviceListener = null;
     }
 
-    public NodeMainExecutorServiceListener getServiceListener()
-    {
+    public NodeMainExecutorServiceListener getServiceListener() {
       return serviceListener;
     }
 

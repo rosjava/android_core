@@ -16,15 +16,13 @@
 
 package org.ros.android;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.support.wearable.activity.WearableActivity;
 
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.IBinder;
-import android.support.wearable.activity.WearableActivity;
 
 import com.google.common.base.Preconditions;
 
@@ -49,7 +47,7 @@ public abstract class RosWearActivity extends WearableActivity {
   private final NodeMainExecutorServiceConnection nodeMainExecutorServiceConnection;
   private final String notificationTicker;
   private final String notificationTitle;
-  private Class<?> masterChooserWearActivity = MasterChooserWear.class;
+  private Class<?> masterChooserActivity = MasterChooserWear.class;
   private int masterChooserRequestCode = MASTER_CHOOSER_REQUEST_CODE;
   protected NodeMainExecutorService nodeMainExecutorService;
 
@@ -57,7 +55,6 @@ public abstract class RosWearActivity extends WearableActivity {
    * Default Activity Result callback - compatible with standard {@link MasterChooser}
    */
   private OnActivityResultCallback onActivityResultCallback = new OnActivityResultCallback() {
-    @SuppressLint("StaticFieldLeak")
     @Override
     public void execute(int requestCode, int resultCode, Intent data) {
       if (resultCode == RESULT_OK) {
@@ -150,16 +147,13 @@ public abstract class RosWearActivity extends WearableActivity {
       return serviceListener;
     }
 
-  }
-
-  ;
+  };
 
   /**
    * Standard constructor.
    * Use this constructor to proceed using the standard {@link MasterChooser}.
-   *
    * @param notificationTicker Title to use in Ticker notifications.
-   * @param notificationTitle  Title to use in notifications.
+   * @param notificationTitle Title to use in notifications.
    */
   protected RosWearActivity(String notificationTicker, String notificationTitle) {
     this(notificationTicker, notificationTitle, null);
@@ -168,10 +162,9 @@ public abstract class RosWearActivity extends WearableActivity {
   /**
    * Custom Master URI constructor.
    * Use this constructor to skip launching {@link MasterChooser}.
-   *
    * @param notificationTicker Title to use in Ticker notifications.
-   * @param notificationTitle  Title to use in notifications.
-   * @param customMasterUri    URI of the ROS master to connect to.
+   * @param notificationTitle Title to use in notifications.
+   * @param customMasterUri URI of the ROS master to connect to.
    */
   protected RosWearActivity(String notificationTicker, String notificationTitle, URI customMasterUri) {
     super();
@@ -182,19 +175,18 @@ public abstract class RosWearActivity extends WearableActivity {
 
   /**
    * Custom MasterChooser constructor.
-   * Use this constructor to specify which {@link Activity} should be started in place of {@link MasterChooser}.
+   * Use this constructor to specify which {@link WearableActivity} should be started in place of {@link MasterChooser}.
    * The specified activity shall return a result that can be handled by a custom callback.
    * See {@link #setOnActivityResultCallback(OnActivityResultCallback)} for more information about
    * how to handle custom request codes and results.
-   *
    * @param notificationTicker Title to use in Ticker notifications.
-   * @param notificationTitle  Title to use in notifications.
-   * @param activity           {@link Activity} to launch instead of {@link MasterChooser}.
-   * @param requestCode        Request identifier to start the given {@link Activity} for a result.
+   * @param notificationTitle Title to use in notifications.
+   * @param activity {@link WearableActivity} to launch instead of {@link MasterChooser}.
+   * @param requestCode Request identifier to start the given {@link WearableActivity} for a result.
    */
   protected RosWearActivity(String notificationTicker, String notificationTitle, Class<?> activity, int requestCode) {
     this(notificationTicker, notificationTitle);
-    masterChooserWearActivity = activity;
+    masterChooserActivity = activity;
     masterChooserRequestCode = requestCode;
   }
 
@@ -236,12 +228,13 @@ public abstract class RosWearActivity extends WearableActivity {
   }
 
   /**
-   * This method is called in a background thread once this {@link Activity} has
+   * This method is called in a background thread once this {@link WearableActivity} has
    * been initialized with a master {@link URI} via the {@link MasterChooser}
    * and a {@link NodeMainExecutorService} has started. Your {@link NodeMain}s
    * should be started here using the provided {@link NodeMainExecutor}.
    *
-   * @param nodeMainExecutor the {@link NodeMainExecutor} created for this {@link Activity}
+   * @param nodeMainExecutor
+   *          the {@link NodeMainExecutor} created for this {@link WearableActivity}
    */
   protected abstract void init(NodeMainExecutor nodeMainExecutor);
 
@@ -249,7 +242,7 @@ public abstract class RosWearActivity extends WearableActivity {
     Preconditions.checkState(getMasterUri() == null);
     // Call this method on super to avoid triggering our precondition in the
     // overridden startActivityForResult().
-    super.startActivityForResult(new Intent(this, masterChooserWearActivity), masterChooserRequestCode);
+    super.startActivityForResult(new Intent(this, masterChooserActivity), masterChooserRequestCode);
   }
 
   public URI getMasterUri() {
@@ -288,7 +281,6 @@ public abstract class RosWearActivity extends WearableActivity {
    * Set a callback that will be called onActivityResult.
    * Custom callbacks should be able to handle custom request codes configured
    * in custom Activity constructor {@link #RosWearActivity(String, String, Class, int)}.
-   *
    * @param callback Action that will be performed when this Activity gets a result.
    */
   public void setOnActivityResultCallback(OnActivityResultCallback callback) {
