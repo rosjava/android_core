@@ -24,7 +24,8 @@ import org.ros.node.NodeMainExecutor;
 public interface NodeMainExecutorListener {
 
   /**
-   * @param nodeMainExecutor the newly created {@link NodeMainExecutor}
+   * @param nodeMainExecutor
+   *          the newly created {@link NodeMainExecutor}
    */
   void onNewNodeMainExecutor(NodeMainExecutor nodeMainExecutor);
 }

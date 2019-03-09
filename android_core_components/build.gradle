@@ -35,9 +35,9 @@ dependencies {
   implementation "com.google.android.support:wearable:2.4.0"
   implementation "com.android.support:appcompat-v7:28.0.0"
   implementation 'com.android.support:support-v4:28.0.0'
-  implementation "org.ros.rosjava_core:rosjava:0.3.6"
-  implementation "org.ros.rosjava_messages:diagnostic_msgs:1.12.6"
-  implementation "org.ros.rosjava_messages:sensor_msgs:1.12.6"
-  implementation 'org.ros.rosjava_core:rosjava_geometry:0.3.6'
-  implementation 'org.ros.rosjava_messages:visualization_msgs:1.12.6'
+  api "org.ros.rosjava_core:rosjava:0.3.6"
+  api "org.ros.rosjava_messages:diagnostic_msgs:1.12.6"
+  api "org.ros.rosjava_messages:sensor_msgs:1.12.6"
+  api 'org.ros.rosjava_core:rosjava_geometry:0.3.6'
+  api 'org.ros.rosjava_messages:visualization_msgs:1.12.6'
 }
