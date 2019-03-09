@@ -20,7 +20,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-
 import org.ros.android.MessageCallable;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;

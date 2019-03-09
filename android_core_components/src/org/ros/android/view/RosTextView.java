@@ -19,7 +19,6 @@ package org.ros.android.view;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
-
 import org.ros.android.MessageCallable;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
