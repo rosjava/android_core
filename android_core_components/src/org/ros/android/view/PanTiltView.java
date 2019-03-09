@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -36,7 +36,7 @@ import org.ros.node.topic.Publisher;
 /**
  * PanTiltZoomView creates a rosjava view that can be used to control a pan tilt
  * device.
- *
+ * 
  * @author munjaldesai@google.com (Munjal Desai)
  */
 public class PanTiltView extends RelativeLayout implements OnTouchListener, NodeMain {
@@ -48,7 +48,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
    * that represent the section of the view where the POINTER_DOWN event
    * occurred. The MIDDLE_AREA represents the area below the top guide (pan
    * marker) and left of the right guide (tilt marker).
-   *
+   * 
    * TODO(munjaldesai): Since these 3 values are used very often, replace the
    * logic with bitwise operations.
    */
@@ -199,7 +199,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
   /**
    * Calls the necessary methods to update the value(s) (pan and/or tilt) based
    * on the pointer's initial location.
-   *
+   * 
    * @param x
    *          The x coordinate of the pointer relative to the parent.
    * @param y
@@ -240,7 +240,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
   /**
    * Calls the necessary methods to update the value(s) (pan and/or tilt). Also
    * sets the initial location based on the location of the DOWN event.
-   *
+   * 
    * @param x
    *          The x coordinate of the pointer relative to the parent.
    * @param y
@@ -304,7 +304,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
   /**
    * Updates the location of the tilt tack on the right and the center tack. It
    * also calls {@link #publishTilt(float)}.
-   *
+   * 
    * @param y
    *          The y coordinate of the pointer relative to the bottom of the
    *          parent.
@@ -347,7 +347,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
   /**
    * Updates the location of the pan tack on the top and the center tack. It
    * also calls {@link #publishPan(float)}.
-   *
+   * 
    * @param x
    *          The x coordinate of the pointer relative to the parent.
    */
@@ -472,7 +472,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
 
   /**
    * Publish the pan position.
-   *
+   * 
    * @param x
    *          the x coordinate corrected for the tack size, but not normalized
    */
@@ -490,7 +490,7 @@ public class PanTiltView extends RelativeLayout implements OnTouchListener, Node
 
   /**
    * Publish the tilt position.
-   *
+   * 
    * @param y
    *          the y coordinate corrected for the tack size, but not normalized
    */

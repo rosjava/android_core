@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -48,7 +48,7 @@ import java.util.TimerTask;
  * VirtualJoystickView creates a virtual joystick view that publishes velocity
  * as (geometry_msgs.Twist) messages. The current version contains the following
  * features: snap to axes, turn in place, and resume previous velocity.
- *
+ * 
  * @author munjaldesai@google.com (Munjal Desai)
  */
 public class VirtualJoystickView extends RelativeLayout implements AnimationListener,
@@ -143,16 +143,16 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    * contactRadius This is the distance between the center of the widget and the
    * point of contact normalized between 0 and 1. This is mostly used for
    * animation/display calculations.
-   *
+   * 
    * TODO(munjaldesai): Omnigraffle this for better documentation.
    */
   private float contactRadius;
   /**
    * deadZoneRatio ...
-   *
+   * 
    * TODO(munjaldesai): Write a simple explanation for this. Currently not easy
    * to immediately comprehend it's meaning.
-   *
+   * 
    * TODO(munjaldesai): Omnigraffle this for better documentation.
    */
   private float deadZoneRatio = Float.NaN;
@@ -428,7 +428,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    * between this method and {@link #animateIntensityCircle(float, long)} is
    * that this method does not attach an animation listener and the animation is
    * instantaneous.
-   *
+   * 
    * @param endScale
    *          The scale factor that must be attained at the end of the
    *          animation.
@@ -458,7 +458,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    * Scale and rotate the intensity circle over the specified duration. Unlike
    * {@link #animateIntensityCircle(float)} this method registers an animation
    * listener.
-   *
+   * 
    * @param endScale
    *          The scale factor that must be attained at the end of the
    *          animation.
@@ -512,7 +512,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    * From http://actionsnippet.com/?p=1451. Calculates the difference between 2
    * angles. The result is always the minimum difference between 2 angles (0<
    * result <= 360).
-   *
+   * 
    * @param angle0
    *          One of 2 angles used to calculate difference. The order of
    *          arguments does not matter. Must be in degrees.
@@ -621,7 +621,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
   /**
    * Updates the virtual joystick layout based on the location of the contact.
    * Generates the velocity messages. Switches in and out of turn-in-place.
-   *
+   * 
    * @param x
    *          The x coordinates of the contact relative to the parent container.
    * @param y
@@ -794,7 +794,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
 
   /**
    * Publish the velocity as a ROS Twist message.
-   *
+   * 
    * @param linearVelocityX
    *          The normalized linear velocity (-1 to 1).
    * @param angularVelocityZ
@@ -879,7 +879,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
    * Moves the {@link #thumbDivet} to the specified coordinates (under the
    * contact) and also orients it so that is facing the direction opposite to
    * the center of the {@link #mainLayout}.
-   *
+   * 
    * @param x
    *          The x coordinate relative to the center of the {@link #mainLayout}
    * @param y
@@ -898,7 +898,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
 
   /**
    * Comparing 2 float values.
-   *
+   * 
    * @param v1
    * @param v2
    * @return True if v1 and v2 and within {@value #FLOAT_EPSILON} of each other.
@@ -920,7 +920,7 @@ public class VirtualJoystickView extends RelativeLayout implements AnimationList
     }
     return false;
   }
-
+  
   public void setTopicName(String topicName) {
     this.topicName = topicName;
   }

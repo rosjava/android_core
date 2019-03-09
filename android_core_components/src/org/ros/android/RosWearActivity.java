@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,7 +17,6 @@
 package org.ros.android;
 
 import android.support.wearable.activity.WearableActivity;
-
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -35,7 +34,6 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -143,7 +141,8 @@ public abstract class RosWearActivity extends WearableActivity {
       serviceListener = null;
     }
 
-    public NodeMainExecutorServiceListener getServiceListener() {
+    public NodeMainExecutorServiceListener getServiceListener()
+    {
       return serviceListener;
     }
 
@@ -154,7 +153,7 @@ public abstract class RosWearActivity extends WearableActivity {
    * Use this constructor to proceed using the standard {@link MasterChooser}.
    * @param notificationTicker Title to use in Ticker notifications.
    * @param notificationTitle Title to use in notifications.
-   */
+     */
   protected RosWearActivity(String notificationTicker, String notificationTitle) {
     this(notificationTicker, notificationTitle, null);
   }
@@ -165,7 +164,7 @@ public abstract class RosWearActivity extends WearableActivity {
    * @param notificationTicker Title to use in Ticker notifications.
    * @param notificationTitle Title to use in notifications.
    * @param customMasterUri URI of the ROS master to connect to.
-   */
+     */
   protected RosWearActivity(String notificationTicker, String notificationTitle, URI customMasterUri) {
     super();
     this.notificationTicker = notificationTicker;
@@ -181,9 +180,9 @@ public abstract class RosWearActivity extends WearableActivity {
    * how to handle custom request codes and results.
    * @param notificationTicker Title to use in Ticker notifications.
    * @param notificationTitle Title to use in notifications.
-   * @param activity {@link WearableActivity} to launch instead of {@link MasterChooser}.
+   * @param activity {@link WearableActivity} to launch instead of {@link MasterChooserWear}.
    * @param requestCode Request identifier to start the given {@link WearableActivity} for a result.
-   */
+     */
   protected RosWearActivity(String notificationTicker, String notificationTitle, Class<?> activity, int requestCode) {
     this(notificationTicker, notificationTitle);
     masterChooserActivity = activity;
@@ -203,8 +202,8 @@ public abstract class RosWearActivity extends WearableActivity {
     intent.putExtra(NodeMainExecutorService.EXTRA_NOTIFICATION_TITLE, notificationTitle);
     startService(intent);
     Preconditions.checkState(
-            bindService(intent, nodeMainExecutorServiceConnection, BIND_AUTO_CREATE),
-            "Failed to bind NodeMainExecutorService.");
+        bindService(intent, nodeMainExecutorServiceConnection, BIND_AUTO_CREATE),
+        "Failed to bind NodeMainExecutorService.");
   }
 
   @Override
@@ -232,7 +231,7 @@ public abstract class RosWearActivity extends WearableActivity {
    * been initialized with a master {@link URI} via the {@link MasterChooser}
    * and a {@link NodeMainExecutorService} has started. Your {@link NodeMain}s
    * should be started here using the provided {@link NodeMainExecutor}.
-   *
+   * 
    * @param nodeMainExecutor
    *          the {@link NodeMainExecutor} created for this {@link WearableActivity}
    */
@@ -282,7 +281,7 @@ public abstract class RosWearActivity extends WearableActivity {
    * Custom callbacks should be able to handle custom request codes configured
    * in custom Activity constructor {@link #RosWearActivity(String, String, Class, int)}.
    * @param callback Action that will be performed when this Activity gets a result.
-   */
+     */
   public void setOnActivityResultCallback(OnActivityResultCallback callback) {
     onActivityResultCallback = callback;
   }
