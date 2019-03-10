@@ -73,7 +73,7 @@ public class MainActivity extends RosActivity {
   }
 
   @Override
-  protected void init(NodeMainExecutor nodeMainExecutor) {
+  public void init(NodeMainExecutor nodeMainExecutor) {
     visualizationView.init(nodeMainExecutor);
     cameraControlLayer.addListener(new CameraControlListener() {
       @Override

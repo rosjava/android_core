@@ -48,7 +48,7 @@ public class MainActivity extends RosActivity {
   }
 
   @Override
-  protected void init(NodeMainExecutor nodeMainExecutor) {
+  public void init(NodeMainExecutor nodeMainExecutor) {
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress(),
             getMasterUri());

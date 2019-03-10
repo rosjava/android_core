@@ -38,11 +38,11 @@ import java.net.URISyntaxException;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public abstract class RosActivity extends Activity {
+public abstract class RosActivity extends Activity  implements RosInterface{
 
   protected static final int MASTER_CHOOSER_REQUEST_CODE = 0;
 
-  private final NodeMainExecutorServiceConnection nodeMainExecutorServiceConnection;
+  private final NodeMainExecutorServiceConnection<RosActivity> nodeMainExecutorServiceConnection;
   private final String notificationTicker;
   private final String notificationTitle;
   private Class<?> masterChooserActivity = MasterChooser.class;
@@ -52,102 +52,8 @@ public abstract class RosActivity extends Activity {
   /**
    * Default Activity Result callback - compatible with standard {@link MasterChooser}
    */
-  private OnActivityResultCallback onActivityResultCallback = new OnActivityResultCallback() {
-    @Override
-    public void execute(int requestCode, int resultCode, Intent data) {
-      if (resultCode == RESULT_OK) {
-        if (requestCode == MASTER_CHOOSER_REQUEST_CODE) {
-          String host;
-          String networkInterfaceName = data.getStringExtra("ROS_MASTER_NETWORK_INTERFACE");
-          // Handles the default selection and prevents possible errors
-          if (networkInterfaceName == null || networkInterfaceName.equals("")) {
-            host = getDefaultHostAddress();
-          } else {
-            try {
-              NetworkInterface networkInterface = NetworkInterface.getByName(networkInterfaceName);
-              host = InetAddressFactory.newNonLoopbackForNetworkInterface(networkInterface).getHostAddress();
-            } catch (SocketException e) {
-              throw new RosRuntimeException(e);
-            }
-          }
-          nodeMainExecutorService.setRosHostname(host);
-          if (data.getBooleanExtra("ROS_MASTER_CREATE_NEW", false)) {
-            nodeMainExecutorService.startMaster(data.getBooleanExtra("ROS_MASTER_PRIVATE", true));
-          } else {
-            URI uri;
-            try {
-              uri = new URI(data.getStringExtra("ROS_MASTER_URI"));
-            } catch (URISyntaxException e) {
-              throw new RosRuntimeException(e);
-            }
-            nodeMainExecutorService.setMasterUri(uri);
-          }
-          // Run init() in a new thread as a convenience since it often requires network access.
-          new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-              RosActivity.this.init(nodeMainExecutorService);
-              return null;
-            }
-          }.execute();
-        } else {
-          // Without a master URI configured, we are in an unusable state.
-          nodeMainExecutorService.forceShutdown();
-        }
-      }
-    }
-  };
-
-  private final class NodeMainExecutorServiceConnection implements ServiceConnection {
-
-    private NodeMainExecutorServiceListener serviceListener;
-    private URI customMasterUri;
-
-    public NodeMainExecutorServiceConnection(URI customUri) {
-      super();
-      customMasterUri = customUri;
-    }
-
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder binder) {
-      nodeMainExecutorService = ((NodeMainExecutorService.LocalBinder) binder).getService();
-
-      if (customMasterUri != null) {
-        nodeMainExecutorService.setMasterUri(customMasterUri);
-        nodeMainExecutorService.setRosHostname(getDefaultHostAddress());
-      }
-
-      serviceListener = new NodeMainExecutorServiceListener() {
-        @Override
-        public void onShutdown(NodeMainExecutorService nodeMainExecutorService) {
-          // We may have added multiple shutdown listeners and we only want to
-          // call finish() once.
-          if (!RosActivity.this.isFinishing()) {
-            RosActivity.this.finish();
-          }
-        }
-      };
-      nodeMainExecutorService.addListener(serviceListener);
-      if (getMasterUri() == null) {
-        startMasterChooser();
-      } else {
-        init();
-      }
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
-      nodeMainExecutorService.removeListener(serviceListener);
-      serviceListener = null;
-    }
-
-    public NodeMainExecutorServiceListener getServiceListener()
-    {
-      return serviceListener;
-    }
-
-  };
-
+  private org.ros.android.OnActivityResultCallback<RosActivity> onActivityResultCallback = new org.ros.android.OnActivityResultCallback<>(this);
+  
   /**
    * Standard constructor.
    * Use this constructor to proceed using the standard {@link MasterChooser}.
@@ -169,7 +75,7 @@ public abstract class RosActivity extends Activity {
     super();
     this.notificationTicker = notificationTicker;
     this.notificationTitle = notificationTitle;
-    nodeMainExecutorServiceConnection = new NodeMainExecutorServiceConnection(customMasterUri);
+    nodeMainExecutorServiceConnection = new NodeMainExecutorServiceConnection<>(this, customMasterUri);
   }
 
   /**
@@ -189,12 +95,28 @@ public abstract class RosActivity extends Activity {
     masterChooserRequestCode = requestCode;
   }
 
+  public NodeMainExecutorService getNodeMainExecutorService(){
+    return nodeMainExecutorService;
+  }
+
+  public void setNodeMainExecutorService(NodeMainExecutorService nodeMainExecutorService){
+    this.nodeMainExecutorService = nodeMainExecutorService;
+  }
+
   @Override
   protected void onStart() {
     super.onStart();
     bindNodeMainExecutorService();
   }
 
+  @Override
+  protected void onDestroy() {
+    unbindService(nodeMainExecutorServiceConnection);
+    nodeMainExecutorService.
+            removeListener(nodeMainExecutorServiceConnection.getServiceListener());
+    super.onDestroy();
+  }
+  
   protected void bindNodeMainExecutorService() {
     Intent intent = new Intent(this, NodeMainExecutorService.class);
     intent.setAction(NodeMainExecutorService.ACTION_START);
@@ -205,25 +127,11 @@ public abstract class RosActivity extends Activity {
         bindService(intent, nodeMainExecutorServiceConnection, BIND_AUTO_CREATE),
         "Failed to bind NodeMainExecutorService.");
   }
-
-  @Override
-  protected void onDestroy() {
-    unbindService(nodeMainExecutorServiceConnection);
-    nodeMainExecutorService.
-            removeListener(nodeMainExecutorServiceConnection.getServiceListener());
-    super.onDestroy();
-  }
-
-  protected void init() {
+  
+  public void init() {
     // Run init() in a new thread as a convenience since it often requires
     // network access.
-    new AsyncTask<Void, Void, Void>() {
-      @Override
-      protected Void doInBackground(Void... params) {
-        RosActivity.this.init(nodeMainExecutorService);
-        return null;
-      }
-    }.execute();
+    new RosAsyncInitializer<RosActivity>().execute(this);
   }
 
   /**
@@ -235,7 +143,7 @@ public abstract class RosActivity extends Activity {
    * @param nodeMainExecutor
    *          the {@link NodeMainExecutor} created for this {@link Activity}
    */
-  protected abstract void init(NodeMainExecutor nodeMainExecutor);
+  public abstract void init(NodeMainExecutor nodeMainExecutor);
 
   public void startMasterChooser() {
     Preconditions.checkState(getMasterUri() == null);
@@ -268,12 +176,8 @@ public abstract class RosActivity extends Activity {
     }
   }
 
-  private String getDefaultHostAddress() {
+  public String getDefaultHostAddress() {
     return InetAddressFactory.newNonLoopback().getHostAddress();
-  }
-
-  public interface OnActivityResultCallback {
-    void execute(int requestCode, int resultCode, Intent data);
   }
 
   /**
@@ -282,7 +186,7 @@ public abstract class RosActivity extends Activity {
    * in custom Activity constructor {@link #RosActivity(String, String, Class, int)}.
    * @param callback Action that will be performed when this Activity gets a result.
      */
-  public void setOnActivityResultCallback(OnActivityResultCallback callback) {
+  public void setOnActivityResultCallback(OnActivityResultCallback<RosActivity> callback) {
     onActivityResultCallback = callback;
   }
 }
