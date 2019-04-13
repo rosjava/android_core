@@ -191,11 +191,7 @@ public class OccupancyGridLayer extends SubscriberLayer<nav_msgs.OccupancyGrid> 
         tiles.get(tileIndex).setOrigin(origin.multiply(new Transform(new Vector3(x *
             resolution * TextureBitmap.STRIDE,
             y * resolution * TextureBitmap.HEIGHT, 0.), Quaternion.identity())));
-        if (x < numTilesWide - 1) {
-          tiles.get(tileIndex).setStride(TextureBitmap.STRIDE);
-        } else {
-          tiles.get(tileIndex).setStride(width % TextureBitmap.STRIDE);
-        }
+        tiles.get(tileIndex).setStride(TextureBitmap.STRIDE);
       }
     }
 
