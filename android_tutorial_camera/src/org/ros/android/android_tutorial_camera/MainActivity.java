@@ -77,7 +77,7 @@ public class MainActivity extends RosActivity {
   }
 
   @Override
-  protected void init(NodeMainExecutor nodeMainExecutor) {
+  public void init(NodeMainExecutor nodeMainExecutor) {
     cameraId = 0;
 
     rosCameraPreviewView.setCamera(getCamera());

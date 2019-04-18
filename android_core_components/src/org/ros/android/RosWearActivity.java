@@ -16,7 +16,7 @@
 
 package org.ros.android;
 
-import android.app.Activity;
+import android.support.wearable.activity.WearableActivity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -38,21 +38,21 @@ import java.net.URISyntaxException;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public abstract class RosActivity extends Activity  implements RosInterface{
+public abstract class RosWearActivity extends WearableActivity implements RosInterface {
 
-  protected static final int MASTER_CHOOSER_REQUEST_CODE = 0;
+  public static final int MASTER_CHOOSER_REQUEST_CODE = 0;
 
-  private final NodeMainExecutorServiceConnection<RosActivity> nodeMainExecutorServiceConnection;
+  private final NodeMainExecutorServiceConnection<RosWearActivity> nodeMainExecutorServiceConnection;
   private final String notificationTicker;
   private final String notificationTitle;
-  private Class<?> masterChooserActivity = MasterChooser.class;
+  private Class<?> masterChooserActivity = MasterChooserWear.class;
   private int masterChooserRequestCode = MASTER_CHOOSER_REQUEST_CODE;
-  protected NodeMainExecutorService nodeMainExecutorService;
-
+  public NodeMainExecutorService nodeMainExecutorService;
+  
   /**
    * Default Activity Result callback - compatible with standard {@link MasterChooser}
    */
-  private org.ros.android.OnActivityResultCallback<RosActivity> onActivityResultCallback = new org.ros.android.OnActivityResultCallback<>(this);
+  private OnActivityResultCallback<RosWearActivity> onActivityResultCallback = new OnActivityResultCallback<>(this);
   
   /**
    * Standard constructor.
@@ -60,7 +60,7 @@ public abstract class RosActivity extends Activity  implements RosInterface{
    * @param notificationTicker Title to use in Ticker notifications.
    * @param notificationTitle Title to use in notifications.
      */
-  protected RosActivity(String notificationTicker, String notificationTitle) {
+  protected RosWearActivity(String notificationTicker, String notificationTitle) {
     this(notificationTicker, notificationTitle, null);
   }
 
@@ -71,7 +71,7 @@ public abstract class RosActivity extends Activity  implements RosInterface{
    * @param notificationTitle Title to use in notifications.
    * @param customMasterUri URI of the ROS master to connect to.
      */
-  protected RosActivity(String notificationTicker, String notificationTitle, URI customMasterUri) {
+  protected RosWearActivity(String notificationTicker, String notificationTitle, URI customMasterUri) {
     super();
     this.notificationTicker = notificationTicker;
     this.notificationTitle = notificationTitle;
@@ -80,16 +80,16 @@ public abstract class RosActivity extends Activity  implements RosInterface{
 
   /**
    * Custom MasterChooser constructor.
-   * Use this constructor to specify which {@link Activity} should be started in place of {@link MasterChooser}.
+   * Use this constructor to specify which {@link WearableActivity} should be started in place of {@link MasterChooser}.
    * The specified activity shall return a result that can be handled by a custom callback.
    * See {@link #setOnActivityResultCallback(OnActivityResultCallback)} for more information about
    * how to handle custom request codes and results.
    * @param notificationTicker Title to use in Ticker notifications.
    * @param notificationTitle Title to use in notifications.
-   * @param activity {@link Activity} to launch instead of {@link MasterChooser}.
-   * @param requestCode Request identifier to start the given {@link Activity} for a result.
+   * @param activity {@link WearableActivity} to launch instead of {@link MasterChooserWear}.
+   * @param requestCode Request identifier to start the given {@link WearableActivity} for a result.
      */
-  protected RosActivity(String notificationTicker, String notificationTitle, Class<?> activity, int requestCode) {
+  protected RosWearActivity(String notificationTicker, String notificationTitle, Class<?> activity, int requestCode) {
     this(notificationTicker, notificationTitle);
     masterChooserActivity = activity;
     masterChooserRequestCode = requestCode;
@@ -98,11 +98,11 @@ public abstract class RosActivity extends Activity  implements RosInterface{
   public NodeMainExecutorService getNodeMainExecutorService(){
     return nodeMainExecutorService;
   }
-
+  
   public void setNodeMainExecutorService(NodeMainExecutorService nodeMainExecutorService){
     this.nodeMainExecutorService = nodeMainExecutorService;
   }
-
+  
   @Override
   protected void onStart() {
     super.onStart();
@@ -131,17 +131,17 @@ public abstract class RosActivity extends Activity  implements RosInterface{
   public void init() {
     // Run init() in a new thread as a convenience since it often requires
     // network access.
-    new RosAsyncInitializer<RosActivity>().execute(this);
+    new RosAsyncInitializer<RosWearActivity>().execute(this);
   }
 
   /**
-   * This method is called in a background thread once this {@link Activity} has
+   * This method is called in a background thread once this {@link WearableActivity} has
    * been initialized with a master {@link URI} via the {@link MasterChooser}
    * and a {@link NodeMainExecutorService} has started. Your {@link NodeMain}s
    * should be started here using the provided {@link NodeMainExecutor}.
    * 
    * @param nodeMainExecutor
-   *          the {@link NodeMainExecutor} created for this {@link Activity}
+   *          the {@link NodeMainExecutor} created for this {@link WearableActivity}
    */
   public abstract void init(NodeMainExecutor nodeMainExecutor);
 
@@ -179,14 +179,14 @@ public abstract class RosActivity extends Activity  implements RosInterface{
   public String getDefaultHostAddress() {
     return InetAddressFactory.newNonLoopback().getHostAddress();
   }
-
+  
   /**
    * Set a callback that will be called onActivityResult.
    * Custom callbacks should be able to handle custom request codes configured
-   * in custom Activity constructor {@link #RosActivity(String, String, Class, int)}.
+   * in custom Activity constructor {@link #RosWearActivity(String, String, Class, int)}.
    * @param callback Action that will be performed when this Activity gets a result.
      */
-  public void setOnActivityResultCallback(OnActivityResultCallback<RosActivity> callback) {
+  public void setOnActivityResultCallback(OnActivityResultCallback<RosWearActivity> callback) {
     onActivityResultCallback = callback;
   }
 }

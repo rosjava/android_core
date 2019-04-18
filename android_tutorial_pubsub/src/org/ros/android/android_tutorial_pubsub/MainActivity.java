@@ -55,7 +55,7 @@ public class MainActivity extends RosActivity {
   }
 
   @Override
-  protected void init(NodeMainExecutor nodeMainExecutor) {
+  public void init(NodeMainExecutor nodeMainExecutor) {
     talker = new Talker();
 
     // At this point, the user has already been prompted to either enter the URI

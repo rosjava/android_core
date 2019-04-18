@@ -15,7 +15,7 @@
  */
 
 dependencies {
-  compile 'org.ros.rosjava_core:rosjava_benchmarks:[0.3,0.4)'
+  compile 'org.ros.rosjava_core:rosjava_benchmarks:0.3.6'
   compile project(':android_core_components')
 }
 
@@ -25,7 +25,7 @@ android {
   compileSdkVersion 28
 
   defaultConfig {
-    minSdkVersion 16
+    minSdkVersion 19
     applicationId "org.ros.android.android_benchmarks"
     targetSdkVersion 28
     versionCode 1

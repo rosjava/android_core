@@ -52,7 +52,7 @@ public class MainActivity extends RosActivity {
   }
 
   @Override
-  protected void init(NodeMainExecutor nodeMainExecutor) {
+  public void init(NodeMainExecutor nodeMainExecutor) {
     NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate();
     nodeConfiguration.setMasterUri(getMasterUri());
     nodeMainExecutor.execute(rosTextView, nodeConfiguration);

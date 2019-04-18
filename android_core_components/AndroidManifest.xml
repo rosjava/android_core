@@ -21,6 +21,12 @@
             android:label="@string/app_name"
             android:launchMode="standard"/>
 
+        <activity
+            android:name="org.ros.android.MasterChooserWear"
+            android:theme="@style/Theme.Wearable"
+            android:label="@string/app_name"
+            android:launchMode="standard"/>
+
         <service android:name="org.ros.android.NodeMainExecutorService"
                  tools:ignore="ExportedService">
             <intent-filter>

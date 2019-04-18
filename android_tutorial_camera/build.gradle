@@ -24,7 +24,7 @@ android {
   compileSdkVersion 28
 
   defaultConfig {
-    minSdkVersion 16
+    minSdkVersion 19
     applicationId "org.ros.android.android_tutorial_camera"
     targetSdkVersion 28
     versionCode 1
