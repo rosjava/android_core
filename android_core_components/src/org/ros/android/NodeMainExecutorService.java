@@ -102,8 +102,8 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
     nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
     binder = new LocalBinder();
     listeners =
-        new ListenerGroup<NodeMainExecutorServiceListener>(
-            nodeMainExecutor.getScheduledExecutorService());
+            new ListenerGroup<NodeMainExecutorServiceListener>(
+                    nodeMainExecutor.getScheduledExecutorService());
   }
 
   @Override
@@ -126,7 +126,7 @@ public class NodeMainExecutorService extends Service implements NodeMainExecutor
 
   @Override
   public void execute(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
-      Collection<NodeListener> nodeListeneners) {
+                      Collection<NodeListener> nodeListeneners) {
     nodeMainExecutor.execute(nodeMain, nodeConfiguration, nodeListeneners);
   }
 
