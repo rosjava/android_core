@@ -86,7 +86,7 @@ public class Vertices {
     gl.glLineWidth(width);
     gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
     gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
-    gl.glDrawArrays(GL10.GL_LINES, 0, countVertices(vertices, 3));
+    gl.glDrawArrays(GL10.GL_LINE_STRIP, 0, countVertices(vertices, 3));
     gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
     vertices.reset();
   }
