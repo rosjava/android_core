@@ -17,15 +17,13 @@
 rootProject.buildscript {
   apply from: "https://github.com/rosjava/rosjava_bootstrap/raw/kinetic/buildscript.gradle"
   dependencies {
-    classpath "com.android.tools.build:gradle:3.2.1"
+    classpath "com.android.tools.build:gradle:3.5.2"
   }
 
   allprojects {
     repositories {
+      google()
       jcenter()
-      maven {
-        url "https://maven.google.com"
-      }
     }
   }
 }
